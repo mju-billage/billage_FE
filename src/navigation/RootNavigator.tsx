@@ -1,28 +1,34 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from '../screens/HomeScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import SplashScreen from '../screens/SplashScreen';
+import { useState } from 'react';
+import SignupScreen from '../screens/SignupScreen';
 
 export type RootStackParamList = {
-  Home: undefined;
-  Profile: undefined;
+  Splash: undefined;
+  Signup: undefined;
+
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
+
+  const [isLoding, setIsLoding] = useState(false)
+
+  if (isLoding) {
+    return <SplashScreen />
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator 
+        initialRouteName="Signup"
+        screenOptions={{ headerShown: false }}
+      >
         <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ title: '홈' }}
-        />
-        <Stack.Screen
-          name="Profile"
-          component={ProfileScreen}
-          options={{ title: '프로필' }}
+          name='Signup'
+          component={SignupScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>
