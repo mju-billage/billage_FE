@@ -1,7 +1,8 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
+import { SocialType } from '../types/social';
 
 type SignupButtonProps = {
-  type: 'Naver' | 'Kakao' | 'Google';
+  type: SocialType;
   onClick: () => void;
 };
 
