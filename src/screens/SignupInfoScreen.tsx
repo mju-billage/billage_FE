@@ -7,6 +7,8 @@ import BackButton from '../components/BackButton';
 import LabeledTextInput from '../components/LabeledTextInput';
 import PrimaryButton from '../components/PrimaryButton';
 import { isValidEmail, isValidPassword } from '../utils/validators';
+import { ApiError } from '../services/apiClient';
+import * as authService from '../services/authService';
 
 type SignupInfoNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -23,11 +25,13 @@ function SignupInfoScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [signupError, setSignupError] = useState<string | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const emailError =
     email.length > 0 && !isValidEmail(email)
       ? '올바른 이메일 형식을 입력해주세요.'
-      : undefined;
+      : signupError;
   const confirmError =
     passwordConfirm.length > 0 && passwordConfirm !== password
       ? '비밀번호가 동일하지 않습니다.'
@@ -39,8 +43,21 @@ function SignupInfoScreen() {
     isValidPassword(password) &&
     passwordConfirm === password;
 
-  const handleNext = () => {
-    navigation.navigate('EmailVerification', { email });
+  const handleNext = async () => {
+    setSignupError(undefined);
+    setIsSubmitting(true);
+    try {
+      await authService.signup({ email, password, name });
+      navigation.navigate('EmailVerification', { email });
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 'EMAIL_ALREADY_EXISTS') {
+        setSignupError('이미 가입된 이메일입니다.');
+      } else {
+        setSignupError('회원가입에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -62,7 +79,10 @@ function SignupInfoScreen() {
         <LabeledTextInput
           label="이메일"
           value={email}
-          onChangeText={setEmail}
+          onChangeText={text => {
+            setEmail(text);
+            setSignupError(undefined);
+          }}
           placeholder="이메일을 입력해주세요."
           error={emailError}
           keyboardType="email-address"
@@ -91,7 +111,7 @@ function SignupInfoScreen() {
         <PrimaryButton
           label="다음으로"
           onPress={handleNext}
-          disabled={!canProceed}
+          disabled={!canProceed || isSubmitting}
         />
       </View>
     </View>

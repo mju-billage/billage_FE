@@ -7,6 +7,8 @@ import SocialIconButton from '../components/SocialIconButton';
 import LabeledTextInput from '../components/LabeledTextInput';
 import PrimaryButton from '../components/PrimaryButton';
 import { SocialType } from '../types/social';
+import { ApiError } from '../services/apiClient';
+import * as authService from '../services/authService';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -18,9 +20,24 @@ function LoginScreen() {
   const navigation = useNavigation<LoginScreenNavigationProp>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState<string | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = () => {
-    // TODO: 로그인 API 연동 필요
+  const handleLogin = async () => {
+    setLoginError(undefined);
+    setIsSubmitting(true);
+    try {
+      await authService.login({ email, password });
+      // TODO: 로그인 성공 후 진입할 홈 화면이 아직 없어 이동 로직은 추후 연결
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 'INVALID_CREDENTIALS') {
+        setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.');
+      } else {
+        setLoginError('로그인에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleSocialLogin = (provider: SocialType) => {
@@ -47,20 +64,31 @@ function LoginScreen() {
       <View style={styles.form}>
         <LabeledTextInput
           value={email}
-          onChangeText={setEmail}
+          onChangeText={text => {
+            setEmail(text);
+            setLoginError(undefined);
+          }}
           placeholder="이메일"
           autoCapitalize="none"
           keyboardType="email-address"
         />
         <LabeledTextInput
           value={password}
-          onChangeText={setPassword}
+          onChangeText={text => {
+            setPassword(text);
+            setLoginError(undefined);
+          }}
           placeholder="비밀번호"
           secureTextEntry
+          error={loginError}
         />
       </View>
 
-      <PrimaryButton label="로그인하기" onPress={handleLogin} />
+      <PrimaryButton
+        label="로그인하기"
+        onPress={handleLogin}
+        disabled={isSubmitting}
+      />
 
       <View style={styles.linkRow}>
         <Pressable onPress={handleFindPassword}>
