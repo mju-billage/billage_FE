@@ -3,10 +3,11 @@ import { SocialType } from '../types/social';
 
 type SignupButtonProps = {
   type: SocialType;
-  onClick: () => void;
+  onPress: () => void;
 };
 
-function SignupButton({ type, onClick }: SignupButtonProps) {
+/** 소셜 회원가입 버튼: 제공자별 배경색을 입힌 전체 너비 버튼을 보여준다. */
+function SignupButton({ type, onPress }: SignupButtonProps) {
   return (
     <Pressable
       style={({ pressed }) => [
@@ -14,7 +15,7 @@ function SignupButton({ type, onClick }: SignupButtonProps) {
         styleByType[type],
         pressed && { opacity: 0.5 },
       ]}
-      onPress={onClick}
+      onPress={onPress}
     >
       <Text>{type}</Text>
     </Pressable>

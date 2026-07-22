@@ -18,6 +18,7 @@ type LoginScreenNavigationProp = NativeStackNavigationProp<
   'Login'
 >;
 
+/** 로그인 화면: 이메일/비밀번호 로그인과 소셜 로그인 진입점을 보여준다. */
 function LoginScreen() {
   const navigation = useNavigation<LoginScreenNavigationProp>();
   const [email, setEmail] = useState('');

@@ -1,8 +1,10 @@
 import { Image, StyleSheet, View } from 'react-native';
 import SignupButton from '../components/SignupButton';
+import { SocialType } from '../types/social';
 
+/** 회원가입 화면: 로고와 소셜 회원가입 버튼 목록을 보여준다. */
 function SignupScreen() {
-  const handleSocialSignup = () => {
+  const handleSocialSignup = (_type: SocialType) => {
     // TODO: 소셜 회원가입 API 연동 필요
   };
 
@@ -16,9 +18,18 @@ function SignupScreen() {
       <View />
       <View />
       <View>
-        <SignupButton type="Naver" onClick={handleSocialSignup} />
-        <SignupButton type="Kakao" onClick={handleSocialSignup} />
-        <SignupButton type="Google" onClick={handleSocialSignup} />
+        <SignupButton
+          type="Naver"
+          onPress={() => handleSocialSignup('Naver')}
+        />
+        <SignupButton
+          type="Kakao"
+          onPress={() => handleSocialSignup('Kakao')}
+        />
+        <SignupButton
+          type="Google"
+          onPress={() => handleSocialSignup('Google')}
+        />
       </View>
     </View>
   );

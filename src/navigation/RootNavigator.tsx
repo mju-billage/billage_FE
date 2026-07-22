@@ -6,13 +6,13 @@ import SignupScreen from '../screens/SignupScreen';
 import LoginScreen from '../screens/LoginScreen';
 
 export type RootStackParamList = {
-  Splash: undefined;
   Login: undefined;
   Signup: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+/** 앱 진입점 내비게이터: 로딩 중엔 스플래시를, 이후엔 로그인/회원가입 스택을 보여준다. */
 function RootNavigator() {
   // TODO: 스플래시 로딩 상태 연동 필요
   const [isLoading, _setIsLoading] = useState(false);

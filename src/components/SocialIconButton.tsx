@@ -6,6 +6,7 @@ type SocialIconButtonProps = {
   onPress: () => void;
 };
 
+/** 소셜 로그인 아이콘 버튼: 제공자별 색상의 원형 배지를 보여준다. */
 function SocialIconButton({ type, onPress }: SocialIconButtonProps) {
   return (
     <Pressable
