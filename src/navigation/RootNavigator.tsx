@@ -2,12 +2,31 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SplashScreen from '../screens/SplashScreen';
 import { useState } from 'react';
-import SignupScreen from '../screens/SignupScreen';
 import LoginScreen from '../screens/LoginScreen';
+import TermsAgreementScreen from '../screens/TermsAgreementScreen';
+import TermsOfServiceScreen from '../screens/TermsOfServiceScreen';
+import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
+import MarketingConsentScreen from '../screens/MarketingConsentScreen';
+import SocialSignupInfoScreen from '../screens/SocialSignupInfoScreen';
+import SignupInfoScreen from '../screens/SignupInfoScreen';
+import EmailVerificationScreen from '../screens/EmailVerificationScreen';
+import SignupCompleteScreen from '../screens/SignupCompleteScreen';
+import PasswordResetScreen from '../screens/PasswordResetScreen';
+import PasswordResetSentScreen from '../screens/PasswordResetSentScreen';
+import { SocialType } from '../types/social';
 
 export type RootStackParamList = {
   Login: undefined;
-  Signup: undefined;
+  TermsAgreement: undefined;
+  TermsOfService: undefined;
+  PrivacyPolicy: undefined;
+  MarketingConsent: undefined;
+  SocialSignupInfo: { provider: SocialType };
+  SignupInfo: undefined;
+  EmailVerification: { email: string };
+  SignupComplete: undefined;
+  PasswordReset: undefined;
+  PasswordResetSent: { email: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -28,7 +47,28 @@ function RootNavigator() {
         screenOptions={{ headerShown: false }}
       >
         <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Signup" component={SignupScreen} />
+        <Stack.Screen name="TermsAgreement" component={TermsAgreementScreen} />
+        <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
+        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+        <Stack.Screen
+          name="MarketingConsent"
+          component={MarketingConsentScreen}
+        />
+        <Stack.Screen
+          name="SocialSignupInfo"
+          component={SocialSignupInfoScreen}
+        />
+        <Stack.Screen name="SignupInfo" component={SignupInfoScreen} />
+        <Stack.Screen
+          name="EmailVerification"
+          component={EmailVerificationScreen}
+        />
+        <Stack.Screen name="SignupComplete" component={SignupCompleteScreen} />
+        <Stack.Screen name="PasswordReset" component={PasswordResetScreen} />
+        <Stack.Screen
+          name="PasswordResetSent"
+          component={PasswordResetSentScreen}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );

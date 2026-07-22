@@ -1,16 +1,11 @@
 import { useState } from 'react';
-import {
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import SocialIconButton from '../components/SocialIconButton';
+import LabeledTextInput from '../components/LabeledTextInput';
+import PrimaryButton from '../components/PrimaryButton';
 import { SocialType } from '../types/social';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
@@ -28,16 +23,17 @@ function LoginScreen() {
     // TODO: 로그인 API 연동 필요
   };
 
-  const handleSocialLogin = (_type: SocialType) => {
-    // TODO: 소셜 로그인 API 연동 필요
+  const handleSocialLogin = (provider: SocialType) => {
+    // TODO: 소셜 로그인 API 연동 필요 (기존 회원이면 바로 로그인, 신규 회원이면 간편 회원가입으로 진입)
+    navigation.navigate('SocialSignupInfo', { provider });
   };
 
   const handleFindPassword = () => {
-    // TODO: 비밀번호 찾기 화면 연동 필요
+    navigation.navigate('PasswordReset');
   };
 
   const handleGoToSignup = () => {
-    navigation.navigate('Signup');
+    navigation.navigate('TermsAgreement');
   };
 
   return (
@@ -49,32 +45,22 @@ function LoginScreen() {
       />
 
       <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="이메일"
+        <LabeledTextInput
           value={email}
           onChangeText={setEmail}
+          placeholder="이메일"
           autoCapitalize="none"
           keyboardType="email-address"
         />
-        <TextInput
-          style={styles.input}
-          placeholder="비밀번호"
+        <LabeledTextInput
           value={password}
           onChangeText={setPassword}
+          placeholder="비밀번호"
           secureTextEntry
         />
       </View>
 
-      <Pressable
-        style={({ pressed }) => [
-          styles.loginButton,
-          pressed && { opacity: 0.8 },
-        ]}
-        onPress={handleLogin}
-      >
-        <Text style={styles.loginButtonText}>로그인하기</Text>
-      </Pressable>
+      <PrimaryButton label="로그인하기" onPress={handleLogin} />
 
       <View style={styles.linkRow}>
         <Pressable onPress={handleFindPassword}>
@@ -103,8 +89,6 @@ function LoginScreen() {
   );
 }
 
-const NAVY = '#12184C';
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -119,33 +103,11 @@ const styles = StyleSheet.create({
   form: {
     width: '100%',
   },
-  input: {
-    width: '100%',
-    borderBottomWidth: 1,
-    borderBottomColor: '#D9D9D9',
-    paddingVertical: 12,
-    marginBottom: 16,
-    fontSize: 16,
-  },
-  loginButton: {
-    width: '100%',
-    height: 52,
-    borderRadius: 8,
-    backgroundColor: NAVY,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 16,
-  },
-  loginButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
   linkRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 16,
-    marginTop: 20,
+    marginTop: 4,
   },
   linkText: {
     fontSize: 13,
