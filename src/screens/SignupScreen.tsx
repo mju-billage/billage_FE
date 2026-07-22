@@ -1,42 +1,38 @@
-import { Image, StyleSheet, Text, View } from "react-native";
-import SignupButton from "../components/SignupButton";
+import { Image, StyleSheet, View } from 'react-native';
+import SignupButton from '../components/SignupButton';
 
 function SignupScreen() {
-        console.log("렌더링됨")
+  const handleSocialSignup = () => {
+    // TODO: 소셜 회원가입 API 연동 필요
+  };
 
-    const pppp = () => {
-        console.log("clicked")
-    }
-
-    return (
-        <View
-        style={styles.container}
-        >
-            <Image 
-            source={require("../assets/images/Billage_logo_big.png")}
-            style={styles.logo}
-            resizeMode="contain"
-            />
-            <View />
-            <View />
-            <View>
-                <SignupButton type = {"Naver" } onClick = {pppp}/>
-                <SignupButton type = {"Kakao" } onClick = {pppp}/>
-                <SignupButton type = {"Google"} onClick = {pppp}/>
-            </View>
-        </View>
-    )
+  return (
+    <View style={styles.container}>
+      <Image
+        source={require('../assets/images/Billage_logo_big.png')}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+      <View />
+      <View />
+      <View>
+        <SignupButton type="Naver" onClick={handleSocialSignup} />
+        <SignupButton type="Kakao" onClick={handleSocialSignup} />
+        <SignupButton type="Google" onClick={handleSocialSignup} />
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    logo: {
-        width: 152
-    },
-    container: {
-        flex:1,
-        alignItems: "center",
-        justifyContent: "space-around"
-    }
-})
+  logo: {
+    width: 152,
+  },
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+});
 
-export default SignupScreen
+export default SignupScreen;
