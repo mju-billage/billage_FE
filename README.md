@@ -88,6 +88,7 @@ src
 ├── assets
 │   └── images          # 이미지, 폰트 등 정적 리소스
 ├── components           # 여러 화면에서 재사용하는 프레젠테이셔널 컴포넌트
+├── constants             # 색상, 약관 전문 등 화면 전반에서 재사용하는 상수
 ├── screens               # 화면 단위 컴포넌트 (route 하나당 폴더/파일 하나)
 ├── navigation            # Navigator, RootStackParamList 등 네비게이션 설정
 ├── hooks                 # 재사용 커스텀 훅
