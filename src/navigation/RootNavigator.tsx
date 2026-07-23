@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SplashScreen from '../screens/SplashScreen';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import LoginScreen from '../screens/LoginScreen';
 import TermsAgreementScreen from '../screens/TermsAgreementScreen';
 import TermsOfServiceScreen from '../screens/TermsOfServiceScreen';
@@ -33,8 +33,12 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 /** 앱 진입점 내비게이터: 로딩 중엔 스플래시를, 이후엔 로그인/회원가입 스택을 보여준다. */
 function RootNavigator() {
-  // TODO: 스플래시 로딩 상태 연동 필요
-  const [isLoading, _setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (isLoading) {
     return <SplashScreen />;
