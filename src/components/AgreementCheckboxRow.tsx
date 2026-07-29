@@ -1,11 +1,15 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { LINK_BLUE, NAVY } from '../constants/colors';
+import {
+  AGREEMENT_TAG_REQUIRED,
+  AGREEMENT_TAG_OPTIONAL,
+} from '../constants/commonText';
 
 type AgreementCheckboxRowProps = {
   label: string;
   checked: boolean;
   onToggle: () => void;
-  tag?: '필수' | '선택';
+  tag?: typeof AGREEMENT_TAG_REQUIRED | typeof AGREEMENT_TAG_OPTIONAL;
   onPressDetail?: () => void;
   emphasized?: boolean;
 };

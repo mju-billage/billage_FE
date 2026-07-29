@@ -7,6 +7,12 @@ import BackButton from '../components/BackButton';
 import LabeledTextInput from '../components/LabeledTextInput';
 import PrimaryButton from '../components/PrimaryButton';
 import { isValidEmail } from '../utils/validators';
+import {
+  PASSWORD_RESET_TITLE,
+  PASSWORD_RESET_SUBTITLE,
+  PASSWORD_RESET_EMAIL_PLACEHOLDER,
+  PASSWORD_RESET_SUBMIT_LABEL,
+} from '../constants/passwordResetText';
 
 type PasswordResetNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -28,21 +34,19 @@ function PasswordResetScreen() {
       <View style={styles.backRow}>
         <BackButton onPress={() => navigation.goBack()} />
       </View>
-      <Text style={styles.title}>비밀번호 재설정</Text>
-      <Text style={styles.subtitle}>
-        임시 비밀번호를 받을{'\n'}이메일 주소를 입력해주세요
-      </Text>
+      <Text style={styles.title}>{PASSWORD_RESET_TITLE}</Text>
+      <Text style={styles.subtitle}>{PASSWORD_RESET_SUBTITLE}</Text>
 
       <LabeledTextInput
         value={email}
         onChangeText={setEmail}
-        placeholder="이메일"
+        placeholder={PASSWORD_RESET_EMAIL_PLACEHOLDER}
         keyboardType="email-address"
         autoCapitalize="none"
       />
 
       <PrimaryButton
-        label="전송하기"
+        label={PASSWORD_RESET_SUBMIT_LABEL}
         onPress={handleSend}
         disabled={!isValidEmail(email)}
       />

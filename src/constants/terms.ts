@@ -1,3 +1,7 @@
+export const TERMS_OF_SERVICE_TITLE = '서비스 이용 약관';
+export const PRIVACY_POLICY_TITLE = '개인정보 처리 방침';
+export const MARKETING_CONSENT_TITLE = '마케팅 정보 수신 동의';
+
 export const TERMS_OF_SERVICE_TEXT = `전문
 본 약관은 Billage(이하 "회사")가 제공하는 모임 회비 장부 관리 및 정산 보조 서비스(이하 "서비스")의 이용과 관련하여, 회사와 이용자 간의 권리·의무·책임사항을 규정함을 목적으로 합니다. Billage는 모임의 투명한 자금 운영을 돕는 '가계 도구'를 지향하며, 실제 금융 거래를 대행하지 않습니다.
 

@@ -6,6 +6,19 @@ import type { RootStackParamList } from '../navigation/RootNavigator';
 import BackButton from '../components/BackButton';
 import AgreementCheckboxRow from '../components/AgreementCheckboxRow';
 import PrimaryButton from '../components/PrimaryButton';
+import {
+  TERMS_AGREEMENT_TITLE,
+  AGREE_ALL_LABEL,
+  AGREE_SERVICE_LABEL,
+  AGREE_PRIVACY_LABEL,
+  AGREE_MARKETING_LABEL,
+  AGREE_AGE_LABEL,
+} from '../constants/termsAgreementScreenText';
+import {
+  NEXT_BUTTON_LABEL,
+  AGREEMENT_TAG_REQUIRED,
+  AGREEMENT_TAG_OPTIONAL,
+} from '../constants/commonText';
 
 type TermsAgreementNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -57,40 +70,40 @@ function TermsAgreementScreen() {
       <View style={styles.backRow}>
         <BackButton onPress={() => navigation.goBack()} />
       </View>
-      <Text style={styles.title}>약관 동의</Text>
+      <Text style={styles.title}>{TERMS_AGREEMENT_TITLE}</Text>
 
       <View style={styles.list}>
         <AgreementCheckboxRow
-          label="전체 동의"
+          label={AGREE_ALL_LABEL}
           checked={allChecked}
           onToggle={toggleAll}
           emphasized
         />
         <View style={styles.divider} />
         <AgreementCheckboxRow
-          label="서비스 이용 약관"
-          tag="필수"
+          label={AGREE_SERVICE_LABEL}
+          tag={AGREEMENT_TAG_REQUIRED}
           checked={agreements.service}
           onToggle={() => toggleField('service')}
           onPressDetail={() => navigation.navigate('TermsOfService')}
         />
         <AgreementCheckboxRow
-          label="개인정보 수집 및 이용에 대한 동의"
-          tag="필수"
+          label={AGREE_PRIVACY_LABEL}
+          tag={AGREEMENT_TAG_REQUIRED}
           checked={agreements.privacy}
           onToggle={() => toggleField('privacy')}
           onPressDetail={() => navigation.navigate('PrivacyPolicy')}
         />
         <AgreementCheckboxRow
-          label="마케팅 정보 수신 동의"
-          tag="선택"
+          label={AGREE_MARKETING_LABEL}
+          tag={AGREEMENT_TAG_OPTIONAL}
           checked={agreements.marketing}
           onToggle={() => toggleField('marketing')}
           onPressDetail={() => navigation.navigate('MarketingConsent')}
         />
         <AgreementCheckboxRow
-          label="만 14세 이상 회원입니다."
-          tag="필수"
+          label={AGREE_AGE_LABEL}
+          tag={AGREEMENT_TAG_REQUIRED}
           checked={agreements.age}
           onToggle={() => toggleField('age')}
         />
@@ -98,7 +111,7 @@ function TermsAgreementScreen() {
 
       <View style={styles.footer}>
         <PrimaryButton
-          label="다음으로"
+          label={NEXT_BUTTON_LABEL}
           onPress={handleNext}
           disabled={!canProceed}
         />

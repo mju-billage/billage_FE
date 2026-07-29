@@ -5,6 +5,11 @@ import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import BackButton from '../components/BackButton';
 import PrimaryButton from '../components/PrimaryButton';
+import {
+  PASSWORD_RESET_TITLE,
+  PASSWORD_RESET_SENT_MESSAGE_SUFFIX,
+  PASSWORD_RESET_BACK_TO_LOGIN_LABEL,
+} from '../constants/passwordResetText';
 
 type PasswordResetSentNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -29,13 +34,14 @@ function PasswordResetSentScreen() {
       <View style={styles.backRow}>
         <BackButton onPress={() => navigation.goBack()} />
       </View>
-      <Text style={styles.title}>비밀번호 재설정</Text>
+      <Text style={styles.title}>{PASSWORD_RESET_TITLE}</Text>
       <Text style={styles.message}>
-        {params.email}으로{'\n'}임시 비밀번호가 전송되었습니다.
+        {params.email}
+        {PASSWORD_RESET_SENT_MESSAGE_SUFFIX}
       </Text>
 
       <PrimaryButton
-        label="로그인 화면으로 돌아가기"
+        label={PASSWORD_RESET_BACK_TO_LOGIN_LABEL}
         onPress={handleBackToLogin}
       />
     </View>

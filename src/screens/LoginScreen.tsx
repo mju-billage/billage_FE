@@ -9,15 +9,24 @@ import PrimaryButton from '../components/PrimaryButton';
 import { SocialType } from '../types/social';
 import { ApiError } from '../services/apiClient';
 import * as authService from '../services/authService';
+import {
+  LOGIN_EMAIL_PLACEHOLDER,
+  LOGIN_PASSWORD_PLACEHOLDER,
+  LOGIN_SUBMIT_LABEL,
+  LOGIN_FIND_PASSWORD_LABEL,
+  LOGIN_GO_TO_SIGNUP_LABEL,
+  LOGIN_INVALID_CREDENTIALS_ERROR,
+  LOGIN_GENERIC_ERROR,
+} from '../constants/loginScreenText';
 
-type LoginScreenNavigationProp = NativeStackNavigationProp<
+type LoginNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Login'
 >;
 
 /** 로그인 화면: 이메일/비밀번호 로그인과 소셜 로그인 진입점을 보여준다. */
 function LoginScreen() {
-  const navigation = useNavigation<LoginScreenNavigationProp>();
+  const navigation = useNavigation<LoginNavigationProp>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState<string | undefined>();
@@ -31,9 +40,9 @@ function LoginScreen() {
       // TODO: 로그인 성공 후 진입할 홈 화면이 아직 없어 이동 로직은 추후 연결
     } catch (error) {
       if (error instanceof ApiError && error.code === 'INVALID_CREDENTIALS') {
-        setLoginError('이메일 또는 비밀번호가 올바르지 않습니다.');
+        setLoginError(LOGIN_INVALID_CREDENTIALS_ERROR);
       } else {
-        setLoginError('로그인에 실패했습니다. 잠시 후 다시 시도해주세요.');
+        setLoginError(LOGIN_GENERIC_ERROR);
       }
     } finally {
       setIsSubmitting(false);
@@ -68,7 +77,7 @@ function LoginScreen() {
             setEmail(text);
             setLoginError(undefined);
           }}
-          placeholder="이메일"
+          placeholder={LOGIN_EMAIL_PLACEHOLDER}
           autoCapitalize="none"
           keyboardType="email-address"
         />
@@ -78,24 +87,24 @@ function LoginScreen() {
             setPassword(text);
             setLoginError(undefined);
           }}
-          placeholder="비밀번호"
+          placeholder={LOGIN_PASSWORD_PLACEHOLDER}
           secureTextEntry
           error={loginError}
         />
       </View>
 
       <PrimaryButton
-        label="로그인하기"
+        label={LOGIN_SUBMIT_LABEL}
         onPress={handleLogin}
         disabled={isSubmitting}
       />
 
       <View style={styles.linkRow}>
         <Pressable onPress={handleFindPassword}>
-          <Text style={styles.linkText}>비밀번호를 잊으셨나요?</Text>
+          <Text style={styles.linkText}>{LOGIN_FIND_PASSWORD_LABEL}</Text>
         </Pressable>
         <Pressable onPress={handleGoToSignup}>
-          <Text style={styles.linkText}>회원가입하기</Text>
+          <Text style={styles.linkText}>{LOGIN_GO_TO_SIGNUP_LABEL}</Text>
         </Pressable>
       </View>
 
