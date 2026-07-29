@@ -4,6 +4,12 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import BackButton from '../components/BackButton';
 import PrimaryButton from '../components/PrimaryButton';
+import {
+  SIGNUP_COMPLETE_TITLE,
+  SIGNUP_COMPLETE_SUBTITLE,
+  SIGNUP_COMPLETE_CREATE_GROUP_LABEL,
+  SIGNUP_COMPLETE_JOIN_WITH_CODE_LABEL,
+} from '../constants/signupCompleteScreenText';
 
 type SignupCompleteNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -27,16 +33,17 @@ function SignupCompleteScreen() {
       <View style={styles.backRow}>
         <BackButton onPress={() => navigation.goBack()} />
       </View>
-      <Text style={styles.title}>빌리지에 오신 걸 환영해요!</Text>
-      <Text style={styles.subtitle}>
-        이제 빌리지와 함께{'\n'}똑똑한 모임 회비 관리를 시작해볼까요?
-      </Text>
+      <Text style={styles.title}>{SIGNUP_COMPLETE_TITLE}</Text>
+      <Text style={styles.subtitle}>{SIGNUP_COMPLETE_SUBTITLE}</Text>
 
       <View style={styles.footer}>
-        <PrimaryButton label="모임 생성하기" onPress={handleCreateGroup} />
+        <PrimaryButton
+          label={SIGNUP_COMPLETE_CREATE_GROUP_LABEL}
+          onPress={handleCreateGroup}
+        />
         <View style={styles.buttonGap} />
         <PrimaryButton
-          label="코드로 참여하기"
+          label={SIGNUP_COMPLETE_JOIN_WITH_CODE_LABEL}
           onPress={handleJoinWithCode}
           variant="secondary"
         />

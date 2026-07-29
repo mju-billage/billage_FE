@@ -7,6 +7,14 @@ import BackButton from '../components/BackButton';
 import OtpCodeInput from '../components/OtpCodeInput';
 import PrimaryButton from '../components/PrimaryButton';
 import { LINK_BLUE } from '../constants/colors';
+import {
+  EMAIL_VERIFICATION_TITLE,
+  EMAIL_VERIFICATION_SUBTITLE,
+  EMAIL_VERIFICATION_TIMER_LABEL,
+  EMAIL_VERIFICATION_RESEND_PROMPT,
+  EMAIL_VERIFICATION_RESEND_LINK_LABEL,
+} from '../constants/emailVerificationScreenText';
+import { NEXT_BUTTON_LABEL } from '../constants/commonText';
 
 type EmailVerificationNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -54,10 +62,8 @@ function EmailVerificationScreen() {
       <View style={styles.backRow}>
         <BackButton onPress={() => navigation.goBack()} />
       </View>
-      <Text style={styles.title}>인증 코드 입력</Text>
-      <Text style={styles.subtitle}>
-        이메일로 전송된 코드를 하단에 입력해주세요.
-      </Text>
+      <Text style={styles.title}>{EMAIL_VERIFICATION_TITLE}</Text>
+      <Text style={styles.subtitle}>{EMAIL_VERIFICATION_SUBTITLE}</Text>
 
       <View style={styles.codeSection}>
         <OtpCodeInput
@@ -66,21 +72,25 @@ function EmailVerificationScreen() {
           length={CODE_LENGTH}
         />
         <Text style={styles.timerText}>
-          입력 남은 시간{' '}
+          {EMAIL_VERIFICATION_TIMER_LABEL}{' '}
           <Text style={styles.timerValue}>{formatCountdown(secondsLeft)}</Text>
         </Text>
       </View>
 
       <View style={styles.resendRow}>
-        <Text style={styles.resendLabel}>메일이 오지 않았나요? </Text>
+        <Text style={styles.resendLabel}>
+          {EMAIL_VERIFICATION_RESEND_PROMPT}
+        </Text>
         <Pressable onPress={handleResend}>
-          <Text style={styles.resendLink}>재전송하기</Text>
+          <Text style={styles.resendLink}>
+            {EMAIL_VERIFICATION_RESEND_LINK_LABEL}
+          </Text>
         </Pressable>
       </View>
 
       <View style={styles.footer}>
         <PrimaryButton
-          label="다음으로"
+          label={NEXT_BUTTON_LABEL}
           onPress={handleNext}
           disabled={code.length !== CODE_LENGTH}
         />
