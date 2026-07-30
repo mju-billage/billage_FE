@@ -2,14 +2,14 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
-import type { RootStackParamList } from '../navigation/RootNavigator';
-import BackButton from '../components/BackButton';
-import PrimaryButton from '../components/PrimaryButton';
+import type { RootStackParamList } from '../../navigation/RootNavigator';
+import BackButton from '../../components/BackButton';
+import PrimaryButton from '../../components/PrimaryButton';
 import {
   PASSWORD_RESET_TITLE,
   PASSWORD_RESET_SENT_MESSAGE_SUFFIX,
   PASSWORD_RESET_BACK_TO_LOGIN_LABEL,
-} from '../constants/passwordResetText';
+} from '../../constants/passwordResetText';
 
 type PasswordResetSentNavigationProp = NativeStackNavigationProp<
   RootStackParamList,

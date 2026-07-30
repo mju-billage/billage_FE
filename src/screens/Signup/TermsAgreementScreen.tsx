@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/RootNavigator';
-import BackButton from '../components/BackButton';
-import AgreementCheckboxRow from '../components/AgreementCheckboxRow';
-import PrimaryButton from '../components/PrimaryButton';
+import type { RootStackParamList } from '../../navigation/RootNavigator';
+import BackButton from '../../components/BackButton';
+import AgreementCheckboxRow from '../../components/AgreementCheckboxRow';
+import PrimaryButton from '../../components/PrimaryButton';
 import {
   TERMS_AGREEMENT_TITLE,
   AGREE_ALL_LABEL,
@@ -13,12 +13,12 @@ import {
   AGREE_PRIVACY_LABEL,
   AGREE_MARKETING_LABEL,
   AGREE_AGE_LABEL,
-} from '../constants/termsAgreementScreenText';
+} from '../../constants/termsAgreementScreenText';
 import {
   NEXT_BUTTON_LABEL,
   AGREEMENT_TAG_REQUIRED,
   AGREEMENT_TAG_OPTIONAL,
-} from '../constants/commonText';
+} from '../../constants/commonText';
 
 type TermsAgreementNavigationProp = NativeStackNavigationProp<
   RootStackParamList,

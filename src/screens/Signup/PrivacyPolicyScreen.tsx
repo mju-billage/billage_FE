@@ -1,8 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/RootNavigator';
-import LegalDocumentView from '../components/LegalDocumentView';
-import { PRIVACY_POLICY_TEXT, PRIVACY_POLICY_TITLE } from '../constants/terms';
+import type { RootStackParamList } from '../../navigation/RootNavigator';
+import LegalDocumentView from '../../components/LegalDocumentView';
+import {
+  PRIVACY_POLICY_TEXT,
+  PRIVACY_POLICY_TITLE,
+} from '../../constants/terms';
 
 type PrivacyPolicyNavigationProp = NativeStackNavigationProp<
   RootStackParamList,

@@ -2,19 +2,19 @@ import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/RootNavigator';
-import BackButton from '../components/BackButton';
-import OtpCodeInput from '../components/OtpCodeInput';
-import PrimaryButton from '../components/PrimaryButton';
-import { LINK_BLUE } from '../constants/colors';
+import type { RootStackParamList } from '../../navigation/RootNavigator';
+import BackButton from '../../components/BackButton';
+import OtpCodeInput from '../../components/OtpCodeInput';
+import PrimaryButton from '../../components/PrimaryButton';
+import { LINK_BLUE } from '../../constants/colors';
 import {
   EMAIL_VERIFICATION_TITLE,
   EMAIL_VERIFICATION_SUBTITLE,
   EMAIL_VERIFICATION_TIMER_LABEL,
   EMAIL_VERIFICATION_RESEND_PROMPT,
   EMAIL_VERIFICATION_RESEND_LINK_LABEL,
-} from '../constants/emailVerificationScreenText';
-import { NEXT_BUTTON_LABEL } from '../constants/commonText';
+} from '../../constants/emailVerificationScreenText';
+import { NEXT_BUTTON_LABEL } from '../../constants/commonText';
 
 type EmailVerificationNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
