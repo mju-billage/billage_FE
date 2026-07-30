@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/RootNavigator';
-import BackButton from '../components/BackButton';
-import LabeledTextInput from '../components/LabeledTextInput';
-import PrimaryButton from '../components/PrimaryButton';
-import { isValidEmail } from '../utils/validators';
+import type { RouteProp } from '@react-navigation/native';
+import type { RootStackParamList } from '../../navigation/RootNavigator';
+import BackButton from '../../components/BackButton';
+import LabeledTextInput from '../../components/LabeledTextInput';
+import PrimaryButton from '../../components/PrimaryButton';
+import { isValidEmail } from '../../utils/validators';
+import { ApiError } from '../../services/apiClient';
+import * as authService from '../../services/authService';
 import {
   SIGNUP_INFO_TITLE,
   SIGNUP_NAME_LABEL,
@@ -15,31 +18,58 @@ import {
   SIGNUP_EMAIL_LABEL,
   SIGNUP_EMAIL_PLACEHOLDER,
   SIGNUP_EMAIL_FORMAT_ERROR,
+  SIGNUP_EMAIL_ALREADY_EXISTS_ERROR,
+  SOCIAL_SIGNUP_GENERIC_ERROR,
   SOCIAL_SIGNUP_SUBMIT_LABEL,
-} from '../constants/signupInfoText';
+} from '../../constants/signupInfoText';
 
 type SocialSignupInfoNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'SocialSignupInfo'
 >;
 
+type SocialSignupInfoRouteProp = RouteProp<
+  RootStackParamList,
+  'SocialSignupInfo'
+>;
+
 const NAME_MAX_LENGTH = 8;
 
-/** 간편(소셜) 회원가입 정보 입력 화면: 이름과 이메일만 받는다. */
+/** 간편(소셜) 회원가입 정보 입력 화면: 소셜 프로필을 프리필해 이름과 이메일만 받는다. */
 function SocialSignupInfoScreen() {
   const navigation = useNavigation<SocialSignupInfoNavigationProp>();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const { profile } = useRoute<SocialSignupInfoRouteProp>().params;
+  const [name, setName] = useState(profile.name.slice(0, NAME_MAX_LENGTH));
+  const [email, setEmail] = useState(profile.email);
+  const [signupError, setSignupError] = useState<string | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const emailError =
     email.length > 0 && !isValidEmail(email)
       ? SIGNUP_EMAIL_FORMAT_ERROR
-      : undefined;
+      : signupError;
   const canProceed = name.length > 0 && isValidEmail(email);
 
-  const handleNext = () => {
-    // TODO: 소셜 프로필 기반 간편 회원가입 API 연동 필요
-    navigation.navigate('SignupComplete');
+  const handleNext = async () => {
+    setSignupError(undefined);
+    setIsSubmitting(true);
+    try {
+      await authService.socialSignup({
+        provider: profile.provider,
+        providerToken: profile.providerToken,
+        name,
+        email,
+      });
+      navigation.navigate('SignupComplete');
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 'EMAIL_ALREADY_EXISTS') {
+        setSignupError(SIGNUP_EMAIL_ALREADY_EXISTS_ERROR);
+      } else {
+        setSignupError(SOCIAL_SIGNUP_GENERIC_ERROR);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -60,7 +90,10 @@ function SocialSignupInfoScreen() {
         <LabeledTextInput
           label={SIGNUP_EMAIL_LABEL}
           value={email}
-          onChangeText={setEmail}
+          onChangeText={text => {
+            setEmail(text);
+            setSignupError(undefined);
+          }}
           placeholder={SIGNUP_EMAIL_PLACEHOLDER}
           error={emailError}
           keyboardType="email-address"
@@ -71,7 +104,7 @@ function SocialSignupInfoScreen() {
         <PrimaryButton
           label={SOCIAL_SIGNUP_SUBMIT_LABEL}
           onPress={handleNext}
-          disabled={!canProceed}
+          disabled={!canProceed || isSubmitting}
         />
       </View>
     </View>
