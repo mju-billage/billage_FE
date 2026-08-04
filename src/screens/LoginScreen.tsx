@@ -6,6 +6,7 @@ import type { RootStackParamList } from '../navigation/RootNavigator';
 import SocialIconButton from '../components/Button/SocialIconButton';
 import TextField from '../components/Field/TextField';
 import PrimaryButton from '../components/Button/PrimaryButton';
+import { FOREGROUND_NEUTRAL_NORMAL } from '../constants/colors';
 import { SocialProfile, SocialType } from '../types/social';
 import { ApiError } from '../services/apiClient';
 import * as authService from '../services/authService';
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     fontSize: 13,
-    color: '#4A4A4A',
+    color: FOREGROUND_NEUTRAL_NORMAL,
     textDecorationLine: 'underline',
   },
   socialRow: {

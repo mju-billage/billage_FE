@@ -1,5 +1,14 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { SocialType } from '../../types/social';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_INVERSE,
+  FOREGROUND_NEUTRAL_NORMAL,
+  SOCIAL_KAKAO_TEXT,
+  SOCIAL_KAKAO_YELLOW,
+  SOCIAL_NAVER_GREEN,
+} from '../../constants/colors';
 
 type SocialIconButtonProps = {
   type: SocialType;
@@ -39,24 +48,24 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   naver: {
-    backgroundColor: '#03C75A',
+    backgroundColor: SOCIAL_NAVER_GREEN,
   },
   kakao: {
-    backgroundColor: '#FEE500',
+    backgroundColor: SOCIAL_KAKAO_YELLOW,
   },
   google: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: BORDER_NEUTRAL_NORMAL,
   },
   naverLabel: {
-    color: '#FFFFFF',
+    color: FOREGROUND_INVERSE,
   },
   kakaoLabel: {
-    color: '#3C1E1E',
+    color: SOCIAL_KAKAO_TEXT,
   },
   googleLabel: {
-    color: '#4A4A4A',
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
 });
 

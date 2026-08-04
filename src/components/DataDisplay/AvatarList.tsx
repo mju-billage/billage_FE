@@ -1,6 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
 import Avatar from './Avatar';
-import { FILL_NEUTRAL } from '../../constants/colors';
+import {
+  BASIC_0,
+  FILL_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_NORMAL,
+} from '../../constants/colors';
 
 type AvatarListMember = {
   id: string;
@@ -60,7 +64,7 @@ const styles = StyleSheet.create({
   avatarWrapper: {
     borderRadius: 999,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: BASIC_0,
   },
   avatarOverlap: {
     marginLeft: -10,
@@ -69,14 +73,14 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: FILL_NEUTRAL,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
     alignItems: 'center',
     justifyContent: 'center',
   },
   overflowText: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#495057',
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
 });
 

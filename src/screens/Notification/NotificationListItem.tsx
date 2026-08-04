@@ -1,10 +1,11 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
 import type { NotificationItem } from '../../types/notification';
 import {
-  BORDER_NEUTRAL,
-  FILL_NEUTRAL,
-  NAVY,
-  TEXT_MUTED,
+  BORDER_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_NORMAL,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_NORMAL,
+  NAVY_800,
 } from '../../constants/colors';
 
 const GRID_ICON = require('../../assets/icons/system/Grid.png');
@@ -55,14 +56,14 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderBottomWidth: 1,
-    borderBottomColor: BORDER_NEUTRAL,
+    borderBottomColor: BORDER_NEUTRAL_NORMAL,
     gap: 12,
   },
   iconBadge: {
     width: 36,
     height: 36,
     borderRadius: 8,
-    backgroundColor: FILL_NEUTRAL,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -85,16 +86,16 @@ const styles = StyleSheet.create({
   },
   time: {
     fontSize: 12,
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
   description: {
     fontSize: 13,
-    color: '#495057',
+    color: FOREGROUND_NEUTRAL_NORMAL,
     lineHeight: 18,
   },
   highlightedText: {
     fontWeight: 'bold',
-    color: NAVY,
+    color: NAVY_800,
   },
 });
 

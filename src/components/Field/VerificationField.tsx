@@ -1,6 +1,11 @@
 import { useRef } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { BACKGROUND_PRIMARY, LINK_BLUE } from '../../constants/colors';
+import {
+  BACKGROUND_PRIMARY,
+  FILL_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 type VerificationFieldProps = {
   value: string;
@@ -58,7 +63,7 @@ const styles = StyleSheet.create({
     width: BOX_SIZE,
     height: BOX_SIZE,
     borderRadius: 8,
-    backgroundColor: '#F1F3F5',
+    backgroundColor: FILL_NEUTRAL_NORMAL,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -67,13 +72,13 @@ const styles = StyleSheet.create({
   },
   boxActive: {
     borderWidth: 1,
-    borderColor: LINK_BLUE,
-    backgroundColor: '#FFFFFF',
+    borderColor: FOREGROUND_SECONDARY,
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
   },
   digit: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
   hiddenInput: {
     position: 'absolute',

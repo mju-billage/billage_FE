@@ -1,6 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
 import ProgressBar from '../Feedback/ProgressBar';
-import { BORDER_NEUTRAL } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 
 type BudgetCardProps =
   | { state: 'empty'; emptyMessage?: string }
@@ -44,13 +48,13 @@ function BudgetCard(props: BudgetCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 12,
     padding: 16,
   },
   emptyMessage: {
     fontSize: 13,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
     textAlign: 'center',
     paddingVertical: 24,
   },
@@ -60,7 +64,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: BORDER_NEUTRAL,
+    backgroundColor: BORDER_NEUTRAL_NORMAL,
     marginVertical: 12,
   },
   row: {
@@ -70,7 +74,7 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: 13,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
 });
 

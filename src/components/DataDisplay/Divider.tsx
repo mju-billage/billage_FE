@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { BORDER_NEUTRAL } from '../../constants/colors';
+import { BORDER_NEUTRAL_NORMAL } from '../../constants/colors';
 
 type DividerOrientation = 'horizontal' | 'vertical';
 type DividerVariant = 'full-width' | 'inset' | 'thick';
@@ -32,11 +32,11 @@ function Divider({
 const styles = StyleSheet.create({
   horizontal: {
     width: '100%',
-    backgroundColor: BORDER_NEUTRAL,
+    backgroundColor: BORDER_NEUTRAL_NORMAL,
   },
   vertical: {
     height: '100%',
-    backgroundColor: BORDER_NEUTRAL,
+    backgroundColor: BORDER_NEUTRAL_NORMAL,
   },
   insetHorizontal: {
     marginHorizontal: 24,

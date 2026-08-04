@@ -1,5 +1,10 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { FILL_NEUTRAL, TEXT_MUTED } from '../../constants/colors';
+import {
+  FILL_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_DISABLED,
+  FOREGROUND_PRIMARY,
+} from '../../constants/colors';
 
 type SegmentedControlOption<T extends string> = {
   label: string;
@@ -41,7 +46,7 @@ function SegmentedControl<T extends string>({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: FILL_NEUTRAL,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
     borderRadius: 8,
     padding: 2,
   },
@@ -52,15 +57,15 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   segmentSelected: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
   },
   label: {
     fontSize: 13,
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
   labelSelected: {
     fontWeight: 'bold',
-    color: '#212529',
+    color: FOREGROUND_PRIMARY,
   },
 });
 

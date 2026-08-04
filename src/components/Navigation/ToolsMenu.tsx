@@ -6,7 +6,11 @@ import {
   Text,
   View,
 } from 'react-native';
-import { BORDER_NEUTRAL, TEXT_MUTED } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_NORMAL,
+} from '../../constants/colors';
 
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/ChevronRight.png');
 
@@ -69,7 +73,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
     marginBottom: 8,
   },
   item: {
@@ -78,7 +82,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: BORDER_NEUTRAL,
+    borderBottomColor: BORDER_NEUTRAL_NORMAL,
   },
   itemPressed: {
     opacity: 0.6,
@@ -86,7 +90,7 @@ const styles = StyleSheet.create({
   itemIcon: {
     width: 24,
     height: 24,
-    tintColor: '#495057',
+    tintColor: FOREGROUND_NEUTRAL_NORMAL,
   },
   itemTextColumn: {
     flex: 1,
@@ -98,12 +102,12 @@ const styles = StyleSheet.create({
   itemSubLabel: {
     marginTop: 2,
     fontSize: 12,
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
   chevron: {
     width: 16,
     height: 16,
-    tintColor: '#ADB5BD',
+    tintColor: FOREGROUND_DISABLED,
   },
 });
 

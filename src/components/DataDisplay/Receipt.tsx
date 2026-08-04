@@ -1,5 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { FILL_NEUTRAL, LINK_BLUE } from '../../constants/colors';
+import {
+  FILL_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 type ReceiptItem = {
   name: string;
@@ -45,7 +50,7 @@ function Receipt({ items, total }: ReceiptProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 12,
     overflow: 'hidden',
   },
@@ -56,7 +61,7 @@ const styles = StyleSheet.create({
   },
   headerCell: {
     fontSize: 12,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
     fontWeight: 'bold',
   },
   row: {
@@ -65,7 +70,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   rowAlt: {
-    backgroundColor: FILL_NEUTRAL,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
   },
   cell: {
     fontSize: 13,
@@ -90,12 +95,12 @@ const styles = StyleSheet.create({
   totalLabel: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
   totalValue: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
 });
 

@@ -1,5 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { BORDER_NEUTRAL, LINK_BLUE } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FEEDBACK_POSITIVE_BOLD,
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 
 type AmountCardProps =
   | { type: 'incomeExpense'; income: number; expense: number }
@@ -84,7 +89,7 @@ function getTotal(props: AmountCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 12,
     padding: 16,
   },
@@ -95,18 +100,18 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   value: {
     fontSize: 13,
     fontWeight: 'bold',
   },
   valuePositive: {
-    color: LINK_BLUE,
+    color: FEEDBACK_POSITIVE_BOLD,
   },
   divider: {
     height: 1,
-    backgroundColor: BORDER_NEUTRAL,
+    backgroundColor: BORDER_NEUTRAL_NORMAL,
     marginVertical: 8,
   },
   totalLabel: {

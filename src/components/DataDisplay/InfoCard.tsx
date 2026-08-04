@@ -1,6 +1,12 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Chip from '../Selection/Chip';
-import { BORDER_NEUTRAL, ERROR_RED, LINK_BLUE } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FEEDBACK_NEGATIVE_BOLD,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/ChevronRight.png');
 
@@ -79,7 +85,7 @@ const styles = StyleSheet.create({
   card: {
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: BORDER_NEUTRAL,
+    borderColor: BORDER_NEUTRAL_NORMAL,
     borderRadius: 12,
     padding: 16,
   },
@@ -91,10 +97,10 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: 13,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   required: {
-    color: ERROR_RED,
+    color: FEEDBACK_NEGATIVE_BOLD,
   },
   fieldValue: {
     fontSize: 14,
@@ -117,13 +123,13 @@ const styles = StyleSheet.create({
   },
   addTagText: {
     fontSize: 12,
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
     fontWeight: 'bold',
   },
   chevron: {
     width: 14,
     height: 14,
-    tintColor: LINK_BLUE,
+    tintColor: FOREGROUND_SECONDARY,
   },
   memoSection: {
     marginTop: 12,
@@ -135,7 +141,7 @@ const styles = StyleSheet.create({
   memoPlaceholder: {
     marginTop: 4,
     fontSize: 13,
-    color: '#ADB5BD',
+    color: FOREGROUND_DISABLED,
   },
 });
 

@@ -5,7 +5,12 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { LINK_BLUE, TEXT_MUTED } from '../../constants/colors';
+import {
+  FILL_NEUTRAL_NORMAL,
+  FOREGROUND_DISABLED,
+  FOREGROUND_PRIMARY,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 type IconButtonProps = {
   icon: ImageSourcePropType;
@@ -54,15 +59,15 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   pressed: {
-    backgroundColor: '#F1F3F5',
+    backgroundColor: FILL_NEUTRAL_NORMAL,
   },
   icon: {
     width: ICON_SIZE,
     height: ICON_SIZE,
-    tintColor: '#212529',
+    tintColor: FOREGROUND_PRIMARY,
   },
   iconDisabled: {
-    tintColor: TEXT_MUTED,
+    tintColor: FOREGROUND_DISABLED,
   },
   badge: {
     position: 'absolute',
@@ -71,7 +76,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: LINK_BLUE,
+    backgroundColor: FOREGROUND_SECONDARY,
   },
 });
 

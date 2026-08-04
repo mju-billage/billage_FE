@@ -1,5 +1,8 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { LINK_BLUE, TEXT_MUTED } from '../../constants/colors';
+import {
+  FOREGROUND_DISABLED,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 export type TabItem<T extends string> = {
   label: string;
@@ -46,17 +49,17 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
   labelSelected: {
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
     fontWeight: 'bold',
   },
   underline: {
     marginTop: 8,
     height: 2,
     width: '100%',
-    backgroundColor: LINK_BLUE,
+    backgroundColor: FOREGROUND_SECONDARY,
   },
 });
 

@@ -1,6 +1,9 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import CheckBox from '../Selection/CheckBox';
-import { FILL_NEUTRAL, TEXT_MUTED } from '../../constants/colors';
+import {
+  FILL_NEUTRAL_NORMAL,
+  FOREGROUND_DISABLED,
+} from '../../constants/colors';
 
 type MemberListItemProps = {
   name: string;
@@ -59,7 +62,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   rowPressed: {
-    backgroundColor: FILL_NEUTRAL,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
   },
   rowDisabled: {
     opacity: 0.5,
@@ -73,7 +76,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   nameDisabled: {
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
   amount: {
     fontSize: 14,

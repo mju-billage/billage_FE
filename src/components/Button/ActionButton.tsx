@@ -1,5 +1,12 @@
 import { Pressable, StyleSheet, Text, TextStyle } from 'react-native';
-import { ERROR_RED, LINK_BLUE, TEXT_MUTED } from '../../constants/colors';
+import {
+  FEEDBACK_NEGATIVE_BOLD,
+  FOREGROUND_DISABLED,
+  FOREGROUND_INVERSE,
+  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_PRIMARY,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 type ActionButtonStyle =
   | 'default'
@@ -50,22 +57,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   defaultLabel: {
-    color: '#212529',
+    color: FOREGROUND_PRIMARY,
   },
   neutralLabel: {
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   successLabel: {
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
   errorLabel: {
-    color: ERROR_RED,
+    color: FEEDBACK_NEGATIVE_BOLD,
   },
   inverseLabel: {
-    color: '#FFFFFF',
+    color: FOREGROUND_INVERSE,
   },
   disabledLabel: {
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
 });
 

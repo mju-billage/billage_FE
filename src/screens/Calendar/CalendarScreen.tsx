@@ -22,6 +22,7 @@ import {
   CALENDAR_SCREEN_TITLE,
   CALENDAR_WEEKDAY_LABELS,
 } from '../../constants/calendarScreenText';
+import { BACKGROUND_SECONDARY } from '../../constants/colors';
 
 const CHEVRON_LEFT_ICON = require('../../assets/icons/nav/ChevronLeft.png');
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/ChevronRight.png');
@@ -130,7 +131,7 @@ function CalendarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: BACKGROUND_SECONDARY,
   },
   scrollContent: {
     paddingHorizontal: 24,

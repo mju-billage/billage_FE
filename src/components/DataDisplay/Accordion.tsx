@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { BORDER_NEUTRAL } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_NORMAL,
+} from '../../constants/colors';
 
 const PLUS_ICON = require('../../assets/icons/action/Plus.png');
 
@@ -31,7 +34,7 @@ function Accordion({ title, children, defaultOpen = false }: AccordionProps) {
 const styles = StyleSheet.create({
   container: {
     borderBottomWidth: 1,
-    borderBottomColor: BORDER_NEUTRAL,
+    borderBottomColor: BORDER_NEUTRAL_NORMAL,
   },
   header: {
     flexDirection: 'row',
@@ -46,7 +49,7 @@ const styles = StyleSheet.create({
   icon: {
     width: 16,
     height: 16,
-    tintColor: '#495057',
+    tintColor: FOREGROUND_NEUTRAL_NORMAL,
   },
   iconOpen: {
     transform: [{ rotate: '45deg' }],

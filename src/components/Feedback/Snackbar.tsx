@@ -1,6 +1,10 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import ActionButton from '../Button/ActionButton';
-import { NAVY } from '../../constants/colors';
+import {
+  FOREGROUND_INACTIVE,
+  FOREGROUND_INVERSE,
+  NAVY_800,
+} from '../../constants/colors';
 
 const CLOSE_ICON = require('../../assets/icons/action/Close.png');
 
@@ -55,7 +59,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: NAVY,
+    backgroundColor: NAVY_800,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -68,11 +72,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: FOREGROUND_INVERSE,
   },
   description: {
     fontSize: 12,
-    color: '#DEE2E6',
+    color: FOREGROUND_INACTIVE,
   },
   actions: {
     flexDirection: 'row',
@@ -82,7 +86,7 @@ const styles = StyleSheet.create({
   closeIcon: {
     width: 16,
     height: 16,
-    tintColor: '#FFFFFF',
+    tintColor: FOREGROUND_INVERSE,
   },
 });
 

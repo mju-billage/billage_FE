@@ -5,7 +5,13 @@ import {
   StyleSheet,
   Text,
 } from 'react-native';
-import { ERROR_RED, LINK_BLUE, TEXT_MUTED } from '../../constants/colors';
+import {
+  FEEDBACK_NEGATIVE_BOLD,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_PRIMARY,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 type TextButtonHierarchy = 'primary' | 'secondary' | 'tertiary' | 'negative';
 
@@ -71,19 +77,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   primaryLabel: {
-    color: '#212529',
+    color: FOREGROUND_PRIMARY,
   },
   secondaryLabel: {
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
   tertiaryLabel: {
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   negativeLabel: {
-    color: ERROR_RED,
+    color: FEEDBACK_NEGATIVE_BOLD,
   },
   disabledLabel: {
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
 });
 

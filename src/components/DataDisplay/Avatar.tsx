@@ -1,5 +1,9 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
-import { LINK_BLUE } from '../../constants/colors';
+import {
+  FILL_NEUTRAL_NORMAL,
+  FILL_SECONDARY_SUBTLE,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 const MEMBER_ICON = require('../../assets/icons/user/Member.png');
 
@@ -65,17 +69,17 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   default: {
-    backgroundColor: '#E7EBFA',
+    backgroundColor: FILL_SECONDARY_SUBTLE,
   },
   neutral: {
-    backgroundColor: '#F1F3F5',
+    backgroundColor: FILL_NEUTRAL_NORMAL,
   },
   icon: {
-    tintColor: LINK_BLUE,
+    tintColor: FOREGROUND_SECONDARY,
   },
   initial: {
     fontWeight: 'bold',
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
   image: {
     width: '100%',

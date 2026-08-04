@@ -2,6 +2,10 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import Badge from './Badge';
 import ProgressBar from '../Feedback/ProgressBar';
 import type { DuesProgress } from '../../types/dashboard';
+import {
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 
 const MEMBER_ICON = require('../../assets/icons/user/Member.png');
 const CARD_WIDTH = 280;
@@ -88,7 +92,7 @@ function PaymentManagementCard({
 const styles = StyleSheet.create({
   card: {
     width: CARD_WIDTH,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 16,
     padding: 16,
   },
@@ -105,7 +109,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 13,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   highlightDescription: {
     fontSize: 20,
@@ -123,11 +127,11 @@ const styles = StyleSheet.create({
   memberIcon: {
     width: 14,
     height: 14,
-    tintColor: '#868E96',
+    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
   memberCountText: {
     fontSize: 12,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   paymentSummaryRow: {
     flexDirection: 'row',

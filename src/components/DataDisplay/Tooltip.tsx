@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { NAVY } from '../../constants/colors';
+import { FOREGROUND_INVERSE, NAVY_800 } from '../../constants/colors';
 
 type TooltipPosition = 'top' | 'bottom' | 'left' | 'right';
 
@@ -36,14 +36,14 @@ const styles = StyleSheet.create({
   },
   bubble: {
     position: 'absolute',
-    backgroundColor: NAVY,
+    backgroundColor: NAVY_800,
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
   text: {
     fontSize: 12,
-    color: '#FFFFFF',
+    color: FOREGROUND_INVERSE,
   },
   top: {
     bottom: '100%',

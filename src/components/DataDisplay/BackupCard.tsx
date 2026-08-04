@@ -1,5 +1,9 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Button from '../Button/Button';
+import {
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const CLOSE_ICON = require('../../assets/icons/action/Close.png');
@@ -54,7 +58,7 @@ function BackupCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 12,
     padding: 16,
   },
@@ -75,12 +79,12 @@ const styles = StyleSheet.create({
   smallIcon: {
     width: 16,
     height: 16,
-    tintColor: '#868E96',
+    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
   meta: {
     marginTop: 6,
     fontSize: 12,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   footer: {
     marginTop: 12,
