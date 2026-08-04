@@ -15,6 +15,7 @@ import {
 import {
   EMAIL_VERIFICATION_TITLE,
   EMAIL_VERIFICATION_SUBTITLE,
+  EMAIL_VERIFICATION_SEND_BUTTON_LABEL,
   EMAIL_VERIFICATION_TIMER_LABEL,
   EMAIL_VERIFICATION_RESEND_PROMPT,
   EMAIL_VERIFICATION_RESEND_LINK_LABEL,
@@ -41,15 +42,23 @@ function formatCountdown(seconds: number): string {
 function EmailVerificationScreen() {
   const navigation = useNavigation<EmailVerificationNavigationProp>();
   const [code, setCode] = useState('');
+  const [isCodeSent, setIsCodeSent] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(COUNTDOWN_SECONDS);
 
   useEffect(() => {
-    if (secondsLeft <= 0) {
+    if (!isCodeSent || secondsLeft <= 0) {
       return;
     }
     const timer = setTimeout(() => setSecondsLeft(prev => prev - 1), 1000);
     return () => clearTimeout(timer);
-  }, [secondsLeft]);
+  }, [isCodeSent, secondsLeft]);
+
+  const handleSendCode = () => {
+    // TODO: route.params.email로 인증 코드 발송 API 연동 필요
+    setIsCodeSent(true);
+    setSecondsLeft(COUNTDOWN_SECONDS);
+    setCode('');
+  };
 
   const handleResend = () => {
     // TODO: route.params.email로 인증 코드 재전송 API 연동 필요
@@ -70,28 +79,44 @@ function EmailVerificationScreen() {
       <Text style={styles.title}>{EMAIL_VERIFICATION_TITLE}</Text>
       <Text style={styles.subtitle}>{EMAIL_VERIFICATION_SUBTITLE}</Text>
 
+      {!isCodeSent && (
+        <View style={styles.sendButtonRow}>
+          <PrimaryButton
+            label={EMAIL_VERIFICATION_SEND_BUTTON_LABEL}
+            onPress={handleSendCode}
+          />
+        </View>
+      )}
+
       <View style={styles.codeSection}>
         <VerificationField
           value={code}
           onChangeText={setCode}
           length={CODE_LENGTH}
+          disabled={!isCodeSent}
         />
-        <Text style={styles.timerText}>
-          {EMAIL_VERIFICATION_TIMER_LABEL}{' '}
-          <Text style={styles.timerValue}>{formatCountdown(secondsLeft)}</Text>
-        </Text>
+        {isCodeSent && (
+          <Text style={styles.timerText}>
+            {EMAIL_VERIFICATION_TIMER_LABEL}{' '}
+            <Text style={styles.timerValue}>
+              {formatCountdown(secondsLeft)}
+            </Text>
+          </Text>
+        )}
       </View>
 
-      <View style={styles.resendRow}>
-        <Text style={styles.resendLabel}>
-          {EMAIL_VERIFICATION_RESEND_PROMPT}
-        </Text>
-        <Pressable onPress={handleResend}>
-          <Text style={styles.resendLink}>
-            {EMAIL_VERIFICATION_RESEND_LINK_LABEL}
+      {isCodeSent && (
+        <View style={styles.resendRow}>
+          <Text style={styles.resendLabel}>
+            {EMAIL_VERIFICATION_RESEND_PROMPT}
           </Text>
-        </Pressable>
-      </View>
+          <Pressable onPress={handleResend}>
+            <Text style={styles.resendLink}>
+              {EMAIL_VERIFICATION_RESEND_LINK_LABEL}
+            </Text>
+          </Pressable>
+        </View>
+      )}
 
       <View style={styles.footer}>
         <PrimaryButton
@@ -121,6 +146,9 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     color: FOREGROUND_NEUTRAL_NORMAL,
+    marginBottom: 24,
+  },
+  sendButtonRow: {
     marginBottom: 24,
   },
   codeSection: {

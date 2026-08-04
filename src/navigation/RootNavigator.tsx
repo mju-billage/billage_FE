@@ -18,6 +18,7 @@ import MainTabNavigator from './MainTabNavigator';
 import NotificationScreen from '../screens/Notification/NotificationScreen';
 import CalendarScreen from '../screens/Calendar/CalendarScreen';
 import { SocialProfile } from '../types/social';
+import * as authService from '../services/authService';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -38,13 +39,21 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-/** 앱 진입점 내비게이터: 로딩 중엔 스플래시를, 이후엔 로그인/회원가입 스택을 보여준다. */
+/**
+ * 앱 진입점 내비게이터: 로딩 중엔 스플래시를 보여주며 저장된 Refresh Token으로
+ * 세션 복원을 시도하고, 이후 로그인 여부에 따라 로그인 화면 또는 메인 화면으로 진입한다.
+ */
 function RootNavigator() {
   const [isLoading, setIsLoading] = useState(true);
+  const [initialRouteName, setInitialRouteName] = useState<'Login' | 'Main'>(
+    'Login',
+  );
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(timer);
+    authService.restoreSession().then(user => {
+      setInitialRouteName(user ? 'Main' : 'Login');
+      setIsLoading(false);
+    });
   }, []);
 
   if (isLoading) {
@@ -55,7 +64,7 @@ function RootNavigator() {
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="Login"
+          initialRouteName={initialRouteName}
           screenOptions={{ headerShown: false }}
         >
           <Stack.Screen name="Login" component={LoginScreen} />

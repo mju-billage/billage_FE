@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 import {
-  BORDER_NEUTRAL_NORMAL,
+  BORDER_NEUTRAL_BOLD,
   FILL_DISABLED,
   FOREGROUND_INVERSE,
   FOREGROUND_SECONDARY,
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     height: SIZE,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: BORDER_NEUTRAL_NORMAL,
+    borderColor: BORDER_NEUTRAL_BOLD,
     alignItems: 'center',
     justifyContent: 'center',
   },

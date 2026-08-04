@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import {
-  BORDER_NEUTRAL_NORMAL,
+  BORDER_NEUTRAL_BOLD,
   FOREGROUND_SECONDARY,
 } from '../../constants/colors';
 
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: BORDER_NEUTRAL_NORMAL,
+    backgroundColor: BORDER_NEUTRAL_BOLD,
   },
   dotSelected: {
     backgroundColor: FOREGROUND_SECONDARY,
