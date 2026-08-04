@@ -1,12 +1,4 @@
-import {
-  FlatList,
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
@@ -14,9 +6,10 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { MainTabParamList } from '../../navigation/MainTabNavigator';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import FloatingActionButton from '../../components/Button/FAB';
+import FAB from '../../components/Button/FAB';
+import IconButton from '../../components/Button/IconButton';
 import MiniCalendarCard from './MiniCalendarCard';
-import DuesProgressCard from './DuesProgressCard';
+import DuesProgressCard from '../../components/DataDisplay/DuesProgressCard';
 import QuickServiceCard from './QuickServiceCard';
 import { MOCK_DASHBOARD_SUMMARY } from '../../types/dashboard';
 import {
@@ -63,13 +56,11 @@ function DashboardScreen() {
       >
         <View style={styles.headerRow}>
           <Text style={styles.nickname}>{summary.userNickname}</Text>
-          <Pressable
+          <IconButton
+            icon={BELL_ICON}
             onPress={handlePressNotification}
-            hitSlop={8}
             accessibilityLabel={DASHBOARD_NOTIFICATION_ACCESSIBILITY_LABEL}
-          >
-            <Image source={BELL_ICON} style={styles.bellIcon} />
-          </Pressable>
+          />
         </View>
 
         <MiniCalendarCard
@@ -82,7 +73,9 @@ function DashboardScreen() {
           horizontal
           data={summary.duesProgressList}
           keyExtractor={item => item.id}
-          renderItem={({ item }) => <DuesProgressCard progress={item} />}
+          renderItem={({ item }) => (
+            <DuesProgressCard type="dashboard" progress={item} />
+          )}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.duesListContent}
         />
@@ -101,7 +94,7 @@ function DashboardScreen() {
           ))}
         </View>
       </ScrollView>
-      <FloatingActionButton onPress={handlePressAddTransaction} />
+      <FAB onPress={handlePressAddTransaction} />
     </SafeAreaView>
   );
 }
@@ -128,10 +121,6 @@ const styles = StyleSheet.create({
   nickname: {
     fontSize: 22,
     fontWeight: 'bold',
-  },
-  bellIcon: {
-    width: 24,
-    height: 24,
   },
   sectionTitle: {
     fontSize: 17,

@@ -5,6 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/BackButton';
 import AgreementCheckboxRow from '../../components/AgreementCheckboxRow';
+import Divider from '../../components/DataDisplay/Divider';
 import PrimaryButton from '../../components/Button/PrimaryButton';
 import {
   TERMS_AGREEMENT_TITLE,
@@ -79,7 +80,9 @@ function TermsAgreementScreen() {
           onToggle={toggleAll}
           emphasized
         />
-        <View style={styles.divider} />
+        <View style={styles.dividerWrapper}>
+          <Divider />
+        </View>
         <AgreementCheckboxRow
           label={AGREE_SERVICE_LABEL}
           tag={AGREEMENT_TAG_REQUIRED}
@@ -137,9 +140,7 @@ const styles = StyleSheet.create({
   list: {
     flex: 1,
   },
-  divider: {
-    height: 1,
-    backgroundColor: '#E9ECEF',
+  dividerWrapper: {
     marginVertical: 8,
   },
   footer: {
