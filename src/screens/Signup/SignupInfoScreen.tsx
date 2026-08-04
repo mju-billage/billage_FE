@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/RootNavigator';
-import BackButton from '../components/BackButton';
-import LabeledTextInput from '../components/LabeledTextInput';
-import PrimaryButton from '../components/PrimaryButton';
-import { isValidEmail, isValidPassword } from '../utils/validators';
-import { ApiError } from '../services/apiClient';
-import * as authService from '../services/authService';
+import type { RootStackParamList } from '../../navigation/RootNavigator';
+import BackButton from '../../components/BackButton';
+import LabeledTextInput from '../../components/LabeledTextInput';
+import PrimaryButton from '../../components/PrimaryButton';
+import { isValidEmail, isValidPassword } from '../../utils/validators';
+import { ApiError } from '../../services/apiClient';
+import * as authService from '../../services/authService';
 import {
   SIGNUP_INFO_TITLE,
   SIGNUP_NAME_LABEL,
@@ -24,8 +24,8 @@ import {
   SIGNUP_PASSWORD_CONFIRM_LABEL,
   SIGNUP_PASSWORD_MISMATCH_ERROR,
   SIGNUP_GENERIC_ERROR,
-} from '../constants/signupInfoText';
-import { NEXT_BUTTON_LABEL } from '../constants/commonText';
+} from '../../constants/signupInfoText';
+import { NEXT_BUTTON_LABEL } from '../../constants/commonText';
 
 type SignupInfoNavigationProp = NativeStackNavigationProp<
   RootStackParamList,

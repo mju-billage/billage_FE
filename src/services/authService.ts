@@ -1,4 +1,5 @@
 import { request } from './apiClient';
+import { SocialType } from '../types/social';
 
 export type SignupRequest = {
   email: string;
@@ -50,5 +51,39 @@ export function getCurrentUser(): Promise<AuthUserResponse> {
 export function logout(): Promise<void> {
   return request<void>('/api/v1/auth/logout', {
     method: 'POST',
+  });
+}
+
+export type SocialLoginRequest = {
+  provider: SocialType;
+  providerToken: string;
+};
+
+export type SocialSignupRequest = SocialLoginRequest & {
+  name: string;
+  email: string;
+};
+
+/**
+ * 소셜 로그인 토큰으로 로그인을 요청한다. 기존 회원이면 로그인에 성공하고,
+ * 신규 회원이면 서버가 `SOCIAL_MEMBER_NOT_FOUND` 코드의 에러를 반환한다.
+ * (백엔드 엔드포인트/에러 코드는 아직 확정 전인 가정치이므로 연동 시 재확인이 필요하다.)
+ */
+export function socialLogin(
+  payload: SocialLoginRequest,
+): Promise<AuthUserResponse> {
+  return request<AuthUserResponse>('/api/v1/auth/social/login', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+/** 소셜 프로필 기반 간편 회원가입을 요청한다. (엔드포인트는 백엔드 확정 전인 가정치) */
+export function socialSignup(
+  payload: SocialSignupRequest,
+): Promise<AuthUserResponse> {
+  return request<AuthUserResponse>('/api/v1/auth/social/signup', {
+    method: 'POST',
+    body: JSON.stringify(payload),
   });
 }

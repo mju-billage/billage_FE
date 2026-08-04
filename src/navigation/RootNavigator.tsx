@@ -1,19 +1,23 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import SplashScreen from '../screens/SplashScreen';
 import { useEffect, useState } from 'react';
 import LoginScreen from '../screens/LoginScreen';
-import TermsAgreementScreen from '../screens/TermsAgreementScreen';
-import TermsOfServiceScreen from '../screens/TermsOfServiceScreen';
-import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
-import MarketingConsentScreen from '../screens/MarketingConsentScreen';
-import SocialSignupInfoScreen from '../screens/SocialSignupInfoScreen';
-import SignupInfoScreen from '../screens/SignupInfoScreen';
-import EmailVerificationScreen from '../screens/EmailVerificationScreen';
-import SignupCompleteScreen from '../screens/SignupCompleteScreen';
-import PasswordResetScreen from '../screens/PasswordResetScreen';
-import PasswordResetSentScreen from '../screens/PasswordResetSentScreen';
-import { SocialType } from '../types/social';
+import TermsAgreementScreen from '../screens/Signup/TermsAgreementScreen';
+import TermsOfServiceScreen from '../screens/Signup/TermsOfServiceScreen';
+import PrivacyPolicyScreen from '../screens/Signup/PrivacyPolicyScreen';
+import MarketingConsentScreen from '../screens/Signup/MarketingConsentScreen';
+import SocialSignupInfoScreen from '../screens/Signup/SocialSignupInfoScreen';
+import SignupInfoScreen from '../screens/Signup/SignupInfoScreen';
+import EmailVerificationScreen from '../screens/Signup/EmailVerificationScreen';
+import SignupCompleteScreen from '../screens/Signup/SignupCompleteScreen';
+import PasswordResetScreen from '../screens/PasswordReset/PasswordResetScreen';
+import PasswordResetSentScreen from '../screens/PasswordReset/PasswordResetSentScreen';
+import MainTabNavigator from './MainTabNavigator';
+import NotificationScreen from '../screens/Notification/NotificationScreen';
+import CalendarScreen from '../screens/Calendar/CalendarScreen';
+import { SocialProfile } from '../types/social';
 
 export type RootStackParamList = {
   Login: undefined;
@@ -21,12 +25,15 @@ export type RootStackParamList = {
   TermsOfService: undefined;
   PrivacyPolicy: undefined;
   MarketingConsent: undefined;
-  SocialSignupInfo: { provider: SocialType };
+  SocialSignupInfo: { profile: SocialProfile };
   SignupInfo: undefined;
   EmailVerification: { email: string };
   SignupComplete: undefined;
   PasswordReset: undefined;
   PasswordResetSent: { email: string };
+  Main: undefined;
+  Notification: undefined;
+  Calendar: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -45,36 +52,50 @@ function RootNavigator() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Login"
-        screenOptions={{ headerShown: false }}
-      >
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="TermsAgreement" component={TermsAgreementScreen} />
-        <Stack.Screen name="TermsOfService" component={TermsOfServiceScreen} />
-        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
-        <Stack.Screen
-          name="MarketingConsent"
-          component={MarketingConsentScreen}
-        />
-        <Stack.Screen
-          name="SocialSignupInfo"
-          component={SocialSignupInfoScreen}
-        />
-        <Stack.Screen name="SignupInfo" component={SignupInfoScreen} />
-        <Stack.Screen
-          name="EmailVerification"
-          component={EmailVerificationScreen}
-        />
-        <Stack.Screen name="SignupComplete" component={SignupCompleteScreen} />
-        <Stack.Screen name="PasswordReset" component={PasswordResetScreen} />
-        <Stack.Screen
-          name="PasswordResetSent"
-          component={PasswordResetSentScreen}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName="Login"
+          screenOptions={{ headerShown: false }}
+        >
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen
+            name="TermsAgreement"
+            component={TermsAgreementScreen}
+          />
+          <Stack.Screen
+            name="TermsOfService"
+            component={TermsOfServiceScreen}
+          />
+          <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+          <Stack.Screen
+            name="MarketingConsent"
+            component={MarketingConsentScreen}
+          />
+          <Stack.Screen
+            name="SocialSignupInfo"
+            component={SocialSignupInfoScreen}
+          />
+          <Stack.Screen name="SignupInfo" component={SignupInfoScreen} />
+          <Stack.Screen
+            name="EmailVerification"
+            component={EmailVerificationScreen}
+          />
+          <Stack.Screen
+            name="SignupComplete"
+            component={SignupCompleteScreen}
+          />
+          <Stack.Screen name="PasswordReset" component={PasswordResetScreen} />
+          <Stack.Screen
+            name="PasswordResetSent"
+            component={PasswordResetSentScreen}
+          />
+          <Stack.Screen name="Main" component={MainTabNavigator} />
+          <Stack.Screen name="Notification" component={NotificationScreen} />
+          <Stack.Screen name="Calendar" component={CalendarScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
 

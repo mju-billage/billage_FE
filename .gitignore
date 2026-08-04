@@ -73,3 +73,9 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# react-native-config
+.env
+
+# local-only dev notes (not shared via git)
+DEV_NOTES.md

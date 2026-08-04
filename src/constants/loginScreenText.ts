@@ -10,5 +10,3 @@ export const LOGIN_GENERIC_ERROR =
   '로그인에 실패했습니다. 잠시 후 다시 시도해주세요.';
 export const LOGIN_SOCIAL_ERROR = '소셜 로그인 중 문제가 발생했습니다.';
 export const LOGIN_MOCK_BUTTON_LABEL = '목 계정으로 로그인 (개발용)';
-export const LOGIN_MOCK_SUCCESS_TEXT =
-  '목 데이터로 로그인 처리됨 (백엔드 연동 없음)';

@@ -2,17 +2,17 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/RootNavigator';
-import BackButton from '../components/BackButton';
-import LabeledTextInput from '../components/LabeledTextInput';
-import PrimaryButton from '../components/PrimaryButton';
-import { isValidEmail } from '../utils/validators';
+import type { RootStackParamList } from '../../navigation/RootNavigator';
+import BackButton from '../../components/BackButton';
+import LabeledTextInput from '../../components/LabeledTextInput';
+import PrimaryButton from '../../components/PrimaryButton';
+import { isValidEmail } from '../../utils/validators';
 import {
   PASSWORD_RESET_TITLE,
   PASSWORD_RESET_SUBTITLE,
   PASSWORD_RESET_EMAIL_PLACEHOLDER,
   PASSWORD_RESET_SUBMIT_LABEL,
-} from '../constants/passwordResetText';
+} from '../../constants/passwordResetText';
 
 type PasswordResetNavigationProp = NativeStackNavigationProp<
   RootStackParamList,

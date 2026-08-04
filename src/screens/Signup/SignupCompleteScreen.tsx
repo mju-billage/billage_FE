@@ -1,15 +1,15 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/RootNavigator';
-import BackButton from '../components/BackButton';
-import PrimaryButton from '../components/PrimaryButton';
+import type { RootStackParamList } from '../../navigation/RootNavigator';
+import BackButton from '../../components/BackButton';
+import PrimaryButton from '../../components/PrimaryButton';
 import {
   SIGNUP_COMPLETE_TITLE,
   SIGNUP_COMPLETE_SUBTITLE,
   SIGNUP_COMPLETE_CREATE_GROUP_LABEL,
   SIGNUP_COMPLETE_JOIN_WITH_CODE_LABEL,
-} from '../constants/signupCompleteScreenText';
+} from '../../constants/signupCompleteScreenText';
 
 type SignupCompleteNavigationProp = NativeStackNavigationProp<
   RootStackParamList,

@@ -1,11 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/RootNavigator';
-import LegalDocumentView from '../components/LegalDocumentView';
+import type { RootStackParamList } from '../../navigation/RootNavigator';
+import LegalDocumentView from '../../components/LegalDocumentView';
 import {
   TERMS_OF_SERVICE_TEXT,
   TERMS_OF_SERVICE_TITLE,
-} from '../constants/terms';
+} from '../../constants/terms';
 
 type TermsOfServiceNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
