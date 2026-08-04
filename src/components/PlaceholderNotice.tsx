@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { TEXT_MUTED } from '../constants/colors';
+import { FOREGROUND_DISABLED } from '../constants/colors';
 
 type PlaceholderNoticeProps = {
   title: string;
@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 15,
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
 });
 

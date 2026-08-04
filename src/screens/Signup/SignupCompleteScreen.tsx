@@ -4,6 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/BackButton';
 import PrimaryButton from '../../components/Button/PrimaryButton';
+import { FOREGROUND_NEUTRAL_NORMAL } from '../../constants/colors';
 import {
   SIGNUP_COMPLETE_TITLE,
   SIGNUP_COMPLETE_SUBTITLE,
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    color: '#495057',
+    color: FOREGROUND_NEUTRAL_NORMAL,
     lineHeight: 20,
   },
   footer: {

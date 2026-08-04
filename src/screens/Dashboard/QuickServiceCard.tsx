@@ -1,5 +1,9 @@
 import { Image, Pressable, StyleSheet, Text } from 'react-native';
 import type { QuickServiceItem } from '../../types/dashboard';
+import {
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 
 type QuickServiceCardProps = {
   item: QuickServiceItem;
@@ -20,7 +24,7 @@ function QuickServiceCard({ item, onPress }: QuickServiceCardProps) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 16,
     padding: 12,
     justifyContent: 'space-between',
@@ -28,7 +32,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 12,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   title: {
     fontSize: 14,

@@ -1,5 +1,10 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { NAVY } from '../../constants/colors';
+import {
+  FILL_DISABLED,
+  FOREGROUND_DISABLED,
+  FOREGROUND_INVERSE,
+  NAVY_800,
+} from '../../constants/colors';
 
 type PrimaryButtonProps = {
   label: string;
@@ -47,18 +52,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   enabled: {
-    backgroundColor: NAVY,
+    backgroundColor: NAVY_800,
   },
   muted: {
-    backgroundColor: '#F1F3F5',
+    backgroundColor: FILL_DISABLED,
   },
   enabledLabel: {
-    color: '#FFFFFF',
+    color: FOREGROUND_INVERSE,
     fontSize: 16,
     fontWeight: 'bold',
   },
   mutedLabel: {
-    color: '#ADB5BD',
+    color: FOREGROUND_DISABLED,
     fontSize: 16,
     fontWeight: 'bold',
   },

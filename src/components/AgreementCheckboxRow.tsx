@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { LINK_BLUE, NAVY } from '../constants/colors';
+import CheckBox from './Selection/CheckBox';
+import { FOREGROUND_DISABLED, FOREGROUND_SECONDARY } from '../constants/colors';
 import {
   AGREEMENT_TAG_REQUIRED,
   AGREEMENT_TAG_OPTIONAL,
@@ -26,8 +27,8 @@ function AgreementCheckboxRow({
   return (
     <View style={styles.row}>
       <Pressable style={styles.tapArea} onPress={onToggle}>
-        <View style={[styles.checkbox, checked && styles.checkboxChecked]}>
-          {checked && <Text style={styles.checkmark}>✓</Text>}
+        <View style={styles.checkboxSlot}>
+          <CheckBox checked={checked} onToggle={onToggle} />
         </View>
         <Text style={[styles.label, emphasized && styles.labelEmphasized]}>
           {label}
@@ -55,24 +56,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#CED4DA',
-    alignItems: 'center',
-    justifyContent: 'center',
+  checkboxSlot: {
     marginRight: 12,
-  },
-  checkboxChecked: {
-    backgroundColor: NAVY,
-    borderColor: NAVY,
-  },
-  checkmark: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: 'bold',
   },
   label: {
     fontSize: 15,
@@ -82,11 +67,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   tag: {
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
   chevron: {
     fontSize: 20,
-    color: '#ADB5BD',
+    color: FOREGROUND_DISABLED,
     paddingHorizontal: 4,
   },
 });

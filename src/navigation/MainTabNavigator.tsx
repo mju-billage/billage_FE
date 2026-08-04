@@ -12,7 +12,7 @@ import {
   TAB_MORE_LABEL,
   TAB_TRANSACTIONS_LABEL,
 } from '../constants/mainTabScreenText';
-import { INACTIVE_NAVY, NAVY } from '../constants/colors';
+import { FOREGROUND_INACTIVE, NAVY_800 } from '../constants/colors';
 
 export type MainTabParamList = {
   Home: undefined;
@@ -69,8 +69,8 @@ function MainTabNavigator() {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: NAVY,
-        tabBarInactiveTintColor: INACTIVE_NAVY,
+        tabBarActiveTintColor: NAVY_800,
+        tabBarInactiveTintColor: FOREGROUND_INACTIVE,
       }}
     >
       <Tab.Screen

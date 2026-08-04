@@ -6,7 +6,12 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/BackButton';
 import VerificationField from '../../components/Field/VerificationField';
 import PrimaryButton from '../../components/Button/PrimaryButton';
-import { LINK_BLUE } from '../../constants/colors';
+import {
+  FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_PRIMARY,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 import {
   EMAIL_VERIFICATION_TITLE,
   EMAIL_VERIFICATION_SUBTITLE,
@@ -115,7 +120,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    color: '#495057',
+    color: FOREGROUND_NEUTRAL_NORMAL,
     marginBottom: 24,
   },
   codeSection: {
@@ -124,10 +129,10 @@ const styles = StyleSheet.create({
   timerText: {
     marginTop: 8,
     fontSize: 13,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   timerValue: {
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
   resendRow: {
     flexDirection: 'row',
@@ -136,11 +141,11 @@ const styles = StyleSheet.create({
   },
   resendLabel: {
     fontSize: 13,
-    color: '#495057',
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   resendLink: {
     fontSize: 13,
-    color: '#212529',
+    color: FOREGROUND_PRIMARY,
     fontWeight: 'bold',
     textDecorationLine: 'underline',
   },

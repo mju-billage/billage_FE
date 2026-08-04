@@ -2,10 +2,11 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import type { CalendarTransaction } from '../../types/calendar';
 import { CALENDAR_APPROVAL_BADGE_LABEL } from '../../constants/calendarScreenText';
 import {
-  FILL_NEUTRAL,
-  NAVY,
-  WARNING_BADGE_BG,
-  WARNING_BADGE_TEXT,
+  FEEDBACK_WARNING_BOLD,
+  FEEDBACK_WARNING_SUBTLE,
+  FILL_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_NORMAL,
+  NAVY_800,
 } from '../../constants/colors';
 
 const RECEIPT_ICON = require('../../assets/icons/content/Bill.png');
@@ -56,7 +57,7 @@ const styles = StyleSheet.create({
   },
   groupBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: FILL_NEUTRAL,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -64,7 +65,7 @@ const styles = StyleSheet.create({
   groupBadgeText: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: '#495057',
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   itemName: {
     fontSize: 15,
@@ -75,7 +76,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   approvalBadge: {
-    backgroundColor: WARNING_BADGE_BG,
+    backgroundColor: FEEDBACK_WARNING_SUBTLE,
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -83,12 +84,12 @@ const styles = StyleSheet.create({
   approvalBadgeText: {
     fontSize: 11,
     fontWeight: 'bold',
-    color: WARNING_BADGE_TEXT,
+    color: FEEDBACK_WARNING_BOLD,
   },
   receiptIcon: {
     width: 18,
     height: 18,
-    tintColor: NAVY,
+    tintColor: NAVY_800,
   },
   amount: {
     fontSize: 15,

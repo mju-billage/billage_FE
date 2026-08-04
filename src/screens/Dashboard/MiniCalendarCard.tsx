@@ -1,6 +1,12 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import Divider from '../../components/DataDisplay/Divider';
 import type { MiniCalendarData } from '../../types/dashboard';
-import { BORDER_NEUTRAL, ERROR_RED, LINK_BLUE } from '../../constants/colors';
+import {
+  FEEDBACK_NEGATIVE_BOLD,
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/ChevronRight.png');
 const DAYS_PER_ROW = 7;
@@ -21,7 +27,9 @@ function MiniCalendarCard({ data, onPress }: MiniCalendarCardProps) {
         <Text style={styles.monthLabel}>{data.monthLabel}</Text>
         <Image source={CHEVRON_RIGHT_ICON} style={styles.chevronIcon} />
       </Pressable>
-      <View style={styles.divider} />
+      <View style={styles.dividerWrapper}>
+        <Divider />
+      </View>
       <View style={styles.week}>
         {firstWeek.map(day => (
           <DayCell
@@ -74,7 +82,7 @@ function DayCell({ day, highlighted }: DayCellProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 16,
@@ -92,9 +100,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
   },
-  divider: {
-    height: 1,
-    backgroundColor: BORDER_NEUTRAL,
+  dividerWrapper: {
     marginVertical: 12,
   },
   week: {
@@ -112,14 +118,14 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   dateTextHighlighted: {
-    color: ERROR_RED,
+    color: FEEDBACK_NEGATIVE_BOLD,
   },
   amountText: {
     fontSize: 10,
-    color: '#495057',
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   amountTextPositive: {
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
 });
 
