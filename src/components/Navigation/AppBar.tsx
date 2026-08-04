@@ -6,7 +6,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import BackButton from './BackButton';
+import BackButton from '../BackButton';
 
 type AppBarProps = {
   title: string;

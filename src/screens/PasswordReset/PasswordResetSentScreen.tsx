@@ -4,7 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/BackButton';
-import PrimaryButton from '../../components/PrimaryButton';
+import PrimaryButton from '../../components/Button/PrimaryButton';
 import {
   PASSWORD_RESET_TITLE,
   PASSWORD_RESET_SENT_MESSAGE_SUFFIX,

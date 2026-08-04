@@ -5,8 +5,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/BackButton';
-import LabeledTextInput from '../../components/LabeledTextInput';
-import PrimaryButton from '../../components/PrimaryButton';
+import TextField from '../../components/Field/TextField';
+import PrimaryButton from '../../components/Button/PrimaryButton';
 import { isValidEmail } from '../../utils/validators';
 import { ApiError } from '../../services/apiClient';
 import * as authService from '../../services/authService';
@@ -79,7 +79,7 @@ function SocialSignupInfoScreen() {
       </View>
       <Text style={styles.title}>{SIGNUP_INFO_TITLE}</Text>
       <View style={styles.header}>
-        <LabeledTextInput
+        <TextField
           label={SIGNUP_NAME_LABEL}
           value={name}
           onChangeText={text => setName(text.slice(0, NAME_MAX_LENGTH))}
@@ -87,7 +87,7 @@ function SocialSignupInfoScreen() {
           helperText={SIGNUP_NAME_HELPER}
           maxLength={NAME_MAX_LENGTH}
         />
-        <LabeledTextInput
+        <TextField
           label={SIGNUP_EMAIL_LABEL}
           value={email}
           onChangeText={text => {

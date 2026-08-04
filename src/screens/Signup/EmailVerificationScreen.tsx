@@ -4,8 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/BackButton';
-import OtpCodeInput from '../../components/OtpCodeInput';
-import PrimaryButton from '../../components/PrimaryButton';
+import VerificationField from '../../components/Field/VerificationField';
+import PrimaryButton from '../../components/Button/PrimaryButton';
 import { LINK_BLUE } from '../../constants/colors';
 import {
   EMAIL_VERIFICATION_TITLE,
@@ -66,7 +66,7 @@ function EmailVerificationScreen() {
       <Text style={styles.subtitle}>{EMAIL_VERIFICATION_SUBTITLE}</Text>
 
       <View style={styles.codeSection}>
-        <OtpCodeInput
+        <VerificationField
           value={code}
           onChangeText={setCode}
           length={CODE_LENGTH}

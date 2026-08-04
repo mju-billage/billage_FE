@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { SocialType } from '../types/social';
+import { SocialType } from '../../types/social';
 
 type SocialIconButtonProps = {
   type: SocialType;

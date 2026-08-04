@@ -3,9 +3,9 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/RootNavigator';
-import SocialIconButton from '../components/SocialIconButton';
-import LabeledTextInput from '../components/LabeledTextInput';
-import PrimaryButton from '../components/PrimaryButton';
+import SocialIconButton from '../components/Button/SocialIconButton';
+import TextField from '../components/Field/TextField';
+import PrimaryButton from '../components/Button/PrimaryButton';
 import { SocialProfile, SocialType } from '../types/social';
 import { ApiError } from '../services/apiClient';
 import * as authService from '../services/authService';
@@ -121,7 +121,7 @@ function LoginScreen() {
       />
 
       <View style={styles.form}>
-        <LabeledTextInput
+        <TextField
           value={email}
           onChangeText={text => {
             setEmail(text);
@@ -131,7 +131,7 @@ function LoginScreen() {
           autoCapitalize="none"
           keyboardType="email-address"
         />
-        <LabeledTextInput
+        <TextField
           value={password}
           onChangeText={text => {
             setPassword(text);

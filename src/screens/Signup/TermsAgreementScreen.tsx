@@ -5,7 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/BackButton';
 import AgreementCheckboxRow from '../../components/AgreementCheckboxRow';
-import PrimaryButton from '../../components/PrimaryButton';
+import PrimaryButton from '../../components/Button/PrimaryButton';
 import {
   TERMS_AGREEMENT_TITLE,
   AGREE_ALL_LABEL,
