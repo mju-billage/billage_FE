@@ -14,7 +14,7 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { MainTabParamList } from '../../navigation/MainTabNavigator';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import FloatingActionButton from '../../components/FloatingActionButton';
+import FloatingActionButton from '../../components/Button/FAB';
 import MiniCalendarCard from './MiniCalendarCard';
 import DuesProgressCard from './DuesProgressCard';
 import QuickServiceCard from './QuickServiceCard';
