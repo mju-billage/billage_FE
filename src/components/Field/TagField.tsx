@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import {
-  BORDER_NEUTRAL,
-  FILL_NEUTRAL,
-  LINK_BLUE,
+  BORDER_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_NORMAL,
+  FOREGROUND_DISABLED,
+  FOREGROUND_SECONDARY,
 } from '../../constants/colors';
 
 type TagFieldProps = {
@@ -53,7 +54,7 @@ function TagField({
           value={draft}
           onChangeText={setDraft}
           placeholder={placeholder}
-          placeholderTextColor="#ADB5BD"
+          placeholderTextColor={FOREGROUND_DISABLED}
           onSubmitEditing={handleSubmit}
           returnKeyType="done"
         />
@@ -69,11 +70,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     borderBottomWidth: 1,
-    borderBottomColor: BORDER_NEUTRAL,
+    borderBottomColor: BORDER_NEUTRAL_NORMAL,
     paddingVertical: 8,
   },
   tag: {
-    backgroundColor: FILL_NEUTRAL,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -81,7 +82,7 @@ const styles = StyleSheet.create({
   tagText: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
   input: {
     flex: 1,

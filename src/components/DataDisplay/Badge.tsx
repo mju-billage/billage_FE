@@ -1,9 +1,13 @@
 import { StyleSheet, Text, View } from 'react-native';
 import {
-  ERROR_RED,
-  NEGATIVE_BADGE_BG,
-  WARNING_BADGE_BG,
-  WARNING_BADGE_TEXT,
+  FEEDBACK_NEGATIVE_BOLD,
+  FEEDBACK_NEGATIVE_SUBTLE,
+  FEEDBACK_POSITIVE_BOLD,
+  FEEDBACK_POSITIVE_SUBTLE,
+  FEEDBACK_WARNING_BOLD,
+  FEEDBACK_WARNING_SUBTLE,
+  FILL_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_NORMAL,
 } from '../../constants/colors';
 
 type BadgeStatus = 'positive' | 'warning' | 'destructive' | 'neutral';
@@ -14,17 +18,17 @@ type BadgeProps = {
 };
 
 const BACKGROUND_BY_STATUS: Record<BadgeStatus, string> = {
-  positive: '#E7EBFA',
-  warning: WARNING_BADGE_BG,
-  destructive: NEGATIVE_BADGE_BG,
-  neutral: '#F1F3F5',
+  positive: FEEDBACK_POSITIVE_SUBTLE,
+  warning: FEEDBACK_WARNING_SUBTLE,
+  destructive: FEEDBACK_NEGATIVE_SUBTLE,
+  neutral: FILL_NEUTRAL_NORMAL,
 };
 
 const TEXT_COLOR_BY_STATUS: Record<BadgeStatus, string> = {
-  positive: '#3B5BDB',
-  warning: WARNING_BADGE_TEXT,
-  destructive: ERROR_RED,
-  neutral: '#495057',
+  positive: FEEDBACK_POSITIVE_BOLD,
+  warning: FEEDBACK_WARNING_BOLD,
+  destructive: FEEDBACK_NEGATIVE_BOLD,
+  neutral: FOREGROUND_NEUTRAL_NORMAL,
 };
 
 /** 상태를 색상으로 표시하는 알약형 뱃지. */

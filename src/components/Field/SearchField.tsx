@@ -1,5 +1,11 @@
 import { Image, StyleSheet, TextInput, View } from 'react-native';
-import { BORDER_NEUTRAL, FILL_NEUTRAL } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 
 const SEARCH_ICON = require('../../assets/icons/system/Search.png');
 
@@ -37,7 +43,7 @@ function SearchField({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor="#ADB5BD"
+        placeholderTextColor={FOREGROUND_DISABLED}
         onSubmitEditing={onSubmit}
         returnKeyType="search"
       />
@@ -50,7 +56,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: FILL_NEUTRAL,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
     borderRadius: 24,
     paddingHorizontal: 16,
   },
@@ -61,9 +67,9 @@ const styles = StyleSheet.create({
     height: 44,
   },
   containerOutline: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderWidth: 1,
-    borderColor: BORDER_NEUTRAL,
+    borderColor: BORDER_NEUTRAL_NORMAL,
   },
   input: {
     flex: 1,
@@ -73,7 +79,7 @@ const styles = StyleSheet.create({
   icon: {
     width: 18,
     height: 18,
-    tintColor: '#868E96',
+    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
 });
 

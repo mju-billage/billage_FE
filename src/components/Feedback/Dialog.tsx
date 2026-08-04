@@ -1,6 +1,10 @@
 import { Modal, StyleSheet, Text, View } from 'react-native';
 import ActionButton from '../Button/ActionButton';
 import TextField from '../Field/TextField';
+import {
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 
 type DialogProps = {
   visible: boolean;
@@ -78,7 +82,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '100%',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 16,
     padding: 20,
   },
@@ -89,7 +93,7 @@ const styles = StyleSheet.create({
   description: {
     marginTop: 8,
     fontSize: 14,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   textFieldWrapper: {
     marginTop: 16,

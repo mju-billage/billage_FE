@@ -1,5 +1,10 @@
 import { Pressable, StyleSheet } from 'react-native';
-import { LINK_BLUE } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_SECONDARY,
+  GREY_300,
+} from '../../constants/colors';
 
 type SwitchToggleProps = {
   value: boolean;
@@ -37,21 +42,21 @@ const styles = StyleSheet.create({
     width: TRACK_WIDTH,
     height: TRACK_HEIGHT,
     borderRadius: TRACK_HEIGHT / 2,
-    backgroundColor: '#CED4DA',
+    backgroundColor: GREY_300,
     justifyContent: 'center',
     padding: 2,
   },
   trackOn: {
-    backgroundColor: LINK_BLUE,
+    backgroundColor: FOREGROUND_SECONDARY,
   },
   trackDisabled: {
-    backgroundColor: '#E9ECEF',
+    backgroundColor: BORDER_NEUTRAL_NORMAL,
   },
   thumb: {
     width: THUMB_SIZE,
     height: THUMB_SIZE,
     borderRadius: THUMB_SIZE / 2,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
   },
   thumbOn: {
     alignSelf: 'flex-end',

@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import CheckBox from './Selection/CheckBox';
-import { LINK_BLUE } from '../constants/colors';
+import { FOREGROUND_DISABLED, FOREGROUND_SECONDARY } from '../constants/colors';
 import {
   AGREEMENT_TAG_REQUIRED,
   AGREEMENT_TAG_OPTIONAL,
@@ -67,11 +67,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   tag: {
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
   chevron: {
     fontSize: 20,
-    color: '#ADB5BD',
+    color: FOREGROUND_DISABLED,
     paddingHorizontal: 4,
   },
 });

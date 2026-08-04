@@ -7,7 +7,13 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { ERROR_RED, LINK_BLUE, TEXT_MUTED } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FEEDBACK_NEGATIVE_BOLD,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 type TextFieldProps = {
   label?: string;
@@ -45,12 +51,12 @@ function TextField({
   const [isSecure, setIsSecure] = useState(secureTextEntry || secureToggle);
 
   const underlineColor = disabled
-    ? '#E9ECEF'
+    ? BORDER_NEUTRAL_NORMAL
     : error
-    ? ERROR_RED
+    ? FEEDBACK_NEGATIVE_BOLD
     : success || isFocused
-    ? LINK_BLUE
-    : '#D9D9D9';
+    ? FOREGROUND_SECONDARY
+    : BORDER_NEUTRAL_NORMAL;
 
   return (
     <View style={styles.container}>
@@ -65,7 +71,7 @@ function TextField({
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor="#ADB5BD"
+          placeholderTextColor={FOREGROUND_DISABLED}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           secureTextEntry={isSecure}
@@ -107,7 +113,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   labelDisabled: {
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
   inputRow: {
     flexDirection: 'row',
@@ -121,7 +127,7 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   inputDisabled: {
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
   toggleIcon: {
     fontSize: 16,
@@ -129,17 +135,17 @@ const styles = StyleSheet.create({
   helperText: {
     marginTop: 6,
     fontSize: 12,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   errorText: {
     marginTop: 6,
     fontSize: 12,
-    color: ERROR_RED,
+    color: FEEDBACK_NEGATIVE_BOLD,
   },
   successText: {
     marginTop: 6,
     fontSize: 12,
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
 });
 

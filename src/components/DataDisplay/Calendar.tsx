@@ -3,8 +3,9 @@ import DateField from '../Field/DateField';
 import { getMonthGridWeeks } from '../../utils/calendarGrid';
 import {
   BACKGROUND_PRIMARY,
-  LINK_BLUE,
-  TEXT_MUTED,
+  FOREGROUND_DISABLED,
+  FOREGROUND_INVERSE,
+  FOREGROUND_SECONDARY,
 } from '../../constants/colors';
 
 const CHEVRON_LEFT_ICON = require('../../assets/icons/nav/ChevronLeft.png');
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
     width: 36,
     textAlign: 'center',
     fontSize: 12,
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
   weekRow: {
     flexDirection: 'row',
@@ -164,13 +165,13 @@ const styles = StyleSheet.create({
     backgroundColor: BACKGROUND_PRIMARY,
   },
   dateCircleSelected: {
-    backgroundColor: LINK_BLUE,
+    backgroundColor: FOREGROUND_SECONDARY,
   },
   dateText: {
     fontSize: 13,
   },
   dateTextSelected: {
-    color: '#FFFFFF',
+    color: FOREGROUND_INVERSE,
     fontWeight: 'bold',
   },
   dateFieldWrapper: {

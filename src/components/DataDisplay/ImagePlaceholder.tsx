@@ -1,5 +1,9 @@
 import { Image, Pressable, StyleSheet, View } from 'react-native';
-import { BORDER_NEUTRAL } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 
 type ImagePlaceholderAspectRatio = '1:1' | '3:4' | '9:16';
 
@@ -50,11 +54,11 @@ const styles = StyleSheet.create({
   container: {
     borderRadius: 8,
     overflow: 'hidden',
-    backgroundColor: '#F1F3F5',
+    backgroundColor: FILL_NEUTRAL_NORMAL,
   },
   emptyBackground: {
     flex: 1,
-    backgroundColor: '#F1F3F5',
+    backgroundColor: FILL_NEUTRAL_NORMAL,
   },
   image: {
     flex: 1,
@@ -66,9 +70,9 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderWidth: 1,
-    borderColor: BORDER_NEUTRAL,
+    borderColor: BORDER_NEUTRAL_NORMAL,
   },
 });
 

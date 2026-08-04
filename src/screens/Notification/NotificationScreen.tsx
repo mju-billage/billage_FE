@@ -10,6 +10,7 @@ import {
   NOTIFICATION_SCREEN_TITLE,
   NOTIFICATION_SETTINGS_ACCESSIBILITY_LABEL,
 } from '../../constants/notificationScreenText';
+import { BACKGROUND_SECONDARY } from '../../constants/colors';
 
 const SETTINGS_ICON = require('../../assets/icons/system/Setting.png');
 
@@ -47,7 +48,7 @@ function NotificationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: BACKGROUND_SECONDARY,
   },
 });
 

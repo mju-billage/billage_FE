@@ -1,5 +1,10 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { LINK_BLUE } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FILL_DISABLED,
+  FOREGROUND_INVERSE,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 type CheckBoxShape = 'square' | 'circle';
 
@@ -42,7 +47,7 @@ const styles = StyleSheet.create({
     height: SIZE,
     borderRadius: 4,
     borderWidth: 1,
-    borderColor: '#CED4DA',
+    borderColor: BORDER_NEUTRAL_NORMAL,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -50,15 +55,15 @@ const styles = StyleSheet.create({
     borderRadius: SIZE / 2,
   },
   checked: {
-    backgroundColor: LINK_BLUE,
-    borderColor: LINK_BLUE,
+    backgroundColor: FOREGROUND_SECONDARY,
+    borderColor: FOREGROUND_SECONDARY,
   },
   disabled: {
-    backgroundColor: '#F1F3F5',
-    borderColor: '#F1F3F5',
+    backgroundColor: FILL_DISABLED,
+    borderColor: FILL_DISABLED,
   },
   checkmark: {
-    color: '#FFFFFF',
+    color: FOREGROUND_INVERSE,
     fontSize: 14,
     fontWeight: 'bold',
   },

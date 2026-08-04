@@ -1,9 +1,11 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
 import {
-  BORDER_NEUTRAL,
-  ERROR_RED,
-  LINK_BLUE,
-  NEGATIVE_BADGE_BG,
+  BORDER_NEUTRAL_NORMAL,
+  FEEDBACK_NEGATIVE_BOLD,
+  FEEDBACK_NEGATIVE_SUBTLE,
+  FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_SECONDARY,
 } from '../../constants/colors';
 
 const MEMBER_ICON = require('../../assets/icons/user/Member.png');
@@ -83,7 +85,7 @@ const styles = StyleSheet.create({
   card: {
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: BORDER_NEUTRAL,
+    borderColor: BORDER_NEUTRAL_NORMAL,
     borderRadius: 12,
     padding: 16,
   },
@@ -98,7 +100,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   dDayBadge: {
-    backgroundColor: NEGATIVE_BADGE_BG,
+    backgroundColor: FEEDBACK_NEGATIVE_SUBTLE,
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -106,7 +108,7 @@ const styles = StyleSheet.create({
   dDayBadgeText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: ERROR_RED,
+    color: FEEDBACK_NEGATIVE_BOLD,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -121,20 +123,20 @@ const styles = StyleSheet.create({
   icon: {
     width: 14,
     height: 14,
-    tintColor: '#868E96',
+    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
   summaryText: {
     fontSize: 13,
-    color: '#495057',
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   summaryTextBlue: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
   divider: {
     height: 1,
-    backgroundColor: BORDER_NEUTRAL,
+    backgroundColor: BORDER_NEUTRAL_NORMAL,
     marginBottom: 12,
   },
   fieldRow: {
@@ -144,7 +146,7 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     fontSize: 13,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   fieldValue: {
     fontSize: 13,

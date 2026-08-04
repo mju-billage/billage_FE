@@ -1,5 +1,8 @@
 import { StyleSheet, View } from 'react-native';
-import { LINK_BLUE } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 type CarouselIndicatorProps = {
   count: number;
@@ -29,10 +32,10 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#CED4DA',
+    backgroundColor: BORDER_NEUTRAL_NORMAL,
   },
   dotSelected: {
-    backgroundColor: LINK_BLUE,
+    backgroundColor: FOREGROUND_SECONDARY,
   },
 });
 

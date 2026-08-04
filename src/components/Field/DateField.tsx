@@ -1,5 +1,10 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { BORDER_NEUTRAL, LINK_BLUE, TEXT_MUTED } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 const CALENDAR_ICON = require('../../assets/icons/system/Calendar.png');
 
@@ -46,13 +51,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 1,
-    borderColor: BORDER_NEUTRAL,
+    borderColor: BORDER_NEUTRAL_NORMAL,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 12,
   },
   containerFocused: {
-    borderColor: LINK_BLUE,
+    borderColor: FOREGROUND_SECONDARY,
   },
   textRow: {
     flexDirection: 'row',
@@ -62,20 +67,20 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
   placeholder: {
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
     fontWeight: 'normal',
   },
   separator: {
     fontSize: 14,
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
   icon: {
     width: 18,
     height: 18,
-    tintColor: '#868E96',
+    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
 });
 

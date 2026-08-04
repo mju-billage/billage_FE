@@ -7,10 +7,12 @@ import {
 } from 'react-native';
 import {
   BACKGROUND_PRIMARY,
-  ERROR_RED,
-  FILL_NEUTRAL,
-  LINK_BLUE,
-  NAVY,
+  FEEDBACK_NEGATIVE_BOLD,
+  FILL_NEUTRAL_NORMAL,
+  FOREGROUND_INVERSE,
+  FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_SECONDARY,
+  NAVY_800,
 } from '../../constants/colors';
 
 type ButtonHierarchy = 'primary' | 'secondary' | 'tertiary';
@@ -82,19 +84,19 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   primary: {
-    backgroundColor: NAVY,
+    backgroundColor: NAVY_800,
   },
   secondary: {
     backgroundColor: BACKGROUND_PRIMARY,
   },
   tertiary: {
-    backgroundColor: FILL_NEUTRAL,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
   },
   negative: {
-    backgroundColor: ERROR_RED,
+    backgroundColor: FEEDBACK_NEGATIVE_BOLD,
   },
   disabled: {
-    backgroundColor: FILL_NEUTRAL,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
   },
   pressed: {
     opacity: 0.8,
@@ -108,16 +110,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   primaryLabel: {
-    color: '#FFFFFF',
+    color: FOREGROUND_INVERSE,
   },
   secondaryLabel: {
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
   tertiaryLabel: {
-    color: '#495057',
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   negativeLabel: {
-    color: '#FFFFFF',
+    color: FOREGROUND_INVERSE,
   },
 });
 

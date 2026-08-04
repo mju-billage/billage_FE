@@ -1,5 +1,9 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { BACKGROUND_PRIMARY, LINK_BLUE } from '../../constants/colors';
+import {
+  BACKGROUND_PRIMARY,
+  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 const FOLDER_ICON = require('../../assets/icons/action/Folder.png');
 const LEDGER_ICON = require('../../assets/icons/content/Bill.png');
@@ -71,7 +75,7 @@ const styles = StyleSheet.create({
   icon: {
     width: 32,
     height: 32,
-    tintColor: LINK_BLUE,
+    tintColor: FOREGROUND_SECONDARY,
   },
   gridTextColumn: {
     alignItems: 'center',
@@ -87,7 +91,7 @@ const styles = StyleSheet.create({
   subtitle: {
     marginTop: 2,
     fontSize: 11,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
 });
 

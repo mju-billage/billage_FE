@@ -1,5 +1,6 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import BackButton from './BackButton';
+import { FOREGROUND_NEUTRAL_NORMAL } from '../constants/colors';
 
 type LegalDocumentViewProps = {
   title: string;
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
   body: {
     fontSize: 13,
     lineHeight: 20,
-    color: '#495057',
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
 });
 

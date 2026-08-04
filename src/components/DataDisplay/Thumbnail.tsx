@@ -1,5 +1,9 @@
 import { Image, Pressable, StyleSheet, View } from 'react-native';
-import { FILL_NEUTRAL } from '../../constants/colors';
+import {
+  FILL_NEUTRAL_NORMAL,
+  FOREGROUND_INVERSE,
+  FOREGROUND_NEUTRAL_NORMAL,
+} from '../../constants/colors';
 
 const CLOSE_ICON = require('../../assets/icons/action/Close.png');
 
@@ -35,7 +39,7 @@ const styles = StyleSheet.create({
   emptyBackground: {
     flex: 1,
     borderRadius: 8,
-    backgroundColor: FILL_NEUTRAL,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
   },
   image: {
     flex: 1,
@@ -48,14 +52,14 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: '#495057',
+    backgroundColor: FOREGROUND_NEUTRAL_NORMAL,
     alignItems: 'center',
     justifyContent: 'center',
   },
   removeIcon: {
     width: 10,
     height: 10,
-    tintColor: '#FFFFFF',
+    tintColor: FOREGROUND_INVERSE,
   },
 });
 

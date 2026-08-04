@@ -1,5 +1,11 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { BORDER_NEUTRAL, LINK_BLUE } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FEEDBACK_POSITIVE_BOLD,
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/ChevronRight.png');
 
@@ -50,7 +56,7 @@ function ReportCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 12,
     padding: 16,
   },
@@ -62,7 +68,7 @@ const styles = StyleSheet.create({
     height: 10,
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
   },
   header: {
     flexDirection: 'row',
@@ -76,16 +82,16 @@ const styles = StyleSheet.create({
   dateRange: {
     marginTop: 4,
     fontSize: 12,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   chevron: {
     width: 16,
     height: 16,
-    tintColor: '#ADB5BD',
+    tintColor: FOREGROUND_DISABLED,
   },
   divider: {
     height: 1,
-    backgroundColor: BORDER_NEUTRAL,
+    backgroundColor: BORDER_NEUTRAL_NORMAL,
     marginVertical: 12,
   },
   row: {
@@ -95,12 +101,12 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   income: {
     fontSize: 13,
     fontWeight: 'bold',
-    color: LINK_BLUE,
+    color: FEEDBACK_POSITIVE_BOLD,
   },
   expense: {
     fontSize: 13,

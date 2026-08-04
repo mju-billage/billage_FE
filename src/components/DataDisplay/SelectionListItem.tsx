@@ -1,6 +1,10 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Switch from '../Selection/Switch';
-import { ERROR_RED, TEXT_MUTED } from '../../constants/colors';
+import {
+  FEEDBACK_NEGATIVE_BOLD,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/ChevronRight.png');
 
@@ -77,15 +81,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   titleDisabled: {
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
   subtitle: {
     marginTop: 2,
     fontSize: 12,
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
   required: {
-    color: ERROR_RED,
+    color: FEEDBACK_NEGATIVE_BOLD,
   },
   valueRow: {
     flexDirection: 'row',
@@ -94,12 +98,12 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 14,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   chevron: {
     width: 14,
     height: 14,
-    tintColor: '#ADB5BD',
+    tintColor: FOREGROUND_DISABLED,
   },
 });
 

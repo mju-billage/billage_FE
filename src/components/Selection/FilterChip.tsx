@@ -1,5 +1,9 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { LINK_BLUE, TEXT_MUTED } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FOREGROUND_DISABLED,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 type FilterChipProps = {
   label: string;
@@ -26,24 +30,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     borderWidth: 1,
-    borderColor: '#DEE2E6',
+    borderColor: BORDER_NEUTRAL_NORMAL,
     borderRadius: 16,
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
   chipActive: {
-    borderColor: LINK_BLUE,
+    borderColor: FOREGROUND_SECONDARY,
   },
   plus: {
     fontSize: 13,
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
   label: {
     fontSize: 13,
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
   textActive: {
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
 });
 

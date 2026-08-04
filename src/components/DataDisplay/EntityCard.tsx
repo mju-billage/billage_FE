@@ -1,7 +1,12 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Avatar from './Avatar';
 import Badge from './Badge';
-import { BORDER_NEUTRAL, LINK_BLUE } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 const PLUS_ICON = require('../../assets/icons/action/Plus.png');
 
@@ -80,10 +85,10 @@ function EntityCard(props: EntityCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: BORDER_NEUTRAL,
+    borderColor: BORDER_NEUTRAL_NORMAL,
     padding: 16,
   },
   newGroupCard: {
@@ -96,12 +101,12 @@ const styles = StyleSheet.create({
   plusIcon: {
     width: 16,
     height: 16,
-    tintColor: LINK_BLUE,
+    tintColor: FOREGROUND_SECONDARY,
   },
   newGroupLabel: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
   groupHeader: {
     flexDirection: 'row',
@@ -115,7 +120,7 @@ const styles = StyleSheet.create({
   memberCount: {
     marginTop: 6,
     fontSize: 12,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   profileRow: {
     flexDirection: 'row',
@@ -127,7 +132,7 @@ const styles = StyleSheet.create({
   },
   email: {
     fontSize: 12,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
 });
 

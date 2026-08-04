@@ -1,5 +1,13 @@
 import { Image, Pressable, StyleSheet, Text } from 'react-native';
-import { BORDER_NEUTRAL, NAVY, TEXT_MUTED } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FILL_DISABLED,
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_DISABLED,
+  FOREGROUND_INVERSE,
+  FOREGROUND_NEUTRAL_NORMAL,
+  NAVY_800,
+} from '../../constants/colors';
 
 const CAMERA_ICON = require('../../assets/icons/content/Camera.png');
 
@@ -68,16 +76,16 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   attachmentCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderWidth: 1,
-    borderColor: BORDER_NEUTRAL,
+    borderColor: BORDER_NEUTRAL_NORMAL,
   },
   galleryCard: {
-    backgroundColor: NAVY,
+    backgroundColor: NAVY_800,
   },
   disabledCard: {
-    backgroundColor: '#F1F3F5',
-    borderColor: '#F1F3F5',
+    backgroundColor: FILL_DISABLED,
+    borderColor: FILL_DISABLED,
   },
   pressed: {
     opacity: 0.85,
@@ -87,27 +95,27 @@ const styles = StyleSheet.create({
     height: 22,
   },
   attachmentIcon: {
-    tintColor: '#495057',
+    tintColor: FOREGROUND_NEUTRAL_NORMAL,
   },
   galleryIcon: {
-    tintColor: '#FFFFFF',
+    tintColor: FOREGROUND_INVERSE,
   },
   disabledIcon: {
-    tintColor: TEXT_MUTED,
+    tintColor: FOREGROUND_DISABLED,
   },
   label: {
     fontSize: 12,
     fontWeight: 'bold',
   },
   attachmentLabel: {
-    color: '#495057',
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   galleryLabel: {
-    color: '#FFFFFF',
+    color: FOREGROUND_INVERSE,
     fontSize: 14,
   },
   disabledLabel: {
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
 });
 

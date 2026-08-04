@@ -18,7 +18,10 @@ import {
   DASHBOARD_QUICK_SERVICE_SUBTITLE_SUFFIX,
   DASHBOARD_QUICK_SERVICE_TITLE,
 } from '../../constants/dashboardScreenText';
-import { BACKGROUND_PRIMARY } from '../../constants/colors';
+import {
+  BACKGROUND_PRIMARY,
+  FOREGROUND_NEUTRAL_NORMAL,
+} from '../../constants/colors';
 
 const BELL_ICON = require('../../assets/icons/communication/Bell.png');
 
@@ -133,7 +136,7 @@ const styles = StyleSheet.create({
   },
   quickServiceSubtitle: {
     fontSize: 14,
-    color: '#4A4A4A',
+    color: FOREGROUND_NEUTRAL_NORMAL,
     marginTop: 32,
   },
   quickServiceRow: {

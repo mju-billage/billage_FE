@@ -1,5 +1,9 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { FILL_NEUTRAL, LINK_BLUE, TEXT_MUTED } from '../../constants/colors';
+import {
+  FILL_NEUTRAL_NORMAL,
+  FOREGROUND_DISABLED,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 type CheckListItemProps = {
   label: string;
@@ -43,7 +47,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   itemPressed: {
-    backgroundColor: FILL_NEUTRAL,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
   },
   itemDisabled: {
     opacity: 0.5,
@@ -52,10 +56,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   labelDisabled: {
-    color: TEXT_MUTED,
+    color: FOREGROUND_DISABLED,
   },
   checkmark: {
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
     fontWeight: 'bold',
   },
 });

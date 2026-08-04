@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
-import { BORDER_NEUTRAL, ERROR_RED, LINK_BLUE } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FEEDBACK_NEGATIVE_BOLD,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 
 type TextAreaProps = {
   value: string;
@@ -22,10 +28,10 @@ function TextArea({
 }: TextAreaProps) {
   const [isFocused, setIsFocused] = useState(false);
   const borderColor = error
-    ? ERROR_RED
+    ? FEEDBACK_NEGATIVE_BOLD
     : isFocused
-    ? LINK_BLUE
-    : BORDER_NEUTRAL;
+    ? FOREGROUND_SECONDARY
+    : BORDER_NEUTRAL_NORMAL;
 
   return (
     <View style={styles.container}>
@@ -34,7 +40,7 @@ function TextArea({
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor="#ADB5BD"
+        placeholderTextColor={FOREGROUND_DISABLED}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         multiline
@@ -62,12 +68,12 @@ const styles = StyleSheet.create({
   helperText: {
     marginTop: 6,
     fontSize: 12,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   errorText: {
     marginTop: 6,
     fontSize: 12,
-    color: ERROR_RED,
+    color: FEEDBACK_NEGATIVE_BOLD,
   },
 });
 

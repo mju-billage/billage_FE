@@ -1,5 +1,5 @@
 import { Image, Pressable, StyleSheet } from 'react-native';
-import { NAVY } from '../../constants/colors';
+import { FOREGROUND_INVERSE, NAVY_800 } from '../../constants/colors';
 
 type FloatingActionButtonProps = {
   onPress: () => void;
@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
     width: SIZE,
     height: SIZE,
     borderRadius: SIZE / 2,
-    backgroundColor: NAVY,
+    backgroundColor: NAVY_800,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
   icon: {
     width: 24,
     height: 24,
-    tintColor: '#FFFFFF',
+    tintColor: FOREGROUND_INVERSE,
   },
 });
 

@@ -7,9 +7,11 @@ import {
   View,
 } from 'react-native';
 import {
-  BORDER_NEUTRAL,
-  FILL_NEUTRAL,
-  LINK_BLUE,
+  BORDER_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_SECONDARY,
 } from '../../constants/colors';
 
 export type MenuItem = {
@@ -58,10 +60,10 @@ function Menu({ items, selectedKey, onSelect, showIcon = true }: MenuProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: BORDER_NEUTRAL,
+    borderColor: BORDER_NEUTRAL_NORMAL,
   },
   item: {
     flexDirection: 'row',
@@ -70,24 +72,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: BORDER_NEUTRAL,
+    borderBottomColor: BORDER_NEUTRAL_NORMAL,
   },
   itemPressed: {
-    backgroundColor: FILL_NEUTRAL,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
   },
   icon: {
     width: 18,
     height: 18,
-    tintColor: '#495057',
+    tintColor: FOREGROUND_NEUTRAL_NORMAL,
   },
   iconSelected: {
-    tintColor: LINK_BLUE,
+    tintColor: FOREGROUND_SECONDARY,
   },
   label: {
     fontSize: 14,
   },
   labelSelected: {
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
     fontWeight: 'bold',
   },
 });

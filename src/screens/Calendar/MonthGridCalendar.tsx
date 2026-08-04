@@ -4,9 +4,12 @@ import { getMonthGridWeeks } from '../../utils/calendarGrid';
 import { sumTransactions } from '../../utils/transactionSummary';
 import { CALENDAR_WEEKDAY_LABELS } from '../../constants/calendarScreenText';
 import {
-  BORDER_NEUTRAL,
+  BORDER_NEUTRAL_NORMAL,
   CALENDAR_TODAY_GREEN,
-  LINK_BLUE,
+  FOREGROUND_INVERSE,
+  FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_SECONDARY,
 } from '../../constants/colors';
 
 type MonthGridCalendarProps = {
@@ -97,7 +100,7 @@ const styles = StyleSheet.create({
     width: 40,
     textAlign: 'center',
     fontSize: 12,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   weekRow: {
     flexDirection: 'row',
@@ -117,7 +120,7 @@ const styles = StyleSheet.create({
   },
   selectedCircle: {
     borderWidth: 1,
-    borderColor: BORDER_NEUTRAL,
+    borderColor: BORDER_NEUTRAL_NORMAL,
   },
   todayCircle: {
     backgroundColor: CALENDAR_TODAY_GREEN,
@@ -126,16 +129,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   todayText: {
-    color: '#FFFFFF',
+    color: FOREGROUND_INVERSE,
     fontWeight: 'bold',
   },
   amountText: {
     fontSize: 10,
-    color: '#495057',
+    color: FOREGROUND_NEUTRAL_NORMAL,
     marginTop: 2,
   },
   amountTextPositive: {
-    color: LINK_BLUE,
+    color: FOREGROUND_SECONDARY,
   },
 });
 

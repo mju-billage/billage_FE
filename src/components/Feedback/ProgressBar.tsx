@@ -1,5 +1,9 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { FILL_NEUTRAL, LINK_BLUE } from '../../constants/colors';
+import {
+  FEEDBACK_POSITIVE_BOLD,
+  FILL_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 
 type ProgressBarStyle = 'round' | 'square';
 
@@ -34,17 +38,17 @@ const styles = StyleSheet.create({
   label: {
     alignSelf: 'flex-end',
     fontSize: 12,
-    color: '#868E96',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
     marginBottom: 4,
   },
   track: {
     height: BAR_HEIGHT,
-    backgroundColor: FILL_NEUTRAL,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
     overflow: 'hidden',
   },
   fill: {
     height: '100%',
-    backgroundColor: LINK_BLUE,
+    backgroundColor: FEEDBACK_POSITIVE_BOLD,
   },
 });
 
