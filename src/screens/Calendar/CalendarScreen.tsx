@@ -12,16 +12,16 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/AppBar';
+import Divider from '../../components/DataDisplay/Divider';
 import MonthGridCalendar from './MonthGridCalendar';
 import CalendarViewToggle from './CalendarViewToggle';
-import TransactionListItem from './TransactionListItem';
+import TransactionListItem from '../../components/DataDisplay/TransactionListItem';
 import { MOCK_CALENDAR_MONTH } from '../../types/calendar';
 import { shiftMonth } from '../../utils/calendarGrid';
 import {
   CALENDAR_SCREEN_TITLE,
   CALENDAR_WEEKDAY_LABELS,
 } from '../../constants/calendarScreenText';
-import { BORDER_NEUTRAL } from '../../constants/colors';
 
 const CHEVRON_LEFT_ICON = require('../../assets/icons/nav/ChevronLeft.png');
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/ChevronRight.png');
@@ -111,7 +111,9 @@ function CalendarScreen() {
         {selectedDateLabel && (
           <>
             <Text style={styles.selectedDateLabel}>{selectedDateLabel}</Text>
-            <View style={styles.divider} />
+            <View style={styles.dividerWrapper}>
+              <Divider />
+            </View>
             {selectedTransactions.map(transaction => (
               <TransactionListItem
                 key={transaction.id}
@@ -159,9 +161,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 12,
   },
-  divider: {
-    height: 1,
-    backgroundColor: BORDER_NEUTRAL,
+  dividerWrapper: {
     marginBottom: 8,
   },
 });

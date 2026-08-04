@@ -1,6 +1,7 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import Divider from '../../components/DataDisplay/Divider';
 import type { MiniCalendarData } from '../../types/dashboard';
-import { BORDER_NEUTRAL, ERROR_RED, LINK_BLUE } from '../../constants/colors';
+import { ERROR_RED, LINK_BLUE } from '../../constants/colors';
 
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/ChevronRight.png');
 const DAYS_PER_ROW = 7;
@@ -21,7 +22,9 @@ function MiniCalendarCard({ data, onPress }: MiniCalendarCardProps) {
         <Text style={styles.monthLabel}>{data.monthLabel}</Text>
         <Image source={CHEVRON_RIGHT_ICON} style={styles.chevronIcon} />
       </Pressable>
-      <View style={styles.divider} />
+      <View style={styles.dividerWrapper}>
+        <Divider />
+      </View>
       <View style={styles.week}>
         {firstWeek.map(day => (
           <DayCell
@@ -92,9 +95,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
   },
-  divider: {
-    height: 1,
-    backgroundColor: BORDER_NEUTRAL,
+  dividerWrapper: {
     marginVertical: 12,
   },
   week: {
