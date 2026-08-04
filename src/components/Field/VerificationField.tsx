@@ -1,28 +1,40 @@
 import { useRef } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { LINK_BLUE } from '../constants/colors';
+import { BACKGROUND_PRIMARY, LINK_BLUE } from '../../constants/colors';
 
-type OtpCodeInputProps = {
+type VerificationFieldProps = {
   value: string;
   onChangeText: (text: string) => void;
   length?: number;
 };
 
-/** 이메일 인증 코드 입력용 자릿수 박스 UI. 숨겨진 입력창 하나로 값을 받아 시각화한다. */
-function OtpCodeInput({ value, onChangeText, length = 6 }: OtpCodeInputProps) {
+/** 인증 코드 입력용 자릿수 박스 UI(이메일 인증 6자리, 계좌 인증 3자리 등). 숨겨진 입력창 하나로 값을 받아 시각화한다. */
+function VerificationField({
+  value,
+  onChangeText,
+  length = 6,
+}: VerificationFieldProps) {
   const inputRef = useRef<TextInput>(null);
   const digits = Array.from({ length }, (_, index) => value[index] ?? '');
 
   return (
     <Pressable style={styles.row} onPress={() => inputRef.current?.focus()}>
-      {digits.map((digit, index) => (
-        <View
-          key={index}
-          style={[styles.box, index === value.length && styles.boxActive]}
-        >
-          <Text style={styles.digit}>{digit}</Text>
-        </View>
-      ))}
+      {digits.map((digit, index) => {
+        const isActive = index === value.length;
+        const isFilled = digit !== '';
+        return (
+          <View
+            key={index}
+            style={[
+              styles.box,
+              isFilled && !isActive && styles.boxFilled,
+              isActive && styles.boxActive,
+            ]}
+          >
+            <Text style={styles.digit}>{digit}</Text>
+          </View>
+        );
+      })}
       <TextInput
         ref={inputRef}
         style={styles.hiddenInput}
@@ -50,6 +62,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  boxFilled: {
+    backgroundColor: BACKGROUND_PRIMARY,
+  },
   boxActive: {
     borderWidth: 1,
     borderColor: LINK_BLUE,
@@ -68,4 +83,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OtpCodeInput;
+export default VerificationField;

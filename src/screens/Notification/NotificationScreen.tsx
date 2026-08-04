@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import AppBar from '../../components/AppBar';
+import AppBar from '../../components/Navigation/AppBar';
 import NotificationListItem from './NotificationListItem';
 import { MOCK_NOTIFICATIONS } from '../../types/notification';
 import {

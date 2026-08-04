@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
-import { NAVY } from '../constants/colors';
+import { NAVY } from '../../constants/colors';
 
 type PrimaryButtonProps = {
   label: string;

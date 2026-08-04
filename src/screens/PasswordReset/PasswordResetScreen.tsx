@@ -4,8 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/BackButton';
-import LabeledTextInput from '../../components/LabeledTextInput';
-import PrimaryButton from '../../components/PrimaryButton';
+import TextField from '../../components/Field/TextField';
+import PrimaryButton from '../../components/Button/PrimaryButton';
 import { isValidEmail } from '../../utils/validators';
 import {
   PASSWORD_RESET_TITLE,
@@ -37,7 +37,7 @@ function PasswordResetScreen() {
       <Text style={styles.title}>{PASSWORD_RESET_TITLE}</Text>
       <Text style={styles.subtitle}>{PASSWORD_RESET_SUBTITLE}</Text>
 
-      <LabeledTextInput
+      <TextField
         value={email}
         onChangeText={setEmail}
         placeholder={PASSWORD_RESET_EMAIL_PLACEHOLDER}

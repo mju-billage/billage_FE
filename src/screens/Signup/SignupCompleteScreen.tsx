@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/BackButton';
-import PrimaryButton from '../../components/PrimaryButton';
+import PrimaryButton from '../../components/Button/PrimaryButton';
 import {
   SIGNUP_COMPLETE_TITLE,
   SIGNUP_COMPLETE_SUBTITLE,

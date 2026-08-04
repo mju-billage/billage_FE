@@ -4,8 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/BackButton';
-import LabeledTextInput from '../../components/LabeledTextInput';
-import PrimaryButton from '../../components/PrimaryButton';
+import TextField from '../../components/Field/TextField';
+import PrimaryButton from '../../components/Button/PrimaryButton';
 import { isValidEmail, isValidPassword } from '../../utils/validators';
 import { ApiError } from '../../services/apiClient';
 import * as authService from '../../services/authService';
@@ -84,7 +84,7 @@ function SignupInfoScreen() {
       <Text style={styles.title}>{SIGNUP_INFO_TITLE}</Text>
 
       <View style={styles.form}>
-        <LabeledTextInput
+        <TextField
           label={SIGNUP_NAME_LABEL}
           value={name}
           onChangeText={text => setName(text.slice(0, NAME_MAX_LENGTH))}
@@ -92,7 +92,7 @@ function SignupInfoScreen() {
           helperText={SIGNUP_NAME_HELPER}
           maxLength={NAME_MAX_LENGTH}
         />
-        <LabeledTextInput
+        <TextField
           label={SIGNUP_EMAIL_LABEL}
           value={email}
           onChangeText={text => {
@@ -104,7 +104,7 @@ function SignupInfoScreen() {
           keyboardType="email-address"
           autoCapitalize="none"
         />
-        <LabeledTextInput
+        <TextField
           label={SIGNUP_PASSWORD_LABEL}
           value={password}
           onChangeText={setPassword}
@@ -112,7 +112,7 @@ function SignupInfoScreen() {
           helperText={SIGNUP_PASSWORD_HELPER}
           secureToggle
         />
-        <LabeledTextInput
+        <TextField
           label={SIGNUP_PASSWORD_CONFIRM_LABEL}
           value={passwordConfirm}
           onChangeText={setPasswordConfirm}

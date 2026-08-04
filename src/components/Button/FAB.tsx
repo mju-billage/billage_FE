@@ -1,11 +1,11 @@
 import { Image, Pressable, StyleSheet } from 'react-native';
-import { NAVY } from '../constants/colors';
+import { NAVY } from '../../constants/colors';
 
 type FloatingActionButtonProps = {
   onPress: () => void;
 };
 
-const ICON = require('../assets/icons/content/DocumentAdd.png');
+const ICON = require('../../assets/icons/content/DocumentAdd.png');
 const SIZE = 56;
 
 /** 화면 우하단에 고정되는 원형 추가 버튼(FAB). */
