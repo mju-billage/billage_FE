@@ -2,7 +2,7 @@ import { Image, ImageSourcePropType, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import DashboardScreen from '../screens/Dashboard/DashboardScreen';
 import TransactionsScreen from '../screens/TransactionsScreen';
-import FolderScreen from '../screens/FolderScreen';
+import FolderTabNavigator from '../screens/Folder/FolderTabNavigator';
 import DuesScreen from '../screens/DuesScreen';
 import MoreScreen from '../screens/MoreScreen';
 import {
@@ -88,7 +88,7 @@ function MainTabNavigator() {
       />
       <Tab.Screen
         name="Folder"
-        component={FolderScreen}
+        component={FolderTabNavigator}
         options={{ tabBarLabel: TAB_FOLDER_LABEL, tabBarIcon: FolderTabIcon }}
       />
       <Tab.Screen

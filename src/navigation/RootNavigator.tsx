@@ -17,6 +17,13 @@ import PasswordResetSentScreen from '../screens/PasswordReset/PasswordResetSentS
 import MainTabNavigator from './MainTabNavigator';
 import NotificationScreen from '../screens/Notification/NotificationScreen';
 import CalendarScreen from '../screens/Calendar/CalendarScreen';
+import FolderSelectMoveScreen from '../screens/Folder/FolderSelectMoveScreen';
+import FolderMoveDestinationScreen from '../screens/Folder/FolderMoveDestinationScreen';
+import FolderBudgetListScreen from '../screens/Folder/FolderBudgetListScreen';
+import LedgerCreateScreen from '../screens/Folder/LedgerCreateScreen';
+import LedgerDetailScreen from '../screens/Folder/LedgerDetailScreen';
+import LedgerSearchScreen from '../screens/Folder/LedgerSearchScreen';
+import TransactionDetailScreen from '../screens/Folder/TransactionDetailScreen';
 import { SocialProfile } from '../types/social';
 import * as authService from '../services/authService';
 
@@ -35,6 +42,17 @@ export type RootStackParamList = {
   Main: undefined;
   Notification: undefined;
   Calendar: undefined;
+  FolderSelectMove: { folderId: string | null };
+  FolderMoveDestination: {
+    itemIds: string[];
+    sourceFolderId: string | null;
+    destinationFolderId: string | null;
+  };
+  FolderBudgetList: undefined;
+  LedgerCreate: { parentId: string | null };
+  LedgerDetail: { ledgerId: string };
+  LedgerSearch: { ledgerId: string };
+  TransactionDetail: { transactionId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -102,6 +120,25 @@ function RootNavigator() {
           <Stack.Screen name="Main" component={MainTabNavigator} />
           <Stack.Screen name="Notification" component={NotificationScreen} />
           <Stack.Screen name="Calendar" component={CalendarScreen} />
+          <Stack.Screen
+            name="FolderSelectMove"
+            component={FolderSelectMoveScreen}
+          />
+          <Stack.Screen
+            name="FolderMoveDestination"
+            component={FolderMoveDestinationScreen}
+          />
+          <Stack.Screen
+            name="FolderBudgetList"
+            component={FolderBudgetListScreen}
+          />
+          <Stack.Screen name="LedgerCreate" component={LedgerCreateScreen} />
+          <Stack.Screen name="LedgerDetail" component={LedgerDetailScreen} />
+          <Stack.Screen name="LedgerSearch" component={LedgerSearchScreen} />
+          <Stack.Screen
+            name="TransactionDetail"
+            component={TransactionDetailScreen}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

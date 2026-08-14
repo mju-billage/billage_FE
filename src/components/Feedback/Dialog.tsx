@@ -1,4 +1,10 @@
-import { Modal, StyleSheet, Text, View } from 'react-native';
+import {
+  KeyboardTypeOptions,
+  Modal,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import ActionButton from '../Button/ActionButton';
 import TextField from '../Field/TextField';
 import {
@@ -14,6 +20,7 @@ type DialogProps = {
   textFieldValue?: string;
   onChangeTextField?: (text: string) => void;
   textFieldPlaceholder?: string;
+  textFieldKeyboardType?: KeyboardTypeOptions;
   cancelLabel?: string;
   confirmLabel?: string;
   onCancel: () => void;
@@ -29,6 +36,7 @@ function Dialog({
   textFieldValue = '',
   onChangeTextField,
   textFieldPlaceholder,
+  textFieldKeyboardType,
   cancelLabel = '취소',
   confirmLabel = '확인',
   onCancel,
@@ -51,6 +59,7 @@ function Dialog({
                 value={textFieldValue}
                 onChangeText={onChangeTextField ?? (() => {})}
                 placeholder={textFieldPlaceholder ?? '텍스트'}
+                keyboardType={textFieldKeyboardType}
               />
             </View>
           )}
