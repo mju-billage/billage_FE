@@ -4,10 +4,11 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/BackButton';
-import IconButton from '../../components/Button/IconButton';
-import Thumbnail from '../../components/DataDisplay/Thumbnail';
-import Dialog from '../../components/Feedback/Dialog';
+import BackButton from '../../components/Navigation/App bar/BackButton';
+import IconButton from '../../components/Input/Button/IconButton';
+import Thumbnail from '../../components/Data Display/Image Placeholder/Thumbnail';
+import Receipt from '../../components/Data Display/Receipt/Receipt';
+import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import { deleteTransaction, getTransactionById } from '../../types/folder';
 import {
   TRANSACTION_DATE_LABEL_EXPENSE,
@@ -21,17 +22,12 @@ import {
   TRANSACTION_MANAGER_LABEL,
   TRANSACTION_MEMO_LABEL,
   TRANSACTION_MEMO_PLACEHOLDER,
-  TRANSACTION_RECEIPT_AMOUNT_LABEL,
   TRANSACTION_RECEIPT_DETAIL_LABEL,
-  TRANSACTION_RECEIPT_ITEM_NAME_LABEL,
   TRANSACTION_RECEIPT_LABEL,
-  TRANSACTION_RECEIPT_QUANTITY_LABEL,
-  TRANSACTION_RECEIPT_TOTAL_LABEL,
 } from '../../constants/ledgerScreenText';
 import {
   BORDER_NEUTRAL_NORMAL,
   FEEDBACK_POSITIVE_BOLD,
-  FILL_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 
@@ -136,44 +132,10 @@ function TransactionDetailScreen() {
             <Text style={styles.sectionLabel}>
               {TRANSACTION_RECEIPT_DETAIL_LABEL}
             </Text>
-            <View style={styles.table}>
-              <View style={styles.tableHeaderRow}>
-                <Text
-                  style={[
-                    styles.tableCell,
-                    styles.tableHeaderCell,
-                    styles.tableNameCell,
-                  ]}
-                >
-                  {TRANSACTION_RECEIPT_ITEM_NAME_LABEL}
-                </Text>
-                <Text style={[styles.tableCell, styles.tableHeaderCell]}>
-                  {TRANSACTION_RECEIPT_QUANTITY_LABEL}
-                </Text>
-                <Text style={[styles.tableCell, styles.tableHeaderCell]}>
-                  {TRANSACTION_RECEIPT_AMOUNT_LABEL}
-                </Text>
-              </View>
-              {transaction.receiptLineItems.map(line => (
-                <View key={line.name} style={styles.tableRow}>
-                  <Text style={[styles.tableCell, styles.tableNameCell]}>
-                    {line.name}
-                  </Text>
-                  <Text style={styles.tableCell}>{line.quantity}</Text>
-                  <Text style={styles.tableCell}>
-                    {line.amount.toLocaleString()}원
-                  </Text>
-                </View>
-              ))}
-              <View style={styles.tableTotalRow}>
-                <Text style={styles.tableTotalLabel}>
-                  {TRANSACTION_RECEIPT_TOTAL_LABEL}
-                </Text>
-                <Text style={styles.tableTotalValue}>
-                  {(receiptTotal ?? 0).toLocaleString()}원
-                </Text>
-              </View>
-            </View>
+            <Receipt
+              items={transaction.receiptLineItems}
+              total={receiptTotal ?? 0}
+            />
           </View>
         )}
       </ScrollView>
@@ -265,54 +227,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-  },
-  table: {
-    borderWidth: 1,
-    borderColor: BORDER_NEUTRAL_NORMAL,
-    borderRadius: 8,
-    overflow: 'hidden',
-  },
-  tableHeaderRow: {
-    flexDirection: 'row',
-    backgroundColor: FILL_NEUTRAL_NORMAL,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-  },
-  tableRow: {
-    flexDirection: 'row',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: BORDER_NEUTRAL_NORMAL,
-  },
-  tableCell: {
-    flex: 1,
-    fontSize: 12,
-    textAlign: 'right',
-  },
-  tableHeaderCell: {
-    fontWeight: 'bold',
-    color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  tableNameCell: {
-    flex: 1.5,
-    textAlign: 'left',
-  },
-  tableTotalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: BORDER_NEUTRAL_NORMAL,
-  },
-  tableTotalLabel: {
-    fontSize: 13,
-    fontWeight: 'bold',
-  },
-  tableTotalValue: {
-    fontSize: 13,
-    fontWeight: 'bold',
   },
 });
 

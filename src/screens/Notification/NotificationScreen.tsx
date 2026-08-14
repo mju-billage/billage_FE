@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import AppBar from '../../components/Navigation/AppBar';
+import AppBar from '../../components/Navigation/App bar/AppBar';
 import NotificationListItem from './NotificationListItem';
 import { MOCK_NOTIFICATIONS } from '../../types/notification';
 import {
@@ -32,9 +32,13 @@ function NotificationScreen() {
       <AppBar
         title={NOTIFICATION_SCREEN_TITLE}
         onBackPress={() => navigation.goBack()}
-        rightIcon={SETTINGS_ICON}
-        onRightPress={handlePressSettings}
-        rightAccessibilityLabel={NOTIFICATION_SETTINGS_ACCESSIBILITY_LABEL}
+        rightIcons={[
+          {
+            icon: SETTINGS_ICON,
+            onPress: handlePressSettings,
+            accessibilityLabel: NOTIFICATION_SETTINGS_ACCESSIBILITY_LABEL,
+          },
+        ]}
       />
       <FlatList
         data={MOCK_NOTIFICATIONS}

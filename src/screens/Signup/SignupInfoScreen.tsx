@@ -3,9 +3,9 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/BackButton';
-import TextField from '../../components/Field/TextField';
-import PrimaryButton from '../../components/Button/PrimaryButton';
+import BackButton from '../../components/Navigation/App bar/BackButton';
+import TextField from '../../components/Input/Text Field/TextField';
+import Button from '../../components/Input/Button/Button';
 import { isValidEmail, isValidPassword } from '../../utils/validators';
 import { ApiError } from '../../services/apiClient';
 import * as authService from '../../services/authService';
@@ -124,9 +124,10 @@ function SignupInfoScreen() {
       </View>
 
       <View style={styles.footer}>
-        <PrimaryButton
+        <Button
           label={NEXT_BUTTON_LABEL}
           onPress={handleNext}
+          fullWidth
           disabled={!canProceed || isSubmitting}
         />
       </View>

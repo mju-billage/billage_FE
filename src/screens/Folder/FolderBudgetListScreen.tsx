@@ -3,12 +3,12 @@ import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/BackButton';
-import TextField from '../../components/Field/TextField';
-import PrimaryButton from '../../components/Button/PrimaryButton';
-import BottomSheet from '../../components/Feedback/BottomSheet';
-import Snackbar from '../../components/Feedback/Snackbar';
-import FolderItem from '../../components/DataDisplay/FolderItem';
+import BackButton from '../../components/Navigation/App bar/BackButton';
+import TextField from '../../components/Input/Text Field/TextField';
+import Button from '../../components/Input/Button/Button';
+import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
+import FolderItem from '../../components/Data Display/Folder/FolderItem';
 import {
   getAllLedgerNodes,
   setLedgerBudget,
@@ -116,10 +116,11 @@ function FolderBudgetListScreen() {
           placeholder={BUDGET_SHEET_PLACEHOLDER}
           keyboardType="number-pad"
         />
-        <PrimaryButton
+        <Button
           label={BUDGET_SAVE_LABEL}
           disabled={!budgetInput.trim()}
           onPress={handleSave}
+          fullWidth
         />
       </BottomSheet>
     </View>

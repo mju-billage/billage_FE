@@ -2,10 +2,8 @@ import { useCallback, useState } from 'react';
 import {
   Dimensions,
   FlatList,
-  Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -19,15 +17,16 @@ import {
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/BackButton';
-import IconButton from '../../components/Button/IconButton';
-import AmountCard from '../../components/DataDisplay/AmountCard';
-import BudgetCard from '../../components/DataDisplay/BudgetCard';
-import CarouselIndicator from '../../components/Navigation/CarouselIndicator';
-import Dialog from '../../components/Feedback/Dialog';
-import Snackbar from '../../components/Feedback/Snackbar';
+import BackButton from '../../components/Navigation/App bar/BackButton';
+import IconButton from '../../components/Input/Button/IconButton';
+import AmountCard from '../../components/Data Display/Card/AmountCard';
+import BudgetCard from '../../components/Data Display/Card/BudgetCard';
+import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
+import CarouselIndicator from '../../components/Navigation/Carousel Indicator/CarouselIndicator';
+import Dialog from '../../components/Feedback/Dialogs/Dialog';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import FolderMoreMenu from './FolderMoreMenu';
-import type { MenuItem } from '../../components/Navigation/Menu';
+import type { MenuItem } from '../../components/Navigation/Menu/Menu';
 import {
   getNodeById,
   getTransactionsByLedgerId,
@@ -58,14 +57,10 @@ import {
   SNACKBAR_LEDGER_RENAMED_SUFFIX,
 } from '../../constants/ledgerScreenText';
 import { SNACKBAR_BUDGET_SAVED } from '../../constants/folderScreenText';
-import {
-  FEEDBACK_POSITIVE_BOLD,
-  FOREGROUND_NEUTRAL_SUBTLE,
-} from '../../constants/colors';
+import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 
 const SEARCH_ICON = require('../../assets/icons/system/Search.png');
 const MENU_ICON = require('../../assets/icons/action/MenuHorizontal.png');
-const RECEIPT_ICON = require('../../assets/icons/content/Bill.png');
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
 const CARD_WIDTH = Dimensions.get('window').width - 48;
@@ -240,35 +235,17 @@ function LedgerDetailScreen() {
           keyExtractor={item => item.id}
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
-            <Pressable
-              style={styles.txRow}
+            <TransactionListItem
+              label={item.date}
+              itemName={item.itemName}
+              amount={item.amount}
+              hasReceipt={item.receiptImages.length > 0}
               onPress={() =>
                 navigation.navigate('TransactionDetail', {
                   transactionId: item.id,
                 })
               }
-            >
-              <View style={styles.txLeft}>
-                <Text style={styles.txDate}>{item.date}</Text>
-                <Text style={styles.txName} numberOfLines={1}>
-                  {item.itemName}
-                </Text>
-              </View>
-              <View style={styles.txRight}>
-                {item.receiptImages.length > 0 && (
-                  <Image source={RECEIPT_ICON} style={styles.receiptIcon} />
-                )}
-                <Text
-                  style={[
-                    styles.txAmount,
-                    item.amount > 0 && styles.txAmountPositive,
-                  ]}
-                >
-                  {item.amount > 0 ? '+' : ''}
-                  {item.amount.toLocaleString()}원
-                </Text>
-              </View>
-            </Pressable>
+            />
           )}
         />
       )}
@@ -391,42 +368,6 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: 24,
     paddingBottom: 24,
-  },
-  txRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  txLeft: {
-    flex: 1,
-    gap: 4,
-  },
-  txDate: {
-    fontSize: 12,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  txName: {
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  txRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  receiptIcon: {
-    width: 16,
-    height: 16,
-    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  txAmount: {
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  txAmountPositive: {
-    color: FEEDBACK_POSITIVE_BOLD,
   },
   emptyState: {
     flex: 1,

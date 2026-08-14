@@ -1,19 +1,13 @@
 import { useMemo, useState } from 'react';
-import {
-  FlatList,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/BackButton';
-import SearchField from '../../components/Field/SearchField';
-import TextButton from '../../components/Button/TextButton';
+import BackButton from '../../components/Navigation/App bar/BackButton';
+import SearchField from '../../components/Input/Search/SearchField';
+import TextButton from '../../components/Input/Button/TextButton';
+import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import {
   getTransactionsByLedgerId,
   type LedgerTransaction,
@@ -26,12 +20,8 @@ import {
   LEDGER_SEARCH_EMPTY,
   LEDGER_SEARCH_PLACEHOLDER,
 } from '../../constants/ledgerScreenText';
-import {
-  FEEDBACK_POSITIVE_BOLD,
-  FOREGROUND_NEUTRAL_SUBTLE,
-} from '../../constants/colors';
+import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 
-const RECEIPT_ICON = require('../../assets/icons/content/Bill.png');
 const FILTER_LABEL = '필터';
 const PERIOD_MONTHS: Record<string, number> = { '1m': 1, '3m': 3, '6m': 6 };
 
@@ -150,35 +140,17 @@ function LedgerSearchScreen() {
           keyExtractor={item => item.id}
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
-            <Pressable
-              style={styles.txRow}
+            <TransactionListItem
+              label={item.date}
+              itemName={item.itemName}
+              amount={item.amount}
+              hasReceipt={item.receiptImages.length > 0}
               onPress={() =>
                 navigation.navigate('TransactionDetail', {
                   transactionId: item.id,
                 })
               }
-            >
-              <View style={styles.txLeft}>
-                <Text style={styles.txDate}>{item.date}</Text>
-                <Text style={styles.txName} numberOfLines={1}>
-                  {item.itemName}
-                </Text>
-              </View>
-              <View style={styles.txRight}>
-                {item.receiptImages.length > 0 && (
-                  <Image source={RECEIPT_ICON} style={styles.receiptIcon} />
-                )}
-                <Text
-                  style={[
-                    styles.txAmount,
-                    item.amount > 0 && styles.txAmountPositive,
-                  ]}
-                >
-                  {item.amount > 0 ? '+' : ''}
-                  {item.amount.toLocaleString()}원
-                </Text>
-              </View>
-            </Pressable>
+            />
           )}
         />
       )}
@@ -215,42 +187,6 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 24,
-  },
-  txRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  txLeft: {
-    flex: 1,
-    gap: 4,
-  },
-  txDate: {
-    fontSize: 12,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  txName: {
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  txRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  receiptIcon: {
-    width: 16,
-    height: 16,
-    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  txAmount: {
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  txAmountPositive: {
-    color: FEEDBACK_POSITIVE_BOLD,
   },
   emptyState: {
     flex: 1,

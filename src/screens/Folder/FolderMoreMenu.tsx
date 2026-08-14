@@ -1,5 +1,5 @@
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import Menu, { MenuItem } from '../../components/Navigation/Menu';
+import Menu, { MenuItem } from '../../components/Navigation/Menu/Menu';
 import { FILL_NEUTRAL_SUBTLE } from '../../constants/colors';
 
 type FolderMoreMenuProps = {
@@ -25,7 +25,7 @@ function FolderMoreMenu({
       <Pressable style={styles.backdrop} onPress={onClose}>
         <View style={styles.menuWrapper}>
           <Menu
-            items={items}
+            sections={[items]}
             onSelect={key => {
               onSelect(key);
             }}

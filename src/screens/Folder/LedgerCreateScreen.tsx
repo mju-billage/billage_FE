@@ -4,11 +4,11 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/BackButton';
-import PrimaryButton from '../../components/Button/PrimaryButton';
-import TextField from '../../components/Field/TextField';
-import Dialog from '../../components/Feedback/Dialog';
-import Snackbar from '../../components/Feedback/Snackbar';
+import BackButton from '../../components/Navigation/App bar/BackButton';
+import Button from '../../components/Input/Button/Button';
+import TextField from '../../components/Input/Text Field/TextField';
+import Dialog from '../../components/Feedback/Dialogs/Dialog';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import { addLedgerNode } from '../../types/folder';
 import {
   LEDGER_BUDGET_LABEL,
@@ -98,9 +98,10 @@ function LedgerCreateScreen() {
       </View>
 
       <View style={styles.footer}>
-        <PrimaryButton
+        <Button
           label={LEDGER_CREATE_SUBMIT_LABEL}
           disabled={!name.trim()}
+          fullWidth
           onPress={handleSubmit}
         />
       </View>

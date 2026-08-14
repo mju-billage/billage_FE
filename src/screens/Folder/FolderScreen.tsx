@@ -12,15 +12,15 @@ import type {
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { FolderTabParamList } from './FolderTabNavigator';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/BackButton';
-import IconButton from '../../components/Button/IconButton';
-import SearchField from '../../components/Field/SearchField';
-import FolderItem from '../../components/DataDisplay/FolderItem';
-import Dialog from '../../components/Feedback/Dialog';
-import Snackbar from '../../components/Feedback/Snackbar';
+import BackButton from '../../components/Navigation/App bar/BackButton';
+import IconButton from '../../components/Input/Button/IconButton';
+import SearchField from '../../components/Input/Search/SearchField';
+import FolderItem from '../../components/Data Display/Folder/FolderItem';
+import Dialog from '../../components/Feedback/Dialogs/Dialog';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import FolderMoreMenu from './FolderMoreMenu';
 import NewItemSheet from './NewItemSheet';
-import type { MenuItem } from '../../components/Navigation/Menu';
+import type { MenuItem } from '../../components/Navigation/Menu/Menu';
 import {
   addFolderNode,
   getChildNodes,
@@ -296,6 +296,11 @@ function FolderScreen() {
               name={item.name}
               subtitle={getItemSubtitle(item)}
               layout={viewMode}
+              hasItems={
+                item.kind === 'folder'
+                  ? getChildNodes(item.id).length > 0
+                  : undefined
+              }
               onPress={() => handlePressItem(item)}
             />
           )}

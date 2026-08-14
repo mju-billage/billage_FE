@@ -11,11 +11,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import AppBar from '../../components/Navigation/AppBar';
-import Divider from '../../components/DataDisplay/Divider';
+import AppBar from '../../components/Navigation/App bar/AppBar';
+import Divider from '../../components/Data Display/Divider/Divider';
 import MonthGridCalendar from './MonthGridCalendar';
 import CalendarViewToggle from './CalendarViewToggle';
-import TransactionListItem from '../../components/DataDisplay/TransactionListItem';
+import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import { MOCK_CALENDAR_MONTH } from '../../types/calendar';
 import { shiftMonth } from '../../utils/calendarGrid';
 import {
@@ -24,8 +24,8 @@ import {
 } from '../../constants/calendarScreenText';
 import { BACKGROUND_SECONDARY } from '../../constants/colors';
 
-const CHEVRON_LEFT_ICON = require('../../assets/icons/nav/ChevronLeft.png');
-const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/ChevronRight.png');
+const CHEVRON_LEFT_ICON = require('../../assets/icons/nav/Chevron Left.png');
+const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/Chevron Right.png');
 const NO_MOCK_DATE = -1;
 
 type CalendarScreenNavigationProp = NativeStackNavigationProp<
@@ -118,7 +118,11 @@ function CalendarScreen() {
             {selectedTransactions.map(transaction => (
               <TransactionListItem
                 key={transaction.id}
-                transaction={transaction}
+                label={transaction.groupName}
+                itemName={transaction.itemName}
+                amount={transaction.amount}
+                hasReceipt={transaction.hasReceipt}
+                isPendingApproval={transaction.isPendingApproval}
               />
             ))}
           </>

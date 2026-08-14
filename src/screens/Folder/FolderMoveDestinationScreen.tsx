@@ -4,10 +4,10 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/BackButton';
-import PrimaryButton from '../../components/Button/PrimaryButton';
-import Snackbar from '../../components/Feedback/Snackbar';
-import FolderItem from '../../components/DataDisplay/FolderItem';
+import BackButton from '../../components/Navigation/App bar/BackButton';
+import Button from '../../components/Input/Button/Button';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
+import FolderItem from '../../components/Data Display/Folder/FolderItem';
 import { getChildNodes, getNodeById, moveNodes } from '../../types/folder';
 import {
   MOVE_DESTINATION_CONFIRM_LABEL,
@@ -85,6 +85,11 @@ function FolderMoveDestinationScreen() {
               name={item.name}
               subtitle={`${getChildNodes(item.id).length}개의 항목`}
               layout="list"
+              hasItems={
+                item.kind === 'folder'
+                  ? getChildNodes(item.id).length > 0
+                  : undefined
+              }
               onPress={() => handlePressFolder(item.id)}
             />
           )}
@@ -98,9 +103,10 @@ function FolderMoveDestinationScreen() {
       )}
 
       <View style={styles.footer}>
-        <PrimaryButton
+        <Button
           label={MOVE_DESTINATION_CONFIRM_LABEL}
           onPress={handleConfirm}
+          fullWidth
         />
       </View>
     </View>

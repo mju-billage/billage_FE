@@ -3,10 +3,17 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/RootNavigator';
-import SocialIconButton from '../components/Button/SocialIconButton';
-import TextField from '../components/Field/TextField';
-import PrimaryButton from '../components/Button/PrimaryButton';
-import { FOREGROUND_NEUTRAL_NORMAL } from '../constants/colors';
+import TextField from '../components/Input/Text Field/TextField';
+import Button from '../components/Input/Button/Button';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_INVERSE,
+  FOREGROUND_NEUTRAL_NORMAL,
+  SOCIAL_KAKAO_TEXT,
+  SOCIAL_KAKAO_YELLOW,
+  SOCIAL_NAVER_GREEN,
+} from '../constants/colors';
 import { SocialProfile, SocialType } from '../types/social';
 import { ApiError } from '../services/apiClient';
 import * as authService from '../services/authService';
@@ -27,6 +34,68 @@ type LoginNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Login'
 >;
+
+const SOCIAL_CIRCLE_SIZE = 48;
+
+const SOCIAL_STYLE_BY_TYPE: Record<SocialType, object> = {
+  Naver: { backgroundColor: SOCIAL_NAVER_GREEN },
+  Kakao: { backgroundColor: SOCIAL_KAKAO_YELLOW },
+  Google: {
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
+    borderWidth: 1,
+    borderColor: BORDER_NEUTRAL_NORMAL,
+  },
+};
+
+const SOCIAL_LABEL_STYLE_BY_TYPE: Record<SocialType, object> = {
+  Naver: { color: FOREGROUND_INVERSE },
+  Kakao: { color: SOCIAL_KAKAO_TEXT },
+  Google: { color: FOREGROUND_NEUTRAL_NORMAL },
+};
+
+const SOCIAL_INITIAL_BY_TYPE: Record<SocialType, string> = {
+  Naver: 'N',
+  Kakao: 'K',
+  Google: 'G',
+};
+
+/** 로그인 화면 전용 소셜 로그인 원형 배지 버튼. */
+function SocialLoginBadge({
+  type,
+  onPress,
+}: {
+  type: SocialType;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        socialBadgeStyles.circle,
+        SOCIAL_STYLE_BY_TYPE[type],
+        pressed && { opacity: 0.5 },
+      ]}
+      onPress={onPress}
+    >
+      <Text style={[socialBadgeStyles.label, SOCIAL_LABEL_STYLE_BY_TYPE[type]]}>
+        {SOCIAL_INITIAL_BY_TYPE[type]}
+      </Text>
+    </Pressable>
+  );
+}
+
+const socialBadgeStyles = StyleSheet.create({
+  circle: {
+    width: SOCIAL_CIRCLE_SIZE,
+    height: SOCIAL_CIRCLE_SIZE,
+    borderRadius: SOCIAL_CIRCLE_SIZE / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  label: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});
 
 /** 로그인 화면: 이메일/비밀번호 로그인과 소셜 로그인 진입점을 보여준다. */
 function LoginScreen() {
@@ -144,10 +213,11 @@ function LoginScreen() {
         />
       </View>
 
-      <PrimaryButton
+      <Button
         label={LOGIN_SUBMIT_LABEL}
         onPress={handleLogin}
         disabled={isSubmitting}
+        fullWidth
       />
 
       <View style={styles.linkRow}>
@@ -160,15 +230,15 @@ function LoginScreen() {
       </View>
 
       <View style={styles.socialRow}>
-        <SocialIconButton
+        <SocialLoginBadge
           type="Kakao"
           onPress={() => handleSocialLogin('Kakao')}
         />
-        <SocialIconButton
+        <SocialLoginBadge
           type="Naver"
           onPress={() => handleSocialLogin('Naver')}
         />
-        <SocialIconButton
+        <SocialLoginBadge
           type="Google"
           onPress={() => handleSocialLogin('Google')}
         />
@@ -176,11 +246,12 @@ function LoginScreen() {
 
       {__DEV__ && (
         <View style={styles.mockLoginRow}>
-          <PrimaryButton
+          <Button
             label={LOGIN_MOCK_BUTTON_LABEL}
             onPress={handleMockLogin}
             disabled={isSubmitting}
-            variant="secondary"
+            hierarchy="secondary"
+            fullWidth
           />
         </View>
       )}

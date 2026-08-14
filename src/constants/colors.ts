@@ -2,23 +2,32 @@
 // $navy/500, $grey/800 등 실제 사용처가 없어 확정 대조가 안 된 값은 스와치 눈대중 근사치.
 
 // ── Palette ──────────────────────────────────────────
-export const NAVY_800 = '#12184C';
-export const NAVY_500 = '#2B3A8F';
-export const NAVY_200 = '#B7BDD6';
-export const BLUE_500 = '#3B5BDB';
-export const BLUE_100 = '#E7EBFA';
-export const BLUE_50 = '#EEF2FC';
-export const GREY_800 = '#212529';
-export const GREY_600 = '#495057';
-export const GREY_400 = '#868E96';
-export const GREY_300 = '#ADB5BD';
-export const GREY_200 = '#E9ECEF';
-export const GREY_100 = '#F1F3F5';
+export const NAVY_800 = '#070A23';
+export const NAVY_500 = '#111957';
+export const NAVY_200 = '#A0A3BC';
+
+export const BLUE_500 = '#4A7FE7';
+export const BLUE_400 = '#6CA1EE';
+export const BLUE_300 = '#9BC1F5';
+export const BLUE_100 = '#DCE8FB';
+export const BLUE_50 = '#F0F5FE';
+
+export const GREY_800 = '#374151';
+export const GREY_700 = '#374151';
+export const GREY_600 = '#4B5563';
+export const GREY_400 = '#9B9B9B';
+export const GREY_300 = '#C1C5CD';
+export const GREY_200 = '#E5E7EB';
+export const GREY_100 = '#F3F4F6';
+
 export const BASIC_0 = '#FFFFFF';
-export const YELLOW_500 = '#F5A623';
-export const YELLOW_50 = '#FFF9DB';
-export const RED_400 = '#E03131';
-export const RED_50 = '#FFF0F0';
+export const BASIC_100 = '#000000';
+
+export const YELLOW_500 = '#FFBF2A';
+export const YELLOW_50 = '#fFF9EA';
+
+export const RED_400 = '#FB6E67';
+export const RED_50 = '#FFEDEC';
 
 // ── Foreground (텍스트/아이콘) ──────────────────────────
 export const FOREGROUND_PRIMARY = NAVY_800;
@@ -57,6 +66,10 @@ export const FEEDBACK_WARNING_SUBTLE = YELLOW_50;
 export const FEEDBACK_WARNING_BOLD = YELLOW_500;
 export const FEEDBACK_NEGATIVE_SUBTLE = RED_50;
 export const FEEDBACK_NEGATIVE_BOLD = RED_400;
+
+// ── Folder Colors ─────────────────────────────
+export const FOLDER_BACKGROUND = BLUE_400;
+export const FOLDER_FRONT = BLUE_300;
 
 // ── color.pdf 범위 밖 (브랜드/화면 전용 액센트) ────────────
 export const CALENDAR_TODAY_GREEN = '#2F9E44';

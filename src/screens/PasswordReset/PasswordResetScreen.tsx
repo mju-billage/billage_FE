@@ -3,9 +3,9 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/BackButton';
-import TextField from '../../components/Field/TextField';
-import PrimaryButton from '../../components/Button/PrimaryButton';
+import BackButton from '../../components/Navigation/App bar/BackButton';
+import TextField from '../../components/Input/Text Field/TextField';
+import Button from '../../components/Input/Button/Button';
 import { isValidEmail } from '../../utils/validators';
 import {
   PASSWORD_RESET_TITLE,
@@ -45,9 +45,10 @@ function PasswordResetScreen() {
         autoCapitalize="none"
       />
 
-      <PrimaryButton
+      <Button
         label={PASSWORD_RESET_SUBMIT_LABEL}
         onPress={handleSend}
+        fullWidth
         disabled={!isValidEmail(email)}
       />
     </View>
