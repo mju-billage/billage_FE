@@ -4,9 +4,9 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/BackButton';
-import PrimaryButton from '../../components/Button/PrimaryButton';
-import FolderItem from '../../components/DataDisplay/FolderItem';
+import BackButton from '../../components/Navigation/App bar/BackButton';
+import Button from '../../components/Input/Button/Button';
+import FolderItem from '../../components/Data Display/Folder/FolderItem';
 import { getChildNodes, type FolderTreeNode } from '../../types/folder';
 import {
   FOLDER_EMPTY_SUBTITLE,
@@ -84,6 +84,11 @@ function FolderSelectMoveScreen() {
               name={item.name}
               subtitle={getItemSubtitle(item)}
               layout="list"
+              hasItems={
+                item.kind === 'folder'
+                  ? getChildNodes(item.id).length > 0
+                  : undefined
+              }
               selected={selectedIds.includes(item.id)}
               onPress={() => toggleSelect(item.id)}
             />
@@ -92,9 +97,10 @@ function FolderSelectMoveScreen() {
       )}
 
       <View style={styles.footer}>
-        <PrimaryButton
+        <Button
           label={confirmLabel}
           disabled={selectedIds.length === 0}
+          fullWidth
           onPress={handleConfirm}
         />
       </View>

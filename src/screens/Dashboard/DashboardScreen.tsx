@@ -6,10 +6,10 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { MainTabParamList } from '../../navigation/MainTabNavigator';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import FAB from '../../components/Button/FAB';
-import IconButton from '../../components/Button/IconButton';
-import MiniCalendarCard from './MiniCalendarCard';
-import DuesProgressCard from '../../components/DataDisplay/DuesProgressCard';
+import FAB from '../../components/Input/Button/FAB';
+import IconButton from '../../components/Input/Button/IconButton';
+import MiniCalendarCard from '../../components/Data Display/Card/MiniCalendarCard';
+import DuesProgressCard from '../../components/Data Display/Card/DuesProgressCard';
 import QuickServiceCard from './QuickServiceCard';
 import { MOCK_DASHBOARD_SUMMARY } from '../../types/dashboard';
 import {

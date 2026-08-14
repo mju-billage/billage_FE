@@ -1,5 +1,5 @@
 import { Image, Pressable, StyleSheet, Text } from 'react-native';
-import BottomSheet from '../../components/Feedback/BottomSheet';
+import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import {
   NEW_ITEM_SHEET_LEDGER_LABEL,
   NEW_ITEM_SHEET_FOLDER_LABEL,

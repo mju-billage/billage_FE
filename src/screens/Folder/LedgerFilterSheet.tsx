@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import BottomSheet from '../../components/Feedback/BottomSheet';
-import PrimaryButton from '../../components/Button/PrimaryButton';
-import TextButton from '../../components/Button/TextButton';
-import Calendar from '../../components/DataDisplay/Calendar';
+import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
+import Button from '../../components/Input/Button/Button';
+import TextButton from '../../components/Input/Button/TextButton';
+import Calendar from '../../components/Data Display/Calendar/Calendar';
 import {
   FILTER_APPLY_LABEL,
   FILTER_PERIOD_1MONTH,
@@ -175,7 +175,7 @@ function LedgerFilterSheet({
       </View>
 
       <View style={styles.footer}>
-        <PrimaryButton label={FILTER_APPLY_LABEL} onPress={handleApply} />
+        <Button label={FILTER_APPLY_LABEL} onPress={handleApply} fullWidth />
       </View>
     </BottomSheet>
   );

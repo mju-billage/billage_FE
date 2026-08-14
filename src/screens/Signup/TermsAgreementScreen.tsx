@@ -3,10 +3,10 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/BackButton';
-import AgreementCheckboxRow from '../../components/AgreementCheckboxRow';
-import Divider from '../../components/DataDisplay/Divider';
-import PrimaryButton from '../../components/Button/PrimaryButton';
+import BackButton from '../../components/Navigation/App bar/BackButton';
+import AgreementCheckboxRow from '../../components/Input/Control/AgreementCheckboxRow';
+import Divider from '../../components/Data Display/Divider/Divider';
+import Button from '../../components/Input/Button/Button';
 import {
   TERMS_AGREEMENT_TITLE,
   AGREE_ALL_LABEL,
@@ -113,9 +113,10 @@ function TermsAgreementScreen() {
       </View>
 
       <View style={styles.footer}>
-        <PrimaryButton
+        <Button
           label={NEXT_BUTTON_LABEL}
           onPress={handleNext}
+          fullWidth
           disabled={!canProceed}
         />
       </View>

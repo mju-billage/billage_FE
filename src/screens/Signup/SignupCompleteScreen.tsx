@@ -2,8 +2,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/BackButton';
-import PrimaryButton from '../../components/Button/PrimaryButton';
+import BackButton from '../../components/Navigation/App bar/BackButton';
+import Button from '../../components/Input/Button/Button';
 import { FOREGROUND_NEUTRAL_NORMAL } from '../../constants/colors';
 import {
   SIGNUP_COMPLETE_TITLE,
@@ -38,15 +38,17 @@ function SignupCompleteScreen() {
       <Text style={styles.subtitle}>{SIGNUP_COMPLETE_SUBTITLE}</Text>
 
       <View style={styles.footer}>
-        <PrimaryButton
+        <Button
           label={SIGNUP_COMPLETE_CREATE_GROUP_LABEL}
           onPress={handleCreateGroup}
+          fullWidth
         />
         <View style={styles.buttonGap} />
-        <PrimaryButton
+        <Button
           label={SIGNUP_COMPLETE_JOIN_WITH_CODE_LABEL}
           onPress={handleJoinWithCode}
-          variant="secondary"
+          hierarchy="secondary"
+          fullWidth
         />
       </View>
     </View>

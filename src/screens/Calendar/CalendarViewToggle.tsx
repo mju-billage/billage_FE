@@ -1,4 +1,4 @@
-import SegmentedControl from '../../components/Selection/SegmentedControl';
+import SegmentedControl from '../../components/Input/Control/SegmentedControl';
 import {
   CALENDAR_VIEW_TOGGLE_CALENDAR_LABEL,
   CALENDAR_VIEW_TOGGLE_DAILY_LABEL,

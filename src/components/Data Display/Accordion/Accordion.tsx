@@ -1,0 +1,80 @@
+import { useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_NORMAL,
+} from '../../../constants/colors';
+
+const PLUS_ICON = require('../../../assets/icons/action/Plus.png');
+const MINUS_ICON = require('../../../assets/icons/action/Minus.png');
+
+type AccordionProps = {
+  title: string;
+  items: string[];
+  defaultOpen?: boolean;
+};
+
+/** 제목을 누르면 항목 목록이 펼쳐지는 아코디언. 항목 사이엔 구분선 없이 간격만 있다. */
+function Accordion({ title, items, defaultOpen = false }: AccordionProps) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <View style={styles.container}>
+      <Pressable style={styles.header} onPress={() => setOpen(!open)}>
+        <Text style={styles.title}>{title}</Text>
+        {open ? (
+          <Image source={MINUS_ICON} style={styles.icon} />
+        ) : (
+          <Image source={PLUS_ICON} style={styles.icon} />
+        )}
+      </Pressable>
+      {open && (
+        <View style={styles.body}>
+          {items.map((item, index) => (
+            <Text key={index} style={styles.item}>
+              {item}
+            </Text>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER_NEUTRAL_NORMAL,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+  },
+  title: {
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  icon: {
+    width: 16,
+    height: 16,
+    tintColor: FOREGROUND_NEUTRAL_NORMAL,
+  },
+  minusIcon: {
+    width: 16,
+    height: 2,
+    borderRadius: 1,
+    backgroundColor: FOREGROUND_NEUTRAL_NORMAL,
+  },
+  body: {
+    paddingBottom: 14,
+    gap: 20,
+  },
+  item: {
+    fontSize: 14,
+    color: FOREGROUND_NEUTRAL_NORMAL,
+  },
+});
+
+export default Accordion;

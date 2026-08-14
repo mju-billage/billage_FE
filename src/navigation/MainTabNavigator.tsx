@@ -1,10 +1,14 @@
-import { Image, ImageSourcePropType, StyleSheet } from 'react-native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { ImageSourcePropType } from 'react-native';
+import {
+  createBottomTabNavigator,
+  BottomTabBarProps,
+} from '@react-navigation/bottom-tabs';
 import DashboardScreen from '../screens/Dashboard/DashboardScreen';
 import TransactionsScreen from '../screens/TransactionsScreen';
 import FolderTabNavigator from '../screens/Folder/FolderTabNavigator';
 import DuesScreen from '../screens/DuesScreen';
 import MoreScreen from '../screens/MoreScreen';
+import BottomNavigation from '../components/Navigation/Bottom Navigation/BottomNavigation';
 import {
   TAB_DUES_LABEL,
   TAB_FOLDER_LABEL,
@@ -12,7 +16,6 @@ import {
   TAB_MORE_LABEL,
   TAB_TRANSACTIONS_LABEL,
 } from '../constants/mainTabScreenText';
-import { FOREGROUND_INACTIVE, NAVY_800 } from '../constants/colors';
 
 export type MainTabParamList = {
   Home: undefined;
@@ -30,86 +33,62 @@ const FOLDER_ICON = require('../assets/icons/action/Folder.png');
 const DUES_ICON = require('../assets/icons/action/Dues.png');
 const MORE_ICON = require('../assets/icons/action/MenuHorizontal.png');
 
-type TabIconProps = {
-  color: string;
+const TAB_ICON_BY_ROUTE: Record<keyof MainTabParamList, ImageSourcePropType> = {
+  Home: HOME_ICON,
+  Transactions: TRANSACTIONS_ICON,
+  Folder: FOLDER_ICON,
+  Dues: DUES_ICON,
+  More: MORE_ICON,
 };
 
-function TabIcon({
-  source,
-  color,
-}: TabIconProps & { source: ImageSourcePropType }) {
+const TAB_LABEL_BY_ROUTE: Record<keyof MainTabParamList, string> = {
+  Home: TAB_HOME_LABEL,
+  Transactions: TAB_TRANSACTIONS_LABEL,
+  Folder: TAB_FOLDER_LABEL,
+  Dues: TAB_DUES_LABEL,
+  More: TAB_MORE_LABEL,
+};
+
+/** react-navigation의 상태를 BottomNavigation(둥근 카드형 탭바) props로 매핑하는 커스텀 tabBar. */
+function CustomTabBar({ state, navigation }: BottomTabBarProps) {
+  const routeName = state.routes[state.index].name as keyof MainTabParamList;
+
   return (
-    <Image source={source} style={[styles.tabIcon, { tintColor: color }]} />
+    <BottomNavigation
+      activeKey={routeName}
+      items={state.routes.map(route => ({
+        key: route.name,
+        icon: TAB_ICON_BY_ROUTE[route.name as keyof MainTabParamList],
+        label: TAB_LABEL_BY_ROUTE[route.name as keyof MainTabParamList],
+      }))}
+      onChange={key => {
+        const event = navigation.emit({
+          type: 'tabPress',
+          target: state.routes.find(route => route.name === key)?.key,
+          canPreventDefault: true,
+        });
+        if (!event.defaultPrevented) {
+          navigation.navigate(key);
+        }
+      }}
+    />
   );
-}
-
-function HomeTabIcon({ color }: TabIconProps) {
-  return <TabIcon source={HOME_ICON} color={color} />;
-}
-
-function TransactionsTabIcon({ color }: TabIconProps) {
-  return <TabIcon source={TRANSACTIONS_ICON} color={color} />;
-}
-
-function FolderTabIcon({ color }: TabIconProps) {
-  return <TabIcon source={FOLDER_ICON} color={color} />;
-}
-
-function DuesTabIcon({ color }: TabIconProps) {
-  return <TabIcon source={DUES_ICON} color={color} />;
-}
-
-function MoreTabIcon({ color }: TabIconProps) {
-  return <TabIcon source={MORE_ICON} color={color} />;
 }
 
 /** 로그인 이후 진입하는 바텀탭 네비게이터: 홈만 실구현이고 나머지는 준비 중 안내 화면이다. */
 function MainTabNavigator() {
   return (
     <Tab.Navigator
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: NAVY_800,
-        tabBarInactiveTintColor: FOREGROUND_INACTIVE,
-      }}
+      screenOptions={{ headerShown: false }}
+      tabBar={CustomTabBar}
     >
-      <Tab.Screen
-        name="Home"
-        component={DashboardScreen}
-        options={{ tabBarLabel: TAB_HOME_LABEL, tabBarIcon: HomeTabIcon }}
-      />
-      <Tab.Screen
-        name="Transactions"
-        component={TransactionsScreen}
-        options={{
-          tabBarLabel: TAB_TRANSACTIONS_LABEL,
-          tabBarIcon: TransactionsTabIcon,
-        }}
-      />
-      <Tab.Screen
-        name="Folder"
-        component={FolderTabNavigator}
-        options={{ tabBarLabel: TAB_FOLDER_LABEL, tabBarIcon: FolderTabIcon }}
-      />
-      <Tab.Screen
-        name="Dues"
-        component={DuesScreen}
-        options={{ tabBarLabel: TAB_DUES_LABEL, tabBarIcon: DuesTabIcon }}
-      />
-      <Tab.Screen
-        name="More"
-        component={MoreScreen}
-        options={{ tabBarLabel: TAB_MORE_LABEL, tabBarIcon: MoreTabIcon }}
-      />
+      <Tab.Screen name="Home" component={DashboardScreen} />
+      <Tab.Screen name="Transactions" component={TransactionsScreen} />
+      <Tab.Screen name="Folder" component={FolderTabNavigator} />
+      <Tab.Screen name="Dues" component={DuesScreen} />
+      <Tab.Screen name="More" component={MoreScreen} />
     </Tab.Navigator>
   );
 }
-
-const styles = StyleSheet.create({
-  tabIcon: {
-    width: 22,
-    height: 22,
-  },
-});
 
 export default MainTabNavigator;

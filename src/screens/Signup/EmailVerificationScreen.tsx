@@ -3,9 +3,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/BackButton';
-import VerificationField from '../../components/Field/VerificationField';
-import PrimaryButton from '../../components/Button/PrimaryButton';
+import BackButton from '../../components/Navigation/App bar/BackButton';
+import VerificationField from '../../components/Input/Verification Field/VerificationField';
+import Button from '../../components/Input/Button/Button';
 import {
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
@@ -81,9 +81,10 @@ function EmailVerificationScreen() {
 
       {!isCodeSent && (
         <View style={styles.sendButtonRow}>
-          <PrimaryButton
+          <Button
             label={EMAIL_VERIFICATION_SEND_BUTTON_LABEL}
             onPress={handleSendCode}
+            fullWidth
           />
         </View>
       )}
@@ -119,9 +120,10 @@ function EmailVerificationScreen() {
       )}
 
       <View style={styles.footer}>
-        <PrimaryButton
+        <Button
           label={NEXT_BUTTON_LABEL}
           onPress={handleNext}
+          fullWidth
           disabled={code.length !== CODE_LENGTH}
         />
       </View>
