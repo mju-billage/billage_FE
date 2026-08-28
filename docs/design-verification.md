@@ -10,8 +10,8 @@
 | 상태 | 개수 | 의미 |
 |---|---:|---|
 | `[구현]` | 51 | 대응 화면이 있고 눈에 띄는 누락 없음 (픽셀 대조 미완) |
-| `[부족함]` | 10 | 화면은 있으나 요소·연결·API가 빠짐 |
-| `[확인필요]` | 15 | 대응 후보는 있으나 실제 일치 여부 미확정 |
+| `[부족함]` | 11 | 화면은 있으나 요소·연결·API가 빠짐 |
+| `[확인필요]` | 14 | 대응 후보는 있으나 실제 일치 여부 미확정 |
 | `[미구현]` | 83 | 대응 화면 없음 |
 | **합계** | **159** | IA 고유 Screen ID |
 
@@ -25,7 +25,7 @@
 | FDR — 폴더/장부 | 24 | 12 | 0 | 10 | 2 |
 | DUE — 납부 관리(회비) | 28 | 0 | 0 | 0 | 28 |
 | ETC — 더보기 — 모임/보고서/증빙앨범/설정 | 61 | 14 | 1 | 2 | 44 |
-| ADD — FAB — 내역 추가 | 17 | 13 | 1 | 2 | 1 |
+| ADD — FAB — 내역 추가 | 17 | 13 | 2 | 1 | 1 |
 
 ## 2. 화면별 체크리스트
 
@@ -208,23 +208,23 @@
 
 | ☐ | Screen ID | 화면명 | 형식 | 권한 | 디자인 | 이미지 | 상태 | 코드 위치 / 비고 |
 |---|---|---|---|---|---|---:|---|---|
-| ☐ | `ADD-1-PAGE-01-0` | 내역 추가 | Page | - | 완료 | 5장 | `[구현]` | `screens/Transactions/TransactionRegisterScreen.tsx` |
-| ☐ | `ADD-2-MODAL-01-0` | 이탈 방지 모달 | Modal | - | 완료 | 1장 | `[구현]` | `screens/Transactions/TransactionRegisterScreen.tsx L480` |
-| ☐ | `ADD-2-SHEET-01-0` | 내역명 입력 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionTextInputSheet.tsx` — 내역명 입력 |
-| ☐ | `ADD-2-SHEET-02-0` | 담당자 선택 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionSingleSelectSheet.tsx` — 담당자 선택 |
-| ☐ | `ADD-2-SHEET-03-0` | 장부 단일 선택 | Bottom Sheet | 총무 | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionSingleSelectSheet.tsx` — 장부 단일 선택 |
-| ☐ | `ADD-2-SHEET-04-0` | 메모 입력 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionTextInputSheet.tsx` — 메모 입력 |
-| ☐ | `ADD-2-SHEET-05-0` | 증빙자료 등록 | Bottom Sheet | - | 완료 | 2장 | `[구현]` | `screens/Transactions/TransactionAttachMenuSheet.tsx` |
+| ☐ | `ADD-1-PAGE-01-0` | 내역 추가 | Page | - | 완료 | 5장 | `[구현]` | `screens/Transactions/TransactionRegisterScreen.tsx` — 상세: [design-diff.md#add-1-page-01-0-내역-추가](design-diff.md#add-1-page-01-0-내역-추가) |
+| ☐ | `ADD-2-MODAL-01-0` | 이탈 방지 모달 | Modal | - | 완료 | 1장 | `[부족함]` | `screens/Transactions/TransactionRegisterScreen.tsx L480` — 시각적으로는 디자인과 일치하나, `BackHandler` 미등록으로 안드로이드 하드웨어/시스템 back 버튼으로는 이 모달이 아예 안 뜨고 확인 없이 나가짐. 상세: [design-diff.md#add-2-modal-01-0-이탈-방지-모달](design-diff.md#add-2-modal-01-0-이탈-방지-모달) |
+| ☐ | `ADD-2-SHEET-01-0` | 내역명 입력 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionTextInputSheet.tsx` — 내역명 입력. 상세: [design-diff.md#add-2-sheet-01-0-내역명-입력](design-diff.md#add-2-sheet-01-0-내역명-입력) |
+| ☐ | `ADD-2-SHEET-02-0` | 담당자 선택 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionSingleSelectSheet.tsx` — 담당자 선택. 상세: [design-diff.md#add-2-sheet-02-0-담당자-선택](design-diff.md#add-2-sheet-02-0-담당자-선택) |
+| ☐ | `ADD-2-SHEET-03-0` | 장부 단일 선택 | Bottom Sheet | 총무 | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionSingleSelectSheet.tsx` — 장부 단일 선택. 상세: [design-diff.md#add-2-sheet-03-0-장부-단일-선택](design-diff.md#add-2-sheet-03-0-장부-단일-선택) |
+| ☐ | `ADD-2-SHEET-04-0` | 메모 입력 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionTextInputSheet.tsx` — 메모 입력. 상세: [design-diff.md#add-2-sheet-04-0-메모-입력](design-diff.md#add-2-sheet-04-0-메모-입력) (캡처 상태 불일치로 레이아웃 재확인 필요) |
+| ☐ | `ADD-2-SHEET-05-0` | 증빙자료 등록 | Bottom Sheet | - | 완료 | 2장 | `[구현]` | `screens/Transactions/TransactionAttachMenuSheet.tsx` — 상세: [design-diff.md#add-2-sheet-05-0-증빙자료-등록](design-diff.md#add-2-sheet-05-0-증빙자료-등록) |
 | ☐ | `ADD-2-SHEET-06-0` | 금액 입력 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionAmountSheet.tsx` — 상세: [design-diff.md#add-2-sheet-06-0-금액-입력](design-diff.md#add-2-sheet-06-0-금액-입력) |
-| ☐ | `ADD-2-SHEET-07-0` | 일자 선택 캘린더 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionDateSheet.tsx` |
-| ☐ | `ADD-2-SNACKBAR-01-0` | 내역 추가 완료 | Snackbar | - | 완료 | 1장 | `[구현]` | `screens/Transactions/TransactionsScreen.tsx L237` — `addedTransactionId` 파라미터를 받아 표시 (`TransactionRegisterScreen.tsx` 자체에는 없음) |
-| ☐ | `ADD-3-PAGE-01-0` | 영수증 스캔 | Page | - | 완료 | 2장 | `[구현]` | `screens/Transactions/ReceiptScanningView.tsx` |
-| ☐ | `ADD-3-PAGE-02-0` | 사진 촬영 | Page | - | 완료 | **0장** | `[부족함]` | `screens/Transactions/MockCameraView.tsx` — Mock 구현. 이미지 0장 — 디자인 확보 필요 |
-| ☐ | `ADD-4-PAGE-01-0` | 영수증 스캔 성공 | Page | - | 완료 | 1장 | `[확인필요]` | `screens/Transactions/TransactionRegisterScreen.tsx` — 스캔 성공 → 필드 반영 (utils/mockOcr.ts 사용중) |
-| ☐ | `ADD-4-PAGE-01-1` | 영수증 스캔 실패 | Page | - | 진행 | 1장 | `[구현]` | `screens/Transactions/ReceiptScanFailedView.tsx` — 디자인 '진행' 중 |
+| ☐ | `ADD-2-SHEET-07-0` | 일자 선택 캘린더 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionDateSheet.tsx` — 실제 구현 정상, 디자인 원본 파일이 더미 데이터(요일 헤더 전부 "일", 날짜 셀 전부 "0")라 원본 재확보 필요. 상세: [design-diff.md#add-2-sheet-07-0-일자-선택-캘린더](design-diff.md#add-2-sheet-07-0-일자-선택-캘린더) |
+| ☐ | `ADD-2-SNACKBAR-01-0` | 내역 추가 완료 | Snackbar | - | 완료 | 1장 | `[구현]` | `screens/Transactions/TransactionsScreen.tsx L237` — `addedTransactionId` 파라미터를 받아 표시 (`TransactionRegisterScreen.tsx` 자체에는 없음). 상세: [design-diff.md#add-2-snackbar-01-0-내역-추가-완료](design-diff.md#add-2-snackbar-01-0-내역-추가-완료) (스낵바 타이밍 못 맞춰 재캡처 필요, 추가 동작 자체는 확인됨) |
+| ☐ | `ADD-3-PAGE-01-0` | 영수증 스캔 | Page | - | 완료 | 2장 | `[구현]` | `screens/Transactions/ReceiptScanningView.tsx` — 상세: [design-diff.md#add-3-page-01-0-영수증-스캔](design-diff.md#add-3-page-01-0-영수증-스캔) (Mock이라 실제 카메라 프리뷰 없음, 기존에 알려진 제약) |
+| ☐ | `ADD-3-PAGE-02-0` | 사진 촬영 | Page | - | 완료 | **0장** | `[부족함]` | `screens/Transactions/MockCameraView.tsx` — Mock 구현. 이미지 0장 — 디자인 확보 필요. 상세: [design-diff.md#add-3-page-02-0-사진-촬영-디자인-없음](design-diff.md#add-3-page-02-0-사진-촬영-디자인-없음) |
+| ☐ | `ADD-4-PAGE-01-0` | 영수증 스캔 성공 | Page | - | 완료 | 1장 | `[확인필요]` | `screens/Transactions/TransactionRegisterScreen.tsx` — 스캔 성공 → 필드 반영 (utils/mockOcr.ts 사용중). 상세: [design-diff.md#add-4-page-01-0-영수증-스캔-성공](design-diff.md#add-4-page-01-0-영수증-스캔-성공) (금액 자동 반영 타이밍이 디자인과 달라 기획 확인 필요) |
+| ☐ | `ADD-4-PAGE-01-1` | 영수증 스캔 실패 | Page | - | 진행 | 1장 | `[구현]` | `screens/Transactions/ReceiptScanFailedView.tsx` — 디자인 '진행' 중. 상세: [design-diff.md#add-4-page-01-1-영수증-스캔-실패](design-diff.md#add-4-page-01-1-영수증-스캔-실패) |
 | ☐ | `ADD-4-PAGE-02-0` | 사진 촬영 결과 | Page | - | 검토 | **0장** | `[미구현]` | 사진 촬영 결과 (디자인 '검토', 이미지 0장) |
-| ☐ | `ADD-4-SNACKBAR-01-0` | 이미지 첨부 제한 | Snackbar | - | 완료 | 1장 | `[확인필요]` | `screens/Transactions/ReceiptGalleryPickerScreen.tsx` — 이미지 첨부 10장 제한 안내 |
-| ☐ | `ADD-5-MODAL-01-0` | 스캔 내용 반영 확인 모달 | Modal | - | 완료 | 1장 | `[구현]` | `screens/Transactions/TransactionRegisterScreen.tsx L498` |
+| ☐ | `ADD-4-SNACKBAR-01-0` | 이미지 첨부 제한 | Snackbar | - | 완료 | 1장 | `[구현]` | `screens/Transactions/ReceiptGalleryPickerScreen.tsx` — 이미지 첨부 10장 제한 안내. 상세: [design-diff.md#add-4-snackbar-01-0-이미지-첨부-제한](design-diff.md#add-4-snackbar-01-0-이미지-첨부-제한) (픽셀 대조로 확인필요 해소, 차이 없음) |
+| ☐ | `ADD-5-MODAL-01-0` | 스캔 내용 반영 확인 모달 | Modal | - | 완료 | 1장 | `[구현]` | `screens/Transactions/TransactionRegisterScreen.tsx L498` — 상세: [design-diff.md#add-5-modal-01-0-스캔-내용-반영-확인-모달](design-diff.md#add-5-modal-01-0-스캔-내용-반영-확인-모달) |
 
 ## 3. 디자인 토큰 대조
 
@@ -344,6 +344,11 @@ FDR이 대부분이다. IA(V0.4)가 최신 디자인을 못 따라온 것으로 
 
 - **`ETC-2-PAGE-02-0`(모임 관리)**: 대응 코드가 없음을 확인했다. 더보기 메인의 "모임 관리" ToolsMenu 항목은 중간 화면 없이 `GroupManagerScreen`(`ETC-2-PAGE-03-0`, 실제 페이지 타이틀은 "모임 관리자")으로 바로 이동한다. IA가 이 둘을 별개 화면으로 정의한 것인지, 아니면 같은 화면을 가리키는 오기인지 확인이 필요하다.
 - **`FDR-3-SHEET-01-0`(장부 예산 입력) / `FDR-3-SHEET-02-0`(예산 설정)**: 코드상 `FolderBudgetListScreen.tsx`에 예산 입력용 BottomSheet가 하나뿐이라 두 ID를 같은 시트로 판단해 매핑했으나 확신이 낮다. 두 ID가 실제로 다른 시트(예: 최초 입력 vs 수정)로 구분되어야 하는지 기획 확인이 필요하다.
+- **`ADD-2-SHEET-07-0`(일자 선택 캘린더)**: 디자인 원본 파일이 더미 데이터다(요일 헤더 7칸 전부 "일", 날짜 셀 전부 "0"). 물어볼 것: **이 화면의 정상 디자인 원본 파일을 다시 받을 수 있는가** — 지금 파일로는 요일 헤더 구성이나 날짜 그리드 스타일을 대조할 수 없다.
+- **`ADD-4-SNACKBAR-01-0`(이미지 첨부 제한)**: 디자인 이미지 헤더 문구가 "4 선택"인데 실제 체크된 사진은 9~10장으로 안 맞는다(실제 구현은 숫자가 정확히 일치해 정상). 물어볼 것: **디자인 쪽 "4 선택" 표기가 목업 작성 시 오기인지, 아니면 다른 상태(4장만 선택된 상태)를 의도적으로 보여준 것인지** — 오기라면 원본만 정정하면 되고 실제 구현은 손댈 필요 없다.
+- **`DTB-3-MODAL-01-0`(상세 내역_삭제)**: 디자인 이미지를 열어보면 삭제 확인 다이얼로그가 아니라 "상세 내역" 타이틀에 본문이 빈 화면 + "등록하기" 버튼만 있다. 물어볼 것: **이 파일이 정말 `DTB-3-MODAL-01-0`(상세 내역 삭제 확인 모달)이 맞는지, 아니면 다른 Screen ID의 파일이 잘못 파일링된 것인지** — 파일명 자체는 맞게 붙어 있어서 대조 코드가 아니라 원본 배치 실수를 의심할 근거가 있다.
+- **`ADD-4-PAGE-01-0`(영수증 스캔 성공)**: 실제 구현은 스캔 성공 즉시 금액 필드가 자동으로 채워지는데(예: "232,000원"), 디자인 이미지는 이 시점에서도 금액이 placeholder("금액을 입력해주세요")로 비어 있다. 물어볼 것: **스캔 직후 금액을 즉시 자동 반영하는 게 의도인지, 아니면 사용자가 한 번 더 확인/승인하는 별도 단계가 있어야 하는지** — 현재 구현(즉시 반영)이 기획 의도와 다르면 `TransactionRegisterScreen.tsx`의 스캔 성공 핸들러를 고쳐야 한다.
+- **D-2에서 "상태 불명"으로 남은 16개** (`DTB-2-SHEET-01-0`, `DTB-3-SHEET-01-0`, `DTB-2-PAGE-02-0`, `DTB-3-MODAL-01-0`[위 항목과 동일], `FDR-2-SHEET-01-0`, `FDR-2-PAGE-02-0`, `FDR-4-SNACKBAR-03-0`, `FDR-4-SNACKBAR-02-0`, `ETC-3-MODAL-01-0`, `ETC-3-MODAL-01-1`, `ADD-1-PAGE-01-0`, `ADD-2-SHEET-07-0`[위 항목과 동일], `ADD-2-SHEET-01-0`, `ADD-2-SHEET-02-0`, `ADD-2-SHEET-03-0`, `ADD-2-SHEET-04-0`): 같은 Screen ID에 디자인 후보 이미지가 2~9장씩 걸려 있는데(대부분 서로 다른 폴더에 중복 배치돼 있어) 어느 게 이 ID의 "진짜" 대표 이미지인지, 혹은 정말 여러 상태(빈 값/입력중/에러 등) 변형인지 사전에 못 정했다. 물어볼 것: **각 Screen ID의 디자인 후보 파일들이 상태 변형인지 단순 중복 배치인지, 상태 변형이라면 어느 파일이 화면의 "기본" 상태를 대표하는지** — `scripts/design-index.json`의 해당 항목에서 후보 경로 전부 확인 가능.
 
 ## 6. 권장 순서
 
