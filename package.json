@@ -9,7 +9,10 @@
     "start": "react-native start",
     "test": "jest",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "shot": "node scripts/capture-shot.js",
+    "design-index": "node scripts/build-design-index.js",
+    "pair": "node scripts/make-pair.js"
   },
   "dependencies": {
     "@react-native-google-signin/google-signin": "^16.1.2",
@@ -51,6 +54,7 @@
     "react-dom": "19.2.3",
     "react-native-web": "^0.21.2",
     "react-test-renderer": "19.2.3",
+    "sharp": "^0.35.4",
     "storybook": "8.6.14",
     "typescript": "^5.8.3",
     "webpack": "^5.94.0"

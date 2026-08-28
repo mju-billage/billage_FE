@@ -36,7 +36,7 @@
 
 | ☐ | Screen ID | 화면명 | 형식 | 권한 | 디자인 | 이미지 | 상태 | 코드 위치 / 비고 |
 |---|---|---|---|---|---|---:|---|---|
-| ☐ | `COM-1-PAGE-01-0` | 로그인 | Page | 전체 | 완료 | 3장 | `[구현]` | `screens/LoginScreen.tsx` |
+| ☐ | `COM-1-PAGE-01-0` | 로그인 | Page | 전체 | 완료 | 3장 | `[부족함]` | `screens/LoginScreen.tsx` — 상세: [design-diff.md#com-1-page-01-0-로그인](design-diff.md#com-1-page-01-0-로그인) |
 | ☐ | `COM-1-PAGE-02-0` | 탈퇴_안내사항 | Page | 전체 | 진행 | 1장 | `[미구현]` | 탈퇴 플로우 전체 없음 |
 | ☐ | `COM-2-PAGE-01-0` | 약관 동의 | Page | 전체 | 완료 | 2장 | `[구현]` | `screens/Signup/TermsAgreementScreen.tsx` |
 | ☐ | `COM-2-PAGE-02-0` | 비밀번호 재설정 | Page | 전체 | 완료 | 3장 | `[부족함]` | `screens/PasswordReset/PasswordResetScreen.tsx` — L29 TODO: 임시 비밀번호 발급/발송 API 미연동 |
@@ -47,14 +47,14 @@
 | ☐ | `COM-3-PAGE-02-0` | 간편 가입 정보 입력 | Page | 전체 | 완료 | 4장 | `[구현]` | `screens/Signup/SocialSignupInfoScreen.tsx` |
 | ☐ | `COM-3-PAGE-03-0` | 가입 정보 입력 | Page | 전체 | 완료 | 4장 | `[구현]` | `screens/Signup/SignupInfoScreen.tsx` |
 | ☐ | `COM-3-PAGE-04-0` | 비밀번호 재설정_완료 | Page | - | 완료 | 1장 | `[구현]` | `screens/PasswordReset/PasswordResetSentScreen.tsx` |
-| ☐ | `COM-4-PAGE-01-0` | 이메일 인증 | Page | 전체 | 완료 | 2장 | `[부족함]` | `screens/Signup/EmailVerificationScreen.tsx` — L58·65·71 TODO: 인증코드 발송/재전송/검증 API 미연동 |
-| ☐ | `COM-5-PAGE-01-0` | 가입 완료 | Page | 전체 | 완료 | 4장 | `[부족함]` | `screens/Signup/SignupCompleteScreen.tsx` — L26·30 TODO: [모임 생성하기]·[코드로 참여하기] 버튼 미연결 — ETC-4-PAGE-01-0 / ETC-4-SHEET-01-0 은 이미 구현돼 있으므로 연결만 하면 됨 |
+| ☐ | `COM-4-PAGE-01-0` | 이메일 인증 | Page | 전체 | 완료 | 2장 | `[부족함]` | `screens/Signup/EmailVerificationScreen.tsx` — L59·66·72 TODO: 인증코드 발송/재전송/검증 API 미연동 |
+| ☐ | `COM-5-PAGE-01-0` | 가입 완료 | Page | 전체 | 완료 | 4장 | `[구현]` | `screens/Signup/SignupCompleteScreen.tsx` — [모임 생성하기]→`GroupCreate`(`ETC-4-PAGE-01-0`), [코드로 참여하기]→`JoinGroupSheet`(`ETC-4-SHEET-01-0`, 화면 내부 상태로 오픈) 연결 완료. 참여 성공 시 `navigation.reset`으로 `Main`까지 스택 정리(LoginScreen과 동일 패턴) |
 
 ### DSH — 대시보드
 
 | ☐ | Screen ID | 화면명 | 형식 | 권한 | 디자인 | 이미지 | 상태 | 코드 위치 / 비고 |
 |---|---|---|---|---|---|---:|---|---|
-| ☐ | `DSH-1-PAGE-01-0` | 대시보드 | Page | 총무 | 예정 | 1장 | `[부족함]` | `screens/Dashboard/DashboardScreen.tsx` — IA상 W/F·디자인 모두 '예정' → 기획 미확정. L48·52 TODO: 내역추가/보고서/통계/앨범 미연결 |
+| ☐ | `DSH-1-PAGE-01-0` | 대시보드 | Page | 총무 | 예정 | 1장 | `[부족함]` | `screens/Dashboard/DashboardScreen.tsx` — IA상 W/F·디자인 모두 '예정' → 기획 미확정. FAB→`TransactionRegister` 연결 완료. 보고서/통계/앨범 TODO는 대상 화면 자체가 아직 없어 그대로 둠 |
 | ☐ | `DSH-2-PAGE-01-0` | 알림 목록 | Page | 전체 | 예정 | 1장 | `[부족함]` | `screens/Notification/NotificationScreen.tsx` — L27 TODO: 알림 설정(ETC-3-PAGE-08-0) 미연결 |
 | ☐ | `DSH-2-PAGE-03-0` | 대시보드 캘린더 | Page | 총무 | 예정 | **0장** | `[확인필요]` | `screens/Calendar/CalendarScreen.tsx` — 디자인 '예정' + 이미지 0장. L81 TODO: 일별 보기 IA 미정의 → 기획 확인 선행 |
 | ☐ | `DSH-2-PAGE-05-0` | 통계 및 분석 | Page | 총무 | 진행 | **0장** | `[미구현]` | 통계 및 분석 (이미지 0장, 디자인 진행중) |
@@ -63,15 +63,15 @@
 
 | ☐ | Screen ID | 화면명 | 형식 | 권한 | 디자인 | 이미지 | 상태 | 코드 위치 / 비고 |
 |---|---|---|---|---|---|---:|---|---|
-| ☐ | `DTB-1-PAGE-01-0` | 내역 메인 | Page | 총무 | 완료 | 5장 | `[구현]` | `screens/Transactions/TransactionsScreen.tsx` — 전체/승인요청 탭 구현됨 |
+| ☐ | `DTB-1-PAGE-01-0` | 내역 메인 | Page | 총무 | 완료 | 5장 | `[구현]` | `screens/Transactions/TransactionsScreen.tsx` — 상세: [design-diff.md#dtb-1-page-01-0-내역-메인](design-diff.md#dtb-1-page-01-0-내역-메인) |
 | ☐ | `DTB-2-PAGE-01-0` | 내역 검색_전체 | Page | 전체 | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionSearchScreen.tsx` |
-| ☐ | `DTB-2-PAGE-02-0` | 상세 내역_조회 | Page | 전체 | 예정 | 6장 | `[부족함]` | `screens/Folder/TransactionDetailScreen.tsx` — L51 주석: 수정 아이콘 노출만 하고 동작 안 함. 디자인 상태 '예정'인데 이미지는 6장 존재 → 어느 쪽이 최신인지 확인 필요 |
+| ☐ | `DTB-2-PAGE-02-0` | 상세 내역_조회 | Page | 전체 | 예정 | 6장 | `[부족함]` | `screens/Folder/TransactionDetailScreen.tsx` — L53 주석: 수정 아이콘 노출만 하고 동작 안 함. 디자인 상태 '예정'인데 이미지는 6장 존재 → 어느 쪽이 최신인지 확인 필요 |
 | ☐ | `DTB-2-PAGE-03-0` | 상세 내역_승인요청 | Page | 총무 | 완료 | **0장** | `[미구현]` | 상세 내역_승인요청 (승인/수정 버튼) — 탭 필터만 있고 승인 상세 화면 없음 |
 | ☐ | `DTB-2-SHEET-01-0` | 내역 필터링 | Bottom Sheet | 전체 | 완료 | 6장 | `[구현]` | `screens/Transactions/TransactionFilterSheet.tsx` |
 | ☐ | `DTB-3-MODAL-01-0` | 상세 내역_삭제 | Modal | 전체 | 완료 | 1장 | `[구현]` | `screens/Folder/TransactionDetailScreen.tsx L152` |
 | ☐ | `DTB-3-MODAL-02-0` | 증빙자료 삭제 | Modal | - | 완료 | **0장** | `[미구현]` | 증빙자료 삭제 모달 |
 | ☐ | `DTB-3-PAGE-01-0` | 증빙자료 상세 | Page | 전체 | 완료 | 1장 | `[미구현]` | 증빙자료 상세 조회 |
-| ☐ | `DTB-3-PAGE-02-0` | 상세 내역_수정 | Page | 전체 | 완료 | **0장** | `[부족함]` | `screens/Transactions/TransactionRegisterScreen.tsx` — transactionId 파라미터는 있으나 상세→수정 진입이 연결 안 됨 |
+| ☐ | `DTB-3-PAGE-02-0` | 상세 내역_수정 | Page | 전체 | 완료 | **0장** | `[부족함]` | `screens/Transactions/TransactionRegisterScreen.tsx` — transactionId 파라미터는 있으나 상세→수정 진입이 연결 안 됨. **연결 보류(조사 완료)**: `Folder/TransactionDetailScreen.tsx`는 `types/folder`(id 형식 `tx-N`)와 `types/transaction`(id 형식 `dtb-tx-N`) 두 소스를 병합 조회하는데, `TransactionRegisterScreen.tsx`의 프리필은 `types/transaction`(`getTransactionById`) 단일 소스만 봄. 폴더 출처 거래(id가 `tx-N` 등 folder 쪽 형식)의 id를 넘기면 두 store의 id 네임스페이스가 완전히 달라 프리필이 조용히 실패해 빈 폼이 뜨고, 그대로 제출하면 원본은 그대로 둔 채 별개의 새 DTB 거래가 생겨 사실상 데이터 유실처럼 보이는 버그가 남. DTB 출처 거래(id가 `dtb-tx-N`)만 연결하는 것은 안전하지만, 같은 화면·같은 아이콘이 출처에 따라 되다 안되다 하는 게 더 혼란스러워 이번엔 연결 안 함. DTB/폴더 거래 데이터소스 병합 완료 후 연결 |
 | ☐ | `DTB-3-SHEET-01-0` | 기간 선택 캘린더 | Bottom Sheet | 전체/총무 | 완료 | 10장 | `[구현]` | `screens/Transactions/TransactionFilterSheet.tsx` — 내부 중첩 BottomSheet(커스텀 기간용). `TransactionDateSheet.tsx`는 `ADD-2-SHEET-07-0`(일자 선택) 전용이라 무관함을 확인 |
 | ☐ | `DTB-3-SHEET-02-0` | 장부 복수 선택 | Bottom Sheet | 전체 | 완료 | 2장 | `[구현]` | `screens/Transactions/TransactionLedgerMultiSelectSheet.tsx` |
 | ☐ | `DTB-4-MODAL-01-0` | 상세 내역_수정 이탈 안내 | Modal | 전체 | 완료 | **0장** | `[구현]` | `screens/Transactions/TransactionRegisterScreen.tsx L480` |
@@ -80,7 +80,7 @@
 
 | ☐ | Screen ID | 화면명 | 형식 | 권한 | 디자인 | 이미지 | 상태 | 코드 위치 / 비고 |
 |---|---|---|---|---|---|---:|---|---|
-| ☐ | `FDR-1-PAGE-01-0` | 폴더 메인 (그리드 뷰) / 폴더 메인 (리스트 뷰) | Page | 전체 | 완료 | 4장 | `[구현]` | `screens/Folder/FolderScreen.tsx` — 그리드/리스트 뷰 전환 확인 필요 |
+| ☐ | `FDR-1-PAGE-01-0` | 폴더 메인 (그리드 뷰) / 폴더 메인 (리스트 뷰) | Page | 전체 | 완료 | 4장 | `[확인필요]` | `screens/Folder/FolderScreen.tsx` — 상세: [design-diff.md#fdr-1-page-01-0-폴더-메인-그리드-뷰](design-diff.md#fdr-1-page-01-0-폴더-메인-그리드-뷰) (디자인 이미지가 검색 상태라 기본 목록과 상태 불일치, 재캡처 필요) |
 | ☐ | `FDR-2-MODAL-01-0` | 새 폴더 생성 | Modal | - | 완료 | 1장 | `[확인필요]` | `screens/Folder/FolderScreen.tsx L344 dialogConfig` |
 | ☐ | `FDR-2-MODAL-02-0` | 폴더 전체 백업 | Modal | 총무 | 완료 | 2장 | `[미구현]` | 폴더 전체 백업 |
 | ☐ | `FDR-2-PAGE-01-0` | 이동 대상 선택 (그리드 뷰) / 이동 대상 선택 (리스트 뷰) | Page | 전체 | 완료 | 1장 | `[구현]` | `screens/Folder/FolderSelectMoveScreen.tsx` |
@@ -103,7 +103,7 @@
 | ☐ | `FDR-3-SNACKBAR-02-0` | 폴더 백업 완료 | Snackbar | 총무 | 완료 | 1장 | `[미구현]` | 폴더 백업 완료 |
 | ☐ | `FDR-4-SNACKBAR-01-0` | 이동 완료 / 폴더 해제_완료 | SnackBar | 전체/총무 | 예정 | 1장 | `[구현]` | "폴더 해제_완료"는 `screens/Folder/FolderScreen.tsx`(`SNACKBAR_FOLDER_UNLINKED_SUFFIX`), "이동 완료"는 `screens/Folder/FolderMoveDestinationScreen.tsx`(`SNACKBAR_FOLDER_MOVED`) — 두 파일에 분산 |
 | ☐ | `FDR-4-SNACKBAR-02-0` | 장부 삭제_완료 | SnackBar | 총무 | 예정 | 2장 | `[구현]` | `screens/Folder/LedgerDetailScreen.tsx` — `SNACKBAR_LEDGER_DELETED_SUFFIX` (`FolderScreen.tsx`에는 장부 삭제 기능이 없음, 폴더 unlink만 함) |
-| ☐ | `FDR-4-SNACKBAR-03-0` | 이름 변경_완료 | SnackBar | 총무 | 예정 | 2장 | `[확인필요]` | `screens/Folder/FolderScreen.tsx L315` |
+| ☐ | `FDR-4-SNACKBAR-03-0` | 이름 변경_완료 | SnackBar | 총무 | 예정 | 2장 | `[구현]` | `screens/Folder/FolderScreen.tsx` — `activeDialog==='rename'` 확인 시 `SNACKBAR_FOLDER_RENAMED` (@screen 작업 때 확인해놓고 이 표 상태 갱신을 빠뜨렸었음) |
 
 ### DUE — 납부 관리(회비)
 
@@ -142,7 +142,7 @@
 
 | ☐ | Screen ID | 화면명 | 형식 | 권한 | 디자인 | 이미지 | 상태 | 코드 위치 / 비고 |
 |---|---|---|---|---|---|---:|---|---|
-| ☐ | `ETC-1-PAGE-01-0` | 더보기 메인 | Page | 전체 | 완료 | 2장 | `[부족함]` | `screens/MoreScreen.tsx` — 보고서·증빙자료 앨범·통계·보관함 메뉴가 onPress:()=>{} 빈 핸들러 |
+| ☐ | `ETC-1-PAGE-01-0` | 더보기 메인 | Page | 전체 | 완료 | 2장 | `[부족함]` | `screens/MoreScreen.tsx` — 상세: [design-diff.md#etc-1-page-01-0-더보기-메인](design-diff.md#etc-1-page-01-0-더보기-메인) (모임 관리만 연결됨, 보고서 생성/증빙자료 앨범/소비 통계·분석/보관함 4개는 L112·118·124·130 여전히 빈 핸들러 + 레이아웃/아이콘 차이) |
 | ☐ | `ETC-2-PAGE-01-0` | 전체 모임 관리 | Page | 전체 | 완료 | 1장 | `[구현]` | `screens/GroupManager/AllGroupsScreen.tsx` |
 | ☐ | `ETC-2-PAGE-02-0` | 모임 관리 | Page | 전체 | 완료 | 1장 | `[미구현]` | 더보기의 '모임 관리' 메뉴는 중간 화면 없이 GroupManagerScreen(`ETC-2-PAGE-03-0`)으로 직행. IA상 별개 화면인지 오기인지 기획 확인 필요 |
 | ☐ | `ETC-2-PAGE-03-0` | 모임 관리자 | Page | 전체 | 완료 | 1장 | `[구현]` | `screens/GroupManager/GroupManagerScreen.tsx` |
@@ -215,7 +215,7 @@
 | ☐ | `ADD-2-SHEET-03-0` | 장부 단일 선택 | Bottom Sheet | 총무 | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionSingleSelectSheet.tsx` — 장부 단일 선택 |
 | ☐ | `ADD-2-SHEET-04-0` | 메모 입력 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionTextInputSheet.tsx` — 메모 입력 |
 | ☐ | `ADD-2-SHEET-05-0` | 증빙자료 등록 | Bottom Sheet | - | 완료 | 2장 | `[구현]` | `screens/Transactions/TransactionAttachMenuSheet.tsx` |
-| ☐ | `ADD-2-SHEET-06-0` | 금액 입력 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionAmountSheet.tsx` |
+| ☐ | `ADD-2-SHEET-06-0` | 금액 입력 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionAmountSheet.tsx` — 상세: [design-diff.md#add-2-sheet-06-0-금액-입력](design-diff.md#add-2-sheet-06-0-금액-입력) |
 | ☐ | `ADD-2-SHEET-07-0` | 일자 선택 캘린더 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionDateSheet.tsx` |
 | ☐ | `ADD-2-SNACKBAR-01-0` | 내역 추가 완료 | Snackbar | - | 완료 | 1장 | `[구현]` | `screens/Transactions/TransactionsScreen.tsx L237` — `addedTransactionId` 파라미터를 받아 표시 (`TransactionRegisterScreen.tsx` 자체에는 없음) |
 | ☐ | `ADD-3-PAGE-01-0` | 영수증 스캔 | Page | - | 완료 | 2장 | `[구현]` | `screens/Transactions/ReceiptScanningView.tsx` |

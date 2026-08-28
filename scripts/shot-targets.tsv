@@ -1,0 +1,77 @@
+SCREEN_ID	화면명	권한	상태	코드파일
+COM-1-PAGE-01-0	로그인	전체	구현	screens/LoginScreen.tsx
+COM-2-PAGE-01-0	약관 동의	전체	구현	screens/Signup/TermsAgreementScreen.tsx
+COM-2-PAGE-02-0	비밀번호 재설정	전체	부족함	screens/PasswordReset/PasswordResetScreen.tsx
+COM-3-PAGE-01-0	약관 상세	전체	구현	screens/Signup/{TermsOfService,PrivacyPolicy,MarketingConsent}Screen.tsx
+COM-3-PAGE-02-0	간편 가입 정보 입력	전체	구현	screens/Signup/SocialSignupInfoScreen.tsx
+COM-3-PAGE-03-0	가입 정보 입력	전체	구현	screens/Signup/SignupInfoScreen.tsx
+COM-3-PAGE-04-0	비밀번호 재설정_완료	-	구현	screens/PasswordReset/PasswordResetSentScreen.tsx
+COM-4-PAGE-01-0	이메일 인증	전체	부족함	screens/Signup/EmailVerificationScreen.tsx
+COM-5-PAGE-01-0	가입 완료	전체	구현	screens/Signup/SignupCompleteScreen.tsx
+DSH-1-PAGE-01-0	대시보드	총무	부족함	screens/Dashboard/DashboardScreen.tsx
+DSH-2-PAGE-01-0	알림 목록	전체	부족함	screens/Notification/NotificationScreen.tsx
+DSH-2-PAGE-03-0	대시보드 캘린더	총무	확인필요	screens/Calendar/CalendarScreen.tsx
+DTB-1-PAGE-01-0	내역 메인	총무	구현	screens/Transactions/TransactionsScreen.tsx
+DTB-2-PAGE-01-0	내역 검색_전체	전체	구현	screens/Transactions/TransactionSearchScreen.tsx
+DTB-2-PAGE-02-0	상세 내역_조회	전체	부족함	screens/Folder/TransactionDetailScreen.tsx
+DTB-2-SHEET-01-0	내역 필터링	전체	구현	screens/Transactions/TransactionFilterSheet.tsx
+DTB-3-MODAL-01-0	상세 내역_삭제	전체	구현	screens/Folder/TransactionDetailScreen.tsx L152
+DTB-3-PAGE-02-0	상세 내역_수정	전체	부족함	screens/Transactions/TransactionRegisterScreen.tsx
+DTB-3-SHEET-01-0	기간 선택 캘린더	전체/총무	구현	screens/Transactions/TransactionFilterSheet.tsx
+DTB-3-SHEET-02-0	장부 복수 선택	전체	구현	screens/Transactions/TransactionLedgerMultiSelectSheet.tsx
+DTB-4-MODAL-01-0	상세 내역_수정 이탈 안내	전체	구현	screens/Transactions/TransactionRegisterScreen.tsx L480
+FDR-1-PAGE-01-0	폴더 메인 (그리드 뷰) / 폴더 메인 (리스트 뷰)	전체	구현	screens/Folder/FolderScreen.tsx
+FDR-2-MODAL-01-0	새 폴더 생성	-	확인필요	screens/Folder/FolderScreen.tsx L344 dialogConfig
+FDR-2-PAGE-01-0	이동 대상 선택 (그리드 뷰) / 이동 대상 선택 (리스트 뷰)	전체	구현	screens/Folder/FolderSelectMoveScreen.tsx
+FDR-2-PAGE-02-0	전체 예산 설정 목록	전체	구현	screens/Folder/FolderBudgetListScreen.tsx
+FDR-2-PAGE-04-0	폴더 상세 (그리드 뷰) / 폴더 상세 (리스트 뷰)	전체	구현	screens/Folder/FolderScreen.tsx
+FDR-2-PAGE-05-0	장부 상세	전체	구현	screens/Folder/LedgerDetailScreen.tsx
+FDR-2-SHEET-01-0	새 장부 생성	총무	확인필요	screens/Folder/NewItemSheet.tsx
+FDR-3-MODAL-01-0	폴더 이름 변경	총무	확인필요	screens/Folder/FolderScreen.tsx dialogConfig
+FDR-3-MODAL-02-0	폴더 해제	총무	확인필요	screens/Folder/FolderScreen.tsx dialogConfig
+FDR-3-MODAL-03-0	장부 이름 변경	총무	확인필요	screens/Folder/LedgerDetailScreen.tsx L262
+FDR-3-MODAL-04-0	장부 삭제	총무	확인필요	screens/Folder/LedgerDetailScreen.tsx L262
+FDR-3-MODAL-05-0	새 폴더 생성	총무	확인필요	screens/Folder/FolderScreen.tsx
+FDR-3-PAGE-01-0	이동 경로 선택 (그리드 뷰) / 이동 경로 선택 (리스트 뷰)	전체	구현	screens/Folder/FolderMoveDestinationScreen.tsx
+FDR-3-PAGE-02-0	내역 검색_장부	전체	구현	screens/Folder/LedgerSearchScreen.tsx
+FDR-3-PAGE-03-0	새 장부 생성	총무	구현	screens/Folder/LedgerCreateScreen.tsx
+FDR-3-SHEET-01-0	장부 예산 입력	총무	확인필요	screens/Folder/FolderBudgetListScreen.tsx
+FDR-3-SHEET-02-0	예산 설정	총무	확인필요	screens/Folder/FolderBudgetListScreen.tsx
+FDR-3-SHEET-03-0	장부상세_필터링	전체	구현	screens/Folder/LedgerFilterSheet.tsx
+FDR-3-SNACKBAR-01-0	새 폴더 생성_완료	총무	구현	screens/Folder/FolderScreen.tsx
+FDR-4-SNACKBAR-01-0	이동 완료 / 폴더 해제_완료	전체/총무	구현	screens/Folder/FolderScreen.tsx; screens/Folder/FolderMoveDestinationScreen.tsx
+FDR-4-SNACKBAR-02-0	장부 삭제_완료	총무	구현	screens/Folder/LedgerDetailScreen.tsx
+FDR-4-SNACKBAR-03-0	이름 변경_완료	총무	구현	screens/Folder/FolderScreen.tsx
+ETC-1-PAGE-01-0	더보기 메인	전체	부족함	screens/MoreScreen.tsx
+ETC-2-PAGE-01-0	전체 모임 관리	전체	구현	screens/GroupManager/AllGroupsScreen.tsx
+ETC-2-PAGE-03-0	모임 관리자	전체	구현	screens/GroupManager/GroupManagerScreen.tsx
+ETC-3-MODAL-01-0	모임 나가기(일반)	일반	구현	screens/GroupManager/MemberProfileSheet.tsx L223
+ETC-3-MODAL-01-1	모임 나가기(총무)	일반	구현	screens/GroupManager/MemberProfileSheet.tsx L232
+ETC-3-SHEET-01-0	모임 추가	전체	구현	screens/GroupManager/AddGroupSheet.tsx
+ETC-3-SHEET-03-0	총무 프로필	총무	구현	screens/GroupManager/MemberProfileSheet.tsx
+ETC-3-SHEET-04-0	일반 프로필	총무	구현	screens/GroupManager/MemberProfileSheet.tsx
+ETC-3-SNACKBAR-01-0	초대 코드 복사완료	-	구현	screens/GroupManager/GroupManagerScreen.tsx
+ETC-4-MODAL-01-0	일반 전환하기	총무	구현	screens/GroupManager/MemberProfileSheet.tsx L205
+ETC-4-MODAL-02-0	총무 전환하기	총무	구현	screens/GroupManager/MemberProfileSheet.tsx L196
+ETC-4-MODAL-03-0	모임 내보내기	총무	구현	screens/GroupManager/MemberProfileSheet.tsx L214
+ETC-4-PAGE-01-0	새 모임 생성	전체	구현	screens/GroupManager/GroupCreateScreen.tsx
+ETC-4-SHEET-01-0	모임 참여	전체	구현	screens/GroupManager/JoinGroupSheet.tsx
+ETC-5-SNACKBAR-01-0	권한 변경 완료	-	확인필요	screens/GroupManager/GroupManagerScreen.tsx
+ETC-5-SNACKBAR-02-0	모임 내보내기 완료	-	확인필요	screens/GroupManager/GroupManagerScreen.tsx
+ETC-5-SNACKBAR-04-0	모임 생성 완료	-	구현	screens/GroupManager/GroupCreateScreen.tsx L78
+ADD-1-PAGE-01-0	내역 추가	-	구현	screens/Transactions/TransactionRegisterScreen.tsx
+ADD-2-MODAL-01-0	이탈 방지 모달	-	구현	screens/Transactions/TransactionRegisterScreen.tsx L480
+ADD-2-SHEET-01-0	내역명 입력	-	구현	screens/Transactions/TransactionTextInputSheet.tsx
+ADD-2-SHEET-02-0	담당자 선택	-	구현	screens/Transactions/TransactionSingleSelectSheet.tsx
+ADD-2-SHEET-03-0	장부 단일 선택	총무	구현	screens/Transactions/TransactionSingleSelectSheet.tsx
+ADD-2-SHEET-04-0	메모 입력	-	구현	screens/Transactions/TransactionTextInputSheet.tsx
+ADD-2-SHEET-05-0	증빙자료 등록	-	구현	screens/Transactions/TransactionAttachMenuSheet.tsx
+ADD-2-SHEET-06-0	금액 입력	-	구현	screens/Transactions/TransactionAmountSheet.tsx
+ADD-2-SHEET-07-0	일자 선택 캘린더	-	구현	screens/Transactions/TransactionDateSheet.tsx
+ADD-2-SNACKBAR-01-0	내역 추가 완료	-	구현	screens/Transactions/TransactionsScreen.tsx L237
+ADD-3-PAGE-01-0	영수증 스캔	-	구현	screens/Transactions/ReceiptScanningView.tsx
+ADD-3-PAGE-02-0	사진 촬영	-	부족함	screens/Transactions/MockCameraView.tsx
+ADD-4-PAGE-01-0	영수증 스캔 성공	-	확인필요	screens/Transactions/TransactionRegisterScreen.tsx
+ADD-4-PAGE-01-1	영수증 스캔 실패	-	구현	screens/Transactions/ReceiptScanFailedView.tsx
+ADD-4-SNACKBAR-01-0	이미지 첨부 제한	-	확인필요	screens/Transactions/ReceiptGalleryPickerScreen.tsx
+ADD-5-MODAL-01-0	스캔 내용 반영 확인 모달	-	구현	screens/Transactions/TransactionRegisterScreen.tsx L498
