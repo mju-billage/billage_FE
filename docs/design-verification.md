@@ -9,8 +9,8 @@
 
 | 상태 | 개수 | 의미 |
 |---|---:|---|
-| `[구현]` | 52 | 대응 화면이 있고 눈에 띄는 누락 없음 (픽셀 대조 미완) |
-| `[부족함]` | 9 | 화면은 있으나 요소·연결·API가 빠짐 |
+| `[구현]` | 51 | 대응 화면이 있고 눈에 띄는 누락 없음 (픽셀 대조 미완) |
+| `[부족함]` | 10 | 화면은 있으나 요소·연결·API가 빠짐 |
 | `[확인필요]` | 15 | 대응 후보는 있으나 실제 일치 여부 미확정 |
 | `[미구현]` | 83 | 대응 화면 없음 |
 | **합계** | **159** | IA 고유 Screen ID |
@@ -19,7 +19,7 @@
 
 | 영역 | 전체 | 구현 | 부족함 | 확인필요 | 미구현 |
 |---|---:|---:|---:|---:|---:|
-| COM — Common — 로그인/회원가입/탈퇴 | 13 | 6 | 3 | 0 | 4 |
+| COM — Common — 로그인/회원가입/탈퇴 | 13 | 5 | 4 | 0 | 4 |
 | DSH — 대시보드 | 4 | 0 | 2 | 1 | 1 |
 | DTB — 내역(거래) | 12 | 7 | 2 | 0 | 3 |
 | FDR — 폴더/장부 | 24 | 12 | 0 | 10 | 2 |
@@ -38,25 +38,25 @@
 |---|---|---|---|---|---|---:|---|---|
 | ☐ | `COM-1-PAGE-01-0` | 로그인 | Page | 전체 | 완료 | 3장 | `[부족함]` | `screens/LoginScreen.tsx` — 상세: [design-diff.md#com-1-page-01-0-로그인](design-diff.md#com-1-page-01-0-로그인) |
 | ☐ | `COM-1-PAGE-02-0` | 탈퇴_안내사항 | Page | 전체 | 진행 | 1장 | `[미구현]` | 탈퇴 플로우 전체 없음 |
-| ☐ | `COM-2-PAGE-01-0` | 약관 동의 | Page | 전체 | 완료 | 2장 | `[구현]` | `screens/Signup/TermsAgreementScreen.tsx` |
+| ☐ | `COM-2-PAGE-01-0` | 약관 동의 | Page | 전체 | 완료 | 2장 | `[구현]` | `screens/Signup/TermsAgreementScreen.tsx` — 상세: [design-diff.md#com-2-page-01-0-약관-동의](design-diff.md#com-2-page-01-0-약관-동의) |
 | ☐ | `COM-2-PAGE-02-0` | 비밀번호 재설정 | Page | 전체 | 완료 | 3장 | `[부족함]` | `screens/PasswordReset/PasswordResetScreen.tsx` — L29 TODO: 임시 비밀번호 발급/발송 API 미연동 |
 | ☐ | `COM-2-PAGE-04-0` | 탈퇴_권한 넘기기 | Page | 전체 | 진행 | 2장 | `[미구현]` | 탈퇴_권한 넘기기 |
 | ☐ | `COM-2-PAGE-05-0` | 탈퇴_사유 입력 | Page | 전체 | 진행 | 4장 | `[미구현]` | 탈퇴_사유 입력 |
 | ☐ | `COM-3-MODAL-01-0` | 탈퇴_사유 입력 | Modal | 전체 | 진행 | 1장 | `[미구현]` | 탈퇴 최종 확인 모달 |
-| ☐ | `COM-3-PAGE-01-0` | 약관 상세 | Page | 전체 | 완료 | 1장 | `[구현]` | `screens/Signup/{TermsOfService,PrivacyPolicy,MarketingConsent}Screen.tsx` — 약관 3종을 각각 별도 화면으로 구현 |
-| ☐ | `COM-3-PAGE-02-0` | 간편 가입 정보 입력 | Page | 전체 | 완료 | 4장 | `[구현]` | `screens/Signup/SocialSignupInfoScreen.tsx` |
-| ☐ | `COM-3-PAGE-03-0` | 가입 정보 입력 | Page | 전체 | 완료 | 4장 | `[구현]` | `screens/Signup/SignupInfoScreen.tsx` |
-| ☐ | `COM-3-PAGE-04-0` | 비밀번호 재설정_완료 | Page | - | 완료 | 1장 | `[구현]` | `screens/PasswordReset/PasswordResetSentScreen.tsx` |
-| ☐ | `COM-4-PAGE-01-0` | 이메일 인증 | Page | 전체 | 완료 | 2장 | `[부족함]` | `screens/Signup/EmailVerificationScreen.tsx` — L59·66·72 TODO: 인증코드 발송/재전송/검증 API 미연동 |
-| ☐ | `COM-5-PAGE-01-0` | 가입 완료 | Page | 전체 | 완료 | 4장 | `[구현]` | `screens/Signup/SignupCompleteScreen.tsx` — [모임 생성하기]→`GroupCreate`(`ETC-4-PAGE-01-0`), [코드로 참여하기]→`JoinGroupSheet`(`ETC-4-SHEET-01-0`, 화면 내부 상태로 오픈) 연결 완료. 참여 성공 시 `navigation.reset`으로 `Main`까지 스택 정리(LoginScreen과 동일 패턴) |
+| ☐ | `COM-3-PAGE-01-0` | 약관 상세 | Page | 전체 | 완료 | 1장 | `[구현]` | `screens/Signup/{TermsOfService,PrivacyPolicy,MarketingConsent}Screen.tsx` — 약관 3종을 각각 별도 화면으로 구현. 상세: [design-diff.md#com-3-page-01-0-약관-상세](design-diff.md#com-3-page-01-0-약관-상세) |
+| ☐ | `COM-3-PAGE-02-0` | 간편 가입 정보 입력 | Page | 전체 | 완료 | 4장 | `[구현]` | `screens/Signup/SocialSignupInfoScreen.tsx` — 상세: [design-diff.md#com-3-page-02-0-간편-가입-정보-입력-막힘](design-diff.md#com-3-page-02-0-간편-가입-정보-입력-막힘) (실 카카오/네이버/구글 OAuth 필요 — 픽셀 대조 불가) |
+| ☐ | `COM-3-PAGE-03-0` | 가입 정보 입력 | Page | 전체 | 완료 | 4장 | `[구현]` | `screens/Signup/SignupInfoScreen.tsx` — 상세: [design-diff.md#com-3-page-03-0-가입-정보-입력](design-diff.md#com-3-page-03-0-가입-정보-입력) |
+| ☐ | `COM-3-PAGE-04-0` | 비밀번호 재설정_완료 | Page | - | 완료 | 1장 | `[구현]` | `screens/PasswordReset/PasswordResetSentScreen.tsx` — 상세: [design-diff.md#com-3-page-04-0-비밀번호-재설정완료](design-diff.md#com-3-page-04-0-비밀번호-재설정완료) |
+| ☐ | `COM-4-PAGE-01-0` | 이메일 인증 | Page | 전체 | 완료 | 2장 | `[부족함]` | `screens/Signup/EmailVerificationScreen.tsx` — L59·66·72 TODO: 인증코드 발송/재전송/검증 API 미연동. 상세: [design-diff.md#com-4-page-01-0-이메일-인증](design-diff.md#com-4-page-01-0-이메일-인증) |
+| ☐ | `COM-5-PAGE-01-0` | 가입 완료 | Page | 전체 | 완료 | 4장 | `[부족함]` | `screens/Signup/SignupCompleteScreen.tsx` — [모임 생성하기]/[코드로 참여하기] 연결은 완료. 상세: [design-diff.md#com-5-page-01-0-가입-완료](design-diff.md#com-5-page-01-0-가입-완료) (레이아웃 간격·보조 버튼 색상 차이) |
 
 ### DSH — 대시보드
 
 | ☐ | Screen ID | 화면명 | 형식 | 권한 | 디자인 | 이미지 | 상태 | 코드 위치 / 비고 |
 |---|---|---|---|---|---|---:|---|---|
-| ☐ | `DSH-1-PAGE-01-0` | 대시보드 | Page | 총무 | 예정 | 1장 | `[부족함]` | `screens/Dashboard/DashboardScreen.tsx` — IA상 W/F·디자인 모두 '예정' → 기획 미확정. FAB→`TransactionRegister` 연결 완료. 보고서/통계/앨범 TODO는 대상 화면 자체가 아직 없어 그대로 둠 |
-| ☐ | `DSH-2-PAGE-01-0` | 알림 목록 | Page | 전체 | 예정 | 1장 | `[부족함]` | `screens/Notification/NotificationScreen.tsx` — L27 TODO: 알림 설정(ETC-3-PAGE-08-0) 미연결 |
-| ☐ | `DSH-2-PAGE-03-0` | 대시보드 캘린더 | Page | 총무 | 예정 | **0장** | `[확인필요]` | `screens/Calendar/CalendarScreen.tsx` — 디자인 '예정' + 이미지 0장. L81 TODO: 일별 보기 IA 미정의 → 기획 확인 선행 |
+| ☐ | `DSH-1-PAGE-01-0` | 대시보드 | Page | 총무 | 예정 | 1장 | `[부족함]` | `screens/Dashboard/DashboardScreen.tsx` — IA상 W/F·디자인 모두 '예정' → 기획 미확정. FAB→`TransactionRegister` 연결 완료. 보고서/통계/앨범 TODO는 대상 화면 자체가 아직 없어 그대로 둠. 상세: [design-diff.md#dsh-1-page-01-0-대시보드](design-diff.md#dsh-1-page-01-0-대시보드) |
+| ☐ | `DSH-2-PAGE-01-0` | 알림 목록 | Page | 전체 | 예정 | 1장 | `[부족함]` | `screens/Notification/NotificationScreen.tsx` — L27 TODO: 알림 설정(ETC-3-PAGE-08-0) 미연결. 상세: [design-diff.md#dsh-2-page-01-0-알림-목록](design-diff.md#dsh-2-page-01-0-알림-목록) (픽셀 대조는 차이 없음) |
+| ☐ | `DSH-2-PAGE-03-0` | 대시보드 캘린더 | Page | 총무 | 예정 | **0장** | `[확인필요]` | `screens/Calendar/CalendarScreen.tsx` — 디자인 '예정' + 이미지 0장. L81 TODO: 일별 보기 IA 미정의 → 기획 확인 선행. 상세: [design-diff.md#dsh-2-page-03-0-대시보드-캘린더-디자인-없음](design-diff.md#dsh-2-page-03-0-대시보드-캘린더-디자인-없음) |
 | ☐ | `DSH-2-PAGE-05-0` | 통계 및 분석 | Page | 총무 | 진행 | **0장** | `[미구현]` | 통계 및 분석 (이미지 0장, 디자인 진행중) |
 
 ### DTB — 내역(거래)
