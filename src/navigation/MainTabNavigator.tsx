@@ -4,9 +4,9 @@ import {
   BottomTabBarProps,
 } from '@react-navigation/bottom-tabs';
 import DashboardScreen from '../screens/Dashboard/DashboardScreen';
-import TransactionsScreen from '../screens/TransactionsScreen';
+import TransactionsScreen from '../screens/Transactions/TransactionsScreen';
 import FolderTabNavigator from '../screens/Folder/FolderTabNavigator';
-import DuesScreen from '../screens/DuesScreen';
+import DuesScreen from '../screens/Dues/DuesScreen';
 import MoreScreen from '../screens/MoreScreen';
 import BottomNavigation from '../components/Navigation/Bottom Navigation/BottomNavigation';
 import {
@@ -19,7 +19,7 @@ import {
 
 export type MainTabParamList = {
   Home: undefined;
-  Transactions: undefined;
+  Transactions: { addedTransactionId?: string } | undefined;
   Folder: undefined;
   Dues: undefined;
   More: undefined;
