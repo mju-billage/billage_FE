@@ -1,0 +1,25 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "src/assets/fonts/PyeojinGothic-Bold.ttf",
+      "sha1": "7226f91b2119ee2bbdf179effae470adbc9f7afb"
+    },
+    {
+      "path": "src/assets/fonts/PyeojinGothic-Light.ttf",
+      "sha1": "d328cb3e3b30425e6b3d7064d12b1a10eb3cbf50"
+    },
+    {
+      "path": "src/assets/fonts/PyeojinGothic-Medium.ttf",
+      "sha1": "7c3a93a4590fd1f3f55f8c3593bc7a3fd74fa277"
+    },
+    {
+      "path": "src/assets/fonts/PyeojinGothic-Regular.ttf",
+      "sha1": "ad5f3848229409af2735d80250388b6f9fb476aa"
+    },
+    {
+      "path": "src/assets/fonts/PyeojinGothic-Semibold.ttf",
+      "sha1": "43b1bd28d7c88fd34376acd19d4d47192cf15835"
+    }
+  ]
+}
