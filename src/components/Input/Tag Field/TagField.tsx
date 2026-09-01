@@ -6,6 +6,7 @@ import {
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type TagFieldProps = {
   tags: string[];
@@ -92,18 +93,16 @@ const styles = StyleSheet.create({
     minWidth: 120,
   },
   hash: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_NEUTRAL_NORMAL,
   },
   tagText: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_NEUTRAL_NORMAL,
   },
   input: {
+    ...TYPOGRAPHY.body2,
     flex: 1,
-    fontSize: 14,
     padding: 0,
     marginLeft: 2,
     color: FOREGROUND_NEUTRAL_NORMAL,

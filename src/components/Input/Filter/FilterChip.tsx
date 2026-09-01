@@ -4,6 +4,7 @@ import {
   FOREGROUND_DISABLED,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type FilterChipProps = {
   label: string;
@@ -39,11 +40,11 @@ const styles = StyleSheet.create({
     borderColor: FOREGROUND_SECONDARY,
   },
   plus: {
-    fontSize: 13,
+    ...TYPOGRAPHY.chips,
     color: FOREGROUND_DISABLED,
   },
   label: {
-    fontSize: 13,
+    ...TYPOGRAPHY.chips,
     color: FOREGROUND_DISABLED,
   },
   textActive: {

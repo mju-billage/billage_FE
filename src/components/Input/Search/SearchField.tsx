@@ -9,6 +9,7 @@ import {
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const SEARCH_ICON = require('../../../assets/icons/system/Search.png');
 
@@ -83,8 +84,8 @@ const styles = StyleSheet.create({
     borderColor: FOREGROUND_SECONDARY,
   },
   input: {
+    ...TYPOGRAPHY.body2,
     flex: 1,
-    fontSize: 14,
     padding: 0,
     color: FOREGROUND_NEUTRAL_NORMAL,
   },

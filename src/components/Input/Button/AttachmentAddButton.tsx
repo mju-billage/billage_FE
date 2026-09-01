@@ -8,6 +8,7 @@ import {
   FOREGROUND_NEUTRAL_NORMAL,
   NAVY_800,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const CAMERA_ICON = require('../../../assets/icons/content/Camera.png');
 
@@ -104,15 +105,13 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_DISABLED,
   },
   label: {
-    fontSize: 12,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.button,
   },
   attachmentLabel: {
     color: FOREGROUND_NEUTRAL_NORMAL,
   },
   galleryLabel: {
     color: FOREGROUND_INVERSE,
-    fontSize: 14,
   },
   disabledLabel: {
     color: FOREGROUND_DISABLED,

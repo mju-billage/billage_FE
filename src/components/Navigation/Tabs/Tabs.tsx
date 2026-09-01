@@ -4,6 +4,7 @@ import {
   FOREGROUND_DISABLED,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 export type TabItem<T extends string> = {
   label: string;
@@ -83,7 +84,7 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_SECONDARY,
   },
   label: {
-    fontSize: 14,
+    ...TYPOGRAPHY.body2,
     color: FOREGROUND_DISABLED,
   },
   labelSelected: {

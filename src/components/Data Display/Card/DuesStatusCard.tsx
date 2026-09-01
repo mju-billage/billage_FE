@@ -1,12 +1,14 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
 import Badge from '../Badge/Badge';
 import Divider from '../Divider/Divider';
+import CardBase from './CardBase';
+import { formatWon } from '../../../utils/currency';
 import {
-  BORDER_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const MEMBER_ICON = require('../../../assets/icons/user/Member.png');
 const MONEY_ICON = require('../../../assets/icons/content/Money.png');
@@ -14,6 +16,9 @@ const MONEY_ICON = require('../../../assets/icons/content/Money.png');
 type DuesStatusCardProps = {
   title: string;
   dDayLabel: string;
+  /** D-day 배지 색상. 회비 상세(DUE-2-PAGE-03-0류)는 상태에 따라 다른 색이 필요하다
+   * (진행 중=위험도별 색, 마감/예정=중립) — 기본값은 기존 호출부 동작을 유지한다. */
+  badgeStatus?: 'positive' | 'warning' | 'destructive' | 'neutral';
   paidMemberCount: number;
   totalMemberCount: number;
   paidAmount: number;
@@ -28,6 +33,7 @@ type DuesStatusCardProps = {
 function DuesStatusCard({
   title,
   dDayLabel,
+  badgeStatus = 'positive',
   paidMemberCount,
   totalMemberCount,
   paidAmount,
@@ -38,10 +44,10 @@ function DuesStatusCard({
   duesAmount,
 }: DuesStatusCardProps) {
   return (
-    <View style={styles.card}>
+    <CardBase variant="dashed">
       <View style={styles.headerRow}>
         <Text style={styles.title}>{title}</Text>
-        <Badge label={dDayLabel} status="positive" />
+        <Badge label={dDayLabel} status={badgeStatus} />
       </View>
 
       <View style={styles.statusSection}>
@@ -58,7 +64,7 @@ function DuesStatusCard({
             <Text style={styles.summaryHighlight}>
               {paidAmount.toLocaleString()}
             </Text>{' '}
-            / {totalAmount.toLocaleString()}원
+            / {formatWon(totalAmount)}
           </Text>
         </View>
       </View>
@@ -80,21 +86,14 @@ function DuesStatusCard({
         </View>
         <View style={styles.twoColumn}>
           <Text style={styles.fieldLabel}>회비 금액</Text>
-          <Text style={styles.fieldValue}>{duesAmount.toLocaleString()}원</Text>
+          <Text style={styles.fieldValue}>{formatWon(duesAmount)}</Text>
         </View>
       </View>
-    </View>
+    </CardBase>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: BORDER_NEUTRAL_NORMAL,
-    borderRadius: 12,
-    padding: 16,
-  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -102,8 +101,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_PRIMARY,
   },
   statusSection: {
@@ -121,12 +119,11 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
   summaryDenominator: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   summaryHighlight: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_SECONDARY,
   },
   periodColumn: {
@@ -145,12 +142,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   fieldLabel: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   fieldValue: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_PRIMARY,
   },
 });

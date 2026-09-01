@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { formatWon } from '../../../utils/currency';
 import {
   BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_NORMAL,
@@ -6,6 +7,7 @@ import {
   FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type ReceiptItem = {
   name: string;
@@ -35,14 +37,14 @@ function Receipt({ items, total }: ReceiptProps) {
               {item.quantity}
             </Text>
             <Text style={[styles.cell, styles.amountCell]}>
-              {item.amount.toLocaleString()}원
+              {formatWon(item.amount)}
             </Text>
           </View>
         ))}
       </View>
       <View style={styles.footerBox}>
         <Text style={styles.totalLabel}>합계</Text>
-        <Text style={styles.totalValue}>{total.toLocaleString()}원</Text>
+        <Text style={styles.totalValue}>{formatWon(total)}</Text>
       </View>
     </View>
   );
@@ -59,7 +61,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   headerCell: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   itemsBox: {
@@ -75,8 +77,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   cell: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle1,
     color: FOREGROUND_PRIMARY,
   },
   nameCell: {
@@ -102,13 +103,11 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   totalLabel: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle1,
     color: FOREGROUND_SECONDARY,
   },
   totalValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle1,
     color: FOREGROUND_SECONDARY,
   },
 });

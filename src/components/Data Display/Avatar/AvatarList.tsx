@@ -1,6 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native';
-import Avatar from './Avatar';
-import { BLUE_100, BLUE_500 } from '../../../constants/colors';
+import Avatar, { getSquircleRadius } from './Avatar';
+import {
+  BORDER_SECONDARY_SUBTLE,
+  FILL_SECONDARY_SUBTLER,
+  FOREGROUND_SECONDARY,
+} from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type AvatarListMember = {
   id: string;
@@ -15,7 +20,7 @@ type AvatarListProps = {
 };
 
 const AVATAR_SIZE = 28;
-const CORNER_RADIUS = AVATAR_SIZE * (7 / 24);
+const CORNER_RADIUS = getSquircleRadius(AVATAR_SIZE);
 
 /** 이니셜/이미지 아바타가 겹쳐진 캡슐형 인원 목록. maxVisible을 넘으면 "+n"으로 표시한다. */
 function AvatarList({
@@ -68,15 +73,15 @@ const styles = StyleSheet.create({
     width: AVATAR_SIZE,
     height: AVATAR_SIZE,
     borderRadius: CORNER_RADIUS,
-    backgroundColor: BLUE_100,
+    backgroundColor: FILL_SECONDARY_SUBTLER,
+    borderWidth: 1,
+    borderColor: BORDER_SECONDARY_SUBTLE,
     alignItems: 'center',
     justifyContent: 'center',
   },
   overflowText: {
-    fontSize: 11,
-    lineHeight: 14,
-    fontWeight: 'bold',
-    color: BLUE_500,
+    ...TYPOGRAPHY.badge,
+    color: FOREGROUND_SECONDARY,
     textAlign: 'center',
   },
 });

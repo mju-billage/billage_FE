@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { FOREGROUND_DISABLED } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type PlaceholderNoticeProps = {
   title: string;
@@ -21,7 +22,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   text: {
-    fontSize: 15,
+    ...TYPOGRAPHY.body2,
     color: FOREGROUND_DISABLED,
   },
 });

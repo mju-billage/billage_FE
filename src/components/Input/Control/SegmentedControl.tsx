@@ -5,6 +5,7 @@ import {
   FOREGROUND_DISABLED,
   FOREGROUND_PRIMARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type SegmentedControlOption<T extends string> = {
   label: string;
@@ -60,7 +61,7 @@ const styles = StyleSheet.create({
     backgroundColor: FILL_NEUTRAL_SUBTLE,
   },
   label: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_DISABLED,
   },
   labelSelected: {

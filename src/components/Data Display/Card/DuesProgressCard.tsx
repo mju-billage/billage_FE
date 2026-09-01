@@ -1,17 +1,21 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Badge from '../Badge/Badge';
 import ProgressBar from '../../Feedback/Progress Bar/ProgressBar';
+import { formatWon } from '../../../utils/currency';
 import type { DuesProgress } from '../../../types/dashboard';
 import {
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const MEMBER_ICON = require('../../../assets/icons/user/Member.png');
 const CARD_WIDTH = 280;
 
 type DuesProgressCardState = 'active' | 'upcoming' | 'ended';
+
+type DateBadgeStatus = 'positive' | 'warning' | 'destructive' | 'neutral';
 
 type DuesProgressCardProps = (
   | { type: 'dashboard'; progress: DuesProgress }
@@ -19,13 +23,22 @@ type DuesProgressCardProps = (
       type: 'paymentManagement';
       title: string;
       dateBadgeLabel: string;
+      /** D-day 배지 색상('active' 상태에서만 적용) — 기본 'neutral'(기존 동작 유지).
+       * DUE 목록(DUE-1-PAGE-01-0)의 마감 임박도별 색 구분에 쓴다. */
+      dateBadgeStatus?: DateBadgeStatus;
       paidMemberCount: number;
       totalMemberCount: number;
       paidAmount: number;
       totalAmount: number;
       progressRatio: number;
     }
-) & { state?: DuesProgressCardState };
+) & {
+  state?: DuesProgressCardState;
+  /** 카드 전체를 누를 수 있게 한다(예: DUE-1-PAGE-01-0 목록 → 상세 이동). */
+  onPress?: () => void;
+  /** true면 가로 캐러셀용 고정 폭(280) 대신 부모 너비에 맞춘다(세로 리스트용). */
+  fullWidth?: boolean;
+};
 
 /**
  * 회비 모금 진행 현황 카드. 대시보드용(dashboard)과 수납관리용(paymentManagement) 두 레이아웃을 지원한다.
@@ -33,10 +46,17 @@ type DuesProgressCardProps = (
  */
 function DuesProgressCard(props: DuesProgressCardProps) {
   const state = props.state ?? 'active';
-  if (props.type === 'paymentManagement') {
-    return <PaymentManagementCard {...props} state={state} />;
+  const inner =
+    props.type === 'paymentManagement' ? (
+      <PaymentManagementCard {...props} state={state} />
+    ) : (
+      <DashboardCard progress={props.progress} state={state} />
+    );
+
+  if (!props.onPress) {
+    return inner;
   }
-  return <DashboardCard progress={props.progress} state={state} />;
+  return <Pressable onPress={props.onPress}>{inner}</Pressable>;
 }
 
 function DateBadge({
@@ -46,7 +66,7 @@ function DateBadge({
 }: {
   label: string;
   state: DuesProgressCardState;
-  activeStatus: 'positive' | 'neutral';
+  activeStatus: DateBadgeStatus;
 }) {
   if (state === 'upcoming') {
     return <Text style={styles.upcomingDate}>{label}</Text>;
@@ -95,26 +115,28 @@ function DashboardCard({
 type PaymentManagementCardProps = Extract<
   DuesProgressCardProps,
   { type: 'paymentManagement' }
-> & { state: DuesProgressCardState };
+> & { state: DuesProgressCardState; fullWidth?: boolean };
 
 function PaymentManagementCard({
   title,
   dateBadgeLabel,
+  dateBadgeStatus = 'neutral',
   paidMemberCount,
   totalMemberCount,
   paidAmount,
   totalAmount,
   progressRatio,
   state,
+  fullWidth = false,
 }: PaymentManagementCardProps) {
   const ended = state === 'ended';
   return (
-    <View style={[styles.card, ended && styles.cardEnded]}>
+    <View style={[styles.card, fullWidth && styles.cardFullWidth, ended && styles.cardEnded]}>
       <View style={styles.badgeRow}>
         <Text style={[styles.groupName, ended && styles.textEnded]}>
           {title}
         </Text>
-        <DateBadge label={dateBadgeLabel} state={state} activeStatus="neutral" />
+        <DateBadge label={dateBadgeLabel} state={state} activeStatus={dateBadgeStatus} />
       </View>
       <View style={styles.paymentSummaryRow}>
         <View style={styles.paymentSummaryColumn}>
@@ -127,7 +149,7 @@ function PaymentManagementCard({
           </Text>
         </View>
         <Text style={[styles.paymentSummaryAmount, ended && styles.textEnded]}>
-          {paidAmount.toLocaleString()}원 / {totalAmount.toLocaleString()}원
+          {formatWon(paidAmount)} / {formatWon(totalAmount)}
         </Text>
       </View>
       <ProgressBar progress={progressRatio} muted={ended} />
@@ -140,6 +162,9 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     padding: 16,
   },
+  cardFullWidth: {
+    width: '100%',
+  },
   cardEnded: {
     backgroundColor: FILL_NEUTRAL_NORMAL,
     borderRadius: 16,
@@ -151,7 +176,7 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_DISABLED,
   },
   upcomingDate: {
-    fontSize: 12,
+    ...TYPOGRAPHY.body3,
     fontWeight: 'bold',
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
@@ -169,16 +194,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   groupName: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
   description: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   highlightDescription: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h2,
     marginTop: 4,
     marginBottom: 12,
   },
@@ -195,7 +218,7 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
   memberCountText: {
-    fontSize: 12,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   paymentSummaryRow: {
@@ -210,12 +233,10 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   paymentSummaryText: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
   paymentSummaryAmount: {
-    fontSize: 14,
-    fontWeight: 'normal',
+    ...TYPOGRAPHY.body2,
   },
 });
 

@@ -16,6 +16,7 @@ import {
   FOREGROUND_SECONDARY,
   NAVY_800,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type ButtonHierarchy = 'primary' | 'secondary' | 'tertiary';
 
@@ -123,12 +124,10 @@ const styles = StyleSheet.create({
     height: 16,
   },
   label: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.button,
   },
   labelLarge: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.button,
   },
   primaryLabel: {
     color: FOREGROUND_INVERSE,

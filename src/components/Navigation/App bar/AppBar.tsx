@@ -12,6 +12,7 @@ import {
   FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const CHEVRON_DOWN_ICON = require('../../../assets/icons/nav/Chevron Right.png');
 
@@ -91,7 +92,9 @@ function AppBar({
 
       <View style={styles.rightRow}>
         {type === 'imageSelect' ? (
-          <Text style={styles.selectedCountText}>{selectedCount ?? 0} 선택</Text>
+          <Text style={styles.selectedCountText}>
+            {selectedCount ? `${selectedCount} 선택` : '선택'}
+          </Text>
         ) : (
           rightIcons?.map((rightIcon, index) => (
             <Pressable
@@ -135,12 +138,10 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h2,
   },
   titleBold: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h2,
   },
   dropdownIcon: {
     width: 16,
@@ -152,11 +153,10 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   detailLabel: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
   detailSubtitle: {
-    fontSize: 12,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   rightRow: {
@@ -169,8 +169,7 @@ const styles = StyleSheet.create({
     height: 24,
   },
   selectedCountText: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_SECONDARY,
   },
 });

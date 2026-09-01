@@ -8,13 +8,14 @@ import {
 } from 'react-native';
 import Avatar from '../../Data Display/Avatar/Avatar';
 import Chip from '../../Data Display/Chips/Chip';
+import Divider from '../../Data Display/Divider/Divider';
 import {
-  BORDER_NEUTRAL_NORMAL,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_SECONDARY,
   FILL_NEUTRAL_NORMAL,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const CHEVRON_RIGHT_ICON = require('../../../assets/icons/nav/Chevron Right.png');
 const CHECK_ICON = require('../../../assets/icons/action/Check.png');
@@ -49,6 +50,11 @@ function ToolsMenu({ sections, showTitle = true, selectedKey }: ToolsMenuProps) 
     <View>
       {sections.map((section, sectionIndex) => (
         <View key={sectionIndex} style={styles.section}>
+          {sectionIndex > 0 && (
+            <View style={styles.dividerWrapper}>
+              <Divider />
+            </View>
+          )}
           {showTitle && section.title && (
             <Text style={styles.sectionTitle}>{section.title}</Text>
           )}
@@ -92,8 +98,9 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 20,
   },
+  // 12px+Bold 조합은 정식 스타일에 없어 body3+bold를 예외로 채택.
   sectionTitle: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     fontWeight: 'bold',
     color: FOREGROUND_DISABLED,
     marginBottom: 8,
@@ -105,8 +112,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 4,
     borderRadius: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER_NEUTRAL_NORMAL,
+  },
+  dividerWrapper: {
+    marginBottom: 12,
   },
   itemPressed: {
     backgroundColor: FILL_NEUTRAL_NORMAL,
@@ -123,8 +131,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   itemLabel: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
   chevron: {
     width: 16,

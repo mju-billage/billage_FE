@@ -9,6 +9,7 @@ import {
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_NORMAL,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type BadgeStatus = 'positive' | 'warning' | 'destructive' | 'neutral';
 
@@ -66,8 +67,7 @@ const styles = StyleSheet.create({
     height: 12,
   },
   label: {
-    fontSize: 12,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.badge,
   },
 });
 

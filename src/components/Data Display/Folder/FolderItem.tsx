@@ -9,6 +9,7 @@ import {
   FOLDER_FRONT,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 import Svg, { Path } from 'react-native-svg';
 
 type FolderItemKind = 'folder' | 'ledger';
@@ -202,13 +203,14 @@ const styles = StyleSheet.create({
   listTextColumn: {
     flex: 1,
   },
+  // 12px+Bold 조합은 정식 스타일에 없어 body3+bold를 예외로 채택.
   name: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     fontWeight: 'bold',
   },
   subtitle: {
+    ...TYPOGRAPHY.caption,
     marginTop: 2,
-    fontSize: 11,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
 });

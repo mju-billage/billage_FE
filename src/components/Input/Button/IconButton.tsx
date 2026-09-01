@@ -8,8 +8,10 @@ import {
 import {
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_DISABLED,
+  FOREGROUND_INVERSE,
   FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
+  OVERLAY_SCRIM,
 } from '../../../constants/colors';
 
 type IconButtonProps = {
@@ -18,6 +20,9 @@ type IconButtonProps = {
   disabled?: boolean;
   showPushBadge?: boolean;
   accessibilityLabel?: string;
+  /** true면 사진/카메라 미리보기처럼 배경이 일정하지 않은 곳 위에서도 보이도록
+   * 항상 반투명 어두운 배경 + 흰색 아이콘으로 렌더링한다. */
+  overlay?: boolean;
 };
 
 const ICON_SIZE = 24;
@@ -29,12 +34,14 @@ function IconButton({
   disabled = false,
   showPushBadge = false,
   accessibilityLabel,
+  overlay = false,
 }: IconButtonProps) {
   return (
     <Pressable
       style={({ pressed }) => [
         styles.button,
-        pressed && !disabled && styles.pressed,
+        overlay && styles.overlayButton,
+        pressed && !disabled && !overlay && styles.pressed,
       ]}
       onPress={onPress}
       disabled={disabled}
@@ -43,7 +50,11 @@ function IconButton({
     >
       <Image
         source={icon}
-        style={[styles.icon, disabled && styles.iconDisabled]}
+        style={[
+          styles.icon,
+          overlay && styles.iconOverlay,
+          disabled && styles.iconDisabled,
+        ]}
       />
       {showPushBadge && <View style={styles.badge} />}
     </Pressable>
@@ -61,10 +72,16 @@ const styles = StyleSheet.create({
   pressed: {
     backgroundColor: FILL_NEUTRAL_NORMAL,
   },
+  overlayButton: {
+    backgroundColor: OVERLAY_SCRIM,
+  },
   icon: {
     width: ICON_SIZE,
     height: ICON_SIZE,
     tintColor: FOREGROUND_PRIMARY,
+  },
+  iconOverlay: {
+    tintColor: FOREGROUND_INVERSE,
   },
   iconDisabled: {
     tintColor: FOREGROUND_DISABLED,

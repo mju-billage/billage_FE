@@ -8,15 +8,19 @@ import {
 } from 'react-native';
 import Divider from '../../Data Display/Divider/Divider';
 import {
+  FEEDBACK_NEGATIVE_BOLD,
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 export type MenuItem = {
   key: string;
   label: string;
   icon?: ImageSourcePropType;
+  /** true면 라벨을 위험(빨강) 색으로 표시한다(모임 나가기 등 파괴적 액션용). */
+  destructive?: boolean;
 };
 
 type MenuProps = {
@@ -56,7 +60,11 @@ function Menu({ sections, selectedKey, onSelect, showIcon = true }: MenuProps) {
                   />
                 )}
                 <Text
-                  style={[styles.label, selected && styles.labelSelected]}
+                  style={[
+                    styles.label,
+                    selected && styles.labelSelected,
+                    item.destructive && styles.labelDestructive,
+                  ]}
                 >
                   {item.label}
                 </Text>
@@ -76,6 +84,7 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingHorizontal: 16,
     paddingVertical: 14,
+    borderRadius: 8,
   },
   itemPressed: {
     backgroundColor: FILL_NEUTRAL_NORMAL,
@@ -92,11 +101,14 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_SECONDARY,
   },
   label: {
-    fontSize: 14,
+    ...TYPOGRAPHY.body2,
   },
   labelSelected: {
     color: FOREGROUND_SECONDARY,
     fontWeight: 'bold',
+  },
+  labelDestructive: {
+    color: FEEDBACK_NEGATIVE_BOLD,
   },
 });
 

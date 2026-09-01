@@ -5,6 +5,7 @@ import {
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type ProgressBarStyle = 'round' | 'square';
 
@@ -46,8 +47,8 @@ const BAR_HEIGHT = 8;
 
 const styles = StyleSheet.create({
   label: {
+    ...TYPOGRAPHY.body3,
     alignSelf: 'flex-end',
-    fontSize: 12,
     color: FOREGROUND_NEUTRAL_SUBTLE,
     marginBottom: 4,
   },

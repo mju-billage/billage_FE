@@ -7,6 +7,7 @@ import {
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type TextAreaProps = {
   value: string;
@@ -36,7 +37,7 @@ function TextArea({
   return (
     <View style={styles.container}>
       <TextInput
-        style={[styles.input, { borderColor }, { height: rows * 22 }]}
+        style={[styles.input, { borderColor }, { height: rows * 24 }]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
@@ -60,21 +61,21 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
+    ...TYPOGRAPHY.body2,
     borderWidth: 1,
     borderRadius: 8,
     padding: 12,
-    fontSize: 14,
     outlineWidth: 0,
     ...({ outlineStyle: 'none' } as any),
   },
   helperText: {
+    ...TYPOGRAPHY.body3,
     marginTop: 6,
-    fontSize: 12,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   errorText: {
+    ...TYPOGRAPHY.body3,
     marginTop: 6,
-    fontSize: 12,
     color: FEEDBACK_NEGATIVE_BOLD,
   },
 });

@@ -1,10 +1,10 @@
 import { StyleSheet, Text, View } from 'react-native';
 import ProgressBar from '../../Feedback/Progress Bar/ProgressBar';
 import Divider from '../Divider/Divider';
-import {
-  FILL_NEUTRAL_SUBTLE,
-  FOREGROUND_NEUTRAL_SUBTLE,
-} from '../../../constants/colors';
+import CardBase from './CardBase';
+import { formatWon } from '../../../utils/currency';
+import { FOREGROUND_NEUTRAL_SUBTLE } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type BudgetCardProps =
   | { state: 'empty'; emptyMessage?: string }
@@ -19,12 +19,12 @@ type BudgetCardProps =
 function BudgetCard(props: BudgetCardProps) {
   if (props.state === 'empty') {
     return (
-      <View style={styles.card}>
+      <CardBase>
         <Text style={styles.emptyMessage}>
           {props.emptyMessage ??
             '예산을 설정하고 장부를 체계적으로 관리해보세요!'}
         </Text>
-      </View>
+      </CardBase>
     );
   }
 
@@ -32,9 +32,9 @@ function BudgetCard(props: BudgetCardProps) {
   const ratio = budget > 0 ? Math.min(expense / budget, 1) : 0;
 
   return (
-    <View style={styles.card}>
+    <CardBase>
       <Text style={styles.remainingTitle}>
-        남은 예산 {remainingBudget.toLocaleString()}원
+        남은 예산 {formatWon(remainingBudget)}
       </Text>
       <View style={styles.dividerWrapper}>
         <Divider />
@@ -42,36 +42,30 @@ function BudgetCard(props: BudgetCardProps) {
       <View style={styles.statRow}>
         <View style={styles.statColumn}>
           <Text style={styles.statLabel}>지출</Text>
-          <Text style={styles.statValue}>-{expense.toLocaleString()}원</Text>
+          <Text style={styles.statValue}>-{formatWon(expense)}</Text>
         </View>
         <View style={styles.statDividerWrapper}>
           <Divider orientation="vertical" />
         </View>
         <View style={styles.statColumn}>
           <Text style={styles.statLabel}>예산</Text>
-          <Text style={styles.statValue}>{budget.toLocaleString()}원</Text>
+          <Text style={styles.statValue}>{formatWon(budget)}</Text>
         </View>
       </View>
       <ProgressBar progress={ratio} showLabel />
-    </View>
+    </CardBase>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: FILL_NEUTRAL_SUBTLE,
-    borderRadius: 12,
-    padding: 16,
-  },
   emptyMessage: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
     textAlign: 'center',
     paddingVertical: 24,
   },
   remainingTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h3,
   },
   dividerWrapper: {
     marginVertical: 12,
@@ -89,12 +83,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
   },
   statLabel: {
-    fontSize: 12,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   statValue: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
 });
 
