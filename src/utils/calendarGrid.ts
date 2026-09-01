@@ -37,3 +37,11 @@ export function shiftMonth(
   const newMonth = ((zeroBasedTotal % 12) + 12) % 12;
   return { year: newYear, month: newMonth + 1 };
 }
+
+/** 'YYYY.MM.DD' 형식의 날짜 키를 만든다. */
+export function formatDateKey(year: number, month: number, date: number) {
+  return `${year}.${String(month).padStart(2, '0')}.${String(date).padStart(
+    2,
+    '0',
+  )}`;
+}

@@ -1,5 +1,5 @@
-// color.pdf(1-1 Semantic Color) 기준 팔레트 + 시멘틱 컬러.
-// $navy/500, $grey/800 등 실제 사용처가 없어 확정 대조가 안 된 값은 스와치 눈대중 근사치.
+// Color_Definition.pdf(1-0 Primitive Color) 기준 팔레트 + 시멘틱 컬러.
+// 팔레트 22개 값은 Color_Definition.pdf와 대조해 전부 정확히 일치함을 확인함(docs/design-verification.md §3-1).
 
 // ── Palette ──────────────────────────────────────────
 export const NAVY_800 = '#070A23';
@@ -13,6 +13,8 @@ export const BLUE_100 = '#DCE8FB';
 export const BLUE_50 = '#F0F5FE';
 
 export const GREY_800 = '#374151';
+// GREY_700과 GREY_800이 동일한 이유: PDF 원본에서 700/800이 둘 다 #374151로 정의돼 있음.
+// 코드 실수 아님 — 디자이너 확인 필요(docs/design-verification.md §3-1).
 export const GREY_700 = '#374151';
 export const GREY_600 = '#4B5563';
 export const GREY_400 = '#9B9B9B';
@@ -71,8 +73,10 @@ export const FEEDBACK_NEGATIVE_BOLD = RED_400;
 export const FOLDER_BACKGROUND = BLUE_400;
 export const FOLDER_FRONT = BLUE_300;
 
+// ── Overlay (모달/시트 배경 스크림) ──────────────────────
+export const OVERLAY_SCRIM = 'rgba(0, 0, 0, 0.4)';
+
 // ── color.pdf 범위 밖 (브랜드/화면 전용 액센트) ────────────
-export const CALENDAR_TODAY_GREEN = '#2F9E44';
 export const SOCIAL_NAVER_GREEN = '#03C75A';
 export const SOCIAL_KAKAO_YELLOW = '#FEE500';
 export const SOCIAL_KAKAO_TEXT = '#3C1E1E';

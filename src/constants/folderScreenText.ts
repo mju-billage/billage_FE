@@ -6,6 +6,13 @@ export const FOLDER_EMPTY_SUBTITLE =
   '새로운 장부를 생성하여 내역을 관리해보세요.';
 export const FOLDER_SEARCH_EMPTY_TITLE = '해당 검색어에 대한 내역이 없어요.';
 export const FOLDER_SEARCH_EMPTY_SUBTITLE = '검색어를 다시 입력해주세요.';
+/** 로딩/에러 문구 — 디자인 시안에 해당 상태가 없어 최소 형태로 통일(api-integration-plan.md "표준 패턴" 참고). */
+export const FOLDER_LOADING = '폴더 정보를 불러오는 중이에요.';
+export const FOLDER_RETRY_LABEL = '다시 시도';
+/** 장부 목록(하위 폴더 아님)이 아직 없어 예산이 null일 때 표시하는 서브타이틀.
+ * 목록 API(`GET /folders/{folderId}/ledgers`)엔 생성일이 없어(docs/api-gaps.md
+ * 필드 공백) 디자인 시안의 날짜 대신 예산 상태를 보여준다. */
+export const LEDGER_ITEM_BUDGET_UNSET = '예산 미설정';
 
 export const NEW_ITEM_SHEET_LEDGER_LABEL = '새 장부 생성하기';
 export const NEW_ITEM_SHEET_FOLDER_LABEL = '새 폴더 생성하기';
@@ -20,6 +27,9 @@ export const FOLDER_MENU_BACKUP = '전체 백업';
 export const VIEW_TOGGLE_GRID_LABEL = '그리드';
 export const VIEW_TOGGLE_LIST_LABEL = '리스트';
 
+/** 폴더명 공통 제약(공통규칙 §4 / Folder.txt "최대 20자"). */
+export const FOLDER_NAME_MAX_LENGTH = 20;
+
 export const NEW_FOLDER_DIALOG_TITLE = '새 폴더 생성하기';
 export const NEW_FOLDER_NAME_PLACEHOLDER = '폴더 이름을 입력해주세요.';
 export const NEW_FOLDER_CREATE_LABEL = '생성';
@@ -32,6 +42,13 @@ export const UNLINK_FOLDER_DIALOG_TITLE = '폴더를 해제하시겠습니까?';
 export const UNLINK_FOLDER_DIALOG_DESCRIPTION =
   '폴더 내 항목은 삭제되지 않습니다.';
 export const UNLINK_CONFIRM_LABEL = '해제';
+/** 0-1: 최상위 폴더 + 직속 장부가 있는 경우 해제를 막을 때 보여주는 안내. 최상위
+ * 장부 조회 API가 없어(docs/api-gaps.md (C)) 해제하면 그 장부를 다시 찾을 방법이
+ * 없다 — 삭제는 아니지만 사실상 못 찾게 되므로 UI에서 먼저 막는다. */
+export const UNLINK_BLOCKED_DIALOG_TITLE = '이 폴더는 지금 해제할 수 없어요.';
+export const UNLINK_BLOCKED_DIALOG_DESCRIPTION =
+  '이 폴더는 최상위에 있고 직접 담긴 장부가 있어요. 지금 해제하면 그 장부를 앱에서 다시 찾을 방법이 없어요.';
+export const UNLINK_BLOCKED_CONFIRM_LABEL = '확인';
 
 export const BACKUP_DIALOG_TITLE = '현재까지 장부를 모두 보관할까요?';
 export const BACKUP_DIALOG_DESCRIPTION = '보관된 장부는 수정이 불가합니다.';
@@ -42,6 +59,10 @@ export const SNACKBAR_FOLDER_CREATED_SUFFIX = ' 폴더가 생성되었어요.';
 export const SNACKBAR_FOLDER_RENAMED = '폴더 이름이 변경되었어요.';
 export const SNACKBAR_FOLDER_UNLINKED_SUFFIX = ' 폴더가 해제되었어요.';
 export const SNACKBAR_FOLDER_MOVED = '폴더 이동이 완료되었어요.';
+/** 0-2: 다건 이동 중 일부만 실패했을 때 — 조용히 "이동 완료"라고 하지 않는다. */
+export const SNACKBAR_FOLDER_MOVE_PARTIAL_PREFIX = '';
+export const SNACKBAR_FOLDER_MOVE_PARTIAL_MIDDLE = '개 이동 완료, ';
+export const SNACKBAR_FOLDER_MOVE_PARTIAL_SUFFIX = '개 실패했어요.';
 export const SNACKBAR_LEDGER_CREATED_SUFFIX = ' 장부가 생성되었어요.';
 export const SNACKBAR_BACKUP_DONE_TITLE = '모든 장부가 보관되었어요.';
 export const SNACKBAR_BACKUP_DONE_DESCRIPTION =
@@ -51,11 +72,19 @@ export const SELECT_MOVE_TITLE = '선택 이동';
 export const SELECT_MOVE_CONFIRM_LABEL = '선택하기';
 export const SELECT_MOVE_CONFIRM_SUFFIX = '개 선택하기';
 export const SELECT_MOVE_EMPTY_TITLE = '이동할 수 있는 항목이 없어요.';
+/** 폴더 선택 화면 로딩/에러 문구(3-B, 서버 트리 조회로 전환). */
+export const SELECT_MOVE_LOADING = '목록을 불러오는 중이에요.';
+export const SELECT_MOVE_RETRY_LABEL = '다시 시도';
 
 export const MOVE_DESTINATION_TITLE = '폴더 선택';
 export const MOVE_DESTINATION_ROOT_TITLE = '전체';
 export const MOVE_DESTINATION_CONFIRM_LABEL = '여기로 이동하기';
 export const MOVE_DESTINATION_NO_SUBFOLDER = '하위 폴더가 없어요.';
+/** 장부는 최상위(폴더 없음)로 이동할 수 있는지 명세에 없어(docs/api-gaps.md) 막아둔 안내.
+ * 폴더는 이동 가능(허용됨), 선택 항목에 장부가 섞여 있을 때만 뜬다. */
+export const MOVE_DESTINATION_LEDGER_TO_ROOT_BLOCKED =
+  '장부는 최상위로 이동할 수 없어요. 폴더 안으로 이동해주세요.';
+export const MOVE_DESTINATION_MOVING_LABEL = '이동 중...';
 
 export const BUDGET_LIST_TITLE = '예산 설정';
 export const BUDGET_LIST_EMPTY_TITLE =
@@ -64,3 +93,6 @@ export const BUDGET_LIST_EMPTY_SUBTITLE = "'폴더'에서 장부를 생성해주
 export const BUDGET_SHEET_PLACEHOLDER = '예산을 입력해주세요.';
 export const BUDGET_SAVE_LABEL = '저장하기';
 export const SNACKBAR_BUDGET_SAVED = '예산이 저장되었어요.';
+/** 로딩/에러 문구 — 디자인 시안에 해당 상태가 없어 최소 형태로 통일. */
+export const BUDGET_LIST_LOADING = '장부 목록을 불러오는 중이에요.';
+export const BUDGET_LIST_RETRY_LABEL = '다시 시도';
