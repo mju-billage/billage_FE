@@ -65,13 +65,13 @@
 |---|---|---|---|---|---|---:|---|---|
 | ☐ | `DTB-1-PAGE-01-0` | 내역 메인 | Page | 총무 | 완료 | 5장 | `[구현]` | `screens/Transactions/TransactionsScreen.tsx` — 상세: [design-diff.md#dtb-1-page-01-0-내역-메인](design-diff.md#dtb-1-page-01-0-내역-메인) |
 | ☐ | `DTB-2-PAGE-01-0` | 내역 검색_전체 | Page | 전체 | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionSearchScreen.tsx` |
-| ☐ | `DTB-2-PAGE-02-0` | 상세 내역_조회 | Page | 전체 | 예정 | 6장 | `[부족함]` | `screens/Folder/TransactionDetailScreen.tsx` — L53 주석: 수정 아이콘 노출만 하고 동작 안 함. 디자인 상태 '예정'인데 이미지는 6장 존재 → 어느 쪽이 최신인지 확인 필요 |
+| ☐ | `DTB-2-PAGE-02-0` | 상세 내역_조회 | Page | 전체 | 예정 | 6장 | `[구현]` | `screens/Folder/TransactionDetailScreen.tsx` — 4-A에서 수정 아이콘 연결 완료(아래 DTB-3-PAGE-02-0 참고). 디자인 상태 '예정'인데 이미지는 6장 존재 → 어느 쪽이 최신인지 확인 필요(미해결) |
 | ☐ | `DTB-2-PAGE-03-0` | 상세 내역_승인요청 | Page | 총무 | 완료 | **0장** | `[미구현]` | 상세 내역_승인요청 (승인/수정 버튼) — 탭 필터만 있고 승인 상세 화면 없음 |
 | ☐ | `DTB-2-SHEET-01-0` | 내역 필터링 | Bottom Sheet | 전체 | 완료 | 6장 | `[구현]` | `screens/Transactions/TransactionFilterSheet.tsx` |
 | ☐ | `DTB-3-MODAL-01-0` | 상세 내역_삭제 | Modal | 전체 | 완료 | 1장 | `[구현]` | `screens/Folder/TransactionDetailScreen.tsx L152` |
 | ☐ | `DTB-3-MODAL-02-0` | 증빙자료 삭제 | Modal | - | 완료 | **0장** | `[미구현]` | 증빙자료 삭제 모달 |
 | ☐ | `DTB-3-PAGE-01-0` | 증빙자료 상세 | Page | 전체 | 완료 | 1장 | `[미구현]` | 증빙자료 상세 조회 |
-| ☐ | `DTB-3-PAGE-02-0` | 상세 내역_수정 | Page | 전체 | 완료 | **0장** | `[부족함]` | `screens/Transactions/TransactionRegisterScreen.tsx` — transactionId 파라미터는 있으나 상세→수정 진입이 연결 안 됨. **연결 보류(조사 완료)**: `Folder/TransactionDetailScreen.tsx`는 `types/folder`(id 형식 `tx-N`)와 `types/transaction`(id 형식 `dtb-tx-N`) 두 소스를 병합 조회하는데, `TransactionRegisterScreen.tsx`의 프리필은 `types/transaction`(`getTransactionById`) 단일 소스만 봄. 폴더 출처 거래(id가 `tx-N` 등 folder 쪽 형식)의 id를 넘기면 두 store의 id 네임스페이스가 완전히 달라 프리필이 조용히 실패해 빈 폼이 뜨고, 그대로 제출하면 원본은 그대로 둔 채 별개의 새 DTB 거래가 생겨 사실상 데이터 유실처럼 보이는 버그가 남. DTB 출처 거래(id가 `dtb-tx-N`)만 연결하는 것은 안전하지만, 같은 화면·같은 아이콘이 출처에 따라 되다 안되다 하는 게 더 혼란스러워 이번엔 연결 안 함. DTB/폴더 거래 데이터소스 병합 완료 후 연결 |
+| ☐ | `DTB-3-PAGE-02-0` | 상세 내역_수정 | Page | 전체 | 완료 | **0장** | `[구현]` | `screens/Transactions/TransactionRegisterScreen.tsx` — **4-A(Entry API 연동)에서 연결 완료.** 막혔던 원인(`types/folder`의 `tx-N`과 `types/transaction`의 `dtb-tx-N` 두 소스가 서로 다른 id 네임스페이스라 프리필이 조용히 실패하던 문제)이 `types/folder`가 통째로 삭제되고 그 자리를 실 Entry API가 대체하며 해소됐다. 이제 `TransactionDetailScreen`/`TransactionRegisterScreen` 둘 다 id 모양(숫자=실 Entry, `dtb-tx-N`=DTB 전체 목록 목 데이터)으로 두 경로를 구분해 처리한다 — 실 Entry는 `entryService.getEntryDetail()`로 비동기 프리필, DTB 목은 기존 `getTransactionById()`로 동기 프리필. 코드로 프리필 매핑 확인함(아래 "보고" 참고), 실기기 재확인은 사용자 몫. |
 | ☐ | `DTB-3-SHEET-01-0` | 기간 선택 캘린더 | Bottom Sheet | 전체/총무 | 완료 | 10장 | `[구현]` | `screens/Transactions/TransactionFilterSheet.tsx` — 내부 중첩 BottomSheet(커스텀 기간용). `TransactionDateSheet.tsx`는 `ADD-2-SHEET-07-0`(일자 선택) 전용이라 무관함을 확인 |
 | ☐ | `DTB-3-SHEET-02-0` | 장부 복수 선택 | Bottom Sheet | 전체 | 완료 | 2장 | `[구현]` | `screens/Transactions/TransactionLedgerMultiSelectSheet.tsx` |
 | ☐ | `DTB-4-MODAL-01-0` | 상세 내역_수정 이탈 안내 | Modal | 전체 | 완료 | **0장** | `[구현]` | `screens/Transactions/TransactionRegisterScreen.tsx L480` |
@@ -109,11 +109,12 @@
 
 | ☐ | Screen ID | 화면명 | 형식 | 권한 | 디자인 | 이미지 | 상태 | 코드 위치 / 비고 |
 |---|---|---|---|---|---|---:|---|---|
-| ☐ | `DUE-1-PAGE-01-0` | 납부 관리 메인 | Page | 전체 | 완료 | **0장** | `[미구현]` |  |
-| ☐ | `DUE-2-PAGE-01-0` | 회비 생성 | Page | 총무 | 완료 | **0장** | `[미구현]` |  |
+| ☐ | `DUE-1-PAGE-01-0` | 납부 관리 메인 | Page | 전체 | 완료 | 1장(화면명세서 임베드) | `[구현]` | `screens/Dues/DuesScreen.tsx` — 6-A(조회 전용). §5-1 "이미지 없음" 표기는 부정확 — `화면명세서\DUE\납부관리_메인.png`에 시안이 임베드돼 있다(design-index.json이 스캔하는 폴더가 아니라 놓쳤던 것으로 보임) |
+| ☐ | `DUE-2-PAGE-01-0` | 회비 생성 | Page | 총무 | 완료 | 1장(화면명세서 임베드) | `[구현]` | `screens/Dues/DuesCreateScreen.tsx`(step='basic') — 6-B. "기간" 필수 입력을 "마감일" 단일 입력으로 축소함(§5-4, docs/api-gaps.md (A) "회비 시작일 필드 부재" 참고) |
+| ☐ | `DUE-3-PAGE-01-0` | 새 회비 생성_모임원 선택 | Page | 총무 | 완료 | 1장(화면명세서 임베드) | `[구현]` | `screens/Dues/DuesCreateScreen.tsx`(step='members') — 6-B. **IA(`billage-ia.md`) 원본 201개 화면 목록에 이 ID 자체가 없다** — 화면명세서에만 정의돼 있음(IA 누락으로 보임). 모임원 0명 빈 상태는 화면명세서 Case A에 명시돼 있어("모임원을 추가해보세요.") 그대로 구현함 |
 | ☐ | `DUE-2-PAGE-02-0` | 모임원 관리 | Page | 전체 | 완료 | 6장 | `[미구현]` |  |
-| ☐ | `DUE-2-PAGE-03-0` | 회비 항목 상세 / 회비 항목 상세 (미납부) | Page | 전체/총무 | 진행 | **0장** | `[미구현]` |  |
-| ☐ | `DUE-2-PAGE-03-1` | 회비 항복 상세 (납부완료) | Page | - | 완료 | **0장** | `[미구현]` |  |
+| ☐ | `DUE-2-PAGE-03-0` | 회비 항목 상세 / 회비 항목 상세 (미납부) | Page | 전체/총무 | 진행 | 1장(화면명세서 임베드) | `[구현]` | `screens/Dues/DuesDetailScreen.tsx` — 6-A(조회 전용). 진행 중 상태(기본 탭 '미납부'). §5-1 "이미지 없음" 표기는 부정확(위 DUE-1-PAGE-01-0과 동일 사유) |
+| ☐ | `DUE-2-PAGE-03-1` | 회비 항복 상세 (납부완료) — 실제로는 "마감된 회비"/"예정된 회비" 두 상태 변형 | Page | - | 완료 | 2장(화면명세서 임베드, 상태별 1장씩) | `[구현]` | `screens/Dues/DuesDetailScreen.tsx` — 같은 파일이 `status`/`paidCount`로 세 상태(진행중=DUE-2-PAGE-03-0, 마감된 회비, 예정된 회비)를 전부 분기 처리한다. IA 페이지명 "회비 항복 상세 (납부완료)"는 오타로 보임(정확히는 "마감된 회비"/"예정된 회비" 두 변형) — 명세서 파일명·내용 모두 이 두 상태를 가리키지 "납부완료"라는 별도 상태는 없다 |
 | ☐ | `DUE-3-MODAL-01-0` | 회비 삭제 | Modal | 총무 | 완료 | **0장** | `[미구현]` |  |
 | ☐ | `DUE-3-MODAL-02-0` | 회비 마감 | Modal | 총무 | 예정 | **0장** | `[미구현]` |  |
 | ☐ | `DUE-3-PAGE-02-0` | 모임원 선택 | Page | 총무 | 완료 | **0장** | `[미구현]` |  |
@@ -176,7 +177,7 @@
 | ☐ | `ETC-3-SNACKBAR-01-0` | 초대 코드 복사완료 | Snackbar | - | 완료 | 1장 | `[구현]` | `screens/GroupManager/GroupManagerScreen.tsx` — 초대 코드 복사 완료 |
 | ☐ | `ETC-4-MODAL-01-0` | 일반 전환하기 | Modal | 총무 | 완료 | 1장 | `[구현]` | `screens/GroupManager/MemberProfileSheet.tsx L205` — 일반 전환하기 |
 | ☐ | `ETC-4-MODAL-02-0` | 총무 전환하기 | Modal | 총무 | 완료 | 1장 | `[구현]` | `screens/GroupManager/MemberProfileSheet.tsx L196` — 총무 전환하기 |
-| ☐ | `ETC-4-MODAL-03-0` | 모임 내보내기 | Modal | 총무 | 완료 | 1장 | `[구현]` | `screens/GroupManager/MemberProfileSheet.tsx L214` — 모임 내보내기 |
+| ☐ | `ETC-4-MODAL-03-0` | 모임 내보내기 | Modal | 총무 | 완료 | 1장 | `[구현→보류]` | 2단계(GroupMembership)에서 API 미제공으로 보류 — `GroupMembership` 명세에 총무가 남을 내보내는 엔드포인트가 없음(`docs/api-gaps.md` (A)). `MemberProfileSheet.tsx` 상단 주석에 남겨두고 메뉴 항목 자체를 렌더링하지 않음. 엔드포인트 생기면 되살릴 것 |
 | ☐ | `ETC-4-MODAL-04-0` | 로그아웃 | Modal | 전체 | 완료 | 1장 | `[미구현]` |  |
 | ☐ | `ETC-4-PAGE-01-0` | 새 모임 생성 | Page | 전체 | 완료 | 3장 | `[구현]` | `screens/GroupManager/GroupCreateScreen.tsx` |
 | ☐ | `ETC-4-PAGE-02-0` | 이미지 선택 | Page | 전체 | 완료 | 4장 | `[미구현]` |  |
@@ -196,7 +197,7 @@
 | ☐ | `ETC-5-PAGE-01-0` | 보고서_장부 선택 | Page | 총무 | 완료 | 2장 | `[미구현]` |  |
 | ☐ | `ETC-5-PAGE-02-0` | 보고서_내역 상세 | Page | 전체/총무 | 완료 | 7장 | `[미구현]` |  |
 | ☐ | `ETC-5-SNACKBAR-01-0` | 권한 변경 완료 | Snackbar | - | 예정 | 2장 | `[확인필요]` | `screens/GroupManager/GroupManagerScreen.tsx` — 권한 변경 완료 |
-| ☐ | `ETC-5-SNACKBAR-02-0` | 모임 내보내기 완료 | Snackbar | - | 예정 | 1장 | `[확인필요]` | `screens/GroupManager/GroupManagerScreen.tsx` — 모임 내보내기 완료 |
+| ☐ | `ETC-5-SNACKBAR-02-0` | 모임 내보내기 완료 | Snackbar | - | 예정 | 1장 | `[보류]` | `ETC-4-MODAL-03-0`(모임 내보내기) 자체가 API 미제공으로 보류돼 이 스낵바도 같이 보류 |
 | ☐ | `ETC-5-SNACKBAR-03-0` | 모임 참여 완료 | Snackbar | - | 예정 | 1장 | `[미구현]` |  |
 | ☐ | `ETC-5-SNACKBAR-04-0` | 모임 생성 완료 | Snackbar | - | 예정 | 1장 | `[구현]` | `screens/GroupManager/GroupCreateScreen.tsx L78` — 모임 생성 완료 |
 | ☐ | `ETC-5-SNACKBAR-05-0` | 모임 전환 완료 | Snackbar | - | 예정 | **0장** | `[미구현]` |  |
@@ -217,7 +218,7 @@
 | ☐ | `ADD-2-SHEET-05-0` | 증빙자료 등록 | Bottom Sheet | - | 완료 | 2장 | `[구현]` | `screens/Transactions/TransactionAttachMenuSheet.tsx` — 상세: [design-diff.md#add-2-sheet-05-0-증빙자료-등록](design-diff.md#add-2-sheet-05-0-증빙자료-등록) |
 | ☐ | `ADD-2-SHEET-06-0` | 금액 입력 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionAmountSheet.tsx` — 상세: [design-diff.md#add-2-sheet-06-0-금액-입력](design-diff.md#add-2-sheet-06-0-금액-입력) |
 | ☐ | `ADD-2-SHEET-07-0` | 일자 선택 캘린더 | Bottom Sheet | - | 완료 | 4장 | `[구현]` | `screens/Transactions/TransactionDateSheet.tsx` — 실제 구현 정상, 디자인 원본 파일이 더미 데이터(요일 헤더 전부 "일", 날짜 셀 전부 "0")라 원본 재확보 필요. 상세: [design-diff.md#add-2-sheet-07-0-일자-선택-캘린더](design-diff.md#add-2-sheet-07-0-일자-선택-캘린더) |
-| ☐ | `ADD-2-SNACKBAR-01-0` | 내역 추가 완료 | Snackbar | - | 완료 | 1장 | `[구현]` | `screens/Transactions/TransactionsScreen.tsx L237` — `addedTransactionId` 파라미터를 받아 표시 (`TransactionRegisterScreen.tsx` 자체에는 없음). 상세: [design-diff.md#add-2-snackbar-01-0-내역-추가-완료](design-diff.md#add-2-snackbar-01-0-내역-추가-완료) (스낵바 타이밍 못 맞춰 재캡처 필요, 추가 동작 자체는 확인됨) |
+| ☐ | `ADD-2-SNACKBAR-01-0` | 내역 추가 완료 | Snackbar | - | 완료 | 1장 | `[구현]` | 4-A부터 실 등록(신규 내역은 전부 실 API로 감)은 `TransactionRegisterScreen.tsx` 자체가 완료 즉시 스낵바를 띄운다(승인 상태에 따라 문구 2종 — 0-2 참고, `SNACKBAR_TRANSACTION_ADDED`/`_PENDING`). `screens/Transactions/TransactionsScreen.tsx L237`의 `addedTransactionId` 경유 스낵바는 DTB 목 데이터 수정(`editMock`) 경로에서만 여전히 쓰인다. 상세: [design-diff.md#add-2-snackbar-01-0-내역-추가-완료](design-diff.md#add-2-snackbar-01-0-내역-추가-완료) (재캡처는 사용자 몫) |
 | ☐ | `ADD-3-PAGE-01-0` | 영수증 스캔 | Page | - | 완료 | 2장 | `[구현]` | `screens/Transactions/ReceiptScanningView.tsx` — 상세: [design-diff.md#add-3-page-01-0-영수증-스캔](design-diff.md#add-3-page-01-0-영수증-스캔) (Mock이라 실제 카메라 프리뷰 없음, 기존에 알려진 제약) |
 | ☐ | `ADD-3-PAGE-02-0` | 사진 촬영 | Page | - | 완료 | **0장** | `[부족함]` | `screens/Transactions/MockCameraView.tsx` — Mock 구현. 이미지 0장 — 디자인 확보 필요. 상세: [design-diff.md#add-3-page-02-0-사진-촬영-디자인-없음](design-diff.md#add-3-page-02-0-사진-촬영-디자인-없음) |
 | ☐ | `ADD-4-PAGE-01-0` | 영수증 스캔 성공 | Page | - | 완료 | 1장 | `[확인필요]` | `screens/Transactions/TransactionRegisterScreen.tsx` — 스캔 성공 → 필드 반영 (utils/mockOcr.ts 사용중). 상세: [design-diff.md#add-4-page-01-0-영수증-스캔-성공](design-diff.md#add-4-page-01-0-영수증-스캔-성공) (금액 자동 반영 타이밍이 디자인과 달라 기획 확인 필요) |
@@ -323,7 +324,9 @@ IA상 총무 전용 61개 / 일반 전용 3개다. **총무 계정과 일반 계
 
 DUE(회비) 14개가 대부분이다. 회비 도메인은 IA 28개 중 절반이 이미지 없이 정의만 있는 상태.
 
-`DSH-2-PAGE-03-0` `DSH-2-PAGE-05-0` `DTB-2-PAGE-03-0` `DTB-3-MODAL-02-0` `DTB-3-PAGE-02-0` `DTB-4-MODAL-01-0` `FDR-3-MODAL-05-0` `FDR-3-PAGE-03-0` `DUE-1-PAGE-01-0` `DUE-2-PAGE-01-0` `DUE-2-PAGE-03-0` `DUE-2-PAGE-03-1` `DUE-3-MODAL-01-0` `DUE-3-MODAL-02-0` `DUE-3-PAGE-02-0` `DUE-3-PAGE-04-0` `DUE-3-PAGE-06-0` `DUE-3-SNACKBAR-01-0` `DUE-3-SNACKBAR-02-0` `DUE-4-MODAL-02-0` `DUE-4-SNACKBAR-01-0` `DUE-4-SNACKBAR-02-0` `DUE-4-SNACKBAR-03-0` `DUE-4-SNACKBAR-04-0` `ETC-5-SNACKBAR-05-0` `ETC-5-SNACKBAR-06-0` `ADD-3-PAGE-02-0` `ADD-4-PAGE-02-0`
+**정정(6-A, 2026-09-01)**: 아래 목록 중 `DUE-1-PAGE-01-0`/`DUE-2-PAGE-03-0`/`DUE-2-PAGE-03-1` 3개는 실제로는 이미지가 있다 — `design-index.json`이 스캔하는 폴더가 아니라 `화면명세서\DUE\` 안의 스펙 시트에 시안이 임베드돼 있어서 이 조사 때 놓쳤다. 나머지 DUE 화면(6-B/6-C 대상)도 같은 폴더를 다시 확인하면 이미지가 있을 가능성이 있다 — 이번엔 이 3개만 실제로 열어봤다.
+
+`DSH-2-PAGE-03-0` `DSH-2-PAGE-05-0` `DTB-2-PAGE-03-0` `DTB-3-MODAL-02-0` `DTB-3-PAGE-02-0` `DTB-4-MODAL-01-0` `FDR-3-MODAL-05-0` `FDR-3-PAGE-03-0` ~~`DUE-1-PAGE-01-0`~~ ~~`DUE-2-PAGE-01-0`~~ ~~`DUE-2-PAGE-03-0`~~ ~~`DUE-2-PAGE-03-1`~~ `DUE-3-MODAL-01-0` `DUE-3-MODAL-02-0` `DUE-3-PAGE-02-0` `DUE-3-PAGE-04-0` `DUE-3-PAGE-06-0` `DUE-3-SNACKBAR-01-0` `DUE-3-SNACKBAR-02-0` `DUE-4-MODAL-02-0` `DUE-4-SNACKBAR-01-0` `DUE-4-SNACKBAR-02-0` `DUE-4-SNACKBAR-03-0` `DUE-4-SNACKBAR-04-0` `ETC-5-SNACKBAR-05-0` `ETC-5-SNACKBAR-06-0` `ADD-3-PAGE-02-0` `ADD-4-PAGE-02-0`
 
 ### 5-2. 이미지는 있는데 IA에 없는 Screen ID — 25개
 
@@ -344,10 +347,12 @@ FDR이 대부분이다. IA(V0.4)가 최신 디자인을 못 따라온 것으로 
 
 - **`ETC-2-PAGE-02-0`(모임 관리)**: 대응 코드가 없음을 확인했다. 더보기 메인의 "모임 관리" ToolsMenu 항목은 중간 화면 없이 `GroupManagerScreen`(`ETC-2-PAGE-03-0`, 실제 페이지 타이틀은 "모임 관리자")으로 바로 이동한다. IA가 이 둘을 별개 화면으로 정의한 것인지, 아니면 같은 화면을 가리키는 오기인지 확인이 필요하다.
 - **`FDR-3-SHEET-01-0`(장부 예산 입력) / `FDR-3-SHEET-02-0`(예산 설정)**: 코드상 `FolderBudgetListScreen.tsx`에 예산 입력용 BottomSheet가 하나뿐이라 두 ID를 같은 시트로 판단해 매핑했으나 확신이 낮다. 두 ID가 실제로 다른 시트(예: 최초 입력 vs 수정)로 구분되어야 하는지 기획 확인이 필요하다.
+- **시안 없음 — 로딩/에러/빈 목록 상태**(`ETC-2-PAGE-01-0`, `ETC-4-PAGE-01-0`, `ETC-4-SHEET-01-0`, `ETC-1-PAGE-01-0`): API 연동 1단계(Group)에서 확인. 목 데이터 시절엔 항상 즉시 채워진 상태만 존재해 화면 시안도 그 상태만 있다. 네트워크 로딩 중/실패/모임이 아예 없는 상태의 디자인이 없어 임의로 최소 형태(중앙 정렬 텍스트 + 재시도 버튼)로 통일해 구현했다 — 표준 패턴은 `api-integration-plan.md` "표준 패턴" 절 참고. 다른 12개 도메인도 같은 패턴을 쓸 예정이라, 스피너/일러스트 사용 여부를 기획팀이 정해주면 한 번에 교체 가능하다.
 - **`ADD-2-SHEET-07-0`(일자 선택 캘린더)**: 디자인 원본 파일이 더미 데이터다(요일 헤더 7칸 전부 "일", 날짜 셀 전부 "0"). 물어볼 것: **이 화면의 정상 디자인 원본 파일을 다시 받을 수 있는가** — 지금 파일로는 요일 헤더 구성이나 날짜 그리드 스타일을 대조할 수 없다.
 - **`ADD-4-SNACKBAR-01-0`(이미지 첨부 제한)**: 디자인 이미지 헤더 문구가 "4 선택"인데 실제 체크된 사진은 9~10장으로 안 맞는다(실제 구현은 숫자가 정확히 일치해 정상). 물어볼 것: **디자인 쪽 "4 선택" 표기가 목업 작성 시 오기인지, 아니면 다른 상태(4장만 선택된 상태)를 의도적으로 보여준 것인지** — 오기라면 원본만 정정하면 되고 실제 구현은 손댈 필요 없다.
 - **`DTB-3-MODAL-01-0`(상세 내역_삭제)**: 디자인 이미지를 열어보면 삭제 확인 다이얼로그가 아니라 "상세 내역" 타이틀에 본문이 빈 화면 + "등록하기" 버튼만 있다. 물어볼 것: **이 파일이 정말 `DTB-3-MODAL-01-0`(상세 내역 삭제 확인 모달)이 맞는지, 아니면 다른 Screen ID의 파일이 잘못 파일링된 것인지** — 파일명 자체는 맞게 붙어 있어서 대조 코드가 아니라 원본 배치 실수를 의심할 근거가 있다.
 - **`ADD-4-PAGE-01-0`(영수증 스캔 성공)**: 실제 구현은 스캔 성공 즉시 금액 필드가 자동으로 채워지는데(예: "232,000원"), 디자인 이미지는 이 시점에서도 금액이 placeholder("금액을 입력해주세요")로 비어 있다. 물어볼 것: **스캔 직후 금액을 즉시 자동 반영하는 게 의도인지, 아니면 사용자가 한 번 더 확인/승인하는 별도 단계가 있어야 하는지** — 현재 구현(즉시 반영)이 기획 의도와 다르면 `TransactionRegisterScreen.tsx`의 스캔 성공 핸들러를 고쳐야 한다.
+- **`DUE-2-PAGE-01-0`(회비 생성) "기간" 필드**: 화면명세서가 시작일~마감일 캘린더 범위 선택을 필수 입력으로 요구하는데, `POST /groups/{groupId}/dues`엔 마감일(`dueDate`) 하나만 받는 필드가 있다(docs/api-gaps.md (A) "회비 시작일 필드 부재"). 구현은 임의로 "마감일" 단일 입력으로 줄였다(`DuesCreateScreen.tsx`) — 물어볼 것: **회비 납부 시작일을 실제로 서버에 저장해야 하는 값인지, 아니면 화면명세서가 완료 안 된 초안이라 마감일만으로 충분한지** — 시작일이 진짜 필요하면 API에 필드 추가가 선행돼야 한다.
 - **D-2에서 "상태 불명"으로 남은 16개** (`DTB-2-SHEET-01-0`, `DTB-3-SHEET-01-0`, `DTB-2-PAGE-02-0`, `DTB-3-MODAL-01-0`[위 항목과 동일], `FDR-2-SHEET-01-0`, `FDR-2-PAGE-02-0`, `FDR-4-SNACKBAR-03-0`, `FDR-4-SNACKBAR-02-0`, `ETC-3-MODAL-01-0`, `ETC-3-MODAL-01-1`, `ADD-1-PAGE-01-0`, `ADD-2-SHEET-07-0`[위 항목과 동일], `ADD-2-SHEET-01-0`, `ADD-2-SHEET-02-0`, `ADD-2-SHEET-03-0`, `ADD-2-SHEET-04-0`): 같은 Screen ID에 디자인 후보 이미지가 2~9장씩 걸려 있는데(대부분 서로 다른 폴더에 중복 배치돼 있어) 어느 게 이 ID의 "진짜" 대표 이미지인지, 혹은 정말 여러 상태(빈 값/입력중/에러 등) 변형인지 사전에 못 정했다. 물어볼 것: **각 Screen ID의 디자인 후보 파일들이 상태 변형인지 단순 중복 배치인지, 상태 변형이라면 어느 파일이 화면의 "기본" 상태를 대표하는지** — `scripts/design-index.json`의 해당 항목에서 후보 경로 전부 확인 가능.
 
 ## 6. 권장 순서
