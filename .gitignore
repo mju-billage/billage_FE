@@ -79,3 +79,11 @@ yarn-error.log
 
 # local-only dev notes (not shared via git)
 DEV_NOTES.md
+
+# design ↔ implementation screenshot captures (docs/shot-routes.md)
+/shots/*
+!/shots/.gitkeep
+
+# 로컬 PC 전용 디자인 원본 경로가 절대경로로 박혀 있어 공유 저장소에 안 어울림
+# (scripts/build-design-index.js로 각자 로컬에서 재생성)
+/scripts/design-index.json

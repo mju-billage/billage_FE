@@ -1,4 +1,5 @@
 import { NavigationContainer } from '@react-navigation/native';
+import type { NavigatorScreenParams } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import SplashScreen from '../screens/SplashScreen';
@@ -15,6 +16,7 @@ import SignupCompleteScreen from '../screens/Signup/SignupCompleteScreen';
 import PasswordResetScreen from '../screens/PasswordReset/PasswordResetScreen';
 import PasswordResetSentScreen from '../screens/PasswordReset/PasswordResetSentScreen';
 import MainTabNavigator from './MainTabNavigator';
+import type { MainTabParamList } from './MainTabNavigator';
 import NotificationScreen from '../screens/Notification/NotificationScreen';
 import CalendarScreen from '../screens/Calendar/CalendarScreen';
 import FolderSelectMoveScreen from '../screens/Folder/FolderSelectMoveScreen';
@@ -24,6 +26,13 @@ import LedgerCreateScreen from '../screens/Folder/LedgerCreateScreen';
 import LedgerDetailScreen from '../screens/Folder/LedgerDetailScreen';
 import LedgerSearchScreen from '../screens/Folder/LedgerSearchScreen';
 import TransactionDetailScreen from '../screens/Folder/TransactionDetailScreen';
+import TransactionSearchScreen from '../screens/Transactions/TransactionSearchScreen';
+import TransactionRegisterScreen from '../screens/Transactions/TransactionRegisterScreen';
+import AllGroupsScreen from '../screens/GroupManager/AllGroupsScreen';
+import GroupCreateScreen from '../screens/GroupManager/GroupCreateScreen';
+import GroupManagerScreen from '../screens/GroupManager/GroupManagerScreen';
+import DuesDetailScreen from '../screens/Dues/DuesDetailScreen';
+import DuesCreateScreen from '../screens/Dues/DuesCreateScreen';
 import { SocialProfile } from '../types/social';
 import * as authService from '../services/authService';
 
@@ -39,12 +48,12 @@ export type RootStackParamList = {
   SignupComplete: undefined;
   PasswordReset: undefined;
   PasswordResetSent: { email: string };
-  Main: undefined;
+  Main: NavigatorScreenParams<MainTabParamList> | undefined;
   Notification: undefined;
   Calendar: undefined;
   FolderSelectMove: { folderId: string | null };
   FolderMoveDestination: {
-    itemIds: string[];
+    items: { id: string; kind: 'folder' | 'ledger' }[];
     sourceFolderId: string | null;
     destinationFolderId: string | null;
   };
@@ -53,6 +62,13 @@ export type RootStackParamList = {
   LedgerDetail: { ledgerId: string };
   LedgerSearch: { ledgerId: string };
   TransactionDetail: { transactionId: string };
+  TransactionSearch: undefined;
+  TransactionRegister: { transactionId?: string };
+  AllGroups: undefined;
+  GroupCreate: undefined;
+  GroupManager: undefined;
+  DuesDetail: { duesId: string };
+  DuesCreate: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -139,6 +155,19 @@ function RootNavigator() {
             name="TransactionDetail"
             component={TransactionDetailScreen}
           />
+          <Stack.Screen
+            name="TransactionSearch"
+            component={TransactionSearchScreen}
+          />
+          <Stack.Screen
+            name="TransactionRegister"
+            component={TransactionRegisterScreen}
+          />
+          <Stack.Screen name="AllGroups" component={AllGroupsScreen} />
+          <Stack.Screen name="GroupCreate" component={GroupCreateScreen} />
+          <Stack.Screen name="GroupManager" component={GroupManagerScreen} />
+          <Stack.Screen name="DuesDetail" component={DuesDetailScreen} />
+          <Stack.Screen name="DuesCreate" component={DuesCreateScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
