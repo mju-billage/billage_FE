@@ -4,6 +4,7 @@ import {
   FOREGROUND_INVERSE,
   GREY_700,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const CLOSE_ICON = require('../../../assets/icons/action/Close.png');
 
@@ -73,12 +74,11 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   title: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_INVERSE,
   },
   description: {
-    fontSize: 12,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_INACTIVE,
   },
   actions: {
@@ -95,8 +95,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   actionLabel: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.button,
     color: FOREGROUND_INVERSE,
   },
   closeIcon: {

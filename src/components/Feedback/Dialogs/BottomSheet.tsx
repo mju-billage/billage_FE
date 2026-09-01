@@ -2,6 +2,7 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import {
   BORDER_NEUTRAL_BOLD,
   FILL_NEUTRAL_SUBTLE,
+  OVERLAY_SCRIM,
 } from '../../../constants/colors';
 
 type BottomSheetProps = {
@@ -31,7 +32,7 @@ function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: OVERLAY_SCRIM,
   },
   sheet: {
     backgroundColor: FILL_NEUTRAL_SUBTLE,

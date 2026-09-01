@@ -1,9 +1,11 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import CheckBox from '../../Input/Control/CheckBox';
+import { formatWon } from '../../../utils/currency';
 import {
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_DISABLED,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type MemberListItemProps = {
   name: string;
@@ -48,7 +50,7 @@ function MemberListItem({
         </Text>
       </View>
       {showAmount && amount != null && (
-        <Text style={styles.amount}>{amount.toLocaleString()}원</Text>
+        <Text style={styles.amount}>{formatWon(amount)}</Text>
       )}
     </Pressable>
   );
@@ -60,6 +62,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 12,
+    borderRadius: 8,
   },
   rowPressed: {
     backgroundColor: FILL_NEUTRAL_NORMAL,
@@ -73,14 +76,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   name: {
-    fontSize: 14,
+    ...TYPOGRAPHY.body2,
   },
   nameDisabled: {
     color: FOREGROUND_DISABLED,
   },
   amount: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
 });
 

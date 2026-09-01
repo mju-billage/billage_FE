@@ -4,6 +4,7 @@ import {
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const CLOSE_ICON = require('../../../assets/icons/action/Close.png');
 
@@ -39,7 +40,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   label: {
-    fontSize: 13,
+    ...TYPOGRAPHY.chips,
     color: FOREGROUND_NEUTRAL_NORMAL,
   },
   icon: {

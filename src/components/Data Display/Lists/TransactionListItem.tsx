@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Badge from '../Badge/Badge';
 import { CALENDAR_APPROVAL_BADGE_LABEL } from '../../../constants/calendarScreenText';
+import { formatWon } from '../../../utils/currency';
 import {
-  BACKGROUND_PRIMARY,
+  FILL_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const RECEIPT_ICON = require('../../../assets/icons/content/Report.png');
 
@@ -57,7 +59,7 @@ function TransactionListItem({
           <Image source={RECEIPT_ICON} style={styles.receiptIcon} />
         ) : null}
         <Text style={[styles.amount, isIncome && styles.amountIncome]}>
-          {amount.toLocaleString()}원
+          {formatWon(amount)}
         </Text>
       </View>
     </Pressable>
@@ -69,24 +71,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    borderRadius: 16,
+    borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 12,
     marginHorizontal: -12,
   },
   containerActive: {
-    backgroundColor: BACKGROUND_PRIMARY,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
   },
   leftColumn: {
     gap: 4,
   },
   groupName: {
-    fontSize: 11,
+    ...TYPOGRAPHY.caption,
     color: FOREGROUND_NEUTRAL_NORMAL,
   },
   itemName: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
   rightColumn: {
     alignItems: 'flex-end',
@@ -98,8 +99,7 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
   amount: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
   amountIncome: {
     color: FOREGROUND_SECONDARY,

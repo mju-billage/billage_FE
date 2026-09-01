@@ -8,6 +8,7 @@ import {
   FOREGROUND_DISABLED,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type VerificationFieldProps = {
   value: string;
@@ -90,8 +91,7 @@ const styles = StyleSheet.create({
     backgroundColor: FILL_DISABLED,
   },
   digit: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h3,
     color: FOREGROUND_SECONDARY,
   },
   digitDisabled: {

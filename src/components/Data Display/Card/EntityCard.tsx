@@ -1,14 +1,14 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import Avatar from '../Avatar/Avatar';
+import { Image, StyleSheet, Text, View } from 'react-native';
+import Avatar, { getSquircleRadius } from '../Avatar/Avatar';
 import Badge from '../Badge/Badge';
 import Chip from '../Chips/Chip';
+import CardBase from './CardBase';
 import {
-  BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_NORMAL,
-  FILL_NEUTRAL_SUBTLE,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const PLUS_ICON = require('../../../assets/icons/action/Plus.png');
 
@@ -39,23 +39,25 @@ type EntityCardProps =
 function EntityCard(props: EntityCardProps) {
   if (props.type === 'newGroup') {
     return (
-      <Pressable
-        style={[styles.card, styles.newGroupCard]}
+      <CardBase
+        variant="bordered"
         onPress={props.onPress}
+        style={styles.newGroupCard}
       >
         <View style={styles.plusAvatar}>
           <Image source={PLUS_ICON} style={styles.plusIcon} />
         </View>
         <Text style={styles.newGroupLabel}>새로운 모임 추가하기</Text>
-      </Pressable>
+      </CardBase>
     );
   }
 
   if (props.type === 'group') {
     return (
-      <Pressable
-        style={[styles.card, styles.groupCard]}
+      <CardBase
+        variant="bordered"
         onPress={props.onPress}
+        style={styles.groupCard}
       >
         <View>
           <Text style={styles.groupName}>{props.groupName}</Text>
@@ -63,15 +65,15 @@ function EntityCard(props: EntityCardProps) {
         </View>
         {props.label && (
           <View>
-            <Badge label={props.label} status="positive" />
+            <Badge label={props.label} status="neutral" />
           </View>
         )}
-      </Pressable>
+      </CardBase>
     );
   }
 
   return (
-    <View style={styles.card}>
+    <CardBase variant="bordered">
       <View style={styles.profileRow}>
         {props.avatarUri ? (
           <Avatar type="image" imageUri={props.avatarUri} />
@@ -90,18 +92,11 @@ function EntityCard(props: EntityCardProps) {
           )}
         </View>
       </View>
-    </View>
+    </CardBase>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: FILL_NEUTRAL_SUBTLE,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: BORDER_NEUTRAL_NORMAL,
-    padding: 16,
-  },
   newGroupCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -111,7 +106,7 @@ const styles = StyleSheet.create({
   plusAvatar: {
     width: 36,
     height: 36,
-    borderRadius: 36 * (7 / 24),
+    borderRadius: getSquircleRadius(36),
     backgroundColor: FILL_NEUTRAL_NORMAL,
     alignItems: 'center',
     justifyContent: 'center',
@@ -122,8 +117,7 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_NEUTRAL_NORMAL,
   },
   newGroupLabel: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_NEUTRAL_NORMAL,
   },
   groupCard: {
@@ -137,12 +131,11 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   groupName: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
   memberCount: {
+    ...TYPOGRAPHY.body3,
     marginTop: 6,
-    fontSize: 12,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   profileRow: {
@@ -154,7 +147,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   email: {
-    fontSize: 12,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
 });

@@ -11,6 +11,7 @@ import {
   FOREGROUND_INACTIVE,
   NAVY_800,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 export type BottomNavigationItem = {
   key: string;
@@ -56,8 +57,6 @@ const styles = StyleSheet.create({
     backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    marginHorizontal: 16,
-    marginBottom: 16,
     paddingVertical: 12,
     paddingHorizontal: 8,
     paddingBottom: 24,
@@ -81,7 +80,7 @@ const styles = StyleSheet.create({
     tintColor: NAVY_800,
   },
   label: {
-    fontSize: 11,
+    ...TYPOGRAPHY.caption,
     color: FOREGROUND_INACTIVE,
   },
   labelSelected: {

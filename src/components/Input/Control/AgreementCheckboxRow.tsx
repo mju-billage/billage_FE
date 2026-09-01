@@ -5,6 +5,7 @@ import {
   AGREEMENT_TAG_REQUIRED,
   AGREEMENT_TAG_OPTIONAL,
 } from '../../../constants/commonText';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const CHEVRON_RIGHT_ICON = require('../../../assets/icons/nav/Chevron Right.png');
 
@@ -62,11 +63,10 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   label: {
-    fontSize: 15,
+    ...TYPOGRAPHY.body2,
   },
   labelEmphasized: {
-    fontWeight: 'bold',
-    fontSize: 16,
+    ...TYPOGRAPHY.subtitle1,
   },
   tag: {
     color: FOREGROUND_SECONDARY,

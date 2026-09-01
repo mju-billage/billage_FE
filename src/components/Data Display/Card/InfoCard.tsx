@@ -1,12 +1,13 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Chip from '../Chips/Chip';
+import CardBase from './CardBase';
 import {
-  BORDER_NEUTRAL_NORMAL,
   FEEDBACK_NEGATIVE_BOLD,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const CHEVRON_RIGHT_ICON = require('../../../assets/icons/nav/Chevron Right.png');
 
@@ -35,7 +36,7 @@ function InfoCard({
   memoPlaceholder = '메모를 입력해주세요.',
 }: InfoCardProps) {
   return (
-    <View style={styles.card}>
+    <CardBase variant="dashed">
       {fields.map(field => (
         <View key={field.label} style={styles.fieldColumn}>
           <Text style={styles.fieldLabel}>
@@ -83,35 +84,29 @@ function InfoCard({
           </Text>
         </View>
       )}
-    </View>
+    </CardBase>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: BORDER_NEUTRAL_NORMAL,
-    borderRadius: 12,
-    padding: 16,
-  },
   fieldColumn: {
     gap: 4,
     paddingVertical: 6,
   },
   fieldLabel: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   required: {
     color: FEEDBACK_NEGATIVE_BOLD,
   },
   fieldValue: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
+  // subtitle3(SemiBold)는 별도 fontFamily라 fontWeight 오버레이가 안 먹혀서
+  // 빈 값 상태는 스타일 객체 자체를 Regular 계열로 통째로 바꾼다.
   fieldValueEmpty: {
-    fontWeight: 'normal',
+    ...TYPOGRAPHY.body2,
     color: FOREGROUND_DISABLED,
   },
   tagSection: {
@@ -132,8 +127,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  // 12px+Bold 조합은 정식 스타일에 없어 body3+bold를 예외로 채택.
   addTagText: {
-    fontSize: 12,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_SECONDARY,
     fontWeight: 'bold',
   },
@@ -147,12 +143,12 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   memoText: {
+    ...TYPOGRAPHY.body3,
     marginTop: 4,
-    fontSize: 13,
   },
   memoPlaceholder: {
+    ...TYPOGRAPHY.body3,
     marginTop: 4,
-    fontSize: 13,
     color: FOREGROUND_DISABLED,
   },
 });

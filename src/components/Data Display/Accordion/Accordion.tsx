@@ -4,6 +4,7 @@ import {
   BORDER_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_NORMAL,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const PLUS_ICON = require('../../../assets/icons/action/Plus.png');
 const MINUS_ICON = require('../../../assets/icons/action/Minus.png');
@@ -53,8 +54,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
   },
   title: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
   icon: {
     width: 16,
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   item: {
-    fontSize: 14,
+    ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_NORMAL,
   },
 });

@@ -1,10 +1,9 @@
 import { StyleSheet, Text, View } from 'react-native';
-import {
-  BORDER_NEUTRAL_NORMAL,
-  FEEDBACK_POSITIVE_BOLD,
-  FILL_NEUTRAL_SUBTLE,
-  FOREGROUND_NEUTRAL_SUBTLE,
-} from '../../../constants/colors';
+import CardBase from './CardBase';
+import Divider from '../Divider/Divider';
+import { formatWon } from '../../../utils/currency';
+import { FEEDBACK_POSITIVE_BOLD, FOREGROUND_NEUTRAL_SUBTLE } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type AmountCardProps =
   | { type: 'incomeExpense'; income: number; expense: number }
@@ -18,7 +17,7 @@ function AmountCard(props: AmountCardProps) {
   const total = getTotal(props);
 
   return (
-    <View style={styles.card}>
+    <CardBase>
       {rows.map(row => (
         <View key={row.label} style={styles.row}>
           <Text style={styles.label}>{row.label}</Text>
@@ -27,17 +26,17 @@ function AmountCard(props: AmountCardProps) {
           </Text>
         </View>
       ))}
-      {props.type === 'incomeExpense' && <View style={styles.divider} />}
+      {props.type === 'incomeExpense' && (
+        <View style={styles.dividerWrapper}>
+          <Divider variant="dashed" />
+        </View>
+      )}
       <View style={styles.row}>
         <Text style={styles.label}>{total.label}</Text>
         <Text style={styles.value}>{total.value}</Text>
       </View>
-    </View>
+    </CardBase>
   );
-}
-
-function formatWon(amount: number) {
-  return `${amount.toLocaleString()}원`;
 }
 
 function getRows(props: AmountCardProps) {
@@ -88,31 +87,23 @@ function getTotal(props: AmountCardProps) {
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: FILL_NEUTRAL_SUBTLE,
-    borderRadius: 12,
-    padding: 16,
-  },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 6,
   },
   label: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   value: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     fontWeight: 'bold',
   },
   valuePositive: {
     color: FEEDBACK_POSITIVE_BOLD,
   },
-  divider: {
-    borderTopWidth: 1,
-    borderStyle: 'dashed',
-    borderTopColor: BORDER_NEUTRAL_NORMAL,
+  dividerWrapper: {
     marginVertical: 8,
   },
 });

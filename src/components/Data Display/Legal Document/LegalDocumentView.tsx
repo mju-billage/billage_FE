@@ -1,6 +1,8 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import BackButton from '../../Navigation/App bar/BackButton';
+import { ScrollView, StyleSheet, Text } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import AppBar from '../../Navigation/App bar/AppBar';
 import { FOREGROUND_NEUTRAL_NORMAL } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type LegalDocumentViewProps = {
   title: string;
@@ -15,41 +17,25 @@ function LegalDocumentView({
   onPressBack,
 }: LegalDocumentViewProps) {
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <BackButton onPress={onPressBack} />
-        <Text style={styles.title}>{title}</Text>
-      </View>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <AppBar type="sub" title={title} onBackPress={onPressBack} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.body}>{bodyText}</Text>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 8,
   },
   scrollContent: {
     paddingHorizontal: 24,
     paddingBottom: 40,
   },
   body: {
-    fontSize: 13,
-    lineHeight: 20,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_NORMAL,
   },
 });

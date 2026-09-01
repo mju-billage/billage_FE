@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { GREY_100, GREY_600 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type TooltipPosition = 'top' | 'bottom' | 'left' | 'right';
 
@@ -85,7 +86,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   text: {
-    fontSize: 10,
+    ...TYPOGRAPHY.caption,
     color: GREY_600,
   },
   top: {

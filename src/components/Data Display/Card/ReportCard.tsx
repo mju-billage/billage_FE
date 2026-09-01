@@ -1,12 +1,15 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import Divider from '../Divider/Divider';
 import FolderTabShape from './FolderTabShape';
+import CardBase from './CardBase';
+import { formatWon } from '../../../utils/currency';
 import {
   FEEDBACK_POSITIVE_BOLD,
   FILL_NEUTRAL_SUBTLE,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const CHEVRON_RIGHT_ICON = require('../../../assets/icons/nav/Chevron Right.png');
 
@@ -31,7 +34,7 @@ function ReportCard({
   onPress,
 }: ReportCardProps) {
   return (
-    <Pressable style={styles.card} onPress={onPress}>
+    <CardBase onPress={onPress}>
       {variant === 'folder' && <FolderTabShape fill={FILL_NEUTRAL_SUBTLE} />}
       <View style={styles.header}>
         <View>
@@ -47,34 +50,28 @@ function ReportCard({
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>수입</Text>
-        <Text style={styles.income}>+{income.toLocaleString()}원</Text>
+        <Text style={styles.income}>+{formatWon(income)}</Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>지출</Text>
-        <Text style={styles.expense}>-{expense.toLocaleString()}원</Text>
+        <Text style={styles.expense}>-{formatWon(expense)}</Text>
       </View>
-    </Pressable>
+    </CardBase>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: FILL_NEUTRAL_SUBTLE,
-    borderRadius: 12,
-    padding: 16,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
   title: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
   dateRange: {
+    ...TYPOGRAPHY.body3,
     marginTop: 4,
-    fontSize: 12,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   chevron: {
@@ -91,16 +88,17 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   label: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
+  // 12px+Bold 조합은 정식 스타일에 없어 body3+bold를 예외로 채택.
   income: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     fontWeight: 'bold',
     color: FEEDBACK_POSITIVE_BOLD,
   },
   expense: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     fontWeight: 'bold',
   },
 });

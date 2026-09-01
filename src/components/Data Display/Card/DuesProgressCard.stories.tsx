@@ -56,3 +56,51 @@ export const Ended: Story = {
     state: 'ended',
   },
 };
+
+/** DUE-1-PAGE-01-0 목록: 마감 여유(D-7 초과) — positive. */
+export const ActiveDueSoon: Story = {
+  args: {
+    type: 'paymentManagement',
+    title: '2026-2 MT',
+    dateBadgeLabel: 'D-14',
+    dateBadgeStatus: 'positive',
+    paidMemberCount: 15,
+    totalMemberCount: 30,
+    paidAmount: 600000,
+    totalAmount: 900000,
+    progressRatio: 15 / 30,
+    fullWidth: true,
+  },
+};
+
+/** DUE-1-PAGE-01-0 목록: 마감 경고(D-3 초과 ~ D-7 이하) — warning. */
+export const ActiveDueWarning: Story = {
+  args: {
+    type: 'paymentManagement',
+    title: '개강총회 뒷풀이',
+    dateBadgeLabel: 'D-7',
+    dateBadgeStatus: 'warning',
+    paidMemberCount: 10,
+    totalMemberCount: 20,
+    paidAmount: 400000,
+    totalAmount: 800000,
+    progressRatio: 10 / 20,
+    fullWidth: true,
+  },
+};
+
+/** DUE-1-PAGE-01-0 목록: 마감 경과·임박(D-Day ~ D-3 이하, 경과 포함) — destructive. */
+export const ActiveDueUrgent: Story = {
+  args: {
+    type: 'paymentManagement',
+    title: '2026-2 MT',
+    dateBadgeLabel: 'D-3',
+    dateBadgeStatus: 'destructive',
+    paidMemberCount: 25,
+    totalMemberCount: 30,
+    paidAmount: 1250000,
+    totalAmount: 1500000,
+    progressRatio: 25 / 30,
+    fullWidth: true,
+  },
+};

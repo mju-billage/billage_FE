@@ -1,9 +1,8 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Button from '../../Input/Button/Button';
-import {
-  FILL_NEUTRAL_SUBTLE,
-  FOREGROUND_NEUTRAL_SUBTLE,
-} from '../../../constants/colors';
+import CardBase from './CardBase';
+import { FOREGROUND_NEUTRAL_SUBTLE } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const EDIT_ICON = require('../../../assets/icons/action/Edit.png');
 const CLOSE_ICON = require('../../../assets/icons/action/Close.png');
@@ -27,7 +26,7 @@ function BackupCard({
   onViewRecords,
 }: BackupCardProps) {
   return (
-    <View style={styles.card}>
+    <CardBase>
       <View style={styles.header}>
         <View style={styles.titleRow}>
           <Text style={styles.title}>{title}</Text>
@@ -53,16 +52,11 @@ function BackupCard({
           fullWidth
         />
       </View>
-    </View>
+    </CardBase>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: FILL_NEUTRAL_SUBTLE,
-    borderRadius: 12,
-    padding: 16,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -74,8 +68,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   title: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
   smallIcon: {
     width: 16,
@@ -84,7 +77,7 @@ const styles = StyleSheet.create({
   },
   meta: {
     marginTop: 6,
-    fontSize: 12,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   footer: {

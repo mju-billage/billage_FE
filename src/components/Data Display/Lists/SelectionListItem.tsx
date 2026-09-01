@@ -1,10 +1,12 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Switch from '../../Input/Control/Switch';
 import {
+  FILL_NEUTRAL_NORMAL,
   FOREGROUND_DISABLED,
   FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const CHEVRON_RIGHT_ICON = require('../../../assets/icons/nav/Chevron Right.png');
 
@@ -48,7 +50,11 @@ function SelectionListItem(props: SelectionListItemProps) {
 
   return (
     <Pressable
-      style={[styles.row, props.disabled && styles.rowDisabled]}
+      style={({ pressed }) => [
+        styles.row,
+        pressed && !props.disabled && styles.rowPressed,
+        props.disabled && styles.rowDisabled,
+      ]}
       onPress={props.onPress}
       disabled={props.disabled}
     >
@@ -72,6 +78,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: 14,
+    borderRadius: 8,
+  },
+  rowPressed: {
+    backgroundColor: FILL_NEUTRAL_NORMAL,
   },
   rowDisabled: {
     opacity: 0.5,
@@ -80,13 +90,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_PRIMARY,
   },
   subtitle: {
+    ...TYPOGRAPHY.body3,
     marginTop: 2,
-    fontSize: 12,
     color: FOREGROUND_DISABLED,
   },
   required: {
@@ -98,7 +107,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   value: {
-    fontSize: 14,
+    ...TYPOGRAPHY.body2,
     color: FOREGROUND_PRIMARY,
   },
   valueRequired: {

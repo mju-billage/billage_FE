@@ -11,16 +11,21 @@ const IMAGE_ICON = require('../../../assets/icons/content/Image.png');
 
 type ThumbnailProps = {
   imageUri?: string;
+  /** imageUri가 인증이 필요한 경로(File 도메인 fileUrl 등)일 때 같이 전달한다. */
+  imageHeaders?: Record<string, string>;
   size?: number;
   onRemove?: () => void;
 };
 
 /** 작은 정사각 이미지 썸네일. 우상단에 겹쳐진 제거 버튼을 옵션으로 보여준다. */
-function Thumbnail({ imageUri, size = 56, onRemove }: ThumbnailProps) {
+function Thumbnail({ imageUri, imageHeaders, size = 56, onRemove }: ThumbnailProps) {
   return (
     <View style={[styles.container, { width: size, height: size }]}>
       {imageUri ? (
-        <Image source={{ uri: imageUri }} style={styles.image} />
+        <Image
+          source={{ uri: imageUri, headers: imageHeaders }}
+          style={styles.image}
+        />
       ) : (
         <View style={styles.emptyBackground}>
           <Image

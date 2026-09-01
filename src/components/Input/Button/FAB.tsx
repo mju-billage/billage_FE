@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { FOREGROUND_INVERSE, NAVY_800 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type FloatingActionButtonProps = {
   onPress: () => void;
@@ -124,8 +125,7 @@ const styles = StyleSheet.create({
     backgroundColor: FOREGROUND_INVERSE,
   },
   label: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.button,
     color: FOREGROUND_INVERSE,
   },
 });

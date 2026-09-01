@@ -4,6 +4,7 @@ import {
   FOREGROUND_DISABLED,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const CHECK_ICON = require('../../../assets/icons/action/Check.png');
 
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   label: {
-    fontSize: 14,
+    ...TYPOGRAPHY.body2,
   },
   labelDisabled: {
     color: FOREGROUND_DISABLED,

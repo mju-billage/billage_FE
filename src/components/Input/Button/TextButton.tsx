@@ -15,6 +15,7 @@ import {
   FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type TextButtonHierarchy = 'primary' | 'secondary' | 'tertiary' | 'negative';
 
@@ -86,8 +87,7 @@ const styles = StyleSheet.create({
     height: 16,
   },
   label: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.button,
   },
   primaryLabel: {
     color: FOREGROUND_PRIMARY,

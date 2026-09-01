@@ -4,6 +4,7 @@ import {
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 type DateFieldProps = {
   startDate?: string;
@@ -56,13 +57,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   label: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
     marginBottom: 8,
   },
   value: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h2,
     color: FOREGROUND_SECONDARY,
   },
 });

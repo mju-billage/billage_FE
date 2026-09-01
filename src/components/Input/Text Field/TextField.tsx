@@ -15,9 +15,11 @@ import {
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
 
 const EYE_ICON = require('../../../assets/icons/system/Eye.png');
 const EYE_CLOSED_ICON = require('../../../assets/icons/system/Eye Closed.png');
+const CLOSE_ICON = require('../../../assets/icons/action/Close.png');
 
 type TextFieldProps = {
   label?: string;
@@ -30,6 +32,8 @@ type TextFieldProps = {
   disabled?: boolean;
   secureTextEntry?: boolean;
   secureToggle?: boolean;
+  /** 입력값이 있을 때 인라인 클리어(X) 아이콘을 보여주고, 누르면 이 콜백으로 값을 비운다. */
+  onClear?: () => void;
   maxLength?: number;
   keyboardType?: KeyboardTypeOptions;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
@@ -47,6 +51,7 @@ function TextField({
   disabled = false,
   secureTextEntry = false,
   secureToggle = false,
+  onClear,
   maxLength,
   keyboardType,
   autoCapitalize,
@@ -92,6 +97,11 @@ function TextField({
             />
           </Pressable>
         )}
+        {onClear && value.length > 0 && !disabled && (
+          <Pressable onPress={onClear} hitSlop={8}>
+            <Image source={CLOSE_ICON} style={styles.clearIcon} />
+          </Pressable>
+        )}
       </View>
       {(error || helperText) && (
         <Text
@@ -115,8 +125,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     marginBottom: 8,
   },
   labelDisabled: {
@@ -129,8 +138,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   input: {
+    ...TYPOGRAPHY.body1,
     flex: 1,
-    fontSize: 16,
     padding: 0,
     outlineWidth: 0,
     ...({ outlineStyle: 'none' } as any),
@@ -143,19 +152,24 @@ const styles = StyleSheet.create({
     height: 20,
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
+  clearIcon: {
+    width: 16,
+    height: 16,
+    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
+  },
   helperText: {
+    ...TYPOGRAPHY.body3,
     marginTop: 6,
-    fontSize: 12,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   errorText: {
+    ...TYPOGRAPHY.body3,
     marginTop: 6,
-    fontSize: 12,
     color: FEEDBACK_NEGATIVE_BOLD,
   },
   successText: {
+    ...TYPOGRAPHY.body3,
     marginTop: 6,
-    fontSize: 12,
     color: FOREGROUND_SECONDARY,
   },
 });
