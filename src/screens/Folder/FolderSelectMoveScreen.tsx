@@ -1,36 +1,53 @@
-import { useState } from 'react';
+/** @screen FDR-2-PAGE-01-0 이동 대상 선택 */
+import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/Navigation/App bar/BackButton';
+import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import FolderItem from '../../components/Data Display/Folder/FolderItem';
-import { getChildNodes, type FolderTreeNode } from '../../types/folder';
+import { getActiveGroup } from '../../types/group';
+import { getChildFolders, mergeFolderListItems } from '../../utils/folderTree';
+import type { FolderListItem } from '../../utils/folderTree';
+import * as folderService from '../../services/folderService';
+import * as ledgerService from '../../services/ledgerService';
+import { ApiError } from '../../services/apiClient';
+import {
+  API_ERROR_DEFAULT_MESSAGE,
+  API_NETWORK_ERROR_MESSAGE,
+  getApiErrorMessage,
+  isNetworkError,
+} from '../../constants/apiErrorMessages';
 import {
   FOLDER_EMPTY_SUBTITLE,
+  LEDGER_ITEM_BUDGET_UNSET,
   SELECT_MOVE_CONFIRM_LABEL,
   SELECT_MOVE_CONFIRM_SUFFIX,
   SELECT_MOVE_EMPTY_TITLE,
+  SELECT_MOVE_LOADING,
+  SELECT_MOVE_RETRY_LABEL,
   SELECT_MOVE_TITLE,
 } from '../../constants/folderScreenText';
-import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { TYPOGRAPHY } from '../../constants/typography';
 
 type FolderSelectMoveNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'FolderSelectMove'
 >;
-type FolderSelectMoveRouteProp = RouteProp<
-  RootStackParamList,
-  'FolderSelectMove'
->;
+type FolderSelectMoveRouteProp = RouteProp<RootStackParamList, 'FolderSelectMove'>;
+type LoadState = 'loading' | 'error' | 'ready';
 
-function getItemSubtitle(node: FolderTreeNode): string {
-  if (node.kind === 'folder') {
-    return `${getChildNodes(node.id).length}개의 항목`;
+function getItemSubtitle(item: FolderListItem): string {
+  if (item.kind === 'folder') {
+    return `${item.itemCount}개의 항목`;
   }
-  return node.createdAt;
+  return item.budget != null
+    ? `예산 ${item.budget.toLocaleString()}원`
+    : LEDGER_ITEM_BUDGET_UNSET;
 }
 
 /** 폴더 최상위/하위에서 "선택 이동"으로 진입: 이동시킬 폴더/장부를 다중 선택한다. */
@@ -39,93 +56,148 @@ function FolderSelectMoveScreen() {
   const route = useRoute<FolderSelectMoveRouteProp>();
   const folderId = route.params.folderId;
 
-  const [items] = useState<FolderTreeNode[]>(() => getChildNodes(folderId));
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [items, setItems] = useState<FolderListItem[]>([]);
+  const [loadState, setLoadState] = useState<LoadState>('loading');
+  const [loadErrorMessage, setLoadErrorMessage] = useState('');
+  const [selected, setSelected] = useState<{ id: string; kind: 'folder' | 'ledger'; name: string }[]>([]);
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds(prev =>
-      prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id],
+  const toErrorMessage = (error: unknown): string => {
+    if (isNetworkError(error)) {
+      return API_NETWORK_ERROR_MESSAGE;
+    }
+    if (error instanceof ApiError) {
+      return getApiErrorMessage(error.code);
+    }
+    return API_ERROR_DEFAULT_MESSAGE;
+  };
+
+  const load = useCallback(async () => {
+    const group = getActiveGroup();
+    if (!group) {
+      return;
+    }
+    setLoadState('loading');
+    try {
+      const [tree, ledgers] = await Promise.all([
+        folderService.getFolderTree(group.id),
+        folderId ? ledgerService.getLedgersInFolder(folderId) : Promise.resolve([]),
+      ]);
+      const childFolders = getChildFolders(tree, folderId);
+      setItems(mergeFolderListItems(childFolders, ledgers));
+      setLoadState('ready');
+    } catch (error) {
+      setLoadErrorMessage(toErrorMessage(error));
+      setLoadState('error');
+    }
+  }, [folderId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
+
+  const toggleSelect = (item: FolderListItem) => {
+    setSelected(prev =>
+      prev.some(sel => sel.id === item.id && sel.kind === item.kind)
+        ? prev.filter(sel => !(sel.id === item.id && sel.kind === item.kind))
+        : [...prev, { id: item.id, kind: item.kind, name: item.name }],
     );
   };
 
   const confirmLabel =
-    selectedIds.length > 0
-      ? `${selectedIds.length}${SELECT_MOVE_CONFIRM_SUFFIX}`
+    selected.length > 0
+      ? `${selected.length}${SELECT_MOVE_CONFIRM_SUFFIX}`
       : SELECT_MOVE_CONFIRM_LABEL;
 
   const handleConfirm = () => {
     navigation.navigate('FolderMoveDestination', {
-      itemIds: selectedIds,
+      items: selected,
       sourceFolderId: folderId,
       destinationFolderId: null,
     });
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <BackButton onPress={() => navigation.goBack()} />
-        <Text style={styles.title}>{SELECT_MOVE_TITLE}</Text>
-      </View>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <AppBar title={SELECT_MOVE_TITLE} onBackPress={() => navigation.goBack()} />
 
-      {items.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>{SELECT_MOVE_EMPTY_TITLE}</Text>
-          <Text style={styles.emptySubtitle}>{FOLDER_EMPTY_SUBTITLE}</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={items}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.listContent}
-          renderItem={({ item }) => (
-            <FolderItem
-              kind={item.kind}
-              name={item.name}
-              subtitle={getItemSubtitle(item)}
-              layout="list"
-              hasItems={
-                item.kind === 'folder'
-                  ? getChildNodes(item.id).length > 0
-                  : undefined
-              }
-              selected={selectedIds.includes(item.id)}
-              onPress={() => toggleSelect(item.id)}
-            />
-          )}
-        />
-      )}
+      <View style={styles.body}>
+        {loadState === 'loading' && (
+          <View style={styles.stateContainer}>
+            <Text style={styles.stateText}>{SELECT_MOVE_LOADING}</Text>
+          </View>
+        )}
 
-      <View style={styles.footer}>
-        <Button
-          label={confirmLabel}
-          disabled={selectedIds.length === 0}
-          fullWidth
-          onPress={handleConfirm}
-        />
+        {loadState === 'error' && (
+          <View style={styles.stateContainer}>
+            <Text style={styles.stateText}>{loadErrorMessage}</Text>
+            <Button label={SELECT_MOVE_RETRY_LABEL} onPress={load} hierarchy="secondary" />
+          </View>
+        )}
+
+        {loadState === 'ready' && (
+          <>
+            {items.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyTitle}>{SELECT_MOVE_EMPTY_TITLE}</Text>
+                <Text style={styles.emptySubtitle}>{FOLDER_EMPTY_SUBTITLE}</Text>
+              </View>
+            ) : (
+              <FlatList
+                data={items}
+                keyExtractor={item => `${item.kind}-${item.id}`}
+                contentContainerStyle={styles.listContent}
+                renderItem={({ item }) => (
+                  <FolderItem
+                    kind={item.kind}
+                    name={item.name}
+                    subtitle={getItemSubtitle(item)}
+                    layout="list"
+                    hasItems={item.kind === 'folder' ? item.itemCount > 0 : undefined}
+                    selected={selected.some(sel => sel.id === item.id && sel.kind === item.kind)}
+                    onPress={() => toggleSelect(item)}
+                  />
+                )}
+              />
+            )}
+
+            <View style={styles.footer}>
+              <Button
+                label={confirmLabel}
+                disabled={selected.length === 0}
+                fullWidth
+                onPress={handleConfirm}
+              />
+            </View>
+          </>
+        )}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
+  },
+  body: {
+    flex: 1,
+    paddingTop: 16,
     paddingHorizontal: 24,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
   },
   listContent: {
     paddingBottom: 24,
+  },
+  stateContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  stateText: {
+    ...TYPOGRAPHY.body2,
+    color: FOREGROUND_DISABLED,
   },
   emptyState: {
     flex: 1,
@@ -133,12 +205,11 @@ const styles = StyleSheet.create({
     paddingTop: 80,
   },
   emptyTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
   emptySubtitle: {
     marginTop: 6,
-    fontSize: 13,
+    ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   footer: {

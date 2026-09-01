@@ -1,10 +1,14 @@
+/** @screen COM-5-PAGE-01-0 가입 완료 */
+import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/Navigation/App bar/BackButton';
 import Button from '../../components/Input/Button/Button';
+import JoinGroupSheet from '../GroupManager/JoinGroupSheet';
 import { FOREGROUND_NEUTRAL_NORMAL } from '../../constants/colors';
+import { TYPOGRAPHY } from '../../constants/typography';
 import {
   SIGNUP_COMPLETE_TITLE,
   SIGNUP_COMPLETE_SUBTITLE,
@@ -20,13 +24,14 @@ type SignupCompleteNavigationProp = NativeStackNavigationProp<
 /** 가입 완료 환영 화면: 모임 생성/참여로 이어지는 다음 액션을 보여준다. */
 function SignupCompleteScreen() {
   const navigation = useNavigation<SignupCompleteNavigationProp>();
+  const [joinSheetVisible, setJoinSheetVisible] = useState(false);
 
   const handleCreateGroup = () => {
-    // TODO: 모임 생성 화면 연동 필요
+    navigation.navigate('GroupCreate');
   };
 
   const handleJoinWithCode = () => {
-    // TODO: 코드로 참여하기 화면 연동 필요
+    setJoinSheetVisible(true);
   };
 
   return (
@@ -51,6 +56,15 @@ function SignupCompleteScreen() {
           fullWidth
         />
       </View>
+
+      <JoinGroupSheet
+        visible={joinSheetVisible}
+        onClose={() => setJoinSheetVisible(false)}
+        onJoined={() => {
+          setJoinSheetVisible(false);
+          navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+        }}
+      />
     </View>
   );
 }
@@ -65,14 +79,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h1,
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 14,
+    ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_NORMAL,
-    lineHeight: 20,
   },
   footer: {
     marginTop: 'auto',

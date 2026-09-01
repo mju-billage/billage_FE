@@ -4,6 +4,7 @@ import {
   FILL_NEUTRAL_SUBTLE,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
+import { TYPOGRAPHY } from '../../constants/typography';
 
 type QuickServiceCardProps = {
   item: QuickServiceItem;
@@ -31,12 +32,11 @@ const styles = StyleSheet.create({
     minHeight: 100,
   },
   label: {
-    fontSize: 12,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   title: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     marginTop: 2,
   },
   icon: {

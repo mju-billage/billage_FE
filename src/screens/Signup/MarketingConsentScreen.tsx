@@ -1,3 +1,4 @@
+/** @screen COM-3-PAGE-01-0 약관 상세 (마케팅 정보 수신 동의) */
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';

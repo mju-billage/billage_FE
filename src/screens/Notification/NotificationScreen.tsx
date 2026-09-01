@@ -1,3 +1,4 @@
+/** @screen DSH-2-PAGE-01-0 알림 목록 */
 import { FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';

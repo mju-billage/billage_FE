@@ -1,17 +1,19 @@
+/** @screen COM-4-PAGE-01-0 이메일 인증 */
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/Navigation/App bar/BackButton';
 import VerificationField from '../../components/Input/Verification Field/VerificationField';
 import Button from '../../components/Input/Button/Button';
+import TextButton from '../../components/Input/Button/TextButton';
 import {
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
-  FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
 } from '../../constants/colors';
+import { TYPOGRAPHY } from '../../constants/typography';
 import {
   EMAIL_VERIFICATION_TITLE,
   EMAIL_VERIFICATION_SUBTITLE,
@@ -111,11 +113,10 @@ function EmailVerificationScreen() {
           <Text style={styles.resendLabel}>
             {EMAIL_VERIFICATION_RESEND_PROMPT}
           </Text>
-          <Pressable onPress={handleResend}>
-            <Text style={styles.resendLink}>
-              {EMAIL_VERIFICATION_RESEND_LINK_LABEL}
-            </Text>
-          </Pressable>
+          <TextButton
+            label={EMAIL_VERIFICATION_RESEND_LINK_LABEL}
+            onPress={handleResend}
+          />
         </View>
       )}
 
@@ -141,12 +142,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h1,
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 14,
+    ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_NORMAL,
     marginBottom: 24,
   },
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
   },
   timerText: {
     marginTop: 8,
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   timerValue: {
@@ -170,14 +170,8 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   resendLabel: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_NORMAL,
-  },
-  resendLink: {
-    fontSize: 13,
-    color: FOREGROUND_PRIMARY,
-    fontWeight: 'bold',
-    textDecorationLine: 'underline',
   },
   footer: {
     marginTop: 'auto',

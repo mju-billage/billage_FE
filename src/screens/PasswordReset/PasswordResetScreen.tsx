@@ -1,3 +1,4 @@
+/** @screen COM-2-PAGE-02-0 비밀번호 재설정 */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -7,6 +8,7 @@ import BackButton from '../../components/Navigation/App bar/BackButton';
 import TextField from '../../components/Input/Text Field/TextField';
 import Button from '../../components/Input/Button/Button';
 import { isValidEmail } from '../../utils/validators';
+import { TYPOGRAPHY } from '../../constants/typography';
 import {
   PASSWORD_RESET_TITLE,
   PASSWORD_RESET_SUBTITLE,
@@ -65,14 +67,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h3,
     marginBottom: 24,
   },
   subtitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    lineHeight: 24,
+    ...TYPOGRAPHY.subtitle1,
     marginBottom: 24,
   },
 });

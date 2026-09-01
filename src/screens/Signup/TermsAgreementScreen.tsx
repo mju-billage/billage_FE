@@ -1,3 +1,4 @@
+/** @screen COM-2-PAGE-01-0 약관 동의 */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -7,6 +8,7 @@ import BackButton from '../../components/Navigation/App bar/BackButton';
 import AgreementCheckboxRow from '../../components/Input/Control/AgreementCheckboxRow';
 import Divider from '../../components/Data Display/Divider/Divider';
 import Button from '../../components/Input/Button/Button';
+import { TYPOGRAPHY } from '../../constants/typography';
 import {
   TERMS_AGREEMENT_TITLE,
   AGREE_ALL_LABEL,
@@ -134,8 +136,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h1,
     marginBottom: 24,
   },
   list: {

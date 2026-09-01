@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+/** @screen FDR-3-PAGE-02-0 내역 검색_장부 */
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -8,22 +9,21 @@ import BackButton from '../../components/Navigation/App bar/BackButton';
 import SearchField from '../../components/Input/Search/SearchField';
 import TextButton from '../../components/Input/Button/TextButton';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
-import {
-  getTransactionsByLedgerId,
-  type LedgerTransaction,
-} from '../../types/folder';
+import type { EntryApprovalStatus, EntrySummary, EntryType } from '../../types/entry';
+import * as entryService from '../../services/entryService';
 import LedgerFilterSheet, {
   DEFAULT_LEDGER_FILTER,
   type LedgerFilterValue,
 } from './LedgerFilterSheet';
 import {
+  LEDGER_ENTRIES_LOADING_MORE,
   LEDGER_SEARCH_EMPTY,
   LEDGER_SEARCH_PLACEHOLDER,
 } from '../../constants/ledgerScreenText';
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { TYPOGRAPHY } from '../../constants/typography';
 
 const FILTER_LABEL = '필터';
-const PERIOD_MONTHS: Record<string, number> = { '1m': 1, '3m': 3, '6m': 6 };
 
 type LedgerSearchNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -31,83 +31,73 @@ type LedgerSearchNavigationProp = NativeStackNavigationProp<
 >;
 type LedgerSearchRouteProp = RouteProp<RootStackParamList, 'LedgerSearch'>;
 
-function monthsAgoDateKey(months: number): string {
-  const date = new Date();
-  date.setMonth(date.getMonth() - months);
-  const yyyy = date.getFullYear();
-  const mm = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
-  return `${yyyy}.${mm}.${dd}`;
+function toApiType(type: LedgerFilterValue['type']): EntryType | undefined {
+  if (type === 'income') return 'INCOME';
+  if (type === 'expense') return 'EXPENSE';
+  return undefined;
 }
 
-function applyFilter(
-  transactions: LedgerTransaction[],
-  filter: LedgerFilterValue,
-): LedgerTransaction[] {
-  let result = transactions;
-
-  if (filter.type !== 'all') {
-    result = result.filter(tx =>
-      filter.type === 'income' ? tx.amount > 0 : tx.amount < 0,
-    );
-  }
-
-  if (filter.period !== 'all') {
-    if (filter.period === 'custom') {
-      if (filter.customStart) {
-        result = result.filter(tx => tx.date >= filter.customStart!);
-      }
-      if (filter.customEnd) {
-        result = result.filter(tx => tx.date <= filter.customEnd!);
-      }
-    } else {
-      const cutoff = monthsAgoDateKey(PERIOD_MONTHS[filter.period]);
-      result = result.filter(tx => tx.date >= cutoff);
-    }
-  }
-
-  result = [...result].sort((a, b) =>
-    filter.sort === 'latest'
-      ? a.date < b.date
-        ? 1
-        : -1
-      : a.date > b.date
-      ? 1
-      : -1,
-  );
-
-  return result;
+function toApiStatus(
+  status: LedgerFilterValue['status'],
+): EntryApprovalStatus | undefined {
+  if (status === 'pending') return 'PENDING';
+  if (status === 'approved') return 'APPROVED';
+  return undefined;
 }
 
-/** 장부 상세에서 진입하는 내역 검색 화면: 이름 검색 + 필터 시트. */
+/** 장부 상세에서 진입하는 내역 검색 화면: 제목/메모 검색(keyword) + 필터 시트. */
 function LedgerSearchScreen() {
   const navigation = useNavigation<LedgerSearchNavigationProp>();
   const route = useRoute<LedgerSearchRouteProp>();
   const ledgerId = route.params.ledgerId;
 
   const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState<LedgerFilterValue>(
-    DEFAULT_LEDGER_FILTER,
-  );
+  const [filter, setFilter] = useState<LedgerFilterValue>(DEFAULT_LEDGER_FILTER);
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
+  const [results, setResults] = useState<EntrySummary[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const allTransactions = useMemo(
-    () => getTransactionsByLedgerId(ledgerId),
-    [ledgerId],
+  const search = useCallback(
+    async (reset: boolean) => {
+      const nextPage = reset ? 0 : page + 1;
+      if (!reset) {
+        setIsLoadingMore(true);
+      }
+      try {
+        const result = await entryService.getEntries(ledgerId, {
+          keyword: query.trim() || undefined,
+          type: toApiType(filter.type),
+          status: toApiStatus(filter.status),
+          sort: filter.sort === 'latest' ? 'occurredOn,desc' : 'occurredOn,asc',
+          page: nextPage,
+        });
+        setResults(current => (reset ? result.items : [...current, ...result.items]));
+        setPage(result.page);
+        setHasMore(!result.last);
+      } catch {
+        if (reset) {
+          setResults([]);
+          setHasMore(false);
+        }
+      } finally {
+        setIsLoadingMore(false);
+      }
+    },
+    [ledgerId, query, filter, page],
   );
 
-  const results = useMemo(() => {
-    const filtered = applyFilter(allTransactions, filter);
-    const trimmed = query.trim().toLowerCase();
-    if (!trimmed) {
-      return filtered;
+  useEffect(() => {
+    search(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ledgerId, query, filter]);
+
+  const loadMore = () => {
+    if (!isLoadingMore && hasMore) {
+      search(false);
     }
-    return filtered.filter(
-      tx =>
-        tx.itemName.toLowerCase().includes(trimmed) ||
-        tx.ledgerName.toLowerCase().includes(trimmed),
-    );
-  }, [allTransactions, filter, query]);
+  };
 
   return (
     <View style={styles.container}>
@@ -139,12 +129,20 @@ function LedgerSearchScreen() {
           data={results}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.listContent}
+          onEndReachedThreshold={0.4}
+          onEndReached={loadMore}
+          ListFooterComponent={
+            isLoadingMore ? (
+              <Text style={styles.loadingMoreText}>{LEDGER_ENTRIES_LOADING_MORE}</Text>
+            ) : null
+          }
           renderItem={({ item }) => (
             <TransactionListItem
-              label={item.date}
-              itemName={item.itemName}
-              amount={item.amount}
-              hasReceipt={item.receiptImages.length > 0}
+              label={item.occurredOn}
+              itemName={item.title}
+              amount={item.type === 'INCOME' ? item.amount : -item.amount}
+              hasReceipt={item.receiptCount > 0}
+              isPendingApproval={item.approvalStatus === 'PENDING'}
               onPress={() =>
                 navigation.navigate('TransactionDetail', {
                   transactionId: item.id,
@@ -188,14 +186,19 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 24,
   },
+  loadingMoreText: {
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+    textAlign: 'center',
+    paddingVertical: 16,
+  },
   emptyState: {
     flex: 1,
     alignItems: 'center',
     paddingTop: 80,
   },
   emptyTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
 });

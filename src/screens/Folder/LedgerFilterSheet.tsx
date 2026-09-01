@@ -1,48 +1,49 @@
+/** @screen FDR-3-SHEET-03-0 장부상세_필터링 */
+/**
+ * 4-A(Entry API 연동): 기간(period) 필터를 없앴다 — `GET /ledgers/{ledgerId}/entries`
+ * 쿼리 파라미터가 `type`/`status`/`keyword`/`page`/`size`/`sort`뿐이라 서버에
+ * 날짜 범위로 거를 방법이 없다(전체 페이지를 다 받아와 클라이언트에서 다시 거르는
+ * 건 페이지네이션 목록에서 부정확하다 — 지금 로드된 페이지 안에서만 걸러진다).
+ * 대신 서버가 실제로 지원하는 승인 상태(status)를 추가했다.
+ */
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Button from '../../components/Input/Button/Button';
 import TextButton from '../../components/Input/Button/TextButton';
-import Calendar from '../../components/Data Display/Calendar/Calendar';
+import FilterPill from '../../components/Input/Filter/FilterPill';
 import {
   FILTER_APPLY_LABEL,
-  FILTER_PERIOD_1MONTH,
-  FILTER_PERIOD_3MONTH,
-  FILTER_PERIOD_6MONTH,
-  FILTER_PERIOD_CUSTOM,
-  FILTER_PERIOD_LABEL,
   FILTER_RESET_LABEL,
   FILTER_SHEET_TITLE,
   FILTER_SORT_LABEL,
   FILTER_SORT_LATEST,
   FILTER_SORT_OLDEST,
+  FILTER_STATUS_ALL,
+  FILTER_STATUS_APPROVED,
+  FILTER_STATUS_LABEL,
+  FILTER_STATUS_PENDING,
   FILTER_TYPE_ALL,
   FILTER_TYPE_EXPENSE,
   FILTER_TYPE_INCOME,
   FILTER_TYPE_LABEL,
 } from '../../constants/ledgerScreenText';
-import {
-  BORDER_NEUTRAL_NORMAL,
-  FOREGROUND_INVERSE,
-  FOREGROUND_NEUTRAL_NORMAL,
-  FOREGROUND_SECONDARY,
-} from '../../constants/colors';
+import { FOREGROUND_NEUTRAL_NORMAL } from '../../constants/colors';
+import { TYPOGRAPHY } from '../../constants/typography';
 
-export type LedgerFilterPeriod = 'all' | '1m' | '3m' | '6m' | 'custom';
 export type LedgerFilterType = 'all' | 'income' | 'expense';
+export type LedgerFilterStatus = 'all' | 'pending' | 'approved';
 export type LedgerFilterSort = 'latest' | 'oldest';
 
 export type LedgerFilterValue = {
-  period: LedgerFilterPeriod;
-  customStart?: string;
-  customEnd?: string;
   type: LedgerFilterType;
+  status: LedgerFilterStatus;
   sort: LedgerFilterSort;
 };
 
 export const DEFAULT_LEDGER_FILTER: LedgerFilterValue = {
-  period: 'all',
   type: 'all',
+  status: 'all',
   sort: 'latest',
 };
 
@@ -53,7 +54,7 @@ type LedgerFilterSheetProps = {
   onApply: (value: LedgerFilterValue) => void;
 };
 
-/** 내역 검색 화면에서 사용하는 필터 바텀시트: 기간/구분/정렬. */
+/** 내역 검색 화면에서 사용하는 필터 바텀시트: 구분/승인 상태/정렬. */
 function LedgerFilterSheet({
   visible,
   value,
@@ -61,28 +62,6 @@ function LedgerFilterSheet({
   onApply,
 }: LedgerFilterSheetProps) {
   const [draft, setDraft] = useState<LedgerFilterValue>(value);
-  const [calendarYear, setCalendarYear] = useState(() =>
-    new Date().getFullYear(),
-  );
-  const [calendarMonth, setCalendarMonth] = useState(
-    () => new Date().getMonth() + 1,
-  );
-
-  const handleSelectDate = (date: string) => {
-    if (!draft.customStart || (draft.customStart && draft.customEnd)) {
-      setDraft({ ...draft, customStart: date, customEnd: undefined });
-    } else if (date < draft.customStart) {
-      setDraft({ ...draft, customStart: date, customEnd: draft.customStart });
-    } else {
-      setDraft({ ...draft, customEnd: date });
-    }
-  };
-
-  const handleChangeMonth = (delta: number) => {
-    const next = new Date(calendarYear, calendarMonth - 1 + delta, 1);
-    setCalendarYear(next.getFullYear());
-    setCalendarMonth(next.getMonth() + 1);
-  };
 
   const handleReset = () => {
     setDraft(DEFAULT_LEDGER_FILTER);
@@ -104,43 +83,6 @@ function LedgerFilterSheet({
         />
       </View>
 
-      <Text style={styles.sectionLabel}>{FILTER_PERIOD_LABEL}</Text>
-      <View style={styles.chipRow}>
-        <FilterPill
-          label={FILTER_PERIOD_1MONTH}
-          active={draft.period === '1m'}
-          onPress={() => setDraft({ ...draft, period: '1m' })}
-        />
-        <FilterPill
-          label={FILTER_PERIOD_3MONTH}
-          active={draft.period === '3m'}
-          onPress={() => setDraft({ ...draft, period: '3m' })}
-        />
-        <FilterPill
-          label={FILTER_PERIOD_6MONTH}
-          active={draft.period === '6m'}
-          onPress={() => setDraft({ ...draft, period: '6m' })}
-        />
-        <FilterPill
-          label={FILTER_PERIOD_CUSTOM}
-          active={draft.period === 'custom'}
-          onPress={() => setDraft({ ...draft, period: 'custom' })}
-        />
-      </View>
-
-      {draft.period === 'custom' && (
-        <View style={styles.calendarWrapper}>
-          <Calendar
-            year={calendarYear}
-            month={calendarMonth}
-            selectedStartDate={draft.customStart}
-            selectedEndDate={draft.customEnd}
-            onSelectDate={handleSelectDate}
-            onChangeMonth={handleChangeMonth}
-          />
-        </View>
-      )}
-
       <Text style={styles.sectionLabel}>{FILTER_TYPE_LABEL}</Text>
       <View style={styles.chipRow}>
         <FilterPill
@@ -157,6 +99,25 @@ function LedgerFilterSheet({
           label={FILTER_TYPE_EXPENSE}
           active={draft.type === 'expense'}
           onPress={() => setDraft({ ...draft, type: 'expense' })}
+        />
+      </View>
+
+      <Text style={styles.sectionLabel}>{FILTER_STATUS_LABEL}</Text>
+      <View style={styles.chipRow}>
+        <FilterPill
+          label={FILTER_STATUS_ALL}
+          active={draft.status === 'all'}
+          onPress={() => setDraft({ ...draft, status: 'all' })}
+        />
+        <FilterPill
+          label={FILTER_STATUS_PENDING}
+          active={draft.status === 'pending'}
+          onPress={() => setDraft({ ...draft, status: 'pending' })}
+        />
+        <FilterPill
+          label={FILTER_STATUS_APPROVED}
+          active={draft.status === 'approved'}
+          onPress={() => setDraft({ ...draft, status: 'approved' })}
         />
       </View>
 
@@ -181,27 +142,6 @@ function LedgerFilterSheet({
   );
 }
 
-function FilterPill({
-  label,
-  active,
-  onPress,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      style={[styles.pill, active && styles.pillActive]}
-      onPress={onPress}
-    >
-      <Text style={[styles.pillLabel, active && styles.pillLabelActive]}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
@@ -210,11 +150,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 17,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle1,
   },
   sectionLabel: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     fontWeight: 'bold',
     color: FOREGROUND_NEUTRAL_NORMAL,
     marginTop: 16,
@@ -224,28 +163,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-  },
-  pill: {
-    borderWidth: 1,
-    borderColor: BORDER_NEUTRAL_NORMAL,
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
-  pillActive: {
-    borderColor: FOREGROUND_SECONDARY,
-    backgroundColor: FOREGROUND_SECONDARY,
-  },
-  pillLabel: {
-    fontSize: 13,
-    color: FOREGROUND_NEUTRAL_NORMAL,
-  },
-  pillLabelActive: {
-    color: FOREGROUND_INVERSE,
-    fontWeight: 'bold',
-  },
-  calendarWrapper: {
-    marginTop: 12,
   },
   footer: {
     marginTop: 24,

@@ -1,3 +1,4 @@
+/** @screen FDR-3-PAGE-03-0 새 장부 생성 */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -9,9 +10,17 @@ import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
-import { addLedgerNode } from '../../types/folder';
+import * as ledgerService from '../../services/ledgerService';
+import { ApiError } from '../../services/apiClient';
+import {
+  API_ERROR_DEFAULT_MESSAGE,
+  API_NETWORK_ERROR_MESSAGE,
+  getApiErrorMessage,
+  isNetworkError,
+} from '../../constants/apiErrorMessages';
 import {
   LEDGER_BUDGET_LABEL,
+  LEDGER_BUDGET_MAX,
   LEDGER_BUDGET_PLACEHOLDER,
   LEDGER_CREATE_SUBMIT_LABEL,
   LEDGER_CREATE_SUBTITLE,
@@ -27,6 +36,7 @@ import {
 } from '../../constants/ledgerScreenText';
 import { SNACKBAR_LEDGER_CREATED_SUFFIX } from '../../constants/folderScreenText';
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { TYPOGRAPHY } from '../../constants/typography';
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
 
@@ -44,6 +54,8 @@ function LedgerCreateScreen() {
 
   const [name, setName] = useState('');
   const [budget, setBudget] = useState('');
+  const [nameError, setNameError] = useState<string | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [leaveConfirmVisible, setLeaveConfirmVisible] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
 
@@ -57,17 +69,35 @@ function LedgerCreateScreen() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const trimmedName = name.trim();
-    if (!trimmedName) {
+    // parentId는 null일 수 없다 — 최상위(폴더 탭 루트)엔 장부를 바로 만들 API가
+    // 없어(POST /folders/{folderId}/ledgers만 있음) NewItemSheet가 이 화면 진입
+    // 자체를 최상위에서 숨긴다.
+    if (!trimmedName || !parentId || isSubmitting) {
       return;
     }
-    const parsedBudget = budget.trim() ? Number(budget.trim()) : null;
-    addLedgerNode(parentId, trimmedName, parsedBudget);
-    setSnackbarVisible(true);
-    setTimeout(() => {
-      navigation.goBack();
-    }, SNACKBAR_AUTO_HIDE_MS);
+    setNameError(undefined);
+    setIsSubmitting(true);
+    try {
+      const parsedBudget = budget.trim() ? Number(budget.trim()) : null;
+      await ledgerService.createLedger(parentId, trimmedName, parsedBudget);
+      setSnackbarVisible(true);
+      setTimeout(() => {
+        navigation.goBack();
+      }, SNACKBAR_AUTO_HIDE_MS);
+    } catch (error) {
+      if (isNetworkError(error)) {
+        setNameError(API_NETWORK_ERROR_MESSAGE);
+      } else if (error instanceof ApiError) {
+        const nameFieldError = error.fieldErrors.find(fe => fe.field === 'name');
+        setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code));
+      } else {
+        setNameError(API_ERROR_DEFAULT_MESSAGE);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -83,15 +113,26 @@ function LedgerCreateScreen() {
         <TextField
           label={LEDGER_NAME_LABEL}
           value={name}
-          onChangeText={text => setName(text.slice(0, LEDGER_NAME_MAX_LENGTH))}
+          onChangeText={text => {
+            setName(text.slice(0, LEDGER_NAME_MAX_LENGTH));
+            setNameError(undefined);
+          }}
           placeholder={LEDGER_NAME_PLACEHOLDER}
           helperText={LEDGER_NAME_HELPER}
+          error={nameError}
           maxLength={LEDGER_NAME_MAX_LENGTH}
         />
         <TextField
           label={LEDGER_BUDGET_LABEL}
           value={budget}
-          onChangeText={text => setBudget(text.replace(/[^0-9]/g, ''))}
+          onChangeText={text => {
+            const digitsOnly = text.replace(/[^0-9]/g, '');
+            const clamped =
+              digitsOnly && Number(digitsOnly) > LEDGER_BUDGET_MAX
+                ? String(LEDGER_BUDGET_MAX)
+                : digitsOnly;
+            setBudget(clamped);
+          }}
           placeholder={LEDGER_BUDGET_PLACEHOLDER}
           keyboardType="number-pad"
         />
@@ -100,7 +141,7 @@ function LedgerCreateScreen() {
       <View style={styles.footer}>
         <Button
           label={LEDGER_CREATE_SUBMIT_LABEL}
-          disabled={!name.trim()}
+          disabled={!name.trim() || isSubmitting}
           fullWidth
           onPress={handleSubmit}
         />
@@ -141,12 +182,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h1,
   },
   subtitle: {
     marginTop: 6,
-    fontSize: 14,
+    ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   form: {
