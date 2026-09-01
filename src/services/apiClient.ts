@@ -6,18 +6,32 @@ type ApiResponse<T> = {
   message: string;
 };
 
+export type ApiFieldError = {
+  field: string;
+  reason: string;
+};
+
 type ApiErrorBody = {
   code: string;
   message: string;
+  fieldErrors?: ApiFieldError[];
 };
 
-/** 서버가 내려주는 에러 코드(예: EMAIL_ALREADY_EXISTS)를 담은 API 에러. */
+/**
+ * 서버가 내려주는 에러 코드(예: GROUP_NOT_FOUND)를 담은 API 에러.
+ * 화면은 `message`가 아니라 `code`로 분기한다(공통규칙 §6) — `code`를
+ * `constants/apiErrorMessages.ts`의 매핑에 넣어 화면 문구로 바꾼다.
+ * `fieldErrors`는 검증 오류가 없어도 항상 빈 배열로 내려오지만, 폼 필드 단위
+ * 에러가 필요 없는 화면은 그냥 무시하면 된다.
+ */
 export class ApiError extends Error {
   code: string;
+  fieldErrors: ApiFieldError[];
 
-  constructor(code: string, message: string) {
+  constructor(code: string, message: string, fieldErrors: ApiFieldError[] = []) {
     super(message);
     this.code = code;
+    this.fieldErrors = fieldErrors;
   }
 }
 
@@ -51,10 +65,15 @@ async function rawRequest<T>(
   options?: RequestOptions,
 ): Promise<T> {
   const accessToken = tokenStorage.getAccessToken();
+  // multipart(FormData) 요청은 Content-Type을 직접 정하면 안 된다 — 경계 문자열
+  // (boundary)이 빠져 서버가 파싱을 못 한다. fetch가 FormData를 보고 알아서
+  // 붙이게 이 헤더만 생략한다(File 도메인, services/fileService.ts).
+  const isFormData =
+    typeof FormData !== 'undefined' && options?.body instanceof FormData;
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(!options?.skipAuth && accessToken
         ? { Authorization: `Bearer ${accessToken}` }
         : {}),
@@ -70,7 +89,11 @@ async function rawRequest<T>(
 
   if (!response.ok) {
     const errorBody = body as ApiErrorBody;
-    throw new ApiError(errorBody.code, errorBody.message);
+    throw new ApiError(
+      errorBody.code,
+      errorBody.message,
+      errorBody.fieldErrors ?? [],
+    );
   }
 
   return (body as ApiResponse<T>).data;

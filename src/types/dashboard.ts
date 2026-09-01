@@ -11,8 +11,6 @@ export type MiniCalendarData = {
   month: number;
   monthLabel: string;
   days: MiniCalendarDay[];
-  /** 강조 색상으로 표시할 날짜 목록. */
-  highlightedDates: number[];
 };
 
 export type DuesProgress = {
@@ -67,7 +65,6 @@ export const MOCK_DASHBOARD_SUMMARY: DashboardSummary = {
       date: index + 1,
       amount,
     })),
-    highlightedDates: [1, 8],
   },
   duesProgressList: [
     {
