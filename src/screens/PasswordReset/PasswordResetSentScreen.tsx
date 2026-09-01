@@ -1,3 +1,4 @@
+/** @screen COM-3-PAGE-04-0 비밀번호 재설정_완료 */
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -5,6 +6,7 @@ import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/Navigation/App bar/BackButton';
 import Button from '../../components/Input/Button/Button';
+import { TYPOGRAPHY } from '../../constants/typography';
 import {
   PASSWORD_RESET_TITLE,
   PASSWORD_RESET_SENT_MESSAGE_SUFFIX,
@@ -59,13 +61,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h3,
     marginBottom: 24,
   },
   message: {
-    fontSize: 16,
-    lineHeight: 24,
+    ...TYPOGRAPHY.body1,
     marginBottom: 24,
   },
 });

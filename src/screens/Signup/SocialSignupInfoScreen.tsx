@@ -1,3 +1,4 @@
+/** @screen COM-3-PAGE-02-0 간편 가입 정보 입력 */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -10,6 +11,7 @@ import Button from '../../components/Input/Button/Button';
 import { isValidEmail } from '../../utils/validators';
 import { ApiError } from '../../services/apiClient';
 import * as authService from '../../services/authService';
+import { TYPOGRAPHY } from '../../constants/typography';
 import {
   SIGNUP_INFO_TITLE,
   SIGNUP_NAME_LABEL,
@@ -122,8 +124,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h1,
     marginBottom: 8,
   },
   header: {

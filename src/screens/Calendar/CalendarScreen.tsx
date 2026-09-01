@@ -1,3 +1,4 @@
+/** @screen DSH-2-PAGE-03-0 대시보드 캘린더 */
 import { useState } from 'react';
 import {
   Image,
@@ -13,20 +14,21 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Divider from '../../components/Data Display/Divider/Divider';
-import MonthGridCalendar from './MonthGridCalendar';
+import Calendar from '../../components/Data Display/Calendar/Calendar';
 import CalendarViewToggle from './CalendarViewToggle';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import { MOCK_CALENDAR_MONTH } from '../../types/calendar';
-import { shiftMonth } from '../../utils/calendarGrid';
+import { sumTransactions } from '../../utils/transactionSummary';
+import { formatDateKey, shiftMonth } from '../../utils/calendarGrid';
 import {
   CALENDAR_SCREEN_TITLE,
   CALENDAR_WEEKDAY_LABELS,
 } from '../../constants/calendarScreenText';
 import { BACKGROUND_SECONDARY } from '../../constants/colors';
+import { TYPOGRAPHY } from '../../constants/typography';
 
 const CHEVRON_LEFT_ICON = require('../../assets/icons/nav/Chevron Left.png');
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/Chevron Right.png');
-const NO_MOCK_DATE = -1;
 
 type CalendarScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -50,19 +52,30 @@ function CalendarScreen() {
     : {};
   const selectedTransactions =
     selectedDate != null ? transactionsByDate[selectedDate] ?? [] : [];
+  const amountsByDate = Object.fromEntries(
+    Object.entries(transactionsByDate).map(([date, txs]) => [
+      Number(date),
+      sumTransactions(txs),
+    ]),
+  );
 
-  const handlePressPrevMonth = () => {
-    const next = shiftMonth(viewedYear, viewedMonth, -1);
+  const selectedDateKey =
+    selectedDate != null
+      ? formatDateKey(viewedYear, viewedMonth, selectedDate)
+      : undefined;
+  const todayDateKey = isMockMonth
+    ? formatDateKey(viewedYear, viewedMonth, MOCK_CALENDAR_MONTH.todayDate)
+    : undefined;
+
+  const handleChangeMonth = (delta: number) => {
+    const next = shiftMonth(viewedYear, viewedMonth, delta);
     setViewedYear(next.year);
     setViewedMonth(next.month);
     setSelectedDate(null);
   };
 
-  const handlePressNextMonth = () => {
-    const next = shiftMonth(viewedYear, viewedMonth, 1);
-    setViewedYear(next.year);
-    setViewedMonth(next.month);
-    setSelectedDate(null);
+  const handleSelectDate = (dateKey: string) => {
+    setSelectedDate(Number(dateKey.split('.')[2]));
   };
 
   const handlePressDailyToggle = () => {
@@ -87,26 +100,30 @@ function CalendarScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.monthNavRow}>
           <View style={styles.monthNav}>
-            <Pressable onPress={handlePressPrevMonth} hitSlop={8}>
+            <Pressable onPress={() => handleChangeMonth(-1)} hitSlop={8}>
               <Image source={CHEVRON_LEFT_ICON} style={styles.chevronIcon} />
             </Pressable>
             <Text style={styles.monthLabel}>
               {viewedYear}.{String(viewedMonth).padStart(2, '0')}
             </Text>
-            <Pressable onPress={handlePressNextMonth} hitSlop={8}>
+            <Pressable onPress={() => handleChangeMonth(1)} hitSlop={8}>
               <Image source={CHEVRON_RIGHT_ICON} style={styles.chevronIcon} />
             </Pressable>
           </View>
           <CalendarViewToggle onPressDaily={handlePressDailyToggle} />
         </View>
 
-        <MonthGridCalendar
+        <Calendar
           year={viewedYear}
           month={viewedMonth}
-          todayDate={isMockMonth ? MOCK_CALENDAR_MONTH.todayDate : NO_MOCK_DATE}
-          transactionsByDate={transactionsByDate}
-          selectedDate={selectedDate}
-          onSelectDate={setSelectedDate}
+          selectedStartDate={selectedDateKey}
+          selectedEndDate={selectedDateKey}
+          outlinedDates={todayDateKey ? [todayDateKey] : []}
+          amountsByDate={amountsByDate}
+          onSelectDate={handleSelectDate}
+          onChangeMonth={handleChangeMonth}
+          showHeader={false}
+          showDateFields={false}
         />
 
         {selectedDateLabel && (
@@ -157,12 +174,10 @@ const styles = StyleSheet.create({
     height: 20,
   },
   monthLabel: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h3,
   },
   selectedDateLabel: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     marginTop: 16,
     marginBottom: 12,
   },

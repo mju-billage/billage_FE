@@ -7,6 +7,7 @@ import {
   FOREGROUND_NEUTRAL_NORMAL,
   NAVY_800,
 } from '../../constants/colors';
+import { TYPOGRAPHY } from '../../constants/typography';
 
 const GRID_ICON = require('../../assets/icons/system/Grid.png');
 const BRACKET_PATTERN = /(\[[^\]]+\])/g;
@@ -80,18 +81,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   title: {
-    fontSize: 15,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     flexShrink: 1,
   },
   time: {
-    fontSize: 12,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_DISABLED,
   },
   description: {
-    fontSize: 13,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_NORMAL,
-    lineHeight: 18,
   },
   highlightedText: {
     fontWeight: 'bold',

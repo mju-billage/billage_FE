@@ -1,35 +1,73 @@
-import { useState } from 'react';
+/** @screen DTB-2-PAGE-02-0 상세 내역_조회 */
+/** @screen DTB-3-MODAL-01-0 상세 내역_삭제 */
+/**
+ * 4-A(Entry API 연동): 실 서버 내역(entryId가 숫자 문자열)과 DTB 전체 목록의 목
+ * 데이터(`dtb-tx-N`, 4-B 전까지 유지)를 id 모양으로 구분해 같은 화면에서 같이
+ * 처리한다 — `TransactionsScreen`(모임 전체 목록, 손대지 말라고 지정된 화면)에서
+ * 들어오면 여전히 dtb-tx-N을 보고, `LedgerDetailScreen`/`LedgerSearchScreen`(이번에
+ * 옮긴 화면)에서 들어오면 실 Entry를 본다.
+ *
+ * 수정/삭제/승인은 전부 총무(OWNER) 전용(Entry.txt) — 일반 관리자는 본인이 등록한
+ * 승인 대기 내역도 못 고친다. 실 내역일 때만 `viewerIsOwner`로 아이콘을 감춘다
+ * (목 데이터는 권한 개념이 없어 그대로 둔다). 승인 진입점은 새 화면(DTB-2-PAGE-03-0,
+ * 미구현)을 만들지 않고 이 화면에 버튼 하나로 얹었다 — 장부 상세 목록에서 승인
+ * 대기 내역도 이미 탭해서 들어올 수 있어 여기가 유일하게 실제로 도달 가능한
+ * 지점이다.
+ */
+import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/Navigation/App bar/BackButton';
-import IconButton from '../../components/Input/Button/IconButton';
+import AppBar from '../../components/Navigation/App bar/AppBar';
 import Thumbnail from '../../components/Data Display/Image Placeholder/Thumbnail';
-import Receipt from '../../components/Data Display/Receipt/Receipt';
+import Badge from '../../components/Data Display/Badge/Badge';
+import Button from '../../components/Input/Button/Button';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
-import { deleteTransaction, getTransactionById } from '../../types/folder';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import {
+  deleteTransactionById as deleteDtbTransaction,
+  getTransactionById as getDtbTransactionById,
+} from '../../types/transaction';
+import type { EntryDetail } from '../../types/entry';
+import * as entryService from '../../services/entryService';
+import { getActiveGroup } from '../../types/group';
+import { ApiError } from '../../services/apiClient';
+import { buildAuthenticatedImageSource } from '../../utils/authenticatedImage';
+import {
+  API_ERROR_DEFAULT_MESSAGE,
+  API_NETWORK_ERROR_MESSAGE,
+  getApiErrorMessage,
+  isNetworkError,
+} from '../../constants/apiErrorMessages';
+import {
+  SNACKBAR_ENTRY_APPROVED,
+  TRANSACTION_APPROVAL_PENDING_BADGE,
+  TRANSACTION_APPROVE_LABEL,
   TRANSACTION_DATE_LABEL_EXPENSE,
   TRANSACTION_DATE_LABEL_INCOME,
   TRANSACTION_DELETE_CONFIRM_DESCRIPTION,
   TRANSACTION_DELETE_CONFIRM_LABEL,
   TRANSACTION_DELETE_CONFIRM_TITLE,
+  TRANSACTION_DETAIL_LOADING,
+  TRANSACTION_DETAIL_RETRY_LABEL,
   TRANSACTION_DETAIL_TITLE,
   TRANSACTION_ITEM_NAME_LABEL,
   TRANSACTION_LEDGER_LABEL,
   TRANSACTION_MANAGER_LABEL,
   TRANSACTION_MEMO_LABEL,
   TRANSACTION_MEMO_PLACEHOLDER,
-  TRANSACTION_RECEIPT_DETAIL_LABEL,
   TRANSACTION_RECEIPT_LABEL,
 } from '../../constants/ledgerScreenText';
 import {
   BORDER_NEUTRAL_NORMAL,
   FEEDBACK_POSITIVE_BOLD,
+  FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
+import { TYPOGRAPHY } from '../../constants/typography';
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const DELETE_ICON = require('../../assets/icons/action/Close.png');
@@ -43,98 +81,217 @@ type TransactionDetailRouteProp = RouteProp<
   'TransactionDetail'
 >;
 
-/** 상세 내역 조회 전용 화면. 수정 아이콘은 노출만 하고(내역 추가/수정 기능이 앱에 아직 없음), 삭제만 동작한다. */
+type LoadState = 'loading' | 'error' | 'ready';
+
+/** 실 Entry(숫자 id)인지 DTB 목 데이터(dtb-tx-N)인지 id 모양으로 구분한다. */
+function isRealEntryId(id: string): boolean {
+  return /^\d+$/.test(id);
+}
+
 function TransactionDetailScreen() {
   const navigation = useNavigation<TransactionDetailNavigationProp>();
   const route = useRoute<TransactionDetailRouteProp>();
-  const transaction = getTransactionById(route.params.transactionId);
+  const transactionId = route.params.transactionId;
+  const isRealEntry = isRealEntryId(transactionId);
 
+  const dtbTransaction = isRealEntry ? undefined : getDtbTransactionById(transactionId);
+
+  const [entry, setEntry] = useState<EntryDetail | null>(null);
+  const [loadState, setLoadState] = useState<LoadState>(isRealEntry ? 'loading' : 'ready');
+  const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
-  if (!transaction) {
+  const toErrorMessage = (error: unknown): string => {
+    if (isNetworkError(error)) {
+      return API_NETWORK_ERROR_MESSAGE;
+    }
+    if (error instanceof ApiError) {
+      return getApiErrorMessage(error.code);
+    }
+    return API_ERROR_DEFAULT_MESSAGE;
+  };
+
+  const load = useCallback(async () => {
+    if (!isRealEntry) {
+      return;
+    }
+    setLoadState('loading');
+    try {
+      const detail = await entryService.getEntryDetail(transactionId);
+      setEntry(detail);
+      setLoadState('ready');
+    } catch (error) {
+      setLoadErrorMessage(toErrorMessage(error));
+      setLoadState('error');
+    }
+  }, [isRealEntry, transactionId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
+  );
+
+  const showSnackbar = (message: string) => {
+    setSnackbarMessage(message);
+    setTimeout(() => setSnackbarMessage(null), 1600);
+  };
+
+  const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
+
+  const handleConfirmDelete = async () => {
+    if (dtbTransaction) {
+      deleteDtbTransaction(dtbTransaction.id);
+      setDeleteDialogVisible(false);
+      navigation.goBack();
+      return;
+    }
+    if (!entry || isDeleting) {
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      await entryService.deleteEntry(entry.id);
+      setDeleteDialogVisible(false);
+      navigation.goBack();
+    } catch (error) {
+      setDeleteDialogVisible(false);
+      showSnackbar(toErrorMessage(error));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleApprove = async () => {
+    if (!entry || isApproving) {
+      return;
+    }
+    setIsApproving(true);
+    try {
+      await entryService.approveEntry(entry.id);
+      showSnackbar(SNACKBAR_ENTRY_APPROVED);
+      load();
+    } catch (error) {
+      showSnackbar(toErrorMessage(error));
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
+  if (isRealEntry && (loadState === 'loading' || loadState === 'error')) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+        <AppBar title={TRANSACTION_DETAIL_TITLE} onBackPress={() => navigation.goBack()} />
+        <View style={styles.stateContainer}>
+          <Text style={styles.stateText}>
+            {loadState === 'loading' ? TRANSACTION_DETAIL_LOADING : loadErrorMessage}
+          </Text>
+          {loadState === 'error' && (
+            <Button label={TRANSACTION_DETAIL_RETRY_LABEL} onPress={load} hierarchy="secondary" />
+          )}
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const transaction = dtbTransaction;
+  if (!isRealEntry && !transaction) {
+    return null;
+  }
+  if (isRealEntry && !entry) {
     return null;
   }
 
-  const isIncome = transaction.amount > 0;
-  const receiptTotal = transaction.receiptLineItems?.reduce(
-    (sum, line) => sum + line.amount,
-    0,
-  );
-
-  const handleConfirmDelete = () => {
-    deleteTransaction(transaction.id);
-    setDeleteDialogVisible(false);
-    navigation.goBack();
-  };
+  // 실 Entry/목 데이터를 이 화면이 필요로 하는 공통 필드로 정규화한다.
+  const isIncome = isRealEntry ? entry!.type === 'INCOME' : transaction!.amount > 0;
+  const amount = isRealEntry ? entry!.amount : Math.abs(transaction!.amount);
+  const dateValue = isRealEntry ? entry!.occurredOn : transaction!.date;
+  const itemNameValue = isRealEntry ? entry!.title : transaction!.itemName;
+  const ledgerNameValue = isRealEntry ? entry!.ledgerName : transaction!.ledgerName;
+  const memoValue = isRealEntry ? entry!.memo ?? '' : transaction!.memo;
+  const canEditDelete = isRealEntry ? viewerIsOwner : true;
+  const isPending = isRealEntry && entry!.approvalStatus === 'PENDING';
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <View style={styles.headerLeft}>
-          <BackButton onPress={() => navigation.goBack()} />
-          <Text style={styles.title}>{TRANSACTION_DETAIL_TITLE}</Text>
-        </View>
-        <View style={styles.headerActions}>
-          <IconButton
-            icon={EDIT_ICON}
-            onPress={() => {}}
-            accessibilityLabel="edit"
-          />
-          <IconButton
-            icon={DELETE_ICON}
-            onPress={() => setDeleteDialogVisible(true)}
-            accessibilityLabel="delete"
-          />
-        </View>
-      </View>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <AppBar
+        title={TRANSACTION_DETAIL_TITLE}
+        onBackPress={() => navigation.goBack()}
+        rightIcons={
+          canEditDelete
+            ? [
+                {
+                  icon: EDIT_ICON,
+                  onPress: () =>
+                    navigation.navigate('TransactionRegister', { transactionId }),
+                  accessibilityLabel: 'edit',
+                },
+                {
+                  icon: DELETE_ICON,
+                  onPress: () => setDeleteDialogVisible(true),
+                  accessibilityLabel: 'delete',
+                },
+              ]
+            : []
+        }
+      />
 
       <ScrollView contentContainerStyle={styles.content}>
+        {isPending && (
+          <Badge label={TRANSACTION_APPROVAL_PENDING_BADGE} status="warning" />
+        )}
         <Text style={[styles.amount, isIncome && styles.amountPositive]}>
           {isIncome ? '+' : ''}
-          {transaction.amount.toLocaleString()}원
+          {amount.toLocaleString()}원
         </Text>
 
         <Field
-          label={
-            isIncome
-              ? TRANSACTION_DATE_LABEL_INCOME
-              : TRANSACTION_DATE_LABEL_EXPENSE
-          }
-          value={transaction.date}
+          label={isIncome ? TRANSACTION_DATE_LABEL_INCOME : TRANSACTION_DATE_LABEL_EXPENSE}
+          value={dateValue}
         />
-        <Field
-          label={TRANSACTION_ITEM_NAME_LABEL}
-          value={transaction.itemName}
-        />
-        <Field label={TRANSACTION_MANAGER_LABEL} value={transaction.manager} />
-        <Field
-          label={TRANSACTION_LEDGER_LABEL}
-          value={transaction.ledgerName}
-        />
+        <Field label={TRANSACTION_ITEM_NAME_LABEL} value={itemNameValue} />
+        {!isRealEntry && (
+          <Field label={TRANSACTION_MANAGER_LABEL} value={transaction!.manager} />
+        )}
+        <Field label={TRANSACTION_LEDGER_LABEL} value={ledgerNameValue} />
         <Field
           label={TRANSACTION_MEMO_LABEL}
-          value={transaction.memo || TRANSACTION_MEMO_PLACEHOLDER}
+          value={memoValue || TRANSACTION_MEMO_PLACEHOLDER}
         />
 
-        {transaction.receiptImages.length > 0 && (
+        {isRealEntry && entry!.receiptFiles.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>{TRANSACTION_RECEIPT_LABEL}</Text>
             <View style={styles.thumbnailRow}>
-              {transaction.receiptImages.map(image => (
+              {entry!.receiptFiles.map(file => {
+                const source = buildAuthenticatedImageSource(file.url);
+                return <Thumbnail key={file.id} imageUri={source.uri} imageHeaders={source.headers} />;
+              })}
+            </View>
+          </View>
+        )}
+
+        {!isRealEntry && transaction!.receiptImages.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>{TRANSACTION_RECEIPT_LABEL}</Text>
+            <View style={styles.thumbnailRow}>
+              {transaction!.receiptImages.map(image => (
                 <Thumbnail key={image} />
               ))}
             </View>
           </View>
         )}
 
-        {transaction.receiptLineItems && (
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>
-              {TRANSACTION_RECEIPT_DETAIL_LABEL}
-            </Text>
-            <Receipt
-              items={transaction.receiptLineItems}
-              total={receiptTotal ?? 0}
+        {isPending && viewerIsOwner && (
+          <View style={styles.approveButtonWrapper}>
+            <Button
+              label={TRANSACTION_APPROVE_LABEL}
+              onPress={handleApprove}
+              disabled={isApproving}
+              fullWidth
             />
           </View>
         )}
@@ -145,10 +302,18 @@ function TransactionDetailScreen() {
         title={TRANSACTION_DELETE_CONFIRM_TITLE}
         description={TRANSACTION_DELETE_CONFIRM_DESCRIPTION}
         confirmLabel={TRANSACTION_DELETE_CONFIRM_LABEL}
+        destructive
+        confirmDisabled={isDeleting}
         onCancel={() => setDeleteDialogVisible(false)}
         onConfirm={handleConfirmDelete}
       />
-    </View>
+
+      {snackbarMessage && (
+        <View style={styles.snackbarWrapper}>
+          <Snackbar visible title={snackbarMessage} />
+        </View>
+      )}
+    </SafeAreaView>
   );
 }
 
@@ -164,35 +329,26 @@ function Field({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    marginBottom: 16,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
   },
   content: {
+    paddingTop: 16,
     paddingHorizontal: 24,
     paddingBottom: 40,
+    gap: 0,
+  },
+  stateContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  stateText: {
+    ...TYPOGRAPHY.body2,
+    color: FOREGROUND_DISABLED,
   },
   amount: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h1,
+    marginTop: 8,
     marginBottom: 24,
   },
   amountPositive: {
@@ -206,12 +362,11 @@ const styles = StyleSheet.create({
     borderBottomColor: BORDER_NEUTRAL_NORMAL,
   },
   fieldLabel: {
-    fontSize: 14,
+    ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   fieldValue: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     flexShrink: 1,
     textAlign: 'right',
   },
@@ -219,14 +374,22 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   sectionLabel: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
     marginBottom: 12,
   },
   thumbnailRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+  },
+  approveButtonWrapper: {
+    marginTop: 24,
+  },
+  snackbarWrapper: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    bottom: 24,
   },
 });
 

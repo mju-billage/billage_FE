@@ -1,0 +1,45 @@
+/** @screen ADD-2-SHEET-05-0 증빙자료 등록 */
+import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
+import Menu from '../../components/Navigation/Menu/Menu';
+import type { MenuItem } from '../../components/Navigation/Menu/Menu';
+import {
+  ATTACH_MENU_GALLERY_LABEL,
+  ATTACH_MENU_PHOTO_LABEL,
+  ATTACH_MENU_SCAN_LABEL,
+} from '../../constants/transactionScreenText';
+
+const SCAN_ICON = require('../../assets/icons/content/Ocr.png');
+const CAMERA_ICON = require('../../assets/icons/content/Camera.png');
+const GALLERY_ICON = require('../../assets/icons/content/Image.png');
+
+export type AttachMenuKey = 'scan' | 'photo' | 'gallery';
+
+const ATTACH_MENU_ITEMS: MenuItem[] = [
+  { key: 'scan', label: ATTACH_MENU_SCAN_LABEL, icon: SCAN_ICON },
+  { key: 'photo', label: ATTACH_MENU_PHOTO_LABEL, icon: CAMERA_ICON },
+  { key: 'gallery', label: ATTACH_MENU_GALLERY_LABEL, icon: GALLERY_ICON },
+];
+
+type TransactionAttachMenuSheetProps = {
+  visible: boolean;
+  onClose: () => void;
+  onSelect: (key: AttachMenuKey) => void;
+};
+
+/** 증빙자료 추가 버튼을 누르면 뜨는 바텀시트: 영수증 스캔/사진 촬영/사진 선택. */
+function TransactionAttachMenuSheet({
+  visible,
+  onClose,
+  onSelect,
+}: TransactionAttachMenuSheetProps) {
+  return (
+    <BottomSheet visible={visible} onClose={onClose}>
+      <Menu
+        sections={[ATTACH_MENU_ITEMS]}
+        onSelect={key => onSelect(key as AttachMenuKey)}
+      />
+    </BottomSheet>
+  );
+}
+
+export default TransactionAttachMenuSheet;

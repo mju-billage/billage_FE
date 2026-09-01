@@ -1,3 +1,4 @@
+/** @screen COM-1-PAGE-01-0 로그인 */
 import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -5,6 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import TextField from '../components/Input/Text Field/TextField';
 import Button from '../components/Input/Button/Button';
+import TextButton from '../components/Input/Button/TextButton';
 import {
   BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_SUBTLE,
@@ -14,6 +16,7 @@ import {
   SOCIAL_KAKAO_YELLOW,
   SOCIAL_NAVER_GREEN,
 } from '../constants/colors';
+import { TYPOGRAPHY } from '../constants/typography';
 import { SocialProfile, SocialType } from '../types/social';
 import { ApiError } from '../services/apiClient';
 import * as authService from '../services/authService';
@@ -92,8 +95,7 @@ const socialBadgeStyles = StyleSheet.create({
     justifyContent: 'center',
   },
   label: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.h3,
   },
 });
 
@@ -201,6 +203,7 @@ function LoginScreen() {
           autoCapitalize="none"
           keyboardType="email-address"
         />
+        <View id="hv" style={{ height: 8}} />
         <TextField
           value={password}
           onChangeText={text => {
@@ -212,21 +215,25 @@ function LoginScreen() {
           error={loginError}
         />
       </View>
-
+      <View id="hv" style={{ height: 16}} />
       <Button
         label={LOGIN_SUBMIT_LABEL}
         onPress={handleLogin}
         disabled={isSubmitting}
         fullWidth
       />
-
+      <View id="hv" style={{ height: 16}} />
       <View style={styles.linkRow}>
-        <Pressable onPress={handleFindPassword}>
-          <Text style={styles.linkText}>{LOGIN_FIND_PASSWORD_LABEL}</Text>
-        </Pressable>
-        <Pressable onPress={handleGoToSignup}>
-          <Text style={styles.linkText}>{LOGIN_GO_TO_SIGNUP_LABEL}</Text>
-        </Pressable>
+        <TextButton
+          label={LOGIN_FIND_PASSWORD_LABEL}
+          onPress={handleFindPassword}
+          hierarchy="tertiary"
+        />
+        <TextButton
+          label={LOGIN_GO_TO_SIGNUP_LABEL}
+          onPress={handleGoToSignup}
+          hierarchy="tertiary"
+        />
       </View>
 
       <View style={styles.socialRow}>
@@ -278,11 +285,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 16,
     marginTop: 4,
-  },
-  linkText: {
-    fontSize: 13,
-    color: FOREGROUND_NEUTRAL_NORMAL,
-    textDecorationLine: 'underline',
   },
   socialRow: {
     flexDirection: 'row',
