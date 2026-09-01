@@ -1,6 +1,7 @@
 import { clearSession, request, storeTokens, TokenPair } from './apiClient';
 import * as tokenStorage from './tokenStorage';
 import { SocialType } from '../types/social';
+import { clearCurrentUser, setCurrentUser } from '../types/session';
 
 export type SignupRequest = {
   email: string;
@@ -39,6 +40,14 @@ export function signup(payload: SignupRequest): Promise<SignupResponse> {
   });
 }
 
+function cacheCurrentUser(user: AuthUserResponse): void {
+  setCurrentUser({
+    userId: String(user.userId),
+    name: user.name,
+    email: user.email,
+  });
+}
+
 /** 이메일/비밀번호로 로그인하고, 발급된 토큰을 저장한다. */
 export async function login(
   payload: LoginRequest,
@@ -52,17 +61,20 @@ export async function login(
     },
   );
   await storeTokens(tokens);
+  cacheCurrentUser(user);
   return user;
 }
 
-/** 현재 세션(Access Token)에 로그인된 사용자 정보를 조회한다. */
-export function getCurrentUser(): Promise<AuthUserResponse> {
-  return request<AuthUserResponse>('/api/v1/auth/me', {
+/** 현재 세션(Access Token)에 로그인된 사용자 정보를 조회하고, 조회 결과를 캐시에 반영한다. */
+export async function getCurrentUser(): Promise<AuthUserResponse> {
+  const user = await request<AuthUserResponse>('/api/v1/auth/me', {
     method: 'GET',
   });
+  cacheCurrentUser(user);
+  return user;
 }
 
-/** 저장된 Refresh Token을 서버에서 폐기하고, 로컬 토큰도 모두 삭제한다. */
+/** 저장된 Refresh Token을 서버에서 폐기하고, 로컬 토큰과 사용자 캐시도 모두 삭제한다. */
 export async function logout(): Promise<void> {
   try {
     const refreshToken = await tokenStorage.getRefreshToken();
@@ -75,6 +87,7 @@ export async function logout(): Promise<void> {
     }
   } finally {
     await clearSession();
+    clearCurrentUser();
   }
 }
 
