@@ -25,7 +25,7 @@ function NotificationScreen() {
   const navigation = useNavigation<NotificationScreenNavigationProp>();
 
   const handlePressSettings = () => {
-    // TODO: 알림 설정 화면 구현 후 연결
+    navigation.navigate('NotificationSettings');
   };
 
   return (

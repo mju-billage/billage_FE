@@ -9,7 +9,7 @@ import { TYPOGRAPHY } from '../../constants/typography';
 type QuickServiceCardProps = {
   item: QuickServiceItem;
   onPress: () => void;
-};
+};  
 
 /** 대시보드 하단의 보고서/통계/증빙자료 바로가기 카드. */
 function QuickServiceCard({ item, onPress }: QuickServiceCardProps) {
@@ -26,7 +26,7 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: FILL_NEUTRAL_SUBTLE,
-    borderRadius: 16,
+    borderRadius: 8,
     padding: 12,
     justifyContent: 'space-between',
     minHeight: 100,
@@ -40,8 +40,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   icon: {
-    width: 20,
-    height: 20,
+    width: 40,
+    height: 40,
     alignSelf: 'flex-end',
     marginTop: 8,
   },

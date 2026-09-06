@@ -45,3 +45,9 @@ export function formatDateKey(year: number, month: number, date: number) {
     '0',
   )}`;
 }
+
+/** 오늘 날짜를 'YYYY.MM.DD' 형식으로 반환한다. */
+export function todayKey(): string {
+  const now = new Date();
+  return formatDateKey(now.getFullYear(), now.getMonth() + 1, now.getDate());
+}

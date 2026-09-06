@@ -6,10 +6,17 @@
  * 도입했다 — `authService.login()`/`restoreSession()`이 채우고 `logout()`이 비운다.
  * 화면에서 직접 API를 다시 호출하지 않도록 group.ts의 활성 모임 캐시와 같은 패턴을 쓴다.
  */
+export type LoginProvider = 'EMAIL' | 'KAKAO' | 'NAVER' | 'GOOGLE';
+
 export type CurrentUser = {
   userId: string;
   name: string;
   email: string;
+  /** 8-A(내 프로필)에서 추가 — 로그인 응답엔 아직 안 오고 `GET /auth/me`(진행 중)에만
+   * 있어, 로그인 직후엔 undefined일 수 있다(내 프로필 화면이 자체적으로 다시 조회). */
+  profileImageUrl?: string | null;
+  loginProvider?: LoginProvider;
+  createdAt?: string;
 };
 
 let currentUser: CurrentUser | null = null;

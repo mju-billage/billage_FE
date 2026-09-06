@@ -6,7 +6,6 @@ import Button from '../../components/Input/Button/Button';
 import TextButton from '../../components/Input/Button/TextButton';
 import CheckListItem from '../../components/Data Display/Lists/CheckListItem';
 import Chip from '../../components/Data Display/Chips/Chip';
-import { getTransactionLedgerOptions } from '../../types/transaction';
 import {
   FILTER_LEDGER_ADD_LABEL,
   LEDGER_SELECT_CREATE_NEW_LABEL,
@@ -17,8 +16,12 @@ import {
 import { FOREGROUND_SECONDARY } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
+type LedgerOption = { id: string; name: string };
+
 type TransactionLedgerMultiSelectSheetProps = {
   visible: boolean;
+  /** 실 API에서 부모(`TransactionFilterSheet`)가 가져와 내려준다. */
+  options: LedgerOption[];
   selectedIds: string[];
   onClose: () => void;
   onApply: (ledgerIds: string[]) => void;
@@ -28,13 +31,13 @@ type TransactionLedgerMultiSelectSheetProps = {
 /** 필터 시트의 "장부" 다중선택 바텀시트. 장부가 없으면 안내문+생성 링크를 보여준다. */
 function TransactionLedgerMultiSelectSheet({
   visible,
+  options,
   selectedIds,
   onClose,
   onApply,
   onPressCreateNewLedger,
 }: TransactionLedgerMultiSelectSheetProps) {
   const [draftIds, setDraftIds] = useState<string[]>(selectedIds);
-  const options = getTransactionLedgerOptions();
 
   const toggleLedger = (id: string) => {
     setDraftIds(current =>

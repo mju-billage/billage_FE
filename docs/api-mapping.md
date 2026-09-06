@@ -1,233 +1,219 @@
 # API ↔ 화면 매핑 (api-mapping)
 
-명세 원본: `C:\Users\jotmd\Downloads\BILLIGE\api\`(txt 14개, 공통 규칙 1 + 도메인 13). 화면 매핑은 `src/screens/**/*.tsx` 파일 상단의 `@screen` 주석을 근거로 했다(전수 `grep` 확인, 76개 중 DUE 도메인 28개는 화면 자체가 없어 매핑 대상에서 제외).
+명세 원본: `C:\Users\jotmd\Downloads\BILLIGE\api\`(txt 16개 — 공통 규칙 1 + 도메인 15, `Notification & Support`·`Statistics` 2개 신설). 화면 매핑은 `src/screens/**/*.tsx` 상단 `@screen` 주석 전수 `grep` 기준.
 
-이 문서 갱신 시점: 2026-08-30. 서버 상태·엔드포인트는 위 txt 스냅샷 기준이며 이후 명세가 바뀌면 이 문서도 다시 훑어야 한다.
+참고 자료: `명세대조표.zip`(대조 2026-09-01, FE `04b6c50`/BE `245eeb4` 기준 — Figma 원문 + BE 컨트롤러·DTO를 직접 대조해 만든 문서). 이 문서 곳곳에서 "대조표"로 인용한다.
+
+이 문서 갱신 시점: **2026-09-04(실호출 검증 반영)**. `API 공통 규칙.txt`만 이번 명세 갱신에서 안 바뀌었다(mtime 08-29 그대로).
+
+⚠️ **명세 자체의 상태 태그(`구현 완료`/`미구현`)와 대조표의 실측 결과가 다른 경우가 여럿이다** — 대조표는 BE 컨트롤러·DTO를 직접 열어 확인했다고 밝힌다. 2026-09-04에 개발 서버 실호출 3건으로 그중 Dues `startDate`·상태 3종·Entry 모임 전체 목록 응답 구조를 확정했다(전부 **대조표가 맞고 명세 "미구현" 태그가 낡은 것**이었다 — 상세 요청/응답 전문은 `docs/api-gaps.md` "확정됨" 절). 아래 표에서 이 3건은 더 이상 "상충"으로 표기하지 않는다. 나머지(Folder `folder-items`류, File 앨범, Report `reportType`, Dues `amount`·일괄변경 5건)는 여전히 미확인 — "대조표:"로 병기해 뒀다.
 
 ---
 
 ## 1. 엔드포인트 → 화면 (도메인별)
 
-### Auth (인증) — 서버 상태: 진행 중/예정, 프론트는 이미 실제 연동됨
+### Auth (인증) — 이메일 로그인/가입/재발급 `진행 중`, 소셜 가입 감사로 6개 신규(전부 `미구현`)
 
-| 엔드포인트 | 서버 상태 | 사용 화면 (Screen ID) | 현재 대신하는 목 함수 | 권한 |
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
 |---|---|---|---|---|
-| `POST /api/v1/auth/signup` | 진행 중 | COM-3-PAGE-03-0(가입 정보 입력) | 없음 — `authService.signup()`이 이미 이 엔드포인트를 직접 호출 | Public |
-| `POST /api/v1/auth/login` | 진행 중 | COM-1-PAGE-01-0(로그인) | 없음 — `authService.login()`이 이미 직접 호출 | Public |
-| `POST /api/v1/auth/refresh` | 진행 예정 | (화면 없음, `apiClient.ts`의 401 재시도 로직에서 자동 호출) | 없음 — `apiClient.refreshSession()`이 이미 직접 호출 | Refresh Token |
-| `GET /api/v1/auth/me` | 진행 중 | (화면 없음, 앱 시작 시 세션 복원용) | 없음 — `authService.restoreSession()`이 이미 직접 호출 | Login |
-| `POST /api/v1/auth/logout` | 진행 예정 | ETC-4-MODAL-04-0(로그아웃) — **[미구현] 상태, 화면 코드 자체가 없음** | 없음 — `authService.logout()` 함수는 이미 있으나 호출할 화면이 없음 | Refresh Token |
+| `POST /auth/signup` | 진행 중 | COM-3-PAGE-03-0 | 연동 완료 | Public |
+| `POST /auth/login` | 진행 중 | COM-1-PAGE-01-0 | 연동 완료 | Public |
+| `POST /auth/refresh` | 진행 예정 | (화면 없음, 401 재시도) | 연동 완료 | Refresh Token |
+| `GET /auth/me` | 진행 중 | (세션 복원용) + ETC-3-PAGE-07-0(내 프로필)·ETC-2-PAGE-09-0(설정 허브) | 연동 완료 — **2026-09-06 해결(8-A)**: User.txt(6필드: +profileImageUrl/loginProvider/createdAt)가 최신 확장판으로 확인돼(같은 경로, Auth.txt 3필드는 구버전 서술) `authService.AuthUserResponse`/`CurrentUser`에 3필드 추가 반영 | Login |
+| `POST /auth/logout` | 진행 예정 | ETC-4-MODAL-04-0(로그아웃) | `authService.logout()` — **2026-09-06 연결 완료**, `screens/More/MyProfileScreen.tsx`(로그아웃 확인 Dialog) | Refresh Token |
+| `POST /auth/email/verification` | 미구현 | COM-4-PAGE-01-0(이메일 인증) | 화면·타이머는 있으나 동작 없음 | Public |
+| `POST /auth/email/verification/confirm` | 미구현 | COM-4-PAGE-01-0 | 위와 동일 | Public |
+| 회원가입 Body 확장(`verificationToken`/`agreements`) | 미구현 | COM-3-PAGE-03-0 | 미반영 | Public |
+| `POST /auth/password/reset` | 미구현 | COM-2-PAGE-02-0(비밀번호 재설정) | 화면은 있으나 TODO | Public |
+| `PATCH /auth/password` | 미구현 | ETC-4-PAGE-17-0(비밀번호 변경) | **2026-09-06 화면 완성**(`screens/More/PasswordChangeScreen.tsx`, `authService.changePassword`) — 서버 미구현이라 호출하면 에러 상태, 명세대로 작성해둠 | Login |
+| `DELETE /auth/me` | 미구현 | COM-1-PAGE-02-0(탈퇴)~COM-2-PAGE-04/05-0(권한이전/사유) — **[미구현]**, 화면 자체가 없음 | 없음 | Login |
 
-> Auth는 이 프로젝트에서 유일하게 **목 데이터가 아니라 이미 실제 서버를 호출하는 도메인**이다(`5f50502 feat: JWT 기반 회원가입/로그인 백엔드 연동` 커밋). 소셜 로그인(`socialLogin`/`socialSignup`)만 예외 — 명세에 없는 `/api/v1/auth/social/*` 경로를 코드가 가정해서 호출한다(§api-gaps.md (A) 참고).
+> 소셜 로그인(`/auth/social/login`·`/auth/social/signup`): 이 16개 spec 파일 어디에도 문서화돼 있지 않다. **대조표는 "서버에 실제로 있고 경로도 일치한다, FE 주석(추측 경로 표기)만 지우고 연결하면 된다"고 확인했다** — BE 컨트롤러를 직접 봤다는 뜻이다. Auth.txt 자체는 여전히 이 경로를 언급하지 않아 **명세 문서화 누락**으로 본다(엔드포인트 부재가 아니라 문서 공백). `services/authService.ts`는 이미 이 경로를 호출하고 있다(코드 수정 불필요 — 주석만 낡음).
 
-### User (사용자) — 서버 상태: 진행 중
+### User (사용자) — 경로 정정: `/users/me`가 아니라 `/auth/me`
 
-| 엔드포인트 | 서버 상태 | 사용 화면 | 현재 목 함수 | 권한 |
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
 |---|---|---|---|---|
-| `GET /api/v1/users/me` | 진행 중 | ETC-3-PAGE-07-0(내 프로필) — **[미구현]** | 없음(화면 자체가 없음) | Login |
-| `PATCH /api/v1/users/me` | 진행 중 | ETC-4-PAGE-15-0(프로필 변경) — **[미구현]** | 없음(화면 자체가 없음) | Login |
+| `GET /auth/me`(User.txt 표기 `/users/me`는 오기 — 실제 경로는 Auth와 동일) | 진행 중 | ETC-3-PAGE-07-0(내 프로필) | **2026-09-06 화면 완성**(`screens/More/MyProfileScreen.tsx`) | Login |
+| `PATCH /auth/me`(User.txt 표기 `/users/me`는 오기) | 진행 중 | ETC-4-PAGE-15-0(프로필 변경) | **2026-09-06 화면 완성**(`screens/More/ProfileEditScreen.tsx`, `authService.updateMyProfile`) — 이미지는 mock 제약으로 "기본 프로필로 변경"(`null`)만 실제 전송됨 | Login |
 
-### Group (모임) — 서버 상태: 구현 완료
+> `GET /auth/me` 응답 필드 수 불일치는 해결됨 — User.txt(6필드)가 최신 확장판, Auth.txt(3필드)는 로그인/세션 복원용 구버전 서술로 판단하고 화면을 만들었다(위 Auth 표 참고). **실호출 재확인은 아직 못 함** — 서버가 이 두 엔드포인트를 "진행 중"에서 완료로 올리면 실제 응답이 이 판단과 맞는지 다시 확인할 것.
+> `profileImageFileId`는 Group의 `groupImageFileId`와 같은 3-state 규칙(생략=유지/`null`=기본값/값=교체)이다 — 단, 실제 파일 업로드가 없어 값 지정 케이스는 이번에 코드로 안 붙였다(위 design-verification.md 참고).
 
-| 엔드포인트 | 서버 상태 | 사용 화면 | 현재 목 함수 | 권한 |
+### Group (모임) — 전체 구현 완료
+
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
 |---|---|---|---|---|
-| `GET /api/v1/groups` | 구현 완료 | ETC-2-PAGE-01-0(전체 모임 관리), MoreScreen 헤더 드롭다운 | `getMyGroups()` (`types/group.ts`) | Login |
-| `POST /api/v1/groups` | 구현 완료 | ETC-4-PAGE-01-0(새 모임 생성) | `createGroup()` (`types/group.ts`) | Login |
-| `GET /api/v1/groups/{groupId}` | 구현 완료 | ETC-2-PAGE-03-0(모임 관리자) 등 여러 화면의 모임명 표시 | `getActiveGroup()` / `getGroupById()` (`types/group.ts`) | MEMBER |
-| `PATCH /api/v1/groups/{groupId}` | 구현 완료 | ETC-3-PAGE-01-0(모임 프로필 변경) — **[미구현]** | 없음(화면 자체가 없음) | OWNER |
-| `DELETE /api/v1/groups/{groupId}` | 구현 완료 | ETC-3-MODAL-02-0(모임 삭제하기) — **[미구현]** | 없음(화면 자체가 없음) | OWNER |
+| `GET /groups` | 구현 완료 | ETC-2-PAGE-01-0, MoreScreen 헤더 | 연동 완료 | Login |
+| `POST /groups` | 구현 완료 | ETC-4-PAGE-01-0 | 연동 완료 | Login |
+| `GET /groups/{groupId}` | 구현 완료 | 여러 화면 | 연동 완료 | MEMBER |
+| `PATCH /groups/{groupId}` | 구현 완료 | ETC-3-PAGE-01-0(모임 프로필 변경) — **[미구현]** | 없음(화면 없음) | OWNER |
+| `DELETE /groups/{groupId}` | 구현 완료, **Body(`confirmName`) 검증은 미구현**(모임명 오타 방지, 2026-08-30 추가) | ETC-3-MODAL-02-0(모임 삭제) — **[미구현]** | 없음(화면 없음) | OWNER |
 
-### GroupMembership (모임 관리자) — 서버 상태: 구현 완료
+> **명세 자기모순(2026-08-30 감사, 명세 자체가 지적)**: 새 모임 생성 화면은 "최대 20자", 모임 프로필 변경 화면은 "최대 10자"로 서로 다르다. 글로벌 정책·현재 구현 모두 10자 — 화면 만들 때 10자로.
+> 모임 생성은 이름만 받는다 — `description` 입력 화면이 어디에도 없다(필드 자체는 무해하니 안 보내도 됨).
 
-| 엔드포인트 | 서버 상태 | 사용 화면 | 현재 목 함수 | 권한 |
+### GroupMembership (모임 관리자) — 신규 2건 + 응답 확장 다수
+
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
 |---|---|---|---|---|
-| `GET /api/v1/groups/{groupId}/memberships` | 구현 완료 | ETC-2-PAGE-03-0(모임 관리자) | `getGroupMembers()` (`types/group.ts`) — ⚠️ 이 함수가 반환하는 `GroupMember`는 실제로는 `GroupMembership`+`Member`가 뒤섞인 목 타입이다(§api-type-design.md) | MEMBER |
-| `POST /api/v1/groups/{groupId}/invitations` | 구현 완료 | ETC-2-PAGE-03-0의 "초대코드" 카드(코드 생성 UI는 없고 이미 발급된 코드를 노출만 함) | `GroupSummary.inviteCode`를 모임 생성 시 클라이언트가 즉석 생성(`generateInviteCode()`) | OWNER |
-| `POST /api/v1/groups/join` | 구현 완료 | ETC-4-SHEET-01-0(모임 참여) | `joinGroupByCode()` (`types/group.ts`) | Login |
-| `PATCH /api/v1/groups/{groupId}/memberships/{membershipId}` | 구현 완료 | ETC-4-MODAL-01-0(일반 전환)/ETC-4-MODAL-02-0(총무 전환) | `updateMemberRole()` (`types/group.ts`) | OWNER |
-| `POST /api/v1/groups/{groupId}/leave` | 구현 완료 | ETC-3-MODAL-01-0(모임 나가기 일반)/ETC-3-MODAL-01-1(마지막 총무 막힘) | `leaveGroup()` (`types/group.ts`) | MEMBER |
+| `GET /groups/{groupId}/memberships` | 구현 완료. **정렬 변경**(총무 먼저→이름순, 2026-09-03) + **응답에 `email` 추가**(2026-08-30, 기존 필드 공백 해소) | ETC-2-PAGE-03-0 | 연동 완료이나 **정렬·email 미반영**(a) | MEMBER |
+| `POST /groups/{groupId}/invitations` | 구현 완료. **2026-09-01부터 멱등 발급**으로 변경(유효 코드 있으면 재사용) | ETC-2-PAGE-03-0 | 연동 완료(자동발급 제거 로직 유지 중이나, 이제 **7번 조회 API로 교체 가능**)(a) | OWNER |
+| `POST /groups/join` | 구현 완료 | ETC-4-SHEET-01-0 | 연동 완료 | Login |
+| `PATCH /groups/{groupId}/memberships/{membershipId}` | 구현 완료. **성공 응답이 1번(목록)과 동일 형태로 확정**(2026-09-01, `email`·`joinedAt` 포함) | ETC-4-MODAL-01/02-0 | 연동 완료이나 **캐시 갱신 로직이 옛 좁은 응답을 가정**(a) | OWNER |
+| `POST /groups/{groupId}/leave` | 구현 완료 | ETC-3-MODAL-01-0/01-1 | 연동 완료 | MEMBER |
+| `DELETE /groups/{groupId}/memberships/{membershipId}` (강제 내보내기) | **구현 완료**(2026-08-30 명세 보강 — 원래도 구현돼 있었으나 문서에 없었음) | ETC-4-MODAL-03-0(모임 내보내기) — **[미구현]** | 없음(화면 없음). `removeMember()`는 6-B 이전 목 함수, 정리 대상 | OWNER |
+| `GET /groups/{groupId}/invitations/current` (초대 코드 조회) | **구현 완료**(2026-09-01 신설) | ETC-2-PAGE-03-0 | 미연동(b) — 이게 생기면서 진입 시 "발급 대신 조회"로 바꿀 수 있음 | MEMBER(코드 없을 때 신규 발급은 OWNER만) |
 
-### Member (모임원 명단) — 서버 상태: 구현 완료
+> 정렬·`email`·응답 형태 3건은 전부 **기존 코드가 낡은 가정으로 짠 부분**이라 (a)로 분류(§api-integration-plan.md 참고). 조회 API 신설은 초대코드 정책 결함을 **완전히 해소**한다 — `docs/api-gaps.md`에서 해결 처리.
 
-| 엔드포인트 | 서버 상태 | 사용 화면 | 현재 목 함수 | 권한 |
+### Member (모임원 명단) — 필드 공백 정리, 신규 없음
+
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
 |---|---|---|---|---|
-| `GET /api/v1/groups/{groupId}/members` | 구현 완료 | DUE-2-PAGE-02-0(모임원 관리) — **[미구현]** | 없음(화면 없음, 회비 도메인 전체 미구현) | MEMBER |
-| `POST /api/v1/groups/{groupId}/members` | 구현 완료 | DUE-4-PAGE-01-0(모임원 추가_개별) — **[미구현]** | 없음 | OWNER |
-| `POST /api/v1/groups/{groupId}/members/bulk` | 구현 완료 | DUE-4-PAGE-02-0(모임원 추가_일괄) — **[미구현]** | 없음 | OWNER |
-| `PATCH /api/v1/groups/{groupId}/members/{memberId}` | 구현 완료 | DUE-4-PAGE-03-0(모임원 수정) — **[미구현]** | 없음 | OWNER |
-| `DELETE /api/v1/groups/{groupId}/members/{memberId}` | 구현 완료 | DUE-4-MODAL-01-0(모임원 삭제) — **[미구현]** | 없음 | OWNER |
+| `GET /groups/{groupId}/members` | 구현 완료 | DUE-2-PAGE-02-0 | 연동 완료(7-A) | MEMBER |
+| `POST /groups/{groupId}/members` | 구현 완료(에러 응답 섹션 여전히 없음) | DUE-4-PAGE-01-0 | 연동 완료(7-A) | OWNER |
+| `POST /groups/{groupId}/members/bulk` | 구현 완료 | DUE-4-PAGE-02-0 | 연동 완료(7-A) | OWNER |
+| `PATCH /groups/{groupId}/members/{memberId}` | 구현 완료 | DUE-4-PAGE-03-0(모임원 수정) — **[미구현]** | 없음(7-B 대상) | OWNER |
+| `DELETE /groups/{groupId}/members/{memberId}` | 구현 완료 | DUE-4-MODAL-01-0(모임원 삭제) — **[미구현]** | 없음(7-B 대상) | OWNER |
 
-> `Member` 관련 5개 엔드포인트 전부 서버는 구현 완료인데 프론트 화면이 하나도 없다 — DUE 도메인이 통째로 미구현이라서다. `docs/api-gaps.md` (B)의 최우선 항목.
+> tags 최대 개수(필드표 10개 vs Validation 3개) 모순은 이번 명세에서도 **그대로 남아 있다** — 정리 안 됨(§3-2 참고).
 
-### Folder (폴더) — 서버 상태: 1~4 구현 완료, 5(백업) 시작 전
+### Folder (폴더) — 신규 2건(둘 다 기존 우회 코드를 대체)
 
-| 엔드포인트 | 서버 상태 | 사용 화면 | 현재 목 함수 | 권한 |
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
 |---|---|---|---|---|
-| `GET /api/v1/groups/{groupId}/folders` | 구현 완료 | FDR-1-PAGE-01-0(폴더 메인) | `getChildNodes(null)` 등 (`types/folder.ts`) | MEMBER |
-| `POST /api/v1/groups/{groupId}/folders` | 구현 완료 | FDR-2-MODAL-01-0/FDR-3-MODAL-05-0(새 폴더 생성) | `addFolderNode()` (`types/folder.ts`) | OWNER |
-| `PATCH /api/v1/folders/{folderId}` | 구현 완료 | FDR-3-MODAL-01-0(폴더 이름 변경), 이동 관련(FDR-2-PAGE-01-0/FDR-3-PAGE-01-0) | `renameNode()` / `moveNodes()` (`types/folder.ts`) | OWNER |
-| `DELETE /api/v1/folders/{folderId}` | 구현 완료 | FDR-3-MODAL-02-0(폴더 해제) | `unlinkFolder()` (`types/folder.ts`) | OWNER |
-| `POST /api/v1/groups/{groupId}/folders/archive` | **시작 전** | FDR-2-MODAL-02-0(폴더 전체 백업) — **[미구현]** | 없음 | OWNER |
+| `GET /groups/{groupId}/folders` | 구현 완료 | FDR-1-PAGE-01-0 | 연동 완료 | MEMBER |
+| `POST /groups/{groupId}/folders` | 구현 완료 | FDR-2-MODAL-01-0/FDR-3-MODAL-05-0 | 연동 완료 | OWNER |
+| `PATCH /folders/{folderId}` | 구현 완료 | FDR-3-MODAL-01-0 등 | 연동 완료(단건). 3b 다건 이동에도 순차 재사용 중 | OWNER |
+| `DELETE /folders/{folderId}` | 구현 완료. 정책 메모에 "6번(folder-items)으로 최상위 영역 장부 조회 공백 해소"가 명시됨 | FDR-3-MODAL-02-0 | 연동 완료이나 **최상위+직속장부 조합을 UI에서 여전히 차단 중**(a, 6번 생겼으니 풀 수 있음) | OWNER |
+| `POST /groups/{groupId}/folders/archive` | 시작 전 | FDR-2-MODAL-02-0 — **[미구현]** | 없음(스텁 유지) | OWNER |
+| `GET /groups/{groupId}/folder-items` | 명세: **미구현**(2026-08-30 추가) / 대조표: 언급 방식상 사용 가능 전제 — **상태 불일치, 실호출 미확인** | FDR-1-PAGE-01-0, FDR-2-PAGE-04-0 | 미연동(a) — 붙이면 폴더+장부 통합 그리드·최상위 조회를 한 번에 해결 | MEMBER |
+| `POST /groups/{groupId}/folder-items/move` | 명세: **미구현**(2026-08-30 추가) / 대조표: 사용 가능 전제 — **상태 불일치, 실호출 미확인** | FDR-2-PAGE-01-0 → FDR-3-PAGE-01-0 | 미연동(a) — 붙이면 순차 `PATCH` 다건 이동 코드를 걷어낼 수 있음 | OWNER |
+| 보관함 4종(`GET/PATCH/DELETE /archives`) | 시작 전 | 「더보기 > 보관함」 — **[미구현]** | 없음 | MEMBER/OWNER |
 
-### Ledger (장부) — 서버 상태: 구현 완료
+> **명세 확인 필요**: 6·7번이 "미구현" 태그인데 대조표는 폴더 화면을 이 API들로 바로 갈아끼우라고 안내한다 — 실제로 배포됐는지 실호출(사용자가 직접 확인 예정)로만 확정 가능.
 
-| 엔드포인트 | 서버 상태 | 사용 화면 | 현재 목 함수 | 권한 |
+### Ledger (장부) — 신규 1건(N+1 완전 해소), 필드 1건 추가
+
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
 |---|---|---|---|---|
-| `GET /api/v1/folders/{folderId}/ledgers` | 구현 완료 | FDR-1-PAGE-01-0(장부 목록 부분), FDR-2-PAGE-04-0 | `getChildNodes()`가 폴더·장부 섞어서 반환(`types/folder.ts`) | MEMBER |
-| `POST /api/v1/folders/{folderId}/ledgers` | 구현 완료 | FDR-3-PAGE-03-0(새 장부 생성) | `addLedgerNode()` (`types/folder.ts`) | OWNER |
-| `GET /api/v1/ledgers/{ledgerId}` | 구현 완료 | FDR-2-PAGE-05-0(장부 상세) | `getNodeById()` (`types/folder.ts`) | MEMBER |
-| `PATCH /api/v1/ledgers/{ledgerId}` | 구현 완료 | FDR-3-MODAL-03-0(장부 이름 변경) | `renameNode()` (`types/folder.ts`) | OWNER |
-| `PATCH /api/v1/ledgers/{ledgerId}/budget` | 구현 완료 | FDR-3-SHEET-01-0/FDR-3-SHEET-02-0(예산 입력·설정) | `setLedgerBudget()` (`types/folder.ts`) | OWNER |
-| `DELETE /api/v1/ledgers/{ledgerId}` | 구현 완료 | FDR-3-MODAL-04-0(장부 삭제) | `deleteLedgerNode()` (`types/folder.ts`) | OWNER |
+| `GET /folders/{folderId}/ledgers` | 구현 완료. **`createdAt` 2026-09-01 추가**(기존 필드 공백 해소) | FDR-1-PAGE-01-0 등 | 연동 완료이나 **`createdAt` 미반영**(카드 서브타이틀이 예산 상태로 대체돼 있음, a) | MEMBER |
+| `POST /folders/{folderId}/ledgers` | 구현 완료 | FDR-3-PAGE-03-0 | 연동 완료 | OWNER |
+| `GET /ledgers/{ledgerId}` | 구현 완료. `budgetUsageRate` 필드는 **미구현**(2026-08-30 추가) | FDR-2-PAGE-05-0 | 연동 완료(신규 필드 미반영) | MEMBER |
+| `PATCH /ledgers/{ledgerId}` | 구현 완료. **`folderId: null`은 "변경 없음"으로 명확화**(2026-09-01) — 최상위 이동 아님 | FDR-3-MODAL-03-0 | 연동 완료. UI가 이미 이 조합을 막아 둠 — 그대로 맞다, 이동은 폴더 move API 사용 | OWNER |
+| `PATCH /ledgers/{ledgerId}/budget` | 구현 완료 | FDR-3-SHEET-01/02-0 | 연동 완료 | OWNER |
+| `DELETE /ledgers/{ledgerId}` | 구현 완료 | FDR-3-MODAL-04-0 | 연동 완료 | OWNER |
+| `GET /groups/{groupId}/ledgers` (모임 전체 장부) | **구현 완료**(2026-09-01 확인) | FDR-2-PAGE-02-0(예산 설정), ADD 장부 선택, 내역 필터, 회비 생성 장부 선택 | 연동 완료(6-B에서 이미 이 엔드포인트로 붙여 N+1 우회 코드 제거함) — 단, 정렬이 "최신 생성순"으로 확정됐는지 재확인 필요 | MEMBER |
 
-### Entry (내역) — 서버 상태: 구현 완료
+> `GET /groups/{groupId}/ledgers`는 이미 3b 이후 프론트가 쓰고 있던 것과 같은 경로다 — 이번 갱신은 상태를 "구현 완료 확인"으로 못박은 것뿐, 코드 변경 불필요.
 
-| 엔드포인트 | 서버 상태 | 사용 화면 | 현재 목 함수 | 권한 |
+### Entry (내역) — 신규 1건이 **핵심 공백을 해소**(모임 전체 목록)
+
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
 |---|---|---|---|---|
-| `GET /api/v1/ledgers/{ledgerId}/entries` | 구현 완료 | FDR-2-PAGE-05-0(장부 상세의 내역 리스트), FDR-3-PAGE-02-0(장부 내 검색) | `getTransactionsByLedgerId()` (`types/folder.ts`) | MEMBER |
-| `POST /api/v1/ledgers/{ledgerId}/entries` | 구현 완료 | ADD-1-PAGE-01-0(내역 추가) | `addTransaction()` (`types/transaction.ts`) | MEMBER |
-| `GET /api/v1/entries/{entryId}` | 구현 완료 | DTB-2-PAGE-02-0(상세 내역_조회) | `getTransactionById()` (`types/transaction.ts` 또는 `types/folder.ts` — 두 파일에 동명 함수가 각각 있음) | MEMBER |
-| `PATCH /api/v1/entries/{entryId}` | 구현 완료 | DTB-3-PAGE-02-0(상세 내역_수정) — 진입 경로 자체가 막혀 있음(§api-gaps.md (C)) | `updateTransaction()` (`types/transaction.ts`) | **OWNER** (목은 권한 구분 없음) |
-| `DELETE /api/v1/entries/{entryId}` | 구현 완료 | DTB-3-MODAL-01-0(상세 내역_삭제) | `deleteTransactionById()` / `deleteTransaction()` (양쪽 파일 각각) | **OWNER** (목은 권한 구분 없음) |
-| `POST /api/v1/entries/{entryId}/approve` | 구현 완료 | DTB-2-PAGE-03-0(상세 내역_승인요청) — **[미구현]**(탭 필터만 있고 승인 화면 없음) | 없음 — `isPendingApproval` 플래그만 있고 승인 액션 없음 | **OWNER** |
-| **없음** — 모임 전체(여러 장부 통합) 내역 목록 API 자체가 명세에 없음 | — | DTB-1-PAGE-01-0(내역 메인), DTB-2-PAGE-01-0(검색), DTB-2-SHEET-01-0/DTB-3-SHEET-01-0(필터) | `getAllTransactions()` / `applyTransactionFilter()` / `searchTransactions()` (`types/transaction.ts`) | — |
+| `GET /ledgers/{ledgerId}/entries` | 구현 완료 | FDR-2-PAGE-05-0 | 연동 완료 | MEMBER |
+| `POST /ledgers/{ledgerId}/entries` | 구현 완료. `managerUserId`(담당자) 필드 **구현 완료**(PR #27, 대조표 확인) | ADD-1-PAGE-01-0 | 연동 완료이나 **담당자 값을 전송하지 않음**(a, 6-A/6-B 스냅샷 당시 필드가 없어서 뺐던 것 — 이제 있음) | MEMBER |
+| `GET /entries/{entryId}` | 구현 완료. `manager` 객체 **구현 완료**(2026-09-01 확인), 마감 회비 수입 내역이면 `duesId`·`duesTitle`·`payerCount`·`payers` 포함(§8) | DTB-2-PAGE-02-0 | 연동 완료이나 담당자·회비 연결 필드 미반영(a) | MEMBER |
+| `PATCH /entries/{entryId}` | 구현 완료. `managerUserId`로 담당자 변경 **구현 완료**(2026-09-01 확인) | DTB-3-PAGE-02-0 | 연동 완료(담당자 변경 미반영, a) | OWNER |
+| `DELETE /entries/{entryId}` | 구현 완료 | DTB-3-MODAL-01-0 | 연동 완료 | OWNER |
+| `POST /entries/{entryId}/approve` | 구현 완료 | DTB-2-PAGE-03-0(승인) — TransactionDetailScreen에 버튼만 추가된 상태 | 연동 완료 | OWNER |
+| `GET /groups/{groupId}/entries` (모임 전체 내역 + 잔액 요약) | **구현 완료**(2026-09-01 확인, 대조표: "PR #26에서 구현됨") — **2026-09-04 실호출로 응답 구조까지 명세와 100% 일치 확정**(`docs/api-gaps.md` "확정됨" 절) | DTB-1-PAGE-01-0, DTB-2-PAGE-01-0(검색), DTB-2-SHEET-01-0(필터) | **미연동**(a, 최우선) — 지금은 여전히 장부 단위 API로 우회 중. 이걸로 갈아끼우면 DTB 전체 계열이 한꺼번에 풀린다 | MEMBER |
 
-> `types/folder.ts`와 `types/transaction.ts`에 **같은 개념(내역)이 두 벌**로 흩어져 있다. 서버 `Entry`는 하나인데 프론트만 둘로 나뉜 상태다 — §api-type-design.md에서 통합안을 다룬다.
+> `receiptFileIds` 명세 자기모순(활성화 배너 vs "미적용" 문구)은 이번 명세에서 문구가 **정리되지 않았다** — Entry.txt에 여전히 남아 있음(§3-2). 대신 10장 상한이 **서버 검증으로도 확정**됐다(2026-09-01).
+> `PATCH .../entries/{entryId}`는 여전히 `ledgerId`를 받지 않는다 — 등록 후 장부 이동 불가는 사양 그대로.
 
-### Dues (회비) — 서버 상태: 전체 구현 완료 · 화면 전체 미구현
+### Dues (회비) — **회비 생성이 지금 100% 깨져 있음 확정**(2026-09-04 실호출)
 
-| 엔드포인트 | 서버 상태 | 사용 화면 | 현재 목 함수 | 권한 |
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
 |---|---|---|---|---|
-| `GET /api/v1/groups/{groupId}/dues` | 구현 완료 | DUE-1-PAGE-01-0(납부 관리 메인) — **[미구현]** | 없음 | MEMBER |
-| `POST /api/v1/groups/{groupId}/dues` | 구현 완료 | DUE-2-PAGE-01-0(회비 생성) — **[미구현]** | 없음 | OWNER |
-| `GET /api/v1/dues/{duesId}` | 구현 완료 | DUE-2-PAGE-03-0/03-1(회비 항목 상세) — **[미구현]** | 없음 | MEMBER |
-| `PATCH /api/v1/dues/{duesId}` | 구현 완료 | DUE-3-PAGE-06-0(회비 수정) — **[미구현]** | 없음 | OWNER |
-| `DELETE /api/v1/dues/{duesId}` | 구현 완료 | DUE-3-MODAL-01-0(회비 삭제) — **[미구현]** | 없음 | OWNER |
-| `GET /api/v1/dues/{duesId}/members` | 구현 완료 | DUE-3-PAGE-02-0(모임원 선택), DUE-2-PAGE-02-0(모임원 관리) — **[미구현]** | 없음 | MEMBER |
-| `PATCH /api/v1/dues/{duesId}/members/{memberId}` | 구현 완료 | DUE-3-SNACKBAR-01/02-0(입금 확인/취소로 이어지는 상태 변경) — **[미구현]** | 없음 | OWNER |
-| `POST /api/v1/dues/{duesId}/close` | 구현 완료 | DUE-3-MODAL-02-0(회비 마감) — **[미구현]** | 없음 | OWNER |
+| `GET /groups/{groupId}/dues` | 구현 완료. `status` 파라미터에 **`SCHEDULED` 확정**(명세 태그는 `미구현`이었으나 2026-09-04 실호출로 실존 확인 — 미래 `startDate` 회비가 정확히 `SCHEDULED`로 옴). `keyword` 파라미터는 **제거 확정**(2026-08-31) | DUE-1-PAGE-01-0 | 연동 완료(6-A). `keyword` 애초에 안 씀(영향 없음). **`status` 3종·서버 정렬 미반영 — 착수 가능**(a, 상충 해소됨) | MEMBER |
+| `POST /groups/{groupId}/dues` | 구현 완료. **`startDate` 필수 확정**(2026-09-04 실호출: 없으면 `400`+`fieldErrors:[{field:"startDate",reason:"시작일은 필수입니다."}]`, 넣으면 `201`) | DUE-2-PAGE-01-0 | 연동 완료(6-B)이나 **`startDate`를 안 보냄 — 회비 생성이 지금 100% 400으로 실패한다(확정)**(a, 최우선) | OWNER |
+| `GET /dues/{duesId}` | 구현 완료 | DUE-2-PAGE-03-0/03-1 | 연동 완료(6-A). `createdAt`으로 "납부 기간" 대체 표시 중 — `startDate` 실존 확인됐으니 그 값으로 교체 가능(a) | MEMBER |
+| `PATCH /dues/{duesId}` | 구현 완료 | DUE-3-PAGE-06-0(회비 수정) — **[미구현]** | 없음(7-B 대상) | OWNER |
+| `DELETE /dues/{duesId}` | 구현 완료(2026-09-04 실호출로 정상 `204` 확인 — 검증용 회비 3건 정리에 사용) | DUE-3-MODAL-01-0(회비 삭제) — **[미구현]** | 없음(7-B 대상) | OWNER |
+| `GET /dues/{duesId}/members` | 구현 완료. 응답에 `amount` 추가(미구현 태그, 2026-08-30) — 대조표는 구현됐다고 함(상충, **미확인** — 이번 3건 예산에 없었음) | DUE-3-PAGE-02-0(모임원 선택) | 연동 완료(6-B, 선택 용도만). 납부 완료 탭 금액 노출은 미반영(a) | MEMBER |
+| `PATCH /dues/{duesId}/members/{memberId}` (단건) | 구현 완료 | DUE-3-SNACKBAR-01/02-0 — **[미구현]** | 없음(7-B 대상) | OWNER |
+| `POST /dues/{duesId}/close` | 구현 완료. **미납자 있어도 마감 허용**으로 정정(2026-08-30, 기존 `UNPAID_MEMBER_EXISTS` 제약 제거 — "구현 수정 필요"라고 명세가 스스로 표시) | DUE-3-MODAL-02-0(회비 마감) — **[미구현]** | 없음(7-B 대상) | OWNER |
+| `PATCH /dues/{duesId}/members` (일괄 납부 변경) | **미구현**(2026-08-30 신설) — 대조표는 구현됐다고 함(상충, **미확인**) | DUE-2-PAGE-03-0 하단 CTA "납부 완료하기"/"납부 취소하기" | 없음(7-B 대상) | OWNER |
 
-> 8개 전부 서버는 이미 되는데 화면이 하나도 없다. `docs/api-gaps.md` (B)에서 최우선으로 다룬다.
+> **2026-09-04 실호출로 확정**: `startDate` 필수 + `SCHEDULED` 3종 상태 둘 다 대조표가 맞았다 — 명세 "미구현" 태그가 낡은 것이었다. 요청/응답 전문은 `docs/api-gaps.md` "확정됨" 절. **`DuesCreateScreen.tsx`(6-B)는 지금 `startDate`를 보내지 않아 회비 생성이 항상 400으로 실패한다** — 이 프로젝트에서 현재 사용자에게 가장 직접적으로 보이는 파손이다. `amount`(대상자 목록)와 일괄 납부변경 2건은 이번 실호출 예산(3건)에 없어 여전히 미확인.
+> "회비 요청하기"(DUE-3-PAGE-04-0)는 **서버 API가 아님**으로 확정 — 클립보드 복사 + OS 공유 시트, 클라이언트 전용 기능. `docs/api-gaps.md`의 관련 (A) 항목은 해결 처리(§2).
+> 마감 취소(재오픈)는 **미제공 확정** — 화면에도 진입점 없음, 조치 불필요.
 
-### File (파일) — 서버 상태: 구현 완료
+### File (파일) — 신규 1건
 
-| 엔드포인트 | 서버 상태 | 사용 화면 | 현재 목 함수 | 권한 |
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
 |---|---|---|---|---|
-| `POST /api/v1/files` (purpose=RECEIPT) | 구현 완료 | ADD-2-SHEET-05-0(증빙자료 등록), ADD-3-PAGE-01-0(영수증 스캔) | 로컬 이미지 URI를 그대로 `receiptImages: string[]`에 저장(업로드 없음) | Login |
-| `POST /api/v1/files` (purpose=GROUP_IMAGE) | 구현 완료 | ETC-3-PAGE-01-0(모임 프로필 변경) — **[미구현]** | 없음 | Login |
-| `POST /api/v1/files` (purpose=PROFILE_IMAGE) | 구현 완료 | ETC-4-PAGE-15-0(프로필 변경) — **[미구현]** | 없음 | Login |
-| `DELETE /api/v1/files/{fileId}` | 구현 완료 | 증빙자료 삭제(DTB-3-MODAL-02-0) — **[미구현]**, 개별 이미지 X 버튼(ADD 폼 내) | ADD 폼의 X 버튼은 로컬 배열에서만 제거(`receiptImages` splice) | 업로더 본인 |
-| `GET /api/v1/files/{fileId}/content` | 구현 완료 (인증 필요 경로) | 증빙자료 썸네일 표시 전반 | 로컬 URI를 `<Image>`에 직접 사용 | (열람 권한은 업로더/모임 관리자) |
+| `POST /files`(RECEIPT) | 구현 완료 | ADD-2-SHEET-05-0 등 | 서비스 계층만 존재, 실호출 없음(카메라·갤러리 라이브러리 부재) | Login |
+| `POST /files`(GROUP_IMAGE) | 구현 완료(2026-08-24 적용) | ETC-3-PAGE-01-0 — **[미구현]** | 없음(화면 없음) | Login |
+| `POST /files`(PROFILE_IMAGE) | 구현 완료 | ETC-4-PAGE-15-0 — **[미구현]** | 없음(화면 없음) | Login |
+| `DELETE /files/{fileId}` | 구현 완료. 권한은 **업로더 본인으로 확정**(2026-08-30, "총무가 남의 파일 삭제" 여부는 미정 상태로 명시 종료) | 여러 화면 | 로컬 배열 제거만, 실호출 없음 | 업로더 본인 |
+| `GET /files/{fileId}/content` | 구현 완료(인증 필요) | 증빙 썸네일 전반 | 연동 완료(`utils/authenticatedImage.ts`) | 업로더/모임 관리자 |
+| `GET /groups/{groupId}/receipts` (증빙자료 앨범) | 명세: **미구현**(2026-08-30 추가) / 대조표: "PR #30에서 구현됨" — **상충, 실호출 미확인** | ETC-2-PAGE-05-0(증빙자료 앨범) — **[미구현]** | 없음(b, 화면 신규 개발 대상) | MEMBER |
 
-### OCR (영수증 인식) — 서버 상태: 시작 전
+### OCR (영수증 인식) — 변경 없음
 
-| 엔드포인트 | 서버 상태 | 사용 화면 | 현재 목 함수 | 권한 |
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
 |---|---|---|---|---|
-| `POST /api/v1/files/{fileId}/ocr` | **시작 전** | ADD-3-PAGE-01-0(영수증 스캔), ADD-4-PAGE-01-0/01-1(스캔 성공/실패), ADD-5-MODAL-01-0(반영 확인) | `generateMockScanResult()` (`utils/mockOcr.ts`, `SUCCESS_RATE=0.78` 랜덤) | Login |
+| `POST /files/{fileId}/ocr` | 시작 전 | ADD-3/4/5 스캔 계열 | `utils/mockOcr.ts` 스텁 | Login |
 
-### Report (보고서) — 서버 상태: 구현 완료 · 화면 전체 미구현
+### Report (보고서) — 요청 형식 분기 추가(미구현), 신규 엔드포인트는 없음
 
-| 엔드포인트 | 서버 상태 | 사용 화면 | 현재 목 함수 | 권한 |
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
 |---|---|---|---|---|
-| `GET /api/v1/groups/{groupId}/reports` | 구현 완료 | ETC-2-PAGE-04-0(보고서 리스트) — **[미구현]** | 없음 | MEMBER |
-| `POST /api/v1/groups/{groupId}/reports` | 구현 완료 | ETC-4-PAGE-03-0/04-0(장부별·기간별 보고서 생성) — **[미구현]** | 없음 | OWNER |
-| `GET /api/v1/reports/{reportId}` | 구현 완료 | ETC-3-PAGE-02/03-0, ETC-4-PAGE-05/07-0(보고서 상세류) — **[미구현]** | 없음 | MEMBER |
+| `GET /groups/{groupId}/reports` | 구현 완료. `keyword` **제거 확정**(2026-08-31), `reportType` 필터 추가(미구현 태그) — 대조표: "완료(PR #32)" | ETC-2-PAGE-04-0(보고서 리스트) — **[미구현]** | 없음(b) | MEMBER |
+| `POST /groups/{groupId}/reports` | 구현 완료이나 **현재 Body가 화면 요구와 어긋남**(장부별/기간별 두 타입을 못 나눔) — `reportType` 분기로 수정 예정(미구현 태그) | ETC-4-PAGE-03/04-0(보고서 생성) — **[미구현]** | 없음(b) — 화면 만들 때 `reportType: BY_LEDGER|BY_PERIOD` 분기부터 반영 | OWNER |
+| `GET /reports/{reportId}` | 구현 완료. `openingBalance`/`closingBalance` 추가(미구현 태그, 기간별 보고서 전용) | ETC-3-PAGE-02/03-0 등(보고서 상세) — **[미구현]** | 없음(b) | MEMBER |
 
-### Dashboard (대시보드) — 서버 상태: 구현 완료
+> Report 13개 화면 전부 여전히 미착수(b) — API·디자인 다 준비된 이 프로젝트 최대 단일 덩어리라는 평가는 유지된다. 다만 생성 API의 `reportType` 분기가 아직 "미구현" 태그라 **화면 개발과 백엔드 작업이 동시에 필요**할 수 있다(실호출 미확인).
 
-| 엔드포인트 | 서버 상태 | 사용 화면 | 현재 목 함수 | 권한 |
+### Dashboard (대시보드) — 신규 1건 + 응답 보강(둘 다 미구현)
+
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
 |---|---|---|---|---|
-| `GET /api/v1/groups/{groupId}/dashboard` | 구현 완료(`dues`는 Dues 도메인 미연동 상태라 항상 0) | DSH-1-PAGE-01-0(대시보드) | `MOCK_DASHBOARD_SUMMARY` (`types/dashboard.ts`) | MEMBER |
+| `GET /groups/{groupId}/dashboard` | 구현 완료. `calendar`/`upcomingDues`/`hasUnreadNotification` 블록 추가는 **미구현**(2026-08-30 화면명세 감사) | DSH-1-PAGE-01-0 | 연동 완료(5단계)이나 신규 3블록 미반영 — 미니 캘린더가 계속 빈 상태인 이유가 이제 명확해짐(a) | MEMBER |
+| `GET /groups/{groupId}/calendar` (월간 캘린더) | **미구현** — 화면 「캘린더 전체보기」(DSH-2-PAGE-03-0) | CalendarScreen.tsx(현재 빈 껍데기) | 없음(a) | MEMBER |
 
-### 명세에 도메인 자체가 없는 것
+> 일별 상세 리스트는 별도 API 없이 `GET /groups/{groupId}/entries?from=X&to=X`(Entry 7번)를 재사용 — 캘린더 화면 자체보다 Entry 7번 연동이 선행돼야 한다.
 
-- **Notification(알림)**: 14개 spec 파일 어디에도 알림 도메인이 없다. DSH-2-PAGE-01-0(알림 목록)이 `types/notification.ts`의 `MOCK_NOTIFICATIONS`를 쓰는데 대응할 서버 엔드포인트가 아예 없다.
-- **Calendar(달력)**: 별도 API 없음. DSH-2-PAGE-03-0(대시보드 캘린더)이 `types/calendar.ts`의 `MOCK_CALENDAR_MONTH`를 쓰는데, 이건 모임 전체 내역을 날짜별로 묶은 뷰라서 위 Entry 도메인의 "모임 전체 내역 목록 API 없음" 문제에 종속된다 — 그 API가 생기면 클라이언트에서 날짜별로 묶어 만들 수 있다.
+### Notification & Support (알림·고객지원) — **신설 도메인, 전체 미구현**
+
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
+|---|---|---|---|---|
+| `GET /notifications` | 미구현 | DSH-2-PAGE-01-0(알림 목록) | `MOCK_NOTIFICATIONS` 스텁 | Login |
+| `PATCH /notifications/{id}/read` | 미구현 | 위와 동일 | 없음 | Login |
+| `GET`/`PATCH /notifications/settings` | 미구현 | ETC-3-PAGE-08-0(알림 설정) — **[미구현]** | 없음 | Login |
+| `GET /notices`, `GET /notices/{id}` | 미구현 | ETC-3-PAGE-09-0/ETC-4-PAGE-18-0(공지사항) — **[미구현]** | 없음 | Public |
+| `GET /terms/{termType}` | 미구현 | 약관 상세 | 없음 | Public |
+| `GET /faqs` | 미구현 | 문의하기 아코디언 | 없음 | Public |
+| `POST /inquiries` | 미구현 | ETC-3-PAGE-10-0(문의하기) — **[미구현]** | 없음 | Login |
+
+> **런칭 범위 판단이 먼저 필요**하다고 명세가 명시(푸시 서버가 인프라 제외 범위인데 알림 화면은 푸시를 전제). 고객지원 쪽(공지·약관·FAQ)은 백오피스가 없어 "정적 파일/메일 링크로 대체"를 명세가 직접 제안 — 기획 판단 대기.
+
+### Statistics (통계/분석) — **신설 도메인, 전체 미구현**
+
+| 엔드포인트 | 서버 상태 | 사용 화면 | 프론트 연동 상태 | 권한 |
+|---|---|---|---|---|
+| `GET /groups/{groupId}/statistics` | 미구현 | 「폴더 메인 > 통계/분석」, ETC-2-PAGE-07-0(더보기 > 소비 통계/분석) — **[미구현]** | 없음 | MEMBER |
+
+> 화면 두 곳이 같은 데이터를 쓰므로 API 하나로 충분(명세가 이미 명시). 응답이 활성 장부 카드·예산 대비 소비·지출 비율 세 블록을 한 번에 묶어 준다.
 
 ---
 
-## 2. 화면 → 엔드포인트 (역방향, 목 데이터 계층 인벤토리)
+## 2. 이번 갱신에서 바뀐 것 요약 (도메인×변경유형)
 
-`src/types/*.ts`의 인메모리 목 저장소와 접근 함수 전체. "동기→비동기"는 현재 전부 동기 함수라 실제 API로 바꾸면 전부 `Promise`가 된다는 뜻.
+| 유형 | 건수 | 도메인 |
+|---|---:|---|
+| 완전 신규 엔드포인트 | 약 20건 | Auth 6, GroupMembership 2, Folder 2, Ledger 1(전체목록 확정), Entry 1(전체목록), Dues 1(일괄변경), File 1(앨범), Dashboard 1(캘린더), Notification 7, Statistics 1 |
+| 기존 엔드포인트 필드/정책 보강 | 약 12건 | GroupMembership(정렬·email·응답형태), Ledger(createdAt·budgetUsageRate), Entry(manager 필드), Dues(startDate·amount·close 정책), Group(confirmName) |
+| 상태·파라미터 제거 | 2건 | Dues 목록 `keyword` 제거, Report 목록 `keyword` 제거(둘 다 2026-08-31, 어차피 FE 미사용이라 영향 없음) |
+| 명세 자기모순(명세가 스스로 지적) | 4건 | Auth 이름 10자/8자, Group 이름 10자/20자, Report Body 항목, Notification 약관 3종 목록 불일치 |
 
-### `types/group.ts` — `GroupSummary` + `GroupMember`(주의: 실제로는 GroupMembership+Member 혼합, §type-design)
-
-| 목 함수 | 시그니처(현재) | 사용 화면 | 대체 엔드포인트 |
-|---|---|---|---|
-| `getMyGroups()` | `() => GroupSummary[]` | ETC-2-PAGE-01-0, MoreScreen | `GET /groups` |
-| `getActiveGroup()` | `() => GroupSummary` | 거의 전 화면(현재 모임 컨텍스트) | 클라이언트 상태로 전환(전역 store), 서버 API 아님 |
-| `setActiveGroup()` | `(id) => void` | GroupSwitcherMenu | 위와 동일, 클라이언트 상태 |
-| `getGroupById()` | `(id) => GroupSummary \| undefined` | 여러 화면 | `GET /groups/{groupId}` |
-| `getGroupMembers()` | `(groupId) => GroupMember[]` | ETC-2-PAGE-03-0 | `GET /groups/{groupId}/memberships` |
-| `createGroup()` | `(name) => GroupSummary` | ETC-4-PAGE-01-0 | `POST /groups` |
-| `joinGroupByCode()` | `(code) => GroupSummary \| null` | ETC-4-SHEET-01-0 | `POST /groups/join` |
-| `updateMemberRole()` | `(memberId, role) => void` | ETC-4-MODAL-01/02-0 | `PATCH /groups/{groupId}/memberships/{membershipId}` |
-| `removeMember()` | `(memberId) => void` | ETC-4-MODAL-03-0 | ⚠️ 명세엔 관리자를 "내보내는" API가 없다 — `leave`는 본인 탈퇴만 있음(§api-gaps.md (C)) |
-| `leaveGroup()` | `(groupId) => void` | ETC-3-MODAL-01-0 | `POST /groups/{groupId}/leave` |
-
-### `types/folder.ts` — `FolderTreeNode`(폴더+장부 통합) + `LedgerTransaction`
-
-| 목 함수 | 사용 화면 | 대체 엔드포인트 |
-|---|---|---|
-| `getChildNodes(parentId)` | FDR-1-PAGE-01-0 등 | `GET /groups/{groupId}/folders` + `GET /folders/{folderId}/ledgers` (**서버는 폴더/장부가 별도 API** — 목처럼 한 번에 안 옴, §type-design) |
-| `getNodeById(id)` | FDR-2-PAGE-05-0 등 | `GET /folders/{folderId}` 없음(폴더 상세 단건 조회 API 자체가 명세에 없음, 목록에서 찾아 씀) / `GET /ledgers/{ledgerId}` |
-| `getAllLedgerNodes()` | FDR-2-PAGE-02-0(전체 예산 설정) | ⚠️ "모임 전체 장부 목록" API 없음 — 폴더별로만 조회 가능(§api-gaps.md (C)) |
-| `searchNodes(query)` | FDR-3-PAGE-02-0 | 없음 — 장부명 검색 API 자체가 명세에 없음 |
-| `getTransactionsByLedgerId(ledgerId)` | FDR-2-PAGE-05-0 | `GET /ledgers/{ledgerId}/entries` |
-| `getTransactionById(id)` | DTB-2-PAGE-02-0 | `GET /entries/{entryId}` |
-| `addFolderNode()` | FDR-2-MODAL-01-0 | `POST /groups/{groupId}/folders` |
-| `addLedgerNode()` | FDR-3-PAGE-03-0 | `POST /folders/{folderId}/ledgers` |
-| `renameNode()` | FDR-3-MODAL-01/03-0 | `PATCH /folders/{folderId}` 또는 `PATCH /ledgers/{ledgerId}`(노드 종류에 따라 분기 필요) |
-| `setLedgerBudget()` | FDR-3-SHEET-01/02-0 | `PATCH /ledgers/{ledgerId}/budget` |
-| `unlinkFolder()` | FDR-3-MODAL-02-0 | `DELETE /folders/{folderId}` |
-| `deleteLedgerNode()` | FDR-3-MODAL-04-0 | `DELETE /ledgers/{ledgerId}` |
-| `moveNodes()` | FDR-2-PAGE-01-0/FDR-3-PAGE-01-0 | `PATCH /folders/{folderId}`(하나씩, 서버는 다건 이동 API 없음 — §api-gaps.md (C)) |
-| `deleteTransaction()` | (folder.ts 쪽 내역 삭제) | `DELETE /entries/{entryId}` |
-
-### `types/transaction.ts` — `Transaction`(DTB 탭 전용 평평한 목록)
-
-| 목 함수 | 사용 화면 | 대체 엔드포인트 |
-|---|---|---|
-| `getAllTransactions()` | DTB-1-PAGE-01-0 | ⚠️ 없음 — 모임 전체 내역 API 자체가 없음(핵심 공백, §api-gaps.md (A)) |
-| `getPendingApprovalTransactions()` | DTB-1-PAGE-01-0의 "승인요청" 탭 | 위와 동일 API 없음 + `status=PENDING` 쿼리는 장부 단위에만 존재 |
-| `getTransactionById()` | DTB-2-PAGE-02-0 | `GET /entries/{entryId}` |
-| `searchTransactions()` | DTB-2-PAGE-01-0 | 위와 동일 API 없음(장부 단위 `keyword` 검색만 존재) |
-| `applyTransactionFilter()` | DTB-2-SHEET-01-0/DTB-3-SHEET-01-0 | 위와 동일 API 없음 + 커스텀 기간(`customStart/customEnd`) 필터 파라미터도 명세에 없음 |
-| `getTransactionLedgerOptions()` | DTB-3-SHEET-02-0(장부 복수 선택) | `GET /folders/{folderId}/ledgers`를 폴더별로 순회해서 합쳐야 함(전체 장부 API 없음) |
-| `addTransaction()` | ADD-1-PAGE-01-0 | `POST /ledgers/{ledgerId}/entries` |
-| `updateTransaction()` | DTB-3-PAGE-02-0(진입 경로 막힘) | `PATCH /entries/{entryId}` |
-| `deleteTransactionById()` | DTB-3-MODAL-01-0 | `DELETE /entries/{entryId}` |
-
-### `types/dashboard.ts` — `DashboardSummary`
-
-| 목 함수 | 사용 화면 | 대체 엔드포인트 |
-|---|---|---|
-| `MOCK_DASHBOARD_SUMMARY`(상수, 함수 아님) | DSH-1-PAGE-01-0 | `GET /groups/{groupId}/dashboard` — 응답 구조가 상당히 다름(§type-design), `quickServices`는 서버에 없는 순수 UI 데이터라 계속 클라이언트에 남아야 함 |
-
-### `types/notification.ts` / `types/calendar.ts` — 대응 API 없음
-
-| 목 함수 | 사용 화면 | 대체 엔드포인트 |
-|---|---|---|
-| `MOCK_NOTIFICATIONS`(상수) | DSH-2-PAGE-01-0 | **없음** — Notification 도메인 자체가 명세에 없음 |
-| `MOCK_CALENDAR_MONTH`(상수) | DSH-2-PAGE-03-0 | **없음(직접)** — 모임 전체 내역 API가 생기면 클라이언트에서 날짜별로 묶어 구성 가능 |
-
-### `utils/mockOcr.ts`
-
-| 목 함수 | 사용 화면 | 대체 엔드포인트 |
-|---|---|---|
-| `generateMockScanResult()` | ADD-3-PAGE-01-0 등 | `POST /files/{fileId}/ocr` — 서버 상태 `시작 전`이라 지금은 못 바꿈 |
+새로 생긴 것 중 **"미구현" 태그와 대조표 실측이 갈리는 항목**(Dues startDate·status 3종·amount·bulk PATCH, Folder folder-items·move, File receipts, Report reportType)은 이 문서에서 전부 "상충"으로 표시해 뒀다 — `docs/api-gaps.md` §판단 불가 절에서 같은 목록을 관리한다.
 
 ---
 
-## 3. 동기 → 비동기 전환 영향 범위
+## 3. 사라진 목 데이터 계층 (참고용, 더 이상 갱신 안 함)
 
-`types/group.ts`·`types/folder.ts`·`types/transaction.ts`·`types/dashboard.ts` 네 파일을 **직접 import**하는 화면/컴포넌트 파일 수(중복 제거):
-
-- `types/group.ts` 사용: 7개 파일
-- `types/folder.ts` 사용: 8개 파일
-- `types/transaction.ts` 사용: 7개 파일 (`TransactionDetailScreen.tsx`가 `folder.ts`와 겹침)
-- `types/dashboard.ts` 사용: 2개 파일
-
-**중복 제거 합계: 23개 파일.** 이 파일들의 마운트 시점 데이터 조회(`getMyGroups()`, `getChildNodes()` 등)가 전부 동기 함수 호출 → `useState` 초기값이나 렌더 중 직접 호출로 짜여 있는데, API로 바뀌면 전부 `Promise`가 되므로 **23개 파일 전부 로딩·에러 상태를 새로 가져야 한다**(현재 로딩/에러 UI 자체가 없는 화면이 대부분).
-
-이 23은 "목 모듈을 직접 import하는 파일" 기준이라 실측 하한선이다. 부모로부터 props로 데이터를 받기만 하는 자식 컴포넌트(예: `QuickServiceCard.tsx`는 `dashboard.ts`를 직접 안 쓰고 `DashboardScreen.tsx`가 내려주는 걸로 추정)는 안 세었으므로, 로딩 상태를 실제로 화면에 반영해야 하는 컴포넌트 수는 이보다 클 수 있다.
+이전 버전 이 문서의 §2·§3(`types/group.ts`·`types/folder.ts`·`types/transaction.ts`·`types/dashboard.ts`의 목 함수 인벤토리, 동기→비동기 전환 영향 범위 23개 파일 집계)는 1~7-A단계를 거치며 **대상 목 함수와 파일 자체가 대부분 삭제됐다**(`types/folder.ts`는 4-A에서 파일째 삭제, `getChildNodes`/`addFolderNode`/`moveNodes` 등도 함께 삭제). 남아 있는 목은 DTB 전체 목록(`types/transaction.ts`, Entry 7번이 아직 미연동이라 유지) 하나뿐이다 — 이제 §1의 도메인별 표가 유일한 참조다.

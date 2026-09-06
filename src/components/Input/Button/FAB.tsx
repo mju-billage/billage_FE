@@ -9,7 +9,7 @@ type FloatingActionButtonProps = {
   label?: string;
 };
 
-const SIZE = 56;
+const SIZE = 46;
 
 /** 문서(가로줄 2개) + 우하단 plus 배지로 구성한 "내역 추가" 아이콘. */
 function DocumentAddIcon() {
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   button: {
     position: 'absolute',
     right: 24,
-    bottom: 24,
+    bottom: 12,
     height: SIZE,
     backgroundColor: NAVY_800,
     flexDirection: 'row',

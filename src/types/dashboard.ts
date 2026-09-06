@@ -81,19 +81,19 @@ export const MOCK_DASHBOARD_SUMMARY: DashboardSummary = {
   quickServices: [
     {
       id: 'report',
-      icon: require('../assets/icons/content/Report.png'),
+      icon: require('../../src/assets/images/report-graphic.png'),
       label: '손쉽게 공유하는',
       title: '보고서 생성',
     },
     {
       id: 'statistics',
-      icon: require('../assets/icons/content/Graph.png'),
+      icon: require('../../src/assets/images/statistics-graphic.png'),
       label: '우리 모임 장부',
       title: '통계/분석',
     },
     {
       id: 'evidence-album',
-      icon: require('../assets/icons/content/Bill.png'),
+      icon: require('../../src/assets/images/album-graphic.png'),
       label: '모아보는',
       title: '증빙자료 앨범',
     },

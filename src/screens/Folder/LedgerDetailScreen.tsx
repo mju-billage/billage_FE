@@ -279,7 +279,7 @@ function LedgerDetailScreen() {
             {loadState === 'loading' ? LEDGER_DETAIL_LOADING : loadErrorMessage}
           </Text>
           {loadState === 'error' && (
-            <Button label={LEDGER_DETAIL_RETRY_LABEL} onPress={load} hierarchy="secondary" />
+            <Button label={LEDGER_DETAIL_RETRY_LABEL} onPress={load} hierarchy="secondary" style={{ alignSelf: 'center' }} />
           )}
         </View>
       </SafeAreaView>

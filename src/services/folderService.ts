@@ -74,3 +74,119 @@ export async function updateFolder(
 export async function deleteFolder(folderId: string): Promise<void> {
   await request<void>(`/api/v1/folders/${folderId}`, { method: 'DELETE' });
 }
+
+export type FolderItemEntry = {
+  itemType: 'FOLDER' | 'LEDGER';
+  id: string;
+  name: string;
+  /** 폴더만 채워진다(하위 폴더+장부 합계). 장부는 null(Folder.txt). */
+  childCount: number | null;
+  createdAt: string;
+};
+
+export type FolderItemsResult = {
+  totalCount: number;
+  items: FolderItemEntry[];
+};
+
+/**
+ * 폴더와 장부를 한 그리드로 섞어 조회한다(Folder.txt "6. 폴더+장부 통합 조회"
+ * — 2026-09-05 실호출로 명세 "미구현" 태그가 낡았음을 확인, `docs/api-gaps.md`
+ * "확정됨" 6번). `folderId`를 생략하면 최상위, 넘기면 그 폴더 바로 아래
+ * 항목만 온다 — **`parentId`가 아니라 `folderId`다**(실호출로 확인, 처음엔
+ * 문서 없이 짐작하다 틀렸었다). `keyword`는 이 함수가 조회한 그 레벨
+ * 안에서만 검색된다(하위 폴더까지 재귀 검색하지 않음). 페이지네이션이 없다
+ * — `totalCount`/`items` 그대로 한 번에 온다.
+ */
+export async function getFolderItems(
+  groupId: string,
+  params: { folderId?: string; keyword?: string } = {},
+): Promise<FolderItemsResult> {
+  const query = new URLSearchParams();
+  if (params.folderId) {
+    query.set('folderId', params.folderId);
+  }
+  if (params.keyword) {
+    query.set('keyword', params.keyword);
+  }
+  const queryString = query.toString();
+
+  const response = await request<{
+    totalCount: number;
+    items: {
+      itemType: 'FOLDER' | 'LEDGER';
+      id: number;
+      name: string;
+      childCount: number | null;
+      createdAt: string;
+    }[];
+  }>(`/api/v1/groups/${groupId}/folder-items${queryString ? `?${queryString}` : ''}`, {
+    method: 'GET',
+  });
+  return {
+    totalCount: response.totalCount,
+    items: response.items.map(item => ({
+      itemType: item.itemType,
+      id: String(item.id),
+      name: item.name,
+      childCount: item.childCount,
+      createdAt: item.createdAt,
+    })),
+  };
+}
+
+export type MoveFolderItemsInput = {
+  folderIds: string[];
+  ledgerIds: string[];
+  /** `null`이면 최상위 영역으로 이동한다(장부도 허용 — Folder.txt §7, 2026-09-05
+   * 실호출로 장부를 최상위로 옮긴 뒤 `folder-items` 루트 조회에 그대로 나타남을
+   * 확인했다). */
+  targetFolderId: string | null;
+};
+
+export type MoveFolderItemsResult = {
+  movedFolderCount: number;
+  movedLedgerCount: number;
+  targetFolderId: string | null;
+  targetFolderName: string | null;
+};
+
+/**
+ * 폴더·장부 여러 개를 한 번에 다른 폴더(또는 최상위)로 옮긴다(Folder.txt
+ * "7. 폴더·장부 선택 이동" — 2026-09-05 실호출로 명세 "미구현" 태그가
+ * 낡았음을 확인, `docs/api-gaps.md` "확정됨" 6번). 서버가 한 트랜잭션으로
+ * 처리한다 — 하나라도 실패하면 전부 취소되고 에러를 던진다(예: 목적지가
+ * 이동 대상 폴더 자신이거나 그 하위면 `409 INVALID_PARENT_FOLDER`).
+ *
+ * ⚠️ 이 원자성은 가정이 아니라 실호출로 직접 검증했다(2026-09-05, 7-F):
+ * 유효한 폴더 1개 + 존재하지 않는 폴더 ID를 같이 보내 `404 FOLDER_NOT_FOUND`를
+ * 받은 뒤 `GET .../folder-items`로 확인한 결과, 유효했던 폴더도 그대로
+ * 원위치에 남아 있었다(부분 이동 없음). 그래서 `FolderMoveDestinationScreen`이
+ * 예전에 쓰던 "성공 N개·실패 M개" 순차 호출·부분 성공 집계 로직이 필요 없다
+ * — 성공하면 전부 성공, 실패하면 전부 무효다.
+ */
+export async function moveFolderItems(
+  groupId: string,
+  input: MoveFolderItemsInput,
+): Promise<MoveFolderItemsResult> {
+  const response = await request<{
+    movedFolderCount: number;
+    movedLedgerCount: number;
+    targetFolderId: number | null;
+    targetFolderName: string | null;
+  }>(`/api/v1/groups/${groupId}/folder-items/move`, {
+    method: 'POST',
+    body: JSON.stringify({
+      folderIds: input.folderIds.map(Number),
+      ledgerIds: input.ledgerIds.map(Number),
+      targetFolderId: input.targetFolderId != null ? Number(input.targetFolderId) : null,
+    }),
+  });
+  return {
+    movedFolderCount: response.movedFolderCount,
+    movedLedgerCount: response.movedLedgerCount,
+    targetFolderId:
+      response.targetFolderId != null ? String(response.targetFolderId) : null,
+    targetFolderName: response.targetFolderName,
+  };
+}

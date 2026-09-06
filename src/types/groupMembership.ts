@@ -57,6 +57,19 @@ export function clearGroupMembershipsCache(groupId: string): void {
   delete membershipsByGroup[groupId];
 }
 
+/** groupMembershipService가 강제 내보내기(kick)에 성공하면 캐시에서 그 항목만 지운다. */
+export function removeMembershipFromCache(
+  groupId: string,
+  membershipId: string,
+): void {
+  const list = membershipsByGroup[groupId];
+  if (list) {
+    membershipsByGroup[groupId] = list.filter(
+      item => item.membershipId !== membershipId,
+    );
+  }
+}
+
 /** 캐시에 있는 특정 모임의 관리자(GroupMembership) 목록을 그대로 반환한다. */
 export function getGroupMemberships(groupId: string): GroupMembership[] {
   return membershipsByGroup[groupId] ?? [];

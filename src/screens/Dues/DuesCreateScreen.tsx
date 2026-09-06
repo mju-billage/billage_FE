@@ -7,30 +7,31 @@
  * 왕복시켜야 해서 더 복잡해진다. `TransactionRegisterScreen`의 내부 stage 패턴과
  * 같은 방식이다.
  *
- * 0. 시작일 판단: 화면명세서(DUE-2-PAGE-01-0 No.5 "기간 선택")는 "회비 납부
- * 시작일과 마감일"을 요구하고 CTA 활성 조건에도 "기간"이 필수 4항목 중
- * 하나로 들어 있다 — 하지만 `POST /groups/{groupId}/dues`엔 `dueDate`(마감일)
- * 하나뿐, 시작일을 받을 필드가 없다(Dues.txt). ADD 화면 "담당자" 필드처럼
- * 입력받고 조용히 버리면 안 되므로, 아예 "마감일" 단일 입력으로 줄였다 —
- * docs/api-gaps.md (A) "회비 시작일 필드 부재", design-verification.md §5-4 참고.
+ * 0. 기간 입력 복원(2026-09-04, 7-A 이후 정합성 복구): 6-B 당시엔 "서버에
+ * 시작일 필드가 없다"고 판단해 화면명세서(DUE-2-PAGE-01-0 No.5 "기간 선택")가
+ * 요구하는 시작~마감 범위를 마감일 단일 입력으로 줄였는데, 그 판단의 근거가
+ * 틀렸다 — 개발 서버 실호출로 `startDate`가 실제로 필수 필드임을 확정했다
+ * (`docs/api-gaps.md` "확정됨" 절: 없으면 400, `fieldErrors:[{field:"startDate"}]`).
+ * 명세대로 기간 범위 입력을 되돌렸다.
  *
  * 기존 시트 재사용:
  *  - "장부 선택"(ADD-2-SHEET-03-0)은 `TransactionSingleSelectSheet`를 그대로
  *    가져다 썼다 — 이미 title/options/selectedKey/onSelect만 받는 완전히
  *    일반화된 컴포넌트라 손댈 필요가 없었다(내역 등록 화면 회귀 없음).
- *  - "기간 선택"(DTB-3-SHEET-01-0, `TransactionFilterSheet` 내부 커스텀 기간
- *    캘린더)은 **재사용하지 않았다** — 위 0번 판단으로 애초에 "기간"이 아니라
- *    단일 "마감일"만 받으면 되므로, 이미 완전히 일반화돼 있는 단일 날짜 시트
- *    `TransactionDateSheet`(ADD-2-SHEET-07-0, 내역 등록의 일자 선택과 동일
- *    컴포넌트)를 그대로 썼다 — 이쪽도 손댈 필요가 없었다.
+ *  - "기간 선택"(DTB-3-SHEET-01-0)은 `TransactionFilterSheet` 내부에 커스텀
+ *    기간 캘린더가 있지만, 그 시트는 장부·구분·정렬까지 같이 묶인 내역 필터
+ *    전용 컴포넌트라 그대로 가져다 쓸 수 없었다(억지로 재사용하면 내역 필터
+ *    동작에 회귀 위험) — 대신 같은 상호작용을 새 컴포넌트
+ *    `DuesDateRangeSheet`로 옮겨 적었다. 진짜 재사용 가능한 조각(`Calendar`
+ *    컴포넌트 자체)은 그대로 썼다 — `TransactionFilterSheet`는 손대지 않았다.
  *  - 제목/금액은 화면명세서가 시트가 아니라 페이지에 바로 있는 텍스트 필드로
  *    정의해서(No.2/3), `TransactionRegisterScreen`류의 시트 패턴이 아니라
  *    `GroupCreateScreen`/`LedgerCreateScreen`류의 페이지 내 `TextField` 패턴을
  *    따랐다 — 시안과 기존 시트 스타일(테두리 버튼)이 다르지만 이번엔 맞추지
- *    않고 기존 폼 로우 스타일(`SelectionListItem`)로 통일했다(장부/마감일).
+ *    않고 기존 폼 로우 스타일(`SelectionListItem`)로 통일했다(장부/기간).
  */
-import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -44,7 +45,7 @@ import MemberListItem from '../../components/Data Display/Lists/MemberListItem';
 import CheckBox from '../../components/Input/Control/CheckBox';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
-import TransactionDateSheet from '../Transactions/TransactionDateSheet';
+import DuesDateRangeSheet from './DuesDateRangeSheet';
 import TransactionSingleSelectSheet from '../Transactions/TransactionSingleSelectSheet';
 import { getActiveGroup } from '../../types/group';
 import type { Member } from '../../types/member';
@@ -52,7 +53,6 @@ import * as duesService from '../../services/duesService';
 import * as ledgerService from '../../services/ledgerService';
 import * as memberService from '../../services/memberService';
 import { ApiError } from '../../services/apiClient';
-import { todayKey } from '../../types/transaction';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
@@ -60,11 +60,8 @@ import {
   isNetworkError,
 } from '../../constants/apiErrorMessages';
 import {
-  DUES_AMOUNT_MAX,
   DUES_CREATE_AMOUNT_LABEL,
   DUES_CREATE_AMOUNT_PLACEHOLDER,
-  DUES_CREATE_DUE_DATE_LABEL,
-  DUES_CREATE_DUE_DATE_PLACEHOLDER,
   DUES_CREATE_LEAVE_CANCEL_LABEL,
   DUES_CREATE_LEAVE_CONFIRM_LABEL,
   DUES_CREATE_LEAVE_DESCRIPTION,
@@ -72,6 +69,8 @@ import {
   DUES_CREATE_LEDGER_LABEL,
   DUES_CREATE_LEDGER_PLACEHOLDER,
   DUES_CREATE_NEXT_LABEL,
+  DUES_CREATE_PERIOD_LABEL,
+  DUES_CREATE_PERIOD_PLACEHOLDER,
   DUES_CREATE_TITLE,
   DUES_CREATE_TITLE_FIELD_LABEL,
   DUES_CREATE_TITLE_PLACEHOLDER,
@@ -87,7 +86,8 @@ import {
   SNACKBAR_DUES_CREATED_PREFIX,
   SNACKBAR_DUES_CREATED_SUFFIX,
 } from '../../constants/duesScreenText';
-import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { DATE_SHEET_CONFIRM_LABEL } from '../../constants/transactionScreenText';
+import { FEEDBACK_NEGATIVE_BOLD, FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const CLOSE_ICON = require('../../assets/icons/action/Close.png');
@@ -95,7 +95,7 @@ const CLOSE_ICON = require('../../assets/icons/action/Close.png');
 const SNACKBAR_AUTO_HIDE_MS = 1600;
 
 type Step = 'basic' | 'members';
-type ActiveSheet = 'none' | 'ledger' | 'dueDate';
+type ActiveSheet = 'none' | 'ledger' | 'period';
 type MemberLoadState = 'loading' | 'error' | 'ready';
 
 type DuesCreateNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -113,10 +113,13 @@ function DuesCreateScreen() {
   const [amount, setAmount] = useState(0);
   const [ledgerId, setLedgerId] = useState('');
   const [ledgerName, setLedgerName] = useState('');
+  const [startDate, setStartDate] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [ledgerOptions, setLedgerOptions] = useState<{ id: string; name: string }[]>([]);
+  const amountInputRef = useRef<TextInput>(null);
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>('none');
   const [leaveDialogVisible, setLeaveDialogVisible] = useState(false);
+  const [periodError, setPeriodError] = useState<string | undefined>();
 
   const [members, setMembers] = useState<Member[]>([]);
   const [memberLoadState, setMemberLoadState] = useState<MemberLoadState>('loading');
@@ -145,6 +148,7 @@ function DuesCreateScreen() {
     title.trim().length > 0 ||
     amount > 0 ||
     ledgerId.length > 0 ||
+    startDate.length > 0 ||
     dueDate.length > 0 ||
     selectedMemberIds.length > 0;
 
@@ -156,13 +160,39 @@ function DuesCreateScreen() {
     }
   };
 
+  /**
+   * 자릿수(최대 9자, `DUES_AMOUNT_MAX`=999,999,999가 9자리 최댓값이라 자릿수
+   * 제한만으로 상한이 그대로 지켜진다) 기준으로 막는다 — 콤마가 섞인 표시
+   * 문자열엔 maxLength를 못 쓴다(자릿수와 문자 길이가 안 맞음).
+   *
+   * 10번째 숫자를 누르거나(자릿수 초과) 실제 값이 그대로인 입력(예: 빈
+   * 칸에서 "0")이 들어오면 setState를 아예 안 한다(클램프해서 되돌리는 게
+   * 아니라 그 입력 자체를 무시). 근데 React는 controlled TextInput의 `value`
+   * prop이 이전 렌더와 값이 같으면(Object.is 동일) 그 prop을 네이티브로
+   * 다시 안 내려보낸다 — 리렌더 자체가 스킵되는 게 아니라(컴포넌트 함수는
+   * 다시 돌아도), 리컨실러가 "값 안 바뀐 prop"을 커밋 단계에서 걸러내는
+   * 것이라 네이티브 EditText는 이미 그려버린 초과/무효 글자를 그대로 들고
+   * 있는다. 그래서 이 두 경우엔 `setNativeProps`로 TextInput 인스턴스를
+   * 직접 건드려 강제로 되돌린다 — React 밖에서 명령형으로 native text를
+   * 다시 쓰는 것이라 prop diffing을 안 거치고 무조건 반영된다.
+   */
   const handleAmountChange = (text: string) => {
     const digitsOnly = text.replace(/[^0-9]/g, '');
-    if (!digitsOnly) {
-      setAmount(0);
+    const revertNative = () => {
+      amountInputRef.current?.setNativeProps({
+        text: amount > 0 ? amount.toLocaleString() : '',
+      });
+    };
+    if (digitsOnly.length > 9) {
+      revertNative();
       return;
     }
-    setAmount(Math.min(Number(digitsOnly), DUES_AMOUNT_MAX));
+    const next = digitsOnly ? Number(digitsOnly) : 0;
+    if (next === amount) {
+      revertNative();
+      return;
+    }
+    setAmount(next);
   };
 
   const handleSelectLedger = (key: string) => {
@@ -172,7 +202,11 @@ function DuesCreateScreen() {
   };
 
   const canProceed =
-    title.trim().length > 0 && amount > 0 && ledgerId.length > 0 && dueDate.length > 0;
+    title.trim().length > 0 &&
+    amount > 0 &&
+    ledgerId.length > 0 &&
+    startDate.length > 0 &&
+    dueDate.length > 0;
 
   const loadLedgerOptions = useCallback(async () => {
     const group = getActiveGroup();
@@ -260,15 +294,30 @@ function DuesCreateScreen() {
       const created = await duesService.createDues(group.id, {
         title: title.trim(),
         amount,
+        startDate: toIsoDate(startDate),
         dueDate: toIsoDate(dueDate),
         targetMemberIds: selectedMemberIds.map(Number),
         ledgerId,
       });
-      showSnackbar(
-        `${SNACKBAR_DUES_CREATED_PREFIX}${created.title}${SNACKBAR_DUES_CREATED_SUFFIX}`,
-      );
-      setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
+      // DUE-4-SNACKBAR-01-0: 생성 화면이 아니라 납부관리 메인 목록에서
+      // 스낵바를 보여준다(시안 확인) — DuesDetailScreen 삭제/마감과 같은 패턴.
+      navigation.navigate('Main', {
+        screen: 'Dues',
+        params: {
+          snackbarMessage: `${SNACKBAR_DUES_CREATED_PREFIX}${created.title}${SNACKBAR_DUES_CREATED_SUFFIX}`,
+        },
+      });
     } catch (error) {
+      if (error instanceof ApiError) {
+        const periodFieldError = error.fieldErrors.find(
+          fe => fe.field === 'startDate' || fe.field === 'dueDate',
+        );
+        if (periodFieldError) {
+          setPeriodError(periodFieldError.reason);
+          setStep('basic');
+          return;
+        }
+      }
       showSnackbar(toErrorMessage(error));
     } finally {
       setIsSubmitting(false);
@@ -305,6 +354,7 @@ function DuesCreateScreen() {
                 label={DUES_MEMBER_SELECT_RETRY_LABEL}
                 onPress={loadMembers}
                 hierarchy="secondary"
+                style={{ alignSelf: 'center' }}
               />
             </View>
           )}
@@ -387,11 +437,13 @@ function DuesCreateScreen() {
           maxLength={DUES_TITLE_MAX_LENGTH}
         />
         <TextField
+          ref={amountInputRef}
           label={DUES_CREATE_AMOUNT_LABEL}
-          value={amount > 0 ? `${amount.toLocaleString()}원` : ''}
+          value={amount > 0 ? amount.toLocaleString() : ''}
           onChangeText={handleAmountChange}
           placeholder={DUES_CREATE_AMOUNT_PLACEHOLDER}
           keyboardType="number-pad"
+          suffix="원"
         />
         <SelectionListItem
           type="picker"
@@ -402,11 +454,16 @@ function DuesCreateScreen() {
         />
         <SelectionListItem
           type="picker"
-          title={DUES_CREATE_DUE_DATE_LABEL}
+          title={DUES_CREATE_PERIOD_LABEL}
           required
-          value={dueDate || DUES_CREATE_DUE_DATE_PLACEHOLDER}
-          onPress={() => setActiveSheet('dueDate')}
+          value={
+            startDate && dueDate
+              ? `${startDate} - ${dueDate}`
+              : DUES_CREATE_PERIOD_PLACEHOLDER
+          }
+          onPress={() => setActiveSheet('period')}
         />
+        {periodError && <Text style={styles.periodError}>{periodError}</Text>}
       </ScrollView>
 
       <View style={styles.footer}>
@@ -426,12 +483,18 @@ function DuesCreateScreen() {
         onClose={() => setActiveSheet('none')}
         onSelect={handleSelectLedger}
       />
-      <TransactionDateSheet
-        visible={activeSheet === 'dueDate'}
-        title={DUES_CREATE_DUE_DATE_LABEL}
-        value={dueDate || todayKey()}
+      <DuesDateRangeSheet
+        visible={activeSheet === 'period'}
+        title={DUES_CREATE_PERIOD_LABEL}
+        confirmLabel={DATE_SHEET_CONFIRM_LABEL}
+        startDate={startDate || undefined}
+        endDate={dueDate || undefined}
         onClose={() => setActiveSheet('none')}
-        onSave={setDueDate}
+        onSave={(nextStart, nextEnd) => {
+          setStartDate(nextStart);
+          setDueDate(nextEnd);
+          setPeriodError(undefined);
+        }}
       />
 
       <Dialog
@@ -465,6 +528,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 16,
     gap: 4,
+  },
+  periodError: {
+    ...TYPOGRAPHY.body3,
+    color: FEEDBACK_NEGATIVE_BOLD,
+    marginTop: -12,
+    marginBottom: 12,
   },
   footer: {
     paddingHorizontal: 24,

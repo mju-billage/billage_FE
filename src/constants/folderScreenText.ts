@@ -42,13 +42,6 @@ export const UNLINK_FOLDER_DIALOG_TITLE = '폴더를 해제하시겠습니까?';
 export const UNLINK_FOLDER_DIALOG_DESCRIPTION =
   '폴더 내 항목은 삭제되지 않습니다.';
 export const UNLINK_CONFIRM_LABEL = '해제';
-/** 0-1: 최상위 폴더 + 직속 장부가 있는 경우 해제를 막을 때 보여주는 안내. 최상위
- * 장부 조회 API가 없어(docs/api-gaps.md (C)) 해제하면 그 장부를 다시 찾을 방법이
- * 없다 — 삭제는 아니지만 사실상 못 찾게 되므로 UI에서 먼저 막는다. */
-export const UNLINK_BLOCKED_DIALOG_TITLE = '이 폴더는 지금 해제할 수 없어요.';
-export const UNLINK_BLOCKED_DIALOG_DESCRIPTION =
-  '이 폴더는 최상위에 있고 직접 담긴 장부가 있어요. 지금 해제하면 그 장부를 앱에서 다시 찾을 방법이 없어요.';
-export const UNLINK_BLOCKED_CONFIRM_LABEL = '확인';
 
 export const BACKUP_DIALOG_TITLE = '현재까지 장부를 모두 보관할까요?';
 export const BACKUP_DIALOG_DESCRIPTION = '보관된 장부는 수정이 불가합니다.';
@@ -59,10 +52,6 @@ export const SNACKBAR_FOLDER_CREATED_SUFFIX = ' 폴더가 생성되었어요.';
 export const SNACKBAR_FOLDER_RENAMED = '폴더 이름이 변경되었어요.';
 export const SNACKBAR_FOLDER_UNLINKED_SUFFIX = ' 폴더가 해제되었어요.';
 export const SNACKBAR_FOLDER_MOVED = '폴더 이동이 완료되었어요.';
-/** 0-2: 다건 이동 중 일부만 실패했을 때 — 조용히 "이동 완료"라고 하지 않는다. */
-export const SNACKBAR_FOLDER_MOVE_PARTIAL_PREFIX = '';
-export const SNACKBAR_FOLDER_MOVE_PARTIAL_MIDDLE = '개 이동 완료, ';
-export const SNACKBAR_FOLDER_MOVE_PARTIAL_SUFFIX = '개 실패했어요.';
 export const SNACKBAR_LEDGER_CREATED_SUFFIX = ' 장부가 생성되었어요.';
 export const SNACKBAR_BACKUP_DONE_TITLE = '모든 장부가 보관되었어요.';
 export const SNACKBAR_BACKUP_DONE_DESCRIPTION =
@@ -80,10 +69,6 @@ export const MOVE_DESTINATION_TITLE = '폴더 선택';
 export const MOVE_DESTINATION_ROOT_TITLE = '전체';
 export const MOVE_DESTINATION_CONFIRM_LABEL = '여기로 이동하기';
 export const MOVE_DESTINATION_NO_SUBFOLDER = '하위 폴더가 없어요.';
-/** 장부는 최상위(폴더 없음)로 이동할 수 있는지 명세에 없어(docs/api-gaps.md) 막아둔 안내.
- * 폴더는 이동 가능(허용됨), 선택 항목에 장부가 섞여 있을 때만 뜬다. */
-export const MOVE_DESTINATION_LEDGER_TO_ROOT_BLOCKED =
-  '장부는 최상위로 이동할 수 없어요. 폴더 안으로 이동해주세요.';
 export const MOVE_DESTINATION_MOVING_LABEL = '이동 중...';
 
 export const BUDGET_LIST_TITLE = '예산 설정';

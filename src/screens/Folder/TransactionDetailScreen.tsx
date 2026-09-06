@@ -1,21 +1,19 @@
 /** @screen DTB-2-PAGE-02-0 상세 내역_조회 */
 /** @screen DTB-3-MODAL-01-0 상세 내역_삭제 */
 /**
- * 4-A(Entry API 연동): 실 서버 내역(entryId가 숫자 문자열)과 DTB 전체 목록의 목
- * 데이터(`dtb-tx-N`, 4-B 전까지 유지)를 id 모양으로 구분해 같은 화면에서 같이
- * 처리한다 — `TransactionsScreen`(모임 전체 목록, 손대지 말라고 지정된 화면)에서
- * 들어오면 여전히 dtb-tx-N을 보고, `LedgerDetailScreen`/`LedgerSearchScreen`(이번에
- * 옮긴 화면)에서 들어오면 실 Entry를 본다.
+ * 4-A(Entry API 연동): 실 Entry 상세를 조회해 보여준다. (4-B 정리: DTB 전체
+ * 목록이 실 API로 전환되며 `dtb-tx-N` 목 id를 만들어내는 곳이 사라져 이 화면의
+ * 옛 목 데이터(`types/transaction.ts`) 분기가 도달 불가능해졌다 — 확인 후 분기와
+ * 그 파일을 함께 걷어냈다. 이제 `transactionId`는 항상 실 Entry id다.)
  *
  * 수정/삭제/승인은 전부 총무(OWNER) 전용(Entry.txt) — 일반 관리자는 본인이 등록한
- * 승인 대기 내역도 못 고친다. 실 내역일 때만 `viewerIsOwner`로 아이콘을 감춘다
- * (목 데이터는 권한 개념이 없어 그대로 둔다). 승인 진입점은 새 화면(DTB-2-PAGE-03-0,
- * 미구현)을 만들지 않고 이 화면에 버튼 하나로 얹었다 — 장부 상세 목록에서 승인
- * 대기 내역도 이미 탭해서 들어올 수 있어 여기가 유일하게 실제로 도달 가능한
- * 지점이다.
+ * 승인 대기 내역도 못 고친다. `viewerIsOwner`로 아이콘을 감춘다. 승인 진입점은
+ * 새 화면(DTB-2-PAGE-03-0, 미구현)을 만들지 않고 이 화면에 버튼 하나로 얹었다 —
+ * 장부 상세 목록에서 승인 대기 내역도 이미 탭해서 들어올 수 있어 여기가 유일하게
+ * 실제로 도달 가능한 지점이다.
  */
 import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -27,10 +25,6 @@ import Badge from '../../components/Data Display/Badge/Badge';
 import Button from '../../components/Input/Button/Button';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
-import {
-  deleteTransactionById as deleteDtbTransaction,
-  getTransactionById as getDtbTransactionById,
-} from '../../types/transaction';
 import type { EntryDetail } from '../../types/entry';
 import * as entryService from '../../services/entryService';
 import { getActiveGroup } from '../../types/group';
@@ -83,21 +77,13 @@ type TransactionDetailRouteProp = RouteProp<
 
 type LoadState = 'loading' | 'error' | 'ready';
 
-/** 실 Entry(숫자 id)인지 DTB 목 데이터(dtb-tx-N)인지 id 모양으로 구분한다. */
-function isRealEntryId(id: string): boolean {
-  return /^\d+$/.test(id);
-}
-
 function TransactionDetailScreen() {
   const navigation = useNavigation<TransactionDetailNavigationProp>();
   const route = useRoute<TransactionDetailRouteProp>();
   const transactionId = route.params.transactionId;
-  const isRealEntry = isRealEntryId(transactionId);
-
-  const dtbTransaction = isRealEntry ? undefined : getDtbTransactionById(transactionId);
 
   const [entry, setEntry] = useState<EntryDetail | null>(null);
-  const [loadState, setLoadState] = useState<LoadState>(isRealEntry ? 'loading' : 'ready');
+  const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
@@ -115,9 +101,6 @@ function TransactionDetailScreen() {
   };
 
   const load = useCallback(async () => {
-    if (!isRealEntry) {
-      return;
-    }
     setLoadState('loading');
     try {
       const detail = await entryService.getEntryDetail(transactionId);
@@ -127,7 +110,7 @@ function TransactionDetailScreen() {
       setLoadErrorMessage(toErrorMessage(error));
       setLoadState('error');
     }
-  }, [isRealEntry, transactionId]);
+  }, [transactionId]);
 
   useFocusEffect(
     useCallback(() => {
@@ -143,12 +126,6 @@ function TransactionDetailScreen() {
   const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
 
   const handleConfirmDelete = async () => {
-    if (dtbTransaction) {
-      deleteDtbTransaction(dtbTransaction.id);
-      setDeleteDialogVisible(false);
-      navigation.goBack();
-      return;
-    }
     if (!entry || isDeleting) {
       return;
     }
@@ -181,7 +158,7 @@ function TransactionDetailScreen() {
     }
   };
 
-  if (isRealEntry && (loadState === 'loading' || loadState === 'error')) {
+  if (loadState === 'loading' || loadState === 'error') {
     return (
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <AppBar title={TRANSACTION_DETAIL_TITLE} onBackPress={() => navigation.goBack()} />
@@ -190,30 +167,26 @@ function TransactionDetailScreen() {
             {loadState === 'loading' ? TRANSACTION_DETAIL_LOADING : loadErrorMessage}
           </Text>
           {loadState === 'error' && (
-            <Button label={TRANSACTION_DETAIL_RETRY_LABEL} onPress={load} hierarchy="secondary" />
+            <Button label={TRANSACTION_DETAIL_RETRY_LABEL} onPress={load} hierarchy="secondary" style={{ alignSelf: 'center' }} />
           )}
         </View>
       </SafeAreaView>
     );
   }
 
-  const transaction = dtbTransaction;
-  if (!isRealEntry && !transaction) {
-    return null;
-  }
-  if (isRealEntry && !entry) {
+  if (!entry) {
     return null;
   }
 
-  // 실 Entry/목 데이터를 이 화면이 필요로 하는 공통 필드로 정규화한다.
-  const isIncome = isRealEntry ? entry!.type === 'INCOME' : transaction!.amount > 0;
-  const amount = isRealEntry ? entry!.amount : Math.abs(transaction!.amount);
-  const dateValue = isRealEntry ? entry!.occurredOn : transaction!.date;
-  const itemNameValue = isRealEntry ? entry!.title : transaction!.itemName;
-  const ledgerNameValue = isRealEntry ? entry!.ledgerName : transaction!.ledgerName;
-  const memoValue = isRealEntry ? entry!.memo ?? '' : transaction!.memo;
-  const canEditDelete = isRealEntry ? viewerIsOwner : true;
-  const isPending = isRealEntry && entry!.approvalStatus === 'PENDING';
+  const isIncome = entry.type === 'INCOME';
+  const amount = entry.amount;
+  const dateValue = entry.occurredOn;
+  const itemNameValue = entry.title;
+  const ledgerNameValue = entry.ledgerName;
+  const memoValue = entry.memo ?? '';
+  const managerValue = entry.manager.name;
+  const canEditDelete = viewerIsOwner;
+  const isPending = entry.approvalStatus === 'PENDING';
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -253,34 +226,30 @@ function TransactionDetailScreen() {
           value={dateValue}
         />
         <Field label={TRANSACTION_ITEM_NAME_LABEL} value={itemNameValue} />
-        {!isRealEntry && (
-          <Field label={TRANSACTION_MANAGER_LABEL} value={transaction!.manager} />
-        )}
+        <Field label={TRANSACTION_MANAGER_LABEL} value={managerValue} />
         <Field label={TRANSACTION_LEDGER_LABEL} value={ledgerNameValue} />
         <Field
           label={TRANSACTION_MEMO_LABEL}
           value={memoValue || TRANSACTION_MEMO_PLACEHOLDER}
         />
 
-        {isRealEntry && entry!.receiptFiles.length > 0 && (
+        {entry.receiptFiles.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>{TRANSACTION_RECEIPT_LABEL}</Text>
             <View style={styles.thumbnailRow}>
-              {entry!.receiptFiles.map(file => {
+              {entry.receiptFiles.map(file => {
                 const source = buildAuthenticatedImageSource(file.url);
-                return <Thumbnail key={file.id} imageUri={source.uri} imageHeaders={source.headers} />;
+                return (
+                  <Pressable
+                    key={file.id}
+                    onPress={() =>
+                      navigation.navigate('TransactionReceiptDetail', { fileUrl: file.url })
+                    }
+                  >
+                    <Thumbnail imageUri={source.uri} imageHeaders={source.headers} />
+                  </Pressable>
+                );
               })}
-            </View>
-          </View>
-        )}
-
-        {!isRealEntry && transaction!.receiptImages.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{TRANSACTION_RECEIPT_LABEL}</Text>
-            <View style={styles.thumbnailRow}>
-              {transaction!.receiptImages.map(image => (
-                <Thumbnail key={image} />
-              ))}
             </View>
           </View>
         )}

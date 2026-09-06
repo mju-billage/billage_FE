@@ -93,7 +93,7 @@ export const TYPOGRAPHY = {
   },
   caption: {
     fontFamily: FONT_FAMILY.regular,
-    fontSize: 10,
+    fontSize: 8,
     lineHeight: 16,
     letterSpacing: 0.4,
   },

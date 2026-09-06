@@ -9,12 +9,15 @@
  * FolderMoveDestinationScreen.tsx) */
 /** @screen FDR-4-SNACKBAR-03-0 이름 변경_완료 (activeDialog='rename' 확인 시 SNACKBAR_FOLDER_RENAMED) */
 /**
- * 3-B(API 연동, 쓰기) 메모 — 0-1 폴더 해제 판단: 최상위 폴더를 해제하면 그 직속
- * 장부가 `folderId: null`이 되는데, 최상위 장부 조회 API가 없어(docs/api-gaps.md
- * (C)) 다시 찾을 방법이 없다. 최상위가 아닌 폴더는 해제해도 내부 항목이 상위
- * 폴더(조회 가능한 폴더)로 승격되므로 안전하다 — 그래서 "최상위 + 직속 장부 있음"
- * 조합만 막는다(`isUnlinkUnsafe`). 백업(archive) 기능은 서버 상태가 "시작 전"이라
- * (`api-gaps.md` (B) 미준비) 이번에도 실제 API를 안 붙이고 로컬 스낵바 스텁을 유지한다.
+ * 3-B(API 연동, 쓰기) 메모 — 0-1 폴더 해제 판단(2026-09-05 철회): 최상위
+ * 폴더를 해제하면 그 직속 장부가 `folderId: null`이 되는데, 당시엔 최상위
+ * 장부를 다시 조회할 API가 없어(docs/api-gaps.md (C)) "최상위 + 직속 장부
+ * 있음" 조합의 해제를 UI에서 막았었다(`isUnlinkUnsafe`). `GET
+ * .../folder-items`(폴더ID 생략=최상위 조회)가 실제로는 최상위 장부도
+ * `LEDGER` 항목으로 그대로 내려준다는 걸 실호출로 확인해(`docs/api-gaps.md`
+ * "확정됨" 6번) 그 전제가 깨졌다 — 차단을 없앴다. 백업(archive) 기능은 서버
+ * 상태가 "시작 전"이라(`api-gaps.md` (B) 미준비) 이번에도 실제 API를 안
+ * 붙이고 로컬 스낵바 스텁을 유지한다.
  */
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
@@ -42,15 +45,17 @@ import FolderMoreMenu from './FolderMoreMenu';
 import NewItemSheet from './NewItemSheet';
 import type { MenuItem } from '../../components/Navigation/Menu/Menu';
 import { getActiveGroup } from '../../types/group';
-import { getChildFolders, findFolderNode, mergeFolderListItems } from '../../utils/folderTree';
+import { getChildFolders, mergeFolderListItems } from '../../utils/folderTree';
 import type { FolderListItem } from '../../utils/folderTree';
-import type { FolderNode } from '../../types/folderTree';
 import * as folderService from '../../services/folderService';
 import * as ledgerService from '../../services/ledgerService';
+import * as groupService from '../../services/groupService';
+import * as archiveService from '../../services/archiveService';
 import { ApiError } from '../../services/apiClient';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
+  NO_ACTIVE_GROUP_MESSAGE,
   getApiErrorMessage,
   isNetworkError,
 } from '../../constants/apiErrorMessages';
@@ -86,16 +91,13 @@ import {
   SNACKBAR_FOLDER_CREATED_SUFFIX,
   SNACKBAR_FOLDER_RENAMED,
   SNACKBAR_FOLDER_UNLINKED_SUFFIX,
-  UNLINK_BLOCKED_CONFIRM_LABEL,
-  UNLINK_BLOCKED_DIALOG_DESCRIPTION,
-  UNLINK_BLOCKED_DIALOG_TITLE,
   UNLINK_CONFIRM_LABEL,
   UNLINK_FOLDER_DIALOG_DESCRIPTION,
   UNLINK_FOLDER_DIALOG_TITLE,
   VIEW_TOGGLE_GRID_LABEL,
   VIEW_TOGGLE_LIST_LABEL,
 } from '../../constants/folderScreenText';
-import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { BLUE_50, FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const MENU_ICON = require('../../assets/icons/action/MenuHorizontal.png');
@@ -114,7 +116,6 @@ type ActiveDialog =
   | 'newFolder'
   | 'rename'
   | 'unlink'
-  | 'unlinkBlocked'
   | 'backup'
   | null;
 type MenuMode = 'main' | 'viewToggle';
@@ -130,7 +131,6 @@ function FolderScreen() {
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
-  const [tree, setTree] = useState<FolderNode[]>([]);
   const [items, setItems] = useState<FolderListItem[]>([]);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
@@ -157,12 +157,20 @@ function FolderScreen() {
   };
 
   const loadItems = useCallback(async () => {
-    const group = getActiveGroup();
-    if (!group) {
-      return;
-    }
     setLoadState('loading');
     try {
+      let group = getActiveGroup();
+      if (!group) {
+        // [치명1] 로그인 직후 첫 포커스처럼 모임 캐시가 아직 없는 순간 대비 —
+        // "다시 시도"가 실제로 동작하도록 여기서 한 번 더 직접 불러온다.
+        await groupService.getMyGroups();
+        group = getActiveGroup();
+      }
+      if (!group) {
+        setLoadErrorMessage(NO_ACTIVE_GROUP_MESSAGE);
+        setLoadState('error');
+        return;
+      }
       // 폴더 트리는 모임 전체를 한 번에 내려주므로 화면 깊이와 무관하게 호출 1번.
       // 장부는 현재 폴더 직속분만 별도 조회(최상위엔 그 조회 API 자체가 없다 —
       // docs/api-gaps.md (C) "최상위 영역 장부 조회").
@@ -170,7 +178,6 @@ function FolderScreen() {
         folderService.getFolderTree(group.id),
         folderId ? ledgerService.getLedgersInFolder(folderId) : Promise.resolve([]),
       ]);
-      setTree(nextTree);
       const childFolders = getChildFolders(nextTree, folderId);
       setItems(mergeFolderListItems(childFolders, ledgers));
       setLoadState('ready');
@@ -235,14 +242,6 @@ function FolderScreen() {
     { key: 'list', label: VIEW_TOGGLE_LIST_LABEL },
   ];
 
-  /** 0-1: 최상위 폴더(자신의 parentId가 null) + 직속 장부가 있으면 해제 후 그 장부를
-   * 다시 찾을 방법이 없다 — 현재 폴더 화면에서 이미 불러온 tree/items로만 판단한다
-   * (추가 API 호출 없음). */
-  const currentFolderNode = folderId ? findFolderNode(tree, folderId) : undefined;
-  const currentFolderLedgerCount = items.filter(item => item.kind === 'ledger').length;
-  const isUnlinkUnsafe =
-    currentFolderNode?.parentId === null && currentFolderLedgerCount > 0;
-
   const handleSelectMenu = (key: string) => {
     switch (key) {
       case 'selectMove':
@@ -267,7 +266,7 @@ function FolderScreen() {
         break;
       case 'unlink':
         closeMoreMenu();
-        setActiveDialog(isUnlinkUnsafe ? 'unlinkBlocked' : 'unlink');
+        setActiveDialog('unlink');
         break;
       case 'budgetList':
         closeMoreMenu();
@@ -339,11 +338,22 @@ function FolderScreen() {
       } finally {
         setIsSubmittingDialog(false);
       }
-    } else if (activeDialog === 'unlinkBlocked') {
-      closeDialog();
     } else if (activeDialog === 'backup') {
-      closeDialog();
-      showSnackbar(SNACKBAR_BACKUP_DONE_TITLE, SNACKBAR_BACKUP_DONE_DESCRIPTION);
+      const trimmed = dialogInputValue.trim();
+      if (!trimmed || !group) {
+        return;
+      }
+      setIsSubmittingDialog(true);
+      try {
+        await archiveService.createArchive(group.id, trimmed);
+        closeDialog();
+        showSnackbar(SNACKBAR_BACKUP_DONE_TITLE, SNACKBAR_BACKUP_DONE_DESCRIPTION);
+        loadItems();
+      } catch (error) {
+        setDialogError(fieldOrGeneralError(error, 'title'));
+      } finally {
+        setIsSubmittingDialog(false);
+      }
     }
   };
 
@@ -386,7 +396,7 @@ function FolderScreen() {
         {loadState === 'error' && (
           <View style={styles.stateContainer}>
             <Text style={styles.stateText}>{loadErrorMessage}</Text>
-            <Button label={FOLDER_RETRY_LABEL} onPress={loadItems} hierarchy="secondary" />
+            <Button label={FOLDER_RETRY_LABEL} onPress={loadItems} hierarchy="secondary" style={{ alignSelf: 'center' }} />
           </View>
         )}
 
@@ -487,7 +497,6 @@ function FolderScreen() {
         textFieldMaxLength={dialogConfig.showTextField ? FOLDER_NAME_MAX_LENGTH : undefined}
         textFieldError={dialogError}
         confirmLabel={dialogConfig.confirmLabel}
-        singleButton={activeDialog === 'unlinkBlocked'}
         destructive={activeDialog === 'unlink'}
         confirmDisabled={isSubmittingDialog}
         onCancel={closeDialog}
@@ -532,14 +541,6 @@ function getDialogConfig(activeDialog: ActiveDialog) {
         placeholder: undefined,
         confirmLabel: UNLINK_CONFIRM_LABEL,
       };
-    case 'unlinkBlocked':
-      return {
-        title: UNLINK_BLOCKED_DIALOG_TITLE,
-        description: UNLINK_BLOCKED_DIALOG_DESCRIPTION,
-        showTextField: false,
-        placeholder: undefined,
-        confirmLabel: UNLINK_BLOCKED_CONFIRM_LABEL,
-      };
     case 'backup':
       return {
         title: BACKUP_DIALOG_TITLE,
@@ -562,6 +563,7 @@ function getDialogConfig(activeDialog: ActiveDialog) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: BLUE_50,
   },
   body: {
     flex: 1,

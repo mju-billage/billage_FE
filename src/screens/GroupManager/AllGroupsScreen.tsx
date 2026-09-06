@@ -1,13 +1,17 @@
 /** @screen ETC-2-PAGE-01-0 전체 모임 관리 */
+/** @screen ETC-4-SNACKBAR-04-0 모임 삭제 완료 (route.params.snackbarMessage로 전달받아 렌더링 — GroupManageScreen.tsx 참고) */
+/** @screen ETC-5-SNACKBAR-03-0 모임 참여 완료 */
 import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import EntityCard from '../../components/Data Display/Card/EntityCard';
 import Button from '../../components/Input/Button/Button';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import AddGroupSheet from './AddGroupSheet';
 import JoinGroupSheet from './JoinGroupSheet';
 import { setActiveGroup } from '../../types/group';
@@ -25,14 +29,18 @@ import {
   ALL_GROUPS_RETRY_LABEL,
   ALL_GROUPS_ROLE_TREASURER,
   ALL_GROUPS_TITLE,
+  SNACKBAR_GROUP_JOINED_SUFFIX,
 } from '../../constants/groupManagerScreenText';
 import { FOREGROUND_DISABLED } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+
+const SNACKBAR_AUTO_HIDE_MS = 1600;
 
 type AllGroupsNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'AllGroups'
 >;
+type AllGroupsRouteProp = RouteProp<RootStackParamList, 'AllGroups'>;
 
 type SheetKey = 'none' | 'add' | 'join';
 type LoadState = 'loading' | 'error' | 'ready';
@@ -40,10 +48,24 @@ type LoadState = 'loading' | 'error' | 'ready';
 /** 전체 모임 관리: 내가 속한 모임 목록 + 새 모임 추가(생성/코드 참여). */
 function AllGroupsScreen() {
   const navigation = useNavigation<AllGroupsNavigationProp>();
+  const route = useRoute<AllGroupsRouteProp>();
   const [sheet, setSheet] = useState<SheetKey>('none');
   const [groups, setGroups] = useState<GroupSummary[]>([]);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [errorMessage, setErrorMessage] = useState('');
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+
+  const showSnackbar = (message: string) => {
+    setSnackbarMessage(message);
+    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
+  };
+
+  useEffect(() => {
+    if (route.params?.snackbarMessage) {
+      showSnackbar(route.params.snackbarMessage);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const loadGroups = useCallback(async () => {
     setLoadState('loading');
@@ -88,6 +110,7 @@ function AllGroupsScreen() {
             label={ALL_GROUPS_RETRY_LABEL}
             onPress={loadGroups}
             hierarchy="secondary"
+            style={{ alignSelf: 'center' }}
           />
         </View>
       )}
@@ -128,11 +151,18 @@ function AllGroupsScreen() {
       <JoinGroupSheet
         visible={sheet === 'join'}
         onClose={() => setSheet('none')}
-        onJoined={() => {
+        onJoined={joinedGroup => {
           setSheet('none');
-          navigation.goBack();
+          showSnackbar(`${joinedGroup.name}${SNACKBAR_GROUP_JOINED_SUFFIX}`);
+          setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
         }}
       />
+
+      {snackbarMessage && (
+        <View style={styles.snackbarWrapper}>
+          <Snackbar visible title={snackbarMessage} />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -146,6 +176,12 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingBottom: 24,
     gap: 12,
+  },
+  snackbarWrapper: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    bottom: 24,
   },
   stateContainer: {
     flex: 1,
