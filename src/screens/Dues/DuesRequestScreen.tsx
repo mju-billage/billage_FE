@@ -54,7 +54,6 @@ function DuesRequestScreen() {
         return false;
       });
       return () => subscription.remove();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [hasInput]),
   );
 
