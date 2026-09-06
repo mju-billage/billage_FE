@@ -38,6 +38,9 @@ type AppBarProps = {
   rightIcons?: AppBarRightIcon[];
   /** imageSelect 전용 우측 텍스트("N 선택")의 N. */
   selectedCount?: number;
+  /** imageSelect 전용. false면 우측 "선택"/"N 선택" 텍스트를 아예 숨긴다(단일
+   * 선택이라 확인 버튼이 따로 없는 화면용, 예: 모임 프로필 이미지 선택). */
+  showSelectionCount?: boolean;
 };
 
 /** 상단 앱바. type에 따라 titleOnly/sub/detailDownload/imageSelect 4가지 레이아웃을 지원한다. */
@@ -50,6 +53,7 @@ function AppBar({
   onPressDropdown,
   rightIcons,
   selectedCount,
+  showSelectionCount = true,
 }: AppBarProps) {
   const titleNode = (
     <View style={styles.titleRow}>
@@ -92,9 +96,11 @@ function AppBar({
 
       <View style={styles.rightRow}>
         {type === 'imageSelect' ? (
-          <Text style={styles.selectedCountText}>
-            {selectedCount ? `${selectedCount} 선택` : '선택'}
-          </Text>
+          showSelectionCount && (
+            <Text style={styles.selectedCountText}>
+              {selectedCount ? `${selectedCount} 선택` : '선택'}
+            </Text>
+          )
         ) : (
           rightIcons?.map((rightIcon, index) => (
             <Pressable
@@ -117,7 +123,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 12,
   },
   leftRow: {

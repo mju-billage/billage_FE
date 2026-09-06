@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 import {
   Image,
   KeyboardTypeOptions,
@@ -13,6 +13,7 @@ import {
   FEEDBACK_NEGATIVE_BOLD,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
@@ -34,28 +35,41 @@ type TextFieldProps = {
   secureToggle?: boolean;
   /** 입력값이 있을 때 인라인 클리어(X) 아이콘을 보여주고, 누르면 이 콜백으로 값을 비운다. */
   onClear?: () => void;
+  /** "원" 같은 단위를 value 문자열에 섞지 않고 입력 오른쪽에 별도로 보여준다
+   * (value에 섞으면 커서가 항상 단위 뒤에 붙어버린다). */
+  suffix?: string;
   maxLength?: number;
   keyboardType?: KeyboardTypeOptions;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
 };
 
-/** 라벨 + 입력 + 헬퍼/에러 텍스트로 구성된 공용 입력 필드. */
-function TextField({
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  helperText,
-  error,
-  success = false,
-  disabled = false,
-  secureTextEntry = false,
-  secureToggle = false,
-  onClear,
-  maxLength,
-  keyboardType,
-  autoCapitalize,
-}: TextFieldProps) {
+/**
+ * 라벨 + 입력 + 헬퍼/에러 텍스트로 구성된 공용 입력 필드.
+ * ref를 넘기면 내부 TextInput 인스턴스를 그대로 받는다 — 컨트롤드 입력값이
+ * 이전과 같아 리렌더가 스킵될 때(React의 Object.is 동일 판정) 네이티브가
+ * JS state와 어긋난 채로 남는 경우, 호출부에서 `ref.current?.setNativeProps(...)`로
+ * 직접 되돌리는 용도(예: DuesCreateScreen 금액 필드).
+ */
+const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
+  {
+    label,
+    value,
+    onChangeText,
+    placeholder,
+    helperText,
+    error,
+    success = false,
+    disabled = false,
+    secureTextEntry = false,
+    secureToggle = false,
+    onClear,
+    suffix,
+    maxLength,
+    keyboardType,
+    autoCapitalize,
+  },
+  ref,
+) {
   const [isFocused, setIsFocused] = useState(false);
   const [isSecure, setIsSecure] = useState(secureTextEntry || secureToggle);
 
@@ -76,6 +90,7 @@ function TextField({
       )}
       <View style={[styles.inputRow, { borderBottomColor: underlineColor }]}>
         <TextInput
+          ref={ref}
           style={[styles.input, disabled && styles.inputDisabled]}
           value={value}
           onChangeText={onChangeText}
@@ -89,6 +104,11 @@ function TextField({
           autoCapitalize={autoCapitalize}
           editable={!disabled}
         />
+        {suffix && (
+          <Text style={[styles.suffix, disabled && styles.inputDisabled]}>
+            {suffix}
+          </Text>
+        )}
         {secureToggle && !disabled && (
           <Pressable onPress={() => setIsSecure(!isSecure)}>
             <Image
@@ -118,7 +138,7 @@ function TextField({
       )}
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -141,11 +161,17 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body1,
     flex: 1,
     padding: 0,
+    color: FOREGROUND_PRIMARY,
     outlineWidth: 0,
     ...({ outlineStyle: 'none' } as any),
   },
   inputDisabled: {
     color: FOREGROUND_DISABLED,
+  },
+  suffix: {
+    ...TYPOGRAPHY.body1,
+    color: FOREGROUND_PRIMARY,
+    marginLeft: 4,
   },
   toggleIcon: {
     width: 20,
@@ -173,5 +199,7 @@ const styles = StyleSheet.create({
     color: FOREGROUND_SECONDARY,
   },
 });
+
+TextField.displayName = 'TextField';
 
 export default TextField;

@@ -1,6 +1,7 @@
 import { request } from './apiClient';
 import {
   clearGroupMembershipsCache,
+  removeMembershipFromCache,
   setGroupMemberships,
   upsertMembershipInCache,
 } from '../types/groupMembership';
@@ -97,4 +98,21 @@ export async function leaveGroup(groupId: string): Promise<void> {
   await request<void>(`/api/v1/groups/${groupId}/leave`, { method: 'POST' });
   clearGroupMembershipsCache(groupId);
   removeGroupFromCache(groupId);
+}
+
+/**
+ * 총무가 다른 모임원을 강제로 내보낸다(2026-09-06 실호출로 실재 확인 —
+ * `docs/api-gaps.md`에 API 없음으로 보류돼 있던 항목, 실제로는 구현돼 있었다).
+ * 장부 내역의 작성자·승인자 이름은 스냅샷이라 안 지워진다(GroupMembership.txt
+ * §6 정책) — 이 함수는 관리자 캐시에서만 지운다.
+ */
+export async function removeMembership(
+  groupId: string,
+  membershipId: string,
+): Promise<void> {
+  await request<void>(
+    `/api/v1/groups/${groupId}/memberships/${membershipId}`,
+    { method: 'DELETE' },
+  );
+  removeMembershipFromCache(groupId, membershipId);
 }

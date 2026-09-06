@@ -1,12 +1,14 @@
 /** @screen COM-1-PAGE-01-0 로그인 */
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import TextField from '../components/Input/Text Field/TextField';
 import Button from '../components/Input/Button/Button';
 import TextButton from '../components/Input/Button/TextButton';
+import Snackbar from '../components/Feedback/Snackbar/Snackbar';
 import {
   BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_SUBTLE,
@@ -21,6 +23,7 @@ import { SocialProfile, SocialType } from '../types/social';
 import { ApiError } from '../services/apiClient';
 import * as authService from '../services/authService';
 import * as socialAuthService from '../services/socialAuthService';
+import * as groupService from '../services/groupService';
 import {
   LOGIN_EMAIL_PLACEHOLDER,
   LOGIN_PASSWORD_PLACEHOLDER,
@@ -37,6 +40,7 @@ type LoginNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Login'
 >;
+type LoginRouteProp = RouteProp<RootStackParamList, 'Login'>;
 
 const SOCIAL_CIRCLE_SIZE = 48;
 
@@ -102,12 +106,36 @@ const socialBadgeStyles = StyleSheet.create({
 /** 로그인 화면: 이메일/비밀번호 로그인과 소셜 로그인 진입점을 보여준다. */
 function LoginScreen() {
   const navigation = useNavigation<LoginNavigationProp>();
+  const route = useRoute<LoginRouteProp>();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
-  const goToMain = () => {
+  useFocusEffect(
+    useCallback(() => {
+      if (route.params?.snackbarMessage) {
+        const message = route.params.snackbarMessage;
+        setSnackbarMessage(message);
+        navigation.setParams({ snackbarMessage: undefined });
+        setTimeout(() => setSnackbarMessage(null), 1600);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [route.params?.snackbarMessage]),
+  );
+
+  const goToMain = async () => {
+    // [치명1] 홈/납부관리 등 여러 화면이 getActiveGroup()이 이미 채워져 있다고
+    // 가정하고 포커스 시 바로 그걸 읽는다 — 로그인 직후 첫 진입이면 아직 아무도
+    // 모임 목록을 안 불러온 상태라 그 화면들이 조용히 로딩에 멈춰 있었다. 여기서
+    // 미리 채워 넣는다. 실패해도(네트워크 등) 로그인 자체를 막을 이유는 없고,
+    // 각 화면 자체에도 "모임 없음" 상태를 보여주는 방어 로직을 따로 둔다.
+    try {
+      await groupService.getMyGroups();
+    } catch {
+      // 무시 — 각 화면의 방어 로직(활성 모임 없음 상태)이 대신 처리한다.
+    }
     navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
   };
 
@@ -262,6 +290,12 @@ function LoginScreen() {
           />
         </View>
       )}
+
+      {snackbarMessage && (
+        <View style={styles.snackbarWrapper}>
+          <Snackbar visible title={snackbarMessage} />
+        </View>
+      )}
     </View>
   );
 }
@@ -295,6 +329,12 @@ const styles = StyleSheet.create({
   mockLoginRow: {
     width: '100%',
     marginTop: 24,
+  },
+  snackbarWrapper: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    bottom: 24,
   },
 });
 

@@ -46,10 +46,12 @@ import { getActiveGroup } from '../../types/group';
 import { getCurrentUser } from '../../types/session';
 import * as dashboardService from '../../services/dashboardService';
 import type { DashboardOverview } from '../../services/dashboardService';
+import * as groupService from '../../services/groupService';
 import { ApiError } from '../../services/apiClient';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
+  NO_ACTIVE_GROUP_MESSAGE,
   getApiErrorMessage,
   isNetworkError,
 } from '../../constants/apiErrorMessages';
@@ -119,12 +121,20 @@ function DashboardScreen() {
   };
 
   const load = useCallback(async () => {
-    const group = getActiveGroup();
-    if (!group) {
-      return;
-    }
     setLoadState('loading');
     try {
+      let group = getActiveGroup();
+      if (!group) {
+        // [치명1] 로그인 직후 첫 포커스처럼 모임 캐시가 아직 없는 순간 대비 —
+        // "다시 시도"가 실제로 동작하도록 여기서 한 번 더 직접 불러온다.
+        await groupService.getMyGroups();
+        group = getActiveGroup();
+      }
+      if (!group) {
+        setLoadErrorMessage(NO_ACTIVE_GROUP_MESSAGE);
+        setLoadState('error');
+        return;
+      }
       const result = await dashboardService.getDashboard(group.id);
       setOverview(result);
       setLoadState('ready');
@@ -152,8 +162,12 @@ function DashboardScreen() {
     navigation.navigate('TransactionRegister', {});
   };
 
-  const handlePressQuickService = () => {
-    // TODO: 보고서 생성 / 통계·분석(DSH-2-PAGE-05-0) / 증빙자료 앨범 화면 구현 후 연결
+  const handlePressQuickService = (itemId: string) => {
+    if (itemId === 'statistics') {
+      navigation.navigate('Statistics');
+      return;
+    }
+    // TODO: 보고서 생성 / 증빙자료 앨범 화면 구현 후 연결
   };
 
   return (
@@ -185,11 +199,11 @@ function DashboardScreen() {
         {loadState === 'error' && (
           <View style={styles.stateContainer}>
             <Text style={styles.stateText}>{loadErrorMessage}</Text>
-            <Button label={DASHBOARD_RETRY_LABEL} onPress={load} hierarchy="secondary" />
+            <Button label={DASHBOARD_RETRY_LABEL} onPress={load} hierarchy="secondary" style={{ alignSelf: 'center' }} />
           </View>
         )}
 
-        {loadState === 'ready' && overview && (
+        {/* {loadState === 'ready' && overview && (
           <>
             <Text style={styles.sectionTitle}>{DASHBOARD_SUMMARY_SECTION_TITLE}</Text>
             <AmountCard
@@ -209,40 +223,8 @@ function DashboardScreen() {
                 </Text>
               )}
             </View>
-
-            {overview.dues.activeDuesCount > 0 ? (
-              <Text style={styles.duesSummaryText}>
-                {DASHBOARD_DUES_SUMMARY_PREFIX}
-                {overview.dues.activeDuesCount}
-                {DASHBOARD_DUES_SUMMARY_MIDDLE}
-                {overview.dues.paidCount}/{overview.dues.totalTargetCount}
-                {DASHBOARD_DUES_SUMMARY_SUFFIX}
-              </Text>
-            ) : (
-              <Text style={styles.duesEmptyText}>{DASHBOARD_DUES_EMPTY}</Text>
-            )}
-
-            <Text style={styles.sectionTitle}>{DASHBOARD_RECENT_ENTRIES_TITLE}</Text>
-            {overview.recentEntries.length === 0 ? (
-              <Text style={styles.recentEmptyText}>{DASHBOARD_RECENT_ENTRIES_EMPTY}</Text>
-            ) : (
-              <View style={styles.recentEntriesList}>
-                {overview.recentEntries.map(entry => (
-                  <TransactionListItem
-                    key={entry.id}
-                    label={entry.ledgerName}
-                    itemName={entry.title}
-                    amount={entry.type === 'INCOME' ? entry.amount : -entry.amount}
-                    isPendingApproval={entry.approvalStatus === 'PENDING'}
-                    onPress={() =>
-                      navigation.navigate('TransactionDetail', { transactionId: entry.id })
-                    }
-                  />
-                ))}
-              </View>
-            )}
           </>
-        )}
+        )} */}
 
         <Text style={styles.quickServiceSubtitle}>
           {nickname} {DASHBOARD_QUICK_SERVICE_SUBTITLE_SUFFIX}
@@ -253,7 +235,7 @@ function DashboardScreen() {
             <QuickServiceCard
               key={item.id}
               item={item}
-              onPress={handlePressQuickService}
+              onPress={() => handlePressQuickService(item.id)}
             />
           ))}
         </View>
@@ -280,14 +262,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 60,
   },
   nickname: {
     ...TYPOGRAPHY.h3,
   },
   sectionTitle: {
     ...TYPOGRAPHY.subtitle1,
-    marginTop: 24,
     marginBottom: 12,
   },
   stateContainer: {
@@ -333,7 +314,7 @@ const styles = StyleSheet.create({
   },
   quickServiceRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 4,
   },
 });
 

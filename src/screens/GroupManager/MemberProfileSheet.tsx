@@ -4,12 +4,8 @@
 /** @screen ETC-3-SHEET-04-0 일반 프로필 (member.role==='MEMBER') */
 /** @screen ETC-4-MODAL-01-0 일반 전환하기 (confirmKind='demote') */
 /** @screen ETC-4-MODAL-02-0 총무 전환하기 (confirmKind='promote') */
-/**
- * @screen ETC-4-MODAL-03-0 모임 내보내기 — API 미제공으로 보류(2단계).
- * `GroupMembership` 명세엔 본인이 나가는 leave만 있고 총무가 남을 내보내는
- * 엔드포인트가 없다(`docs/api-gaps.md` (A)). 메뉴 자체를 렌더링하지 않는다 —
- * 백엔드에 엔드포인트가 생기면 이 파일에 되살릴 것.
- */
+/** @screen ETC-4-MODAL-03-0 모임 내보내기 (confirmKind='kick') */
+/** @screen ETC-5-SNACKBAR-02-0 모임 내보내기 완료 (스낵바 렌더링은 GroupManagerScreen.tsx) */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
@@ -44,19 +40,25 @@ import {
   PROFILE_LEAVE_GROUP,
   PROFILE_PERMISSION_SECTION_TITLE,
   PROFILE_PROMOTE_TO_TREASURER,
+  PROFILE_REMOVE_MEMBER,
   PROFILE_SHEET_TITLE,
   PROFILE_SHEET_TITLE_ME,
   PROMOTE_CONFIRM_DESCRIPTION,
   PROMOTE_CONFIRM_LABEL,
   PROMOTE_CONFIRM_TITLE_PREFIX,
   PROMOTE_CONFIRM_TITLE_SUFFIX,
+  REMOVE_MEMBER_CONFIRM_LABEL,
+  REMOVE_MEMBER_CONFIRM_TITLE_PREFIX,
+  REMOVE_MEMBER_CONFIRM_TITLE_SUFFIX,
+  SNACKBAR_MEMBER_REMOVED_PREFIX,
+  SNACKBAR_MEMBER_REMOVED_SUFFIX,
   SNACKBAR_ROLE_CHANGED_PREFIX,
   SNACKBAR_ROLE_CHANGED_SUFFIX,
 } from '../../constants/groupManagerScreenText';
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-type ConfirmKind = 'none' | 'promote' | 'demote' | 'leave' | 'leave-blocked';
+type ConfirmKind = 'none' | 'promote' | 'demote' | 'leave' | 'leave-blocked' | 'kick';
 
 type MemberProfileSheetProps = {
   visible: boolean;
@@ -151,6 +153,25 @@ function MemberProfileSheet({
     }
   };
 
+  const handleKick = async () => {
+    if (isSubmitting) {
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await groupMembershipService.removeMembership(groupId, member.membershipId);
+      closeAll();
+      onChanged(
+        `${SNACKBAR_MEMBER_REMOVED_PREFIX}${member.name}${SNACKBAR_MEMBER_REMOVED_SUFFIX}`,
+      );
+    } catch (error) {
+      setConfirmKind('none');
+      handleApiError(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handlePressLeave = () => {
     const treasurerCount = getGroupMemberships(groupId).filter(
       item => item.role === 'OWNER',
@@ -197,7 +218,11 @@ function MemberProfileSheet({
                         key: 'promote',
                         label: PROFILE_PROMOTE_TO_TREASURER,
                       },
-                  // "모임 내보내기"는 대응 API가 없어 뺐다 — 파일 상단 @screen 주석 참고.
+                  {
+                    key: 'kick',
+                    label: PROFILE_REMOVE_MEMBER,
+                    destructive: true,
+                  },
                 ],
               ]}
               onSelect={key => setConfirmKind(key as ConfirmKind)}
@@ -241,6 +266,16 @@ function MemberProfileSheet({
         confirmLabel={DEMOTE_CONFIRM_LABEL}
         onCancel={() => setConfirmKind('none')}
         onConfirm={handleDemote}
+      />
+      <Dialog
+        visible={confirmKind === 'kick'}
+        title={`${REMOVE_MEMBER_CONFIRM_TITLE_PREFIX}${member.name}${REMOVE_MEMBER_CONFIRM_TITLE_SUFFIX}`}
+        cancelLabel={DIALOG_CANCEL_LABEL}
+        confirmLabel={REMOVE_MEMBER_CONFIRM_LABEL}
+        destructive
+        confirmDisabled={isSubmitting}
+        onCancel={() => setConfirmKind('none')}
+        onConfirm={handleKick}
       />
       <Dialog
         visible={confirmKind === 'leave'}

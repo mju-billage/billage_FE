@@ -110,7 +110,6 @@ function CalendarScreen() {
               <Image source={CHEVRON_RIGHT_ICON} style={styles.chevronIcon} />
             </Pressable>
           </View>
-          <CalendarViewToggle onPressDaily={handlePressDailyToggle} />
         </View>
 
         <Calendar
@@ -132,6 +131,10 @@ function CalendarScreen() {
             <View style={styles.dividerWrapper}>
               <Divider />
             </View>
+            {/* MOCK_CALENDAR_MONTH가 목 데이터라 id가 실제 Entry id가 아니다 —
+                캘린더 자체가 아직 실 API에 안 붙어(DSH-2-PAGE-03-0, 와이어프레임
+                예정) 지금은 눌러도 상세 화면이 EntryNotFound 에러 상태를 보여준다.
+                캘린더가 실 데이터로 바뀌면 이 탭 이동은 그대로 유효하다. */}
             {selectedTransactions.map(transaction => (
               <TransactionListItem
                 key={transaction.id}
@@ -140,6 +143,11 @@ function CalendarScreen() {
                 amount={transaction.amount}
                 hasReceipt={transaction.hasReceipt}
                 isPendingApproval={transaction.isPendingApproval}
+                onPress={() =>
+                  navigation.navigate('TransactionDetail', {
+                    transactionId: transaction.id,
+                  })
+                }
               />
             ))}
           </>
@@ -161,8 +169,9 @@ const styles = StyleSheet.create({
   monthNavRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     marginBottom: 16,
+    marginTop: 30,
   },
   monthNav: {
     flexDirection: 'row',

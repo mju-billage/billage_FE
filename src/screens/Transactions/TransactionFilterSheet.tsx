@@ -11,10 +11,9 @@ import Chip from '../../components/Data Display/Chips/Chip';
 import Calendar from '../../components/Data Display/Calendar/Calendar';
 import TransactionLedgerMultiSelectSheet from './TransactionLedgerMultiSelectSheet';
 import {
-  DEFAULT_TRANSACTION_FILTER,
-  getTransactionLedgerOptions,
-  type TransactionFilterValue,
-} from '../../types/transaction';
+  DEFAULT_ENTRY_LIST_FILTER,
+  type EntryListFilterValue,
+} from '../../types/entry';
 import {
   FILTER_APPLY_LABEL,
   FILTER_PERIOD_1MONTH,
@@ -41,11 +40,17 @@ import { TYPOGRAPHY } from '../../constants/typography';
 
 const CALENDAR_ICON = require('../../assets/icons/system/Calendar.png');
 
+type LedgerOption = { id: string; name: string };
+
 type TransactionFilterSheetProps = {
   visible: boolean;
-  value: TransactionFilterValue;
+  value: EntryListFilterValue;
+  /** 실 API(`ledgerService.getAllLedgersInGroup`)에서 부모가 가져와 내려준다 —
+   * 이 시트와 하위 `TransactionLedgerMultiSelectSheet`가 열릴 때마다 따로
+   * 부르지 않는다. */
+  ledgerOptions: LedgerOption[];
   onClose: () => void;
-  onApply: (value: TransactionFilterValue) => void;
+  onApply: (value: EntryListFilterValue) => void;
   onPressCreateNewLedger: () => void;
 };
 
@@ -53,11 +58,12 @@ type TransactionFilterSheetProps = {
 function TransactionFilterSheet({
   visible,
   value,
+  ledgerOptions,
   onClose,
   onApply,
   onPressCreateNewLedger,
 }: TransactionFilterSheetProps) {
-  const [draft, setDraft] = useState<TransactionFilterValue>(value);
+  const [draft, setDraft] = useState<EntryListFilterValue>(value);
   const [ledgerSheetVisible, setLedgerSheetVisible] = useState(false);
   const [calendarSheetVisible, setCalendarSheetVisible] = useState(false);
   const [calendarYear, setCalendarYear] = useState(() =>
@@ -66,8 +72,6 @@ function TransactionFilterSheet({
   const [calendarMonth, setCalendarMonth] = useState(
     () => new Date().getMonth() + 1,
   );
-
-  const ledgerOptions = getTransactionLedgerOptions();
 
   const handleSelectDate = (date: string) => {
     if (!draft.customStart || (draft.customStart && draft.customEnd)) {
@@ -86,7 +90,7 @@ function TransactionFilterSheet({
   };
 
   const handleReset = () => {
-    setDraft(DEFAULT_TRANSACTION_FILTER);
+    setDraft(DEFAULT_ENTRY_LIST_FILTER);
   };
 
   const handleApply = () => {
@@ -208,6 +212,7 @@ function TransactionFilterSheet({
 
       <TransactionLedgerMultiSelectSheet
         visible={ledgerSheetVisible}
+        options={ledgerOptions}
         selectedIds={draft.ledgerIds}
         onClose={() => setLedgerSheetVisible(false)}
         onApply={ledgerIds => setDraft({ ...draft, ledgerIds })}

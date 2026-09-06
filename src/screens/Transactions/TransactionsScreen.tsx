@@ -1,51 +1,81 @@
 /** @screen DTB-1-PAGE-01-0 내역 메인 */
-/** @screen ADD-2-SNACKBAR-01-0 내역 추가 완료 (design-verification.md는 TransactionRegisterScreen.tsx로 추정했으나
- * 실제로는 여기서 addedTransactionId 파라미터를 받아 표시함) */
-import { useCallback, useEffect, useState } from 'react';
-import { SectionList, StyleSheet, Text, View } from 'react-native';
+/**
+ * 4-B(모임 전체 내역 목록 API 연동): 목(`types/transaction.ts`, 4-B 정리로 삭제됨)을
+ * 걷어내고 `entryService.getGroupEntries()`(Entry.txt §7)로 옮겼다.
+ *
+ * 4-B 정리(2026-09-05): 옛 `editMock`(DTB 목 데이터 수정) 경로가 완료 시
+ * `navigation.navigate('Main', { screen: 'Transactions', params: { addedTransactionId } })`로
+ * 이 화면에 신호를 보내 스낵바를 띄우던 게 있었는데, 그 경로 자체가 삭제되며
+ * `addedTransactionId`를 만들어내는 곳이 사라졌다 — `route.params` 기반 스낵바
+ * 블록과 `MainTabParamList`의 파라미터 타입을 함께 제거했다(`ADD-2-SNACKBAR-01-0`은
+ * 이제 `TransactionRegisterScreen.tsx`에만 있다).
+ *
+ * 잔액 카드·건수·목록이 한 응답에 묶여 온다(명세가 "세 번 호출하지 않도록"이라고
+ * 명시) — 필터를 바꿔도 `load()` 한 번만 다시 부른다. 페이지네이션은 4-A에서
+ * 확정한 무한 스크롤(FlatList/SectionList `onEndReached`) 그대로 쓴다 — "더보기"
+ * 버튼을 새로 만들지 않았다. 탭(전체/승인요청)·필터가 바뀌면 `load()`가 매번
+ * `page=0`부터 다시 불러온다(`loadMoreEntries`만 페이지를 증가시킨다).
+ *
+ * 장부 목록(`ledgerOptions`)은 `load()`와 완전히 분리했다 — `loadLedgerOptions()`가
+ * 별도 `useFocusEffect`로, 필터/탭과 무관하게 화면에 포커스될 때마다 한 번만
+ * 불린다. 그래서 필터 칩을 눌러도 장부 목록은 다시 안 부르고, 대신 "장부 추가"로
+ * `LedgerCreate`에 갔다가 돌아오는 포커스 복귀 시점엔 갱신된다 — 별도 이벤트
+ * 연결 없이 포커스 재진입만으로 새 장부가 목록에 반영된다.
+ */
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, SectionList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  useFocusEffect,
-  useNavigation,
-  useRoute,
-} from '@react-navigation/native';
-import type { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { MainTabParamList } from '../../navigation/MainTabNavigator';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import IconButton from '../../components/Input/Button/IconButton';
+import Button from '../../components/Input/Button/Button';
 import Tabs from '../../components/Navigation/Tabs/Tabs';
 import type { TabItem } from '../../components/Navigation/Tabs/Tabs';
 import AmountCard from '../../components/Data Display/Card/AmountCard';
 import Chip from '../../components/Data Display/Chips/Chip';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import FloatingActionButton from '../../components/Input/Button/FAB';
-import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import TransactionFilterSheet from './TransactionFilterSheet';
+import type { EntryGroupSummary, EntrySummary } from '../../types/entry';
 import {
-  applyTransactionFilter,
-  DEFAULT_TRANSACTION_FILTER,
-  getTransactionLedgerOptions,
-  groupTransactionsByDate,
-  type Transaction,
-  type TransactionFilterValue,
-} from '../../types/transaction';
+  DEFAULT_ENTRY_LIST_FILTER,
+  getEntryListFilterDateRange,
+  groupEntriesByDate,
+  type EntryListFilterValue,
+} from '../../types/entry';
+import { getActiveGroup } from '../../types/group';
+import * as entryService from '../../services/entryService';
+import * as ledgerService from '../../services/ledgerService';
+import * as groupService from '../../services/groupService';
+import { ApiError } from '../../services/apiClient';
+import {
+  API_ERROR_DEFAULT_MESSAGE,
+  API_NETWORK_ERROR_MESSAGE,
+  NO_ACTIVE_GROUP_MESSAGE,
+  getApiErrorMessage,
+  isNetworkError,
+} from '../../constants/apiErrorMessages';
 import {
   FILTER_TYPE_EXPENSE,
   FILTER_TYPE_INCOME,
+  LEDGER_ENTRIES_LOADING_MORE,
 } from '../../constants/ledgerScreenText';
 import { CALENDAR_WEEKDAY_LABELS } from '../../constants/calendarScreenText';
 import {
-  SNACKBAR_TRANSACTION_ADDED,
   TRANSACTIONS_COUNT_SUFFIX,
   TRANSACTIONS_EMPTY,
+  TRANSACTIONS_LOADING,
+  TRANSACTIONS_RETRY_LABEL,
   TRANSACTIONS_TAB_ALL,
   TRANSACTIONS_TAB_PENDING,
   TRANSACTIONS_TITLE,
 } from '../../constants/transactionScreenText';
-import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { BLUE_50, FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const FILTER_ICON = require('../../assets/icons/system/Filter.png');
@@ -55,34 +85,37 @@ type TransactionsScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Transactions'>,
   NativeStackNavigationProp<RootStackParamList>
 >;
-type TransactionsScreenRouteProp = RouteProp<MainTabParamList, 'Transactions'>;
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
+const EMPTY_SUMMARY: EntryGroupSummary = { totalIncome: 0, totalExpense: 0, balance: 0 };
 
 type TransactionsTab = 'all' | 'pending';
+type LoadState = 'loading' | 'error' | 'ready';
+type LedgerOption = { id: string; name: string };
 
 const TABS: TabItem<TransactionsTab>[] = [
   { label: TRANSACTIONS_TAB_ALL, value: 'all' },
   { label: TRANSACTIONS_TAB_PENDING, value: 'pending' },
 ];
 
-/** 'YYYY.MM.DD' -> 'M월 D일 요일'. */
-function formatDateHeader(date: string): string {
-  const [year, month, day] = date.split('.').map(Number);
+/** 'YYYY-MM-DD' -> 'M월 D일 요일'. */
+function formatDateHeader(isoDate: string): string {
+  const [year, month, day] = isoDate.split('-').map(Number);
   const jsDate = new Date(year, month - 1, day);
   return `${month}월 ${day}일 ${CALENDAR_WEEKDAY_LABELS[jsDate.getDay()]}요일`;
 }
 
 type FilterChipInfo = { key: string; label: string };
 
-function getFilterChips(filter: TransactionFilterValue): FilterChipInfo[] {
+function getFilterChips(
+  filter: EntryListFilterValue,
+  ledgerOptions: LedgerOption[],
+): FilterChipInfo[] {
   const chips: FilterChipInfo[] = [];
   if (filter.type === 'income') {
     chips.push({ key: 'type', label: FILTER_TYPE_INCOME });
   } else if (filter.type === 'expense') {
     chips.push({ key: 'type', label: FILTER_TYPE_EXPENSE });
   }
-  const ledgerOptions = getTransactionLedgerOptions();
   for (const id of filter.ledgerIds) {
     const option = ledgerOptions.find(item => item.id === id);
     if (option) {
@@ -95,64 +128,146 @@ function getFilterChips(filter: TransactionFilterValue): FilterChipInfo[] {
 /** 내역 메인 화면: 전체 내역/승인요청 탭, 요약 카드, 날짜별 거래 목록을 보여준다. */
 function TransactionsScreen() {
   const navigation = useNavigation<TransactionsScreenNavigationProp>();
-  const route = useRoute<TransactionsScreenRouteProp>();
   const [tab, setTab] = useState<TransactionsTab>('all');
-  const [filter, setFilter] = useState<TransactionFilterValue>(
-    DEFAULT_TRANSACTION_FILTER,
+  const [filter, setFilter] = useState<EntryListFilterValue>(
+    DEFAULT_ENTRY_LIST_FILTER,
   );
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [ledgerOptions, setLedgerOptions] = useState<LedgerOption[]>([]);
+  const [summary, setSummary] = useState<EntryGroupSummary>(EMPTY_SUMMARY);
+  const [entries, setEntries] = useState<EntrySummary[]>([]);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [loadState, setLoadState] = useState<LoadState>('loading');
+  const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
 
-  const refresh = useCallback(() => {
-    setTransactions(applyTransactionFilter(filter));
-  }, [filter]);
-
-  useFocusEffect(refresh);
-
-  useEffect(() => {
-    if (route.params?.addedTransactionId) {
-      setSnackbarVisible(true);
-      navigation.setParams({ addedTransactionId: undefined });
+  const toErrorMessage = (error: unknown): string => {
+    if (isNetworkError(error)) {
+      return API_NETWORK_ERROR_MESSAGE;
     }
-  }, [route.params?.addedTransactionId, navigation]);
+    if (error instanceof ApiError) {
+      return getApiErrorMessage(error.code);
+    }
+    return API_ERROR_DEFAULT_MESSAGE;
+  };
 
-  useEffect(() => {
-    if (!snackbarVisible) {
+  const buildParams = useCallback(
+    (pageToLoad: number): entryService.GroupEntryListParams => {
+      const range = getEntryListFilterDateRange(filter);
+      return {
+        ledgerIds: filter.ledgerIds.length > 0 ? filter.ledgerIds : undefined,
+        type:
+          filter.type === 'income'
+            ? 'INCOME'
+            : filter.type === 'expense'
+            ? 'EXPENSE'
+            : undefined,
+        status: tab === 'pending' ? 'PENDING' : undefined,
+        from: range.from,
+        to: range.to,
+        sort: filter.sort === 'latest' ? 'occurredOn,desc' : 'occurredOn,asc',
+        page: pageToLoad,
+      };
+    },
+    [filter, tab],
+  );
+
+  const load = useCallback(async () => {
+    setLoadState('loading');
+    try {
+      let group = getActiveGroup();
+      if (!group) {
+        // [치명1] 로그인 직후 첫 포커스처럼 모임 캐시가 아직 없는 순간 대비 —
+        // "다시 시도"가 실제로 동작하도록 여기서 한 번 더 직접 불러온다.
+        await groupService.getMyGroups();
+        group = getActiveGroup();
+      }
+      if (!group) {
+        setLoadErrorMessage(NO_ACTIVE_GROUP_MESSAGE);
+        setLoadState('error');
+        return;
+      }
+      const firstPage = await entryService.getGroupEntries(
+        group.id,
+        buildParams(0),
+      );
+      setSummary(firstPage.summary);
+      setEntries(firstPage.items);
+      setPage(firstPage.page);
+      setHasMore(!firstPage.last);
+      setLoadState('ready');
+    } catch (error) {
+      setLoadErrorMessage(toErrorMessage(error));
+      setLoadState('error');
+    }
+  }, [buildParams]);
+
+  // 필터/탭과 무관하게 포커스될 때마다 한 번만 불린다 — 필터 칩을 눌러도 다시
+  // 부르지 않고, "장부 추가" 후 돌아왔을 때는 포커스 복귀로 갱신된다.
+  const loadLedgerOptions = useCallback(async () => {
+    let group = getActiveGroup();
+    if (!group) {
+      await groupService.getMyGroups();
+      group = getActiveGroup();
+    }
+    if (!group) {
       return;
     }
-    const timer = setTimeout(
-      () => setSnackbarVisible(false),
-      SNACKBAR_AUTO_HIDE_MS,
-    );
-    return () => clearTimeout(timer);
-  }, [snackbarVisible]);
+    try {
+      const ledgers = await ledgerService.getAllLedgersInGroup(group.id);
+      setLedgerOptions(ledgers.map(l => ({ id: l.id, name: l.name })));
+    } catch {
+      // 필터 칩/시트 보조 데이터라 실패해도 조용히 넘어간다 — 메인 목록 조회
+      // 쪽의 에러 상태·재시도가 화면 상태를 대표한다.
+    }
+  }, []);
 
-  const visibleTransactions =
-    tab === 'pending'
-      ? transactions.filter(tx => tx.isPendingApproval)
-      : transactions;
+  const loadMoreEntries = useCallback(async () => {
+    if (isLoadingMore || !hasMore) {
+      return;
+    }
+    const group = getActiveGroup();
+    if (!group) {
+      return;
+    }
+    setIsLoadingMore(true);
+    try {
+      const nextPage = await entryService.getGroupEntries(
+        group.id,
+        buildParams(page + 1),
+      );
+      setEntries(current => [...current, ...nextPage.items]);
+      setPage(nextPage.page);
+      setHasMore(!nextPage.last);
+    } catch {
+      // 다음 페이지 실패는 조용히 무시한다 — 목록 끝에서 다시 스크롤하면 재시도된다.
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [buildParams, page, isLoadingMore, hasMore]);
 
-  const income = transactions
-    .filter(tx => tx.amount > 0)
-    .reduce((sum, tx) => sum + tx.amount, 0);
-  const expense = transactions
-    .filter(tx => tx.amount < 0)
-    .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
-
-  const sections = groupTransactionsByDate(visibleTransactions).map(
-    group => ({
-      title: formatDateHeader(group.date),
-      data: group.items,
-    }),
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
   );
 
-  const filterChips = getFilterChips(filter);
+  useFocusEffect(
+    useCallback(() => {
+      loadLedgerOptions();
+    }, [loadLedgerOptions]),
+  );
 
-  const handlePressTransaction = (transaction: Transaction) => {
-    navigation.navigate('TransactionDetail', {
-      transactionId: transaction.id,
-    });
+  const sections = groupEntriesByDate(entries).map(group => ({
+    title: formatDateHeader(group.date),
+    data: group.items,
+  }));
+
+  const filterChips = getFilterChips(filter, ledgerOptions);
+
+  const handlePressTransaction = (entry: EntrySummary) => {
+    navigation.navigate('TransactionDetail', { transactionId: entry.id });
   };
 
   const removeFilterChip = (key: string) => {
@@ -172,7 +287,11 @@ function TransactionsScreen() {
       <AppBar type="titleOnly" title={TRANSACTIONS_TITLE} />
 
       <View style={styles.body}>
-        <AmountCard type="incomeExpense" income={income} expense={expense} />
+        <AmountCard
+          type="incomeExpense"
+          income={summary.totalIncome}
+          expense={summary.totalExpense}
+        />
 
         <View style={styles.tabRow}>
           <Tabs items={TABS} value={tab} onChange={setTab} showIcon={false} />
@@ -203,42 +322,70 @@ function TransactionsScreen() {
           </View>
         )}
 
-        <Text style={styles.countText}>
-          {visibleTransactions.length}
-          {TRANSACTIONS_COUNT_SUFFIX}
-        </Text>
-
-        {visibleTransactions.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>{TRANSACTIONS_EMPTY}</Text>
+        {loadState === 'loading' && (
+          <View style={styles.stateContainer}>
+            <Text style={styles.stateText}>{TRANSACTIONS_LOADING}</Text>
           </View>
-        ) : (
-          <SectionList
-            sections={sections}
-            keyExtractor={item => item.id}
-            contentContainerStyle={styles.listContent}
-            renderSectionHeader={({ section }) => (
-              <Text style={styles.sectionHeader}>{section.title}</Text>
-            )}
-            renderItem={({ item }) => (
-              <TransactionListItem
-                label={item.ledgerName}
-                itemName={item.itemName}
-                amount={item.amount}
-                hasReceipt={item.hasReceipt}
-                isPendingApproval={item.isPendingApproval}
-                onPress={() => handlePressTransaction(item)}
+        )}
+
+        {loadState === 'error' && (
+          <View style={styles.stateContainer}>
+            <Text style={styles.stateText}>{loadErrorMessage}</Text>
+            <Button
+              label={TRANSACTIONS_RETRY_LABEL}
+              onPress={load}
+              hierarchy="secondary"
+              style={{ alignSelf: 'center' }}
+            />
+          </View>
+        )}
+
+        {loadState === 'ready' && (
+          <>
+            <Text style={styles.countText}>
+              {entries.length}
+              {TRANSACTIONS_COUNT_SUFFIX}
+            </Text>
+
+            {entries.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyText}>{TRANSACTIONS_EMPTY}</Text>
+              </View>
+            ) : (
+              <SectionList
+                sections={sections}
+                keyExtractor={item => item.id}
+                contentContainerStyle={styles.listContent}
+                onEndReachedThreshold={0.4}
+                onEndReached={loadMoreEntries}
+                ListFooterComponent={
+                  isLoadingMore ? (
+                    <View style={styles.loadingMoreRow}>
+                      <ActivityIndicator size="small" />
+                      <Text style={styles.loadingMoreText}>
+                        {LEDGER_ENTRIES_LOADING_MORE}
+                      </Text>
+                    </View>
+                  ) : null
+                }
+                renderSectionHeader={({ section }) => (
+                  <Text style={styles.sectionHeader}>{section.title}</Text>
+                )}
+                renderItem={({ item }) => (
+                  <TransactionListItem
+                    label={item.ledgerName}
+                    itemName={item.title}
+                    amount={item.type === 'INCOME' ? item.amount : -item.amount}
+                    hasReceipt={item.receiptCount > 0}
+                    isPendingApproval={item.approvalStatus === 'PENDING'}
+                    onPress={() => handlePressTransaction(item)}
+                  />
+                )}
               />
             )}
-          />
+          </>
         )}
       </View>
-
-      {snackbarVisible && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={SNACKBAR_TRANSACTION_ADDED} />
-        </View>
-      )}
 
       <FloatingActionButton
         onPress={() => navigation.navigate('TransactionRegister', {})}
@@ -247,6 +394,7 @@ function TransactionsScreen() {
       <TransactionFilterSheet
         visible={filterSheetVisible}
         value={filter}
+        ledgerOptions={ledgerOptions}
         onClose={() => setFilterSheetVisible(false)}
         onApply={setFilter}
         onPressCreateNewLedger={() =>
@@ -260,6 +408,7 @@ function TransactionsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: BLUE_50,
   },
   body: {
     flex: 1,
@@ -300,6 +449,17 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 6,
   },
+  stateContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    paddingTop: 40,
+  },
+  stateText: {
+    ...TYPOGRAPHY.body2,
+    color: FOREGROUND_DISABLED,
+  },
   emptyState: {
     flex: 1,
     alignItems: 'center',
@@ -308,11 +468,16 @@ const styles = StyleSheet.create({
   emptyText: {
     ...TYPOGRAPHY.subtitle3,
   },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
+  loadingMoreRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 16,
+  },
+  loadingMoreText: {
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
 });
 

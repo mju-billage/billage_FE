@@ -13,6 +13,15 @@ export const API_ERROR_DEFAULT_MESSAGE =
 export const API_NETWORK_ERROR_MESSAGE =
   '네트워크 연결을 확인해주세요.';
 
+/**
+ * [치명1] `getActiveGroup()`이 비어 있을 때 쓴다 — 로그인/세션 복원 직후 모임
+ * 캐시를 아직 못 채웠거나(레이스, 재시도로 해결됨) 정말 속한 모임이 없는 경우
+ * (재시도로 해결 안 됨) 둘 다 이 메시지 하나로 통일한다. 원인이 뭐든 "화면이
+ * 영원히 로딩 중" 상태로 남겨두지 않는 것이 목적이라 문구를 세분화하지 않았다.
+ */
+export const NO_ACTIVE_GROUP_MESSAGE =
+  '모임 정보를 불러오지 못했어요. 다시 시도해주세요.';
+
 /** 여러 도메인 API에 공통으로 나오는 에러 코드. */
 const COMMON_ERROR_MESSAGES: Record<string, string> = {
   UNAUTHORIZED: '로그인이 필요해요. 다시 로그인해주세요.',
@@ -50,14 +59,29 @@ const LEDGER_ERROR_MESSAGES: Record<string, string> = {
   GROUP_MISMATCH: '다른 모임의 폴더로는 옮길 수 없어요.',
 };
 
+/** User 도메인 고유 에러 코드(`GET/PATCH/DELETE /auth/me`, 8-A, 11). */
+const USER_ERROR_MESSAGES: Record<string, string> = {
+  USER_NOT_FOUND: '사용자 정보를 찾을 수 없어요.',
+  OWNER_TRANSFER_REQUIRED: '권한을 위임할 멤버를 모두 선택해주세요.',
+};
+
 /** Member 도메인 고유 에러 코드(6-B에서 회비 생성 대상자 검증 중 실제로 붙음). */
 const MEMBER_ERROR_MESSAGES: Record<string, string> = {
   MEMBER_NOT_FOUND: '모임원을 찾을 수 없어요. 이미 삭제됐을 수 있어요.',
 };
 
-/** Dues 도메인 고유 에러 코드(6-B). */
+/** Dues 도메인 고유 에러 코드(6-B, 7-B-1, 7-B-2). */
 const DUES_ERROR_MESSAGES: Record<string, string> = {
   DUES_NOT_FOUND: '회비를 찾을 수 없어요. 이미 삭제됐을 수 있어요.',
+  DUES_ALREADY_CLOSED: '이미 마감된 회비예요.',
+  DUES_AMOUNT_IMMUTABLE: '금액은 수정할 수 없어요.',
+  DUES_NOT_STARTED: '아직 시작하지 않은 회비예요.',
+};
+
+/** Archive(보관함) 도메인 고유 에러 코드(Folder.txt 5·8번, 서버 시작 전). */
+const ARCHIVE_ERROR_MESSAGES: Record<string, string> = {
+  ARCHIVE_NOT_FOUND: '보관 기록을 찾을 수 없어요. 이미 삭제됐을 수 있어요.',
+  ARCHIVE_IN_PROGRESS: '이미 백업 작업이 진행 중이에요. 잠시 후 다시 시도해주세요.',
 };
 
 const API_ERROR_MESSAGES: Record<string, string> = {
@@ -68,6 +92,8 @@ const API_ERROR_MESSAGES: Record<string, string> = {
   ...LEDGER_ERROR_MESSAGES,
   ...MEMBER_ERROR_MESSAGES,
   ...DUES_ERROR_MESSAGES,
+  ...USER_ERROR_MESSAGES,
+  ...ARCHIVE_ERROR_MESSAGES,
 };
 
 /** ApiError.code를 화면에 띄울 한글 문구로 바꾼다. 매핑에 없으면 기본 문구. */

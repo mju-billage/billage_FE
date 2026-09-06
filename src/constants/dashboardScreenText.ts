@@ -16,7 +16,7 @@ export const DASHBOARD_DUES_SUMMARY_PREFIX = '회비 ';
 export const DASHBOARD_DUES_SUMMARY_MIDDLE = '건 진행 중 · ';
 export const DASHBOARD_DUES_SUMMARY_SUFFIX = '명 납부완료';
 
-export const DASHBOARD_SUMMARY_SECTION_TITLE = '모임 현황';
+export const DASHBOARD_SUMMARY_SECTION_TITLE = '이만큼 회비를 모았어요';
 export const DASHBOARD_LEDGER_COUNT_SUFFIX = '개 장부';
 export const DASHBOARD_PENDING_APPROVAL_PREFIX = '승인 대기 ';
 export const DASHBOARD_PENDING_APPROVAL_SUFFIX = '건';

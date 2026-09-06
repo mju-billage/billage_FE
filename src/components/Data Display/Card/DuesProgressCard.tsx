@@ -4,6 +4,7 @@ import ProgressBar from '../../Feedback/Progress Bar/ProgressBar';
 import { formatWon } from '../../../utils/currency';
 import type { DuesProgress } from '../../../types/dashboard';
 import {
+  BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
@@ -43,6 +44,13 @@ type DuesProgressCardProps = (
 /**
  * 회비 모금 진행 현황 카드. 대시보드용(dashboard)과 수납관리용(paymentManagement) 두 레이아웃을 지원한다.
  * `state='upcoming'`이면 D-day 배지 대신 시작일을 텍스트로, `state='ended'`면 회색 카드로 종료를 표시한다.
+ *
+ * 검증 중 "진행률 바가 안 보인다"는 [결함]이 나왔다 — 카드가 흰 배경 위에 얹혀
+ * ProgressBar 기본 트랙색(FILL_NEUTRAL_NORMAL, #F3F4F6)과 대비가 거의 없어서
+ * 생긴 문제였다(로직/데이터는 정상 — progressRatio 계산과 채움 폭 자체는
+ * 문제 없음). ProgressBar에 추가한 `trackColor`로 여기서만 더 진한
+ * BORDER_NEUTRAL_NORMAL(#E5E7EB)을 준다 — 이 화면(DUE-1-PAGE-01-0) 시안은
+ * 퍼센트 숫자 없이 바만(+인원/금액 텍스트) 보여주므로 `showLabel`은 그대로 둔다.
  */
 function DuesProgressCard(props: DuesProgressCardProps) {
   const state = props.state ?? 'active';
@@ -107,7 +115,11 @@ function DashboardCard({
           {progress.paidMemberCount}/{progress.totalMemberCount}
         </Text>
       </View>
-      <ProgressBar progress={progress.progressRatio} muted={ended} />
+      <ProgressBar
+        progress={progress.progressRatio}
+        muted={ended}
+        trackColor={BORDER_NEUTRAL_NORMAL}
+      />
     </View>
   );
 }
@@ -152,7 +164,11 @@ function PaymentManagementCard({
           {formatWon(paidAmount)} / {formatWon(totalAmount)}
         </Text>
       </View>
-      <ProgressBar progress={progressRatio} muted={ended} />
+      <ProgressBar
+        progress={progressRatio}
+        muted={ended}
+        trackColor={BORDER_NEUTRAL_NORMAL}
+      />
     </View>
   );
 }

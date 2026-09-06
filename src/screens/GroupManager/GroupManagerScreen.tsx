@@ -1,6 +1,7 @@
 /** @screen ETC-2-PAGE-03-0 모임 관리자 */
 /** @screen ETC-3-SNACKBAR-01-0 초대 코드 복사완료 */
 /** @screen ETC-5-SNACKBAR-01-0 권한 변경 완료 (스낵바 렌더링은 여기, 메시지 조합은 MemberProfileSheet.tsx) */
+/** @screen ETC-5-SNACKBAR-02-0 모임 내보내기 완료 (스낵바 렌더링은 여기, 메시지 조합은 MemberProfileSheet.tsx) */
 import { useCallback, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,10 +18,12 @@ import { getActiveGroup } from '../../types/group';
 import type { GroupSummary } from '../../types/group';
 import type { GroupMembership } from '../../types/groupMembership';
 import * as groupMembershipService from '../../services/groupMembershipService';
+import * as groupService from '../../services/groupService';
 import { ApiError } from '../../services/apiClient';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
+  NO_ACTIVE_GROUP_MESSAGE,
   getApiErrorMessage,
   isNetworkError,
 } from '../../constants/apiErrorMessages';
@@ -31,6 +34,7 @@ import {
   GROUP_MANAGER_INVITE_CODE_PENDING,
   GROUP_MANAGER_INVITE_CODE_PREFIX,
   GROUP_MANAGER_LOADING,
+  GROUP_MANAGER_MEMBER_MANAGE_LABEL,
   GROUP_MANAGER_RETRY_LABEL,
   GROUP_MANAGER_TITLE,
   SNACKBAR_INVITE_CODE_COPIED,
@@ -39,6 +43,7 @@ import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_NORMAL } from '../../constants/
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const COPY_ICON = require('../../assets/icons/system/Copy.png');
+const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/Chevron Right.png');
 
 type GroupManagerNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -95,55 +100,62 @@ function GroupManagerScreen() {
     }
   }, []);
 
-  const loadMembers = useCallback(
-    async (groupId: string) => {
-      setLoadState('loading');
-      try {
-        const result = await groupMembershipService.getMemberships(groupId);
-        setMembers(result);
-        setLoadState('ready');
-      } catch (error) {
-        setLoadErrorMessage(toErrorMessage(error));
-        setLoadState('error');
+  const load = useCallback(async () => {
+    setLoadState('loading');
+    try {
+      let activeGroup = getActiveGroup();
+      if (!activeGroup) {
+        // [치명1] 로그인 직후 첫 포커스처럼 모임 캐시가 아직 없는 순간 대비 —
+        // "다시 시도"가 실제로 동작하도록 여기서 한 번 더 직접 불러온다.
+        await groupService.getMyGroups();
+        activeGroup = getActiveGroup();
       }
-    },
-    [],
-  );
-
-  useFocusEffect(
-    useCallback(() => {
-      const activeGroup = getActiveGroup();
       setGroup(activeGroup);
       if (!activeGroup) {
+        setLoadErrorMessage(NO_ACTIVE_GROUP_MESSAGE);
+        setLoadState('error');
         return;
       }
-      loadMembers(activeGroup.id);
+      const result = await groupMembershipService.getMemberships(activeGroup.id);
+      setMembers(result);
+      setLoadState('ready');
       // 초대코드는 자동 발급하지 않는다 — 발급 API가 멱등하지 않아(재호출마다 새 코드,
       // docs/api-gaps.md 정책 결함 참고) 화면 진입만으로 호출하면 코드가 계속 늘어난다.
       // 카드를 눌렀을 때만(handlePressInviteCode) 발급을 요청한다.
-    }, [loadMembers]),
+    } catch (error) {
+      setLoadErrorMessage(toErrorMessage(error));
+      setLoadState('error');
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load]),
   );
 
   const handleMemberChanged = (message: string) => {
     if (group) {
-      loadMembers(group.id);
+      load();
     }
     showSnackbar(message);
   };
 
-  if (!group) {
-    return null;
-  }
-
-  const inviteCodeText = isIssuingInvite
-    ? GROUP_MANAGER_INVITE_CODE_ISSUING
-    : group.inviteCode ??
-      (inviteError
-        ? GROUP_MANAGER_INVITE_CODE_ERROR
-        : GROUP_MANAGER_INVITE_CODE_PENDING);
+  // [치명1] 예전엔 group이 없으면(모임 캐시 미준비) 여기서 바로 null을 반환해
+  // 로딩/에러 상태조차 못 그렸다 — AppBar도 없는 완전 빈 화면으로 멈췄다. 이제
+  // group 의존 값은 group이 있을 때만 계산하고, 없을 때도 아래 loadState 분기가
+  // 에러+재시도를 보여줄 수 있게 렌더를 계속 진행한다.
+  const inviteCodeText = group
+    ? isIssuingInvite
+      ? GROUP_MANAGER_INVITE_CODE_ISSUING
+      : group.inviteCode ??
+        (inviteError
+          ? GROUP_MANAGER_INVITE_CODE_ERROR
+          : GROUP_MANAGER_INVITE_CODE_PENDING)
+    : '';
 
   const handlePressInviteCode = () => {
-    if (isIssuingInvite) {
+    if (!group || isIssuingInvite) {
       return;
     }
     if (group.inviteCode) {
@@ -163,13 +175,20 @@ function GroupManagerScreen() {
       />
 
       <View style={styles.content}>
-        {viewerIsOwner && (
+        {group && viewerIsOwner && (
           <CardBase onPress={handlePressInviteCode} style={styles.inviteCodeRow}>
             <Image source={COPY_ICON} style={styles.inviteCodeIcon} />
             <Text style={styles.inviteCodeText}>
               {GROUP_MANAGER_INVITE_CODE_PREFIX}
               {inviteCodeText}
             </Text>
+          </CardBase>
+        )}
+
+        {group && (
+          <CardBase onPress={() => navigation.navigate('MemberManage')} style={styles.memberManageRow}>
+            <Text style={styles.memberManageLabel}>{GROUP_MANAGER_MEMBER_MANAGE_LABEL}</Text>
+            <Image source={CHEVRON_RIGHT_ICON} style={styles.memberManageChevron} />
           </CardBase>
         )}
 
@@ -184,8 +203,9 @@ function GroupManagerScreen() {
             <Text style={styles.stateText}>{loadErrorMessage}</Text>
             <Button
               label={GROUP_MANAGER_RETRY_LABEL}
-              onPress={() => loadMembers(group.id)}
+              onPress={load}
               hierarchy="secondary"
+              style={{ alignSelf: 'center' }}
             />
           </View>
         )}
@@ -216,11 +236,14 @@ function GroupManagerScreen() {
       <MemberProfileSheet
         visible={selectedMember != null}
         member={selectedMember}
-        groupId={group.id}
+        groupId={group?.id ?? ''}
         onClose={() => setSelectedMember(null)}
         onChanged={handleMemberChanged}
         onError={showSnackbar}
-        onLeftGroup={() => navigation.goBack()}
+        // "모임 관리자"는 이제 "모임 관리"(GroupManageScreen)를 거쳐 들어온다 — 나가면
+        // 두 화면 다 지나쳐 더보기로 돌아가야 한다(goBack 한 번이면 모임 관리에
+        // 남는데, 그 화면도 활성 모임이 없어 바로 에러 상태가 되니 의미가 없다).
+        onLeftGroup={() => navigation.pop(2)}
       />
 
       {snackbarMessage && (
@@ -254,6 +277,19 @@ const styles = StyleSheet.create({
   },
   inviteCodeText: {
     ...TYPOGRAPHY.subtitle3,
+  },
+  memberManageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  memberManageLabel: {
+    ...TYPOGRAPHY.subtitle3,
+  },
+  memberManageChevron: {
+    width: 16,
+    height: 16,
+    tintColor: FOREGROUND_DISABLED,
   },
   memberListWrapper: {
     marginTop: 4,

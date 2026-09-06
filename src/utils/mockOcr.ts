@@ -1,4 +1,4 @@
-import { todayKey } from '../types/transaction';
+import { todayKey } from './calendarGrid';
 
 export type MockScanResult = { amount: number; date: string };
 

@@ -2,16 +2,26 @@
 /** @screen FDR-4-SNACKBAR-01-0 이동 완료 / 폴더 해제_완료 (여기는 이동 완료 절반. 폴더 해제_완료는
  * FolderScreen.tsx) */
 /**
- * 0-2 다건 이동 판단: 서버는 `PATCH /folders/{id}` / `PATCH /ledgers/{id}` 단건뿐이라
- * 선택된 개수만큼 순차 호출한다(병렬 아님 — 서버 부하를 줄이고, 실패 시 "몇 번째까지
- * 성공했는지"를 순서대로 명확히 알 수 있어서다). 중간에 실패해도 이미 이동된 항목은
- * 롤백하지 않는다(서버에 다건 트랜잭션 API가 없어 애초에 불가능) — 대신 성공/실패
- * 개수를 그대로 스낵바에 보여준다("N개 이동 완료, M개 실패했어요"), 조용히 전부
- * 성공한 척하지 않는다.
+ * 0-2 다건 이동 판단 — 2026-09-05 `folder-items/move` 전환: 서버가 실제로는
+ * 다건 이동 API를 갖고 있었다(명세 "미구현" 태그가 낡은 것, 실호출로 확인
+ * — `docs/api-gaps.md` "확정됨" 6번). 그래서 `PATCH /folders/{id}`/
+ * `PATCH /ledgers/{id}` 단건 API를 선택된 개수만큼 순차 호출하던 예전 로직을
+ * `folderService.moveFolderItems()`(`POST .../folder-items/move`) 한 번
+ * 호출로 바꿨다 — 서버가 한 트랜잭션으로 처리해 부분 성공이 없다(하나라도
+ * 실패하면 전부 취소, 예: 목적지가 이동 대상 자신/하위면 `409
+ * INVALID_PARENT_FOLDER`). "N개 성공 M개 실패" 부분 성공 집계·스낵바 문구가
+ * 더 이상 필요 없어 걷어냈다.
  *
- * 장부를 최상위(destinationFolderId: null)로 이동하는 것은 서버 문서에 없는 동작이라
- * (Ledger.txt는 Folder.txt와 달리 `folderId: null`의 의미를 명시하지 않음,
- * docs/api-gaps.md 참고) 그 조합만 UI에서 막는다 — 폴더 이동은 최상위 포함 전부 허용.
+ * 장부를 최상위(destinationFolderId: null)로 이동하는 것도 예전엔 UI에서
+ * 막았다(`Ledger.txt`가 옛 단건 PATCH API의 `folderId: null` 의미를 명시하지
+ * 않아서) — 새 `/move` API는 Folder.txt §7에 "`targetFolderId`가 `null`이면
+ * 최상위 영역으로 이동"이라고 장부·폴더 구분 없이 명시하고, 실호출로 장부를
+ * 최상위로 옮긴 뒤 `GET .../folder-items`(폴더ID 생략=최상위) 응답에 그
+ * 장부가 `LEDGER` 항목으로 그대로 나타남까지 확인했다 — 이제 막을 이유가
+ * 없어 그 차단도 같이 뺐다.
+ *
+ * 목적지 폴더 트리 탐색(아래 `subfolders`)은 그대로 뒀다 — 이 부분은 원래도
+ * `getFolderTree()`로 잘 동작했고, 이번 전환 대상이 아니다.
  */
 import { useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
@@ -28,18 +38,21 @@ import { getActiveGroup } from '../../types/group';
 import { getCachedFolderTree } from '../../types/folderTree';
 import { findFolderNode, getChildFolders } from '../../utils/folderTree';
 import * as folderService from '../../services/folderService';
-import * as ledgerService from '../../services/ledgerService';
+import { ApiError } from '../../services/apiClient';
+import {
+  API_ERROR_DEFAULT_MESSAGE,
+  API_NETWORK_ERROR_MESSAGE,
+  getApiErrorMessage,
+  isNetworkError,
+} from '../../constants/apiErrorMessages';
 import {
   MOVE_DESTINATION_CONFIRM_LABEL,
-  MOVE_DESTINATION_LEDGER_TO_ROOT_BLOCKED,
   MOVE_DESTINATION_MOVING_LABEL,
   MOVE_DESTINATION_NO_SUBFOLDER,
   MOVE_DESTINATION_ROOT_TITLE,
-  SNACKBAR_FOLDER_MOVE_PARTIAL_MIDDLE,
-  SNACKBAR_FOLDER_MOVE_PARTIAL_SUFFIX,
   SNACKBAR_FOLDER_MOVED,
 } from '../../constants/folderScreenText';
-import { FEEDBACK_NEGATIVE_BOLD, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
@@ -79,8 +92,15 @@ function FolderMoveDestinationScreen() {
     folder => !selectedFolderIds.has(folder.id),
   );
 
-  const hasLedgerSelected = items.some(item => item.kind === 'ledger');
-  const isLedgerToRootBlocked = destinationFolderId === null && hasLedgerSelected;
+  const toErrorMessage = (error: unknown): string => {
+    if (isNetworkError(error)) {
+      return API_NETWORK_ERROR_MESSAGE;
+    }
+    if (error instanceof ApiError) {
+      return getApiErrorMessage(error.code);
+    }
+    return API_ERROR_DEFAULT_MESSAGE;
+  };
 
   const handlePressFolder = (folderId: string) => {
     navigation.push('FolderMoveDestination', {
@@ -91,41 +111,25 @@ function FolderMoveDestinationScreen() {
   };
 
   const handleConfirm = async () => {
-    if (isMoving || isLedgerToRootBlocked) {
+    if (isMoving || !group) {
       return;
     }
     setIsMoving(true);
-    let succeeded = 0;
-    let failed = 0;
-    // 순차 호출: 서버가 다건 이동 API를 안 줘서 하나씩 부른다(위 주석 참고).
-    for (const item of items) {
-      try {
-        if (item.kind === 'folder') {
-          await folderService.updateFolder(item.id, {
-            parentFolderId: destinationFolderId,
-          });
-        } else {
-          await ledgerService.updateLedger(item.id, {
-            folderId: destinationFolderId,
-          });
-        }
-        succeeded += 1;
-      } catch {
-        failed += 1;
-      }
-    }
-    setIsMoving(false);
-
-    if (failed === 0) {
+    try {
+      await folderService.moveFolderItems(group.id, {
+        folderIds: items.filter(item => item.kind === 'folder').map(item => item.id),
+        ledgerIds: items.filter(item => item.kind === 'ledger').map(item => item.id),
+        targetFolderId: destinationFolderId,
+      });
       setSnackbarMessage(SNACKBAR_FOLDER_MOVED);
-    } else {
-      setSnackbarMessage(
-        `${succeeded}${SNACKBAR_FOLDER_MOVE_PARTIAL_MIDDLE}${failed}${SNACKBAR_FOLDER_MOVE_PARTIAL_SUFFIX}`,
-      );
+      setTimeout(() => {
+        navigation.popToTop();
+      }, SNACKBAR_AUTO_HIDE_MS);
+    } catch (error) {
+      setSnackbarMessage(toErrorMessage(error));
+    } finally {
+      setIsMoving(false);
     }
-    setTimeout(() => {
-      navigation.popToTop();
-    }, SNACKBAR_AUTO_HIDE_MS);
   };
 
   return (
@@ -157,17 +161,11 @@ function FolderMoveDestinationScreen() {
           />
         )}
 
-        {isLedgerToRootBlocked && (
-          <Text style={styles.blockedHint}>
-            {MOVE_DESTINATION_LEDGER_TO_ROOT_BLOCKED}
-          </Text>
-        )}
-
         <View style={styles.footer}>
           <Button
             label={isMoving ? MOVE_DESTINATION_MOVING_LABEL : MOVE_DESTINATION_CONFIRM_LABEL}
             onPress={handleConfirm}
-            disabled={isMoving || isLedgerToRootBlocked}
+            disabled={isMoving}
             fullWidth
           />
         </View>
@@ -202,11 +200,6 @@ const styles = StyleSheet.create({
   emptyTitle: {
     ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  blockedHint: {
-    ...TYPOGRAPHY.body3,
-    color: FEEDBACK_NEGATIVE_BOLD,
-    marginBottom: 8,
   },
   snackbarWrapper: {
     position: 'absolute',

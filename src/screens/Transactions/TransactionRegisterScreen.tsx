@@ -6,16 +6,17 @@
 /** @screen ADD-5-MODAL-01-0 스캔 내용 반영 확인 모달 (scanApply 다이얼로그) */
 /** @screen ADD-2-SNACKBAR-01-0 등록 완료 (SNACKBAR_TRANSACTION_ADDED[_PENDING]) */
 /**
- * 4-A(Entry API 연동): 등록(신규)은 항상 실 서버로 간다 — id가 없으면 무조건
- * `mode='createReal'`. 수정은 넘어온 id 모양으로 갈린다: 숫자 문자열이면 실
- * Entry(`editReal`), `dtb-tx-N`이면 아직 4-B 전인 DTB 전체 목록 목 데이터
- * (`editMock`, `types/transaction.ts`) — `TransactionsScreen`(손대지 말라고 지정된
- * 화면)에서 들어오는 경로가 여전히 이 값을 쓴다.
+ * 4-A(Entry API 연동): 등록(신규)은 항상 실 서버로 간다 — id가 없으면
+ * `mode='createReal'`, 있으면 `mode='editReal'`이다. (4-B 정리: DTB 전체 목록이
+ * 실 API로 전환되며 `dtb-tx-N` 목 id를 만들어내는 곳이 사라져 이 화면의 옛
+ * `editMock` 분기가 도달 불가능해졌다 — 확인 후 분기와 `types/transaction.ts`를
+ * 함께 걷어냈다.)
  *
- * 실 API로 가는 두 모드에서 뺀 것들:
- *  - "담당자" 필드: Entry API에 이 개념 자체가 없다(CLAUDE.md엔 있지만 명세엔
- *    없음, docs/api-gaps.md 참고) — 입력해도 서버에 보내지 않는다(저장할 곳이
- *    없어서). editMock에서만 그대로 동작한다.
+ * "담당자" 필드(2026-09-05 연동): `managerUserId`는 이 모임의 관리자(`GroupMembership`,
+ * User 기준)여야 한다 — 납부 명단(`Member`)은 담당자가 될 수 없다(Entry.txt §4). 그래서
+ * 선택 목록도 `groupMembershipService.getMemberships()`에서 가져온다.
+ *
+ * 실 API로 가는 두 모드에서 여전히 뺀 것들:
  *  - "장부" 변경(editReal만): `PATCH /entries/{id}`에 ledgerId가 없어 등록 후엔
  *    장부를 옮길 수 없다 — 표시만 하고 못 누르게 막았다.
  *  - 증빙 실제 업로드: 카메라/스캔/갤러리가 전부 가짜 문자열 토큰만 만들어서
@@ -48,15 +49,11 @@ import MockCameraView from './MockCameraView';
 import ReceiptScanningView from './ReceiptScanningView';
 import ReceiptScanFailedView from './ReceiptScanFailedView';
 import ReceiptGalleryPickerScreen from './ReceiptGalleryPickerScreen';
-import {
-  getTransactionById,
-  getTransactionLedgerOptions,
-  todayKey,
-  updateTransaction,
-} from '../../types/transaction';
+import { todayKey } from '../../utils/calendarGrid';
 import { getActiveGroup } from '../../types/group';
 import * as ledgerService from '../../services/ledgerService';
 import * as entryService from '../../services/entryService';
+import * as groupMembershipService from '../../services/groupMembershipService';
 import { ApiError } from '../../services/apiClient';
 import { buildAuthenticatedImageSource } from '../../utils/authenticatedImage';
 import {
@@ -118,15 +115,8 @@ import {
 import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-const MANAGER_OPTIONS = [
-  { key: '김민주', label: '김민주' },
-  { key: '김시현', label: '김시현' },
-  { key: '봉서연', label: '봉서연' },
-  { key: '이정현', label: '이정현' },
-];
-
 type TransactionKind = 'income' | 'expense';
-type RegisterMode = 'createReal' | 'editReal' | 'editMock';
+type RegisterMode = 'createReal' | 'editReal';
 
 type RegisterStage =
   | { kind: 'form' }
@@ -186,35 +176,25 @@ function TransactionRegisterScreen() {
   const route = useRoute<TransactionRegisterRouteProp>();
   const transactionId = route.params?.transactionId;
 
-  const mode: RegisterMode = !transactionId
-    ? 'createReal'
-    : /^\d+$/.test(transactionId)
-    ? 'editReal'
-    : 'editMock';
+  const mode: RegisterMode = !transactionId ? 'createReal' : 'editReal';
 
-  const existingDtb = mode === 'editMock' ? getTransactionById(transactionId!) : undefined;
-
-  const [transactionKind, setTransactionKind] = useState<TransactionKind>(
-    existingDtb ? (existingDtb.amount > 0 ? 'income' : 'expense') : 'expense',
-  );
-  const [amount, setAmount] = useState(existingDtb ? Math.abs(existingDtb.amount) : 0);
-  const [date, setDate] = useState(existingDtb?.date ?? todayKey());
-  const [itemName, setItemName] = useState(existingDtb?.itemName ?? '');
-  const [manager, setManager] = useState(existingDtb?.manager ?? '');
-  const [ledgerId, setLedgerId] = useState(existingDtb?.ledgerId ?? '');
-  const [ledgerName, setLedgerName] = useState(existingDtb?.ledgerName ?? '');
-  const [memo, setMemo] = useState(existingDtb?.memo ?? '');
-  const [receiptImages, setReceiptImages] = useState<string[]>(
-    existingDtb?.receiptImages ?? [],
-  );
+  const [transactionKind, setTransactionKind] = useState<TransactionKind>('expense');
+  const [amount, setAmount] = useState(0);
+  const [date, setDate] = useState(todayKey());
+  const [itemName, setItemName] = useState('');
+  const [managerUserId, setManagerUserId] = useState<string | undefined>(undefined);
+  const [managerName, setManagerName] = useState('');
+  const [managerOptions, setManagerOptions] = useState<
+    { key: string; label: string }[]
+  >([]);
+  const [ledgerId, setLedgerId] = useState('');
+  const [ledgerName, setLedgerName] = useState('');
+  const [memo, setMemo] = useState('');
+  const [receiptImages, setReceiptImages] = useState<string[]>([]);
   const [realReceiptUrls, setRealReceiptUrls] = useState<Record<string, string>>({});
 
-  const [ledgerOptions, setLedgerOptions] = useState<LedgerOption[]>(
-    mode === 'editMock' ? getTransactionLedgerOptions() : [],
-  );
-  const [screenLoadState, setScreenLoadState] = useState<ScreenLoadState>(
-    mode === 'editMock' ? 'ready' : 'loading',
-  );
+  const [ledgerOptions, setLedgerOptions] = useState<LedgerOption[]>([]);
+  const [screenLoadState, setScreenLoadState] = useState<ScreenLoadState>('loading');
   const [screenErrorMessage, setScreenErrorMessage] = useState('');
 
   // editReal 저장 시 "실제로 바뀐 것만" 서버로 보내기 위한 원본 스냅샷(0-1).
@@ -223,6 +203,7 @@ function TransactionRegisterScreen() {
     amount: number;
     occurredOn: string;
     memo: string;
+    managerUserId: string;
     receiptFileIds: number[];
   } | null>(null);
 
@@ -247,8 +228,14 @@ function TransactionRegisterScreen() {
   const loadReal = useCallback(async () => {
     setScreenLoadState('loading');
     try {
+      const group = getActiveGroup();
+      if (group) {
+        // 담당자 후보는 이 모임의 관리자(GroupMembership)다 — 납부 명단(Member)이
+        // 아니다(Entry.txt §4). createReal/editReal 둘 다 필요해 공통으로 가져온다.
+        const memberships = await groupMembershipService.getMemberships(group.id);
+        setManagerOptions(memberships.map(m => ({ key: m.userId, label: m.name })));
+      }
       if (mode === 'createReal') {
-        const group = getActiveGroup();
         const ledgers = group ? await ledgerService.getAllLedgersInGroup(group.id) : [];
         setLedgerOptions(ledgers.map(l => ({ id: l.id, name: l.name })));
       } else if (mode === 'editReal') {
@@ -258,6 +245,8 @@ function TransactionRegisterScreen() {
         setDate(fromIsoDate(detail.occurredOn));
         setItemName(detail.title);
         setMemo(detail.memo ?? '');
+        setManagerUserId(detail.manager.userId);
+        setManagerName(detail.manager.name);
         setLedgerId(detail.ledgerId);
         setLedgerName(detail.ledgerName);
         const realIds = detail.receiptFiles.map(f => f.id);
@@ -270,6 +259,7 @@ function TransactionRegisterScreen() {
           amount: detail.amount,
           occurredOn: detail.occurredOn,
           memo: detail.memo ?? '',
+          managerUserId: detail.manager.userId,
           receiptFileIds: realIds.map(Number),
         });
       }
@@ -281,15 +271,17 @@ function TransactionRegisterScreen() {
   }, [mode, transactionId]);
 
   useEffect(() => {
-    if (mode !== 'editMock') {
-      loadReal();
-    }
+    loadReal();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const canChangeLedger = mode !== 'editReal';
-  const showManagerField = mode === 'editMock';
   const canSubmit = itemName.trim().length > 0 && ledgerId.length > 0 && amount > 0;
+
+  const handleSelectManager = (key: string) => {
+    setManagerUserId(key);
+    setManagerName(managerOptions.find(option => option.key === key)?.label ?? '');
+  };
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
@@ -310,28 +302,6 @@ function TransactionRegisterScreen() {
       return;
     }
 
-    if (mode === 'editMock') {
-      if (existingDtb) {
-        updateTransaction(existingDtb.id, {
-          date,
-          ledgerId,
-          ledgerName,
-          itemName: itemName.trim(),
-          amount: transactionKind === 'income' ? Math.abs(amount) : -Math.abs(amount),
-          manager,
-          memo,
-          hasReceipt: receiptImages.length > 0,
-          receiptImages,
-          isPendingApproval: false,
-        });
-      }
-      navigation.navigate('Main', {
-        screen: 'Transactions',
-        params: { addedTransactionId: existingDtb?.id },
-      });
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       if (mode === 'createReal') {
@@ -341,6 +311,7 @@ function TransactionRegisterScreen() {
           amount,
           occurredOn: toIsoDate(date),
           memo: memo.trim() || undefined,
+          managerUserId,
         });
         showSnackbar(
           created.approvalStatus === 'PENDING'
@@ -364,6 +335,9 @@ function TransactionRegisterScreen() {
           }
           if (trimmedMemo !== initialSnapshot.memo) {
             updates.memo = trimmedMemo;
+          }
+          if (managerUserId && managerUserId !== initialSnapshot.managerUserId) {
+            updates.managerUserId = managerUserId;
           }
           // 실제 서버 파일(숫자 id)만 골라 비교한다 — 카메라/스캔/갤러리로 새로
           // 붙인 항목은 가짜 토큰이라 여기 안 들어간다(진짜 업로드가 아직 없음).
@@ -511,7 +485,7 @@ function TransactionRegisterScreen() {
     );
   }
 
-  if (mode !== 'editMock' && (screenLoadState === 'loading' || screenLoadState === 'error')) {
+  if (screenLoadState === 'loading' || screenLoadState === 'error') {
     return (
       <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <AppBar type="sub" title={TRANSACTION_REGISTER_TITLE} onBackPress={() => navigation.goBack()} />
@@ -520,7 +494,7 @@ function TransactionRegisterScreen() {
             {screenLoadState === 'loading' ? TRANSACTION_REGISTER_LOADING : screenErrorMessage}
           </Text>
           {screenLoadState === 'error' && (
-            <Button label={TRANSACTION_REGISTER_RETRY_LABEL} onPress={loadReal} hierarchy="secondary" />
+            <Button label={TRANSACTION_REGISTER_RETRY_LABEL} onPress={loadReal} hierarchy="secondary" style={{ alignSelf: 'center' }} />
           )}
         </View>
       </SafeAreaView>
@@ -576,14 +550,12 @@ function TransactionRegisterScreen() {
           value={itemName || TRANSACTION_REGISTER_ITEM_NAME_PLACEHOLDER}
           onPress={() => setActiveSheet('itemName')}
         />
-        {showManagerField && (
-          <SelectionListItem
-            type="picker"
-            title={TRANSACTION_MANAGER_LABEL}
-            value={manager || TRANSACTION_REGISTER_MANAGER_PLACEHOLDER}
-            onPress={() => setActiveSheet('manager')}
-          />
-        )}
+        <SelectionListItem
+          type="picker"
+          title={TRANSACTION_MANAGER_LABEL}
+          value={managerName || TRANSACTION_REGISTER_MANAGER_PLACEHOLDER}
+          onPress={() => setActiveSheet('manager')}
+        />
         <SelectionListItem
           type="picker"
           title={TRANSACTION_LEDGER_LABEL}
@@ -674,16 +646,14 @@ function TransactionRegisterScreen() {
         onClose={() => setActiveSheet('none')}
         onSave={setMemo}
       />
-      {showManagerField && (
-        <TransactionSingleSelectSheet
-          visible={activeSheet === 'manager'}
-          title={MANAGER_SELECT_SHEET_TITLE}
-          options={MANAGER_OPTIONS}
-          selectedKey={manager || undefined}
-          onClose={() => setActiveSheet('none')}
-          onSelect={setManager}
-        />
-      )}
+      <TransactionSingleSelectSheet
+        visible={activeSheet === 'manager'}
+        title={MANAGER_SELECT_SHEET_TITLE}
+        options={managerOptions}
+        selectedKey={managerUserId || undefined}
+        onClose={() => setActiveSheet('none')}
+        onSelect={handleSelectManager}
+      />
       <TransactionSingleSelectSheet
         visible={activeSheet === 'ledger' && canChangeLedger}
         title={TRANSACTION_LEDGER_LABEL}

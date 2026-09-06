@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Button from '../../components/Input/Button/Button';
 import Calendar from '../../components/Data Display/Calendar/Calendar';
-import { todayKey } from '../../types/transaction';
+import { todayKey } from '../../utils/calendarGrid';
 import {
   DATE_SHEET_CANCEL_LABEL,
   DATE_SHEET_CONFIRM_LABEL,

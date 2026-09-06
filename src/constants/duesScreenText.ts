@@ -13,9 +13,6 @@ export const DUES_EMPTY_MESSAGE = '새로운 회비를 생성해보세요.';
 export const DUES_LOADING = '회비 목록을 불러오는 중이에요.';
 export const DUES_RETRY_LABEL = '다시 시도';
 
-/** 목록 응답엔 생성일이 없어(docs/api-gaps.md) "예정" 카드에 시작일 배지를 못
- * 만든다 — 날짜 대신 상태 라벨로 대체. */
-export const DUES_BADGE_UPCOMING = '예정';
 export const DUES_BADGE_CLOSED = '마감';
 
 export const DUES_DETAIL_LOADING = '회비 정보를 불러오는 중이에요.';
@@ -45,14 +42,14 @@ export const DUES_CREATE_LEDGER_LABEL = '장부';
 export const DUES_CREATE_LEDGER_PLACEHOLDER = '장부를 선택해주세요.';
 
 /**
- * 화면명세서(DUE-2-PAGE-01-0)는 "기간"(시작~마감 캘린더 범위)을 필수 항목으로
- * 요구하지만, `POST /groups/{groupId}/dues`엔 `dueDate`(마감일) 하나뿐이다 —
- * 시작일을 받을 자리가 서버에 없다. ADD 화면의 "담당자" 필드(받아놓고 저장 안 됨)와
- * 같은 실수를 반복하지 않기 위해 아예 마감일 단일 입력으로 줄였다 —
- * docs/api-gaps.md (A) "회비 시작일 필드 부재", design-verification.md §5-4 참고.
+ * 화면명세서(DUE-2-PAGE-01-0)가 요구하는 "기간"(시작~마감 범위) 그대로 복원했다
+ * (2026-09-04) — 6-B 당시 "서버에 시작일 필드가 없다"고 판단해 마감일 단일
+ * 입력으로 줄였던 것은 그 판단 자체가 틀렸다(`docs/api-gaps.md` "확정됨" 절:
+ * `startDate` 없이는 400). 범위 선택은 `DuesDateRangeSheet`(DTB-3-SHEET-01-0과
+ * 같은 유형의 기간 선택 캘린더)를 새로 만들어 붙였다.
  */
-export const DUES_CREATE_DUE_DATE_LABEL = '마감일';
-export const DUES_CREATE_DUE_DATE_PLACEHOLDER = '마감일을 선택해주세요.';
+export const DUES_CREATE_PERIOD_LABEL = '기간';
+export const DUES_CREATE_PERIOD_PLACEHOLDER = '기간을 선택해주세요.';
 
 export const DUES_CREATE_NEXT_LABEL = '다음으로';
 
@@ -72,3 +69,62 @@ export const DUES_MEMBER_SELECT_RETRY_LABEL = '다시 시도';
 
 export const SNACKBAR_DUES_CREATED_PREFIX = "'";
 export const SNACKBAR_DUES_CREATED_SUFFIX = "' 회비가 생성되었어요.";
+
+/** 회비 상세 ⋮ 메뉴(7-B-1, DUE-2-PAGE-03-0) 전용 문구. 전부 총무 전용이라
+ * ⋮ 버튼 자체를 일반 관리자에게 숨긴다(2단계 UI 우선 차단 패턴). */
+export const DUES_MENU_ACCESSIBILITY_LABEL = '회비 관리 메뉴';
+export const DUES_MENU_EDIT_LABEL = '회비 수정';
+export const DUES_MENU_MEMBERS_LABEL = '모임원 선택';
+export const DUES_MENU_CLOSE_LABEL = '회비 마감';
+export const DUES_MENU_DELETE_LABEL = '회비 삭제';
+
+/** 회비 수정(DUE-3-PAGE-06-0, +DUE-4-MODAL-02-0 이탈 방지) 전용 문구. */
+export const DUES_EDIT_TITLE = '회비 수정';
+export const DUES_EDIT_AMOUNT_LOCKED_HINT =
+  '금액은 마감 전까지도 수정할 수 없어요.';
+export const DUES_EDIT_SUBMIT_LABEL = '수정하기';
+export const DUES_EDIT_LEAVE_TITLE = '회비 수정을 그만둘까요?';
+export const DUES_EDIT_LOADING = '회비 정보를 불러오는 중이에요.';
+export const DUES_EDIT_RETRY_LABEL = '다시 시도';
+export const SNACKBAR_DUES_UPDATED = '회비 수정이 완료되었어요.';
+
+/** 회비 수정_모임원 선택(DUE-3-PAGE-02-0, +DUE-4-MODAL-02-0 이탈 방지) 전용 문구.
+ * 제목/검색창/전체선택/빈 상태 문구는 생성 화면(DUES_MEMBER_SELECT_*)과 동일해
+ * 그대로 재사용하고, CTA·이탈 모달·완료 스낵바만 별도로 둔다(문구가 다름). */
+export const DUES_MEMBER_EDIT_SUBMIT_LABEL = '수정하기';
+export const DUES_MEMBER_EDIT_LEAVE_TITLE = '모임원 선택을 그만둘까요?';
+export const SNACKBAR_DUES_MEMBERS_UPDATED = '변경 사항이 저장되었어요.';
+
+/** 회비 삭제(DUE-3-MODAL-01-0, +DUE-4-SNACKBAR-03-0) 전용 문구. */
+export const DUES_DELETE_CONFIRM_TITLE = '해당 회비를 삭제하시겠습니까?';
+export const DUES_DELETE_CONFIRM_DESCRIPTION =
+  '삭제 이후에는 데이터 복구가 어렵습니다.';
+export const DUES_DELETE_CONFIRM_LABEL = '삭제';
+export const SNACKBAR_DUES_DELETED_PREFIX = "'";
+export const SNACKBAR_DUES_DELETED_SUFFIX = "' 회비가 삭제되었어요.";
+
+/** 납부 상태 일괄 변경(7-B-2, DUE-2-PAGE-03-0의 체크박스+CTA) 전용 문구.
+ * `OPEN` 상태에서만 노출(SCHEDULED/CLOSED는 체크박스·CTA 자체를 숨김). */
+export const DUES_PAYMENT_MARK_PAID_LABEL = '납부 완료하기';
+export const DUES_PAYMENT_MARK_UNPAID_LABEL = '납부 취소하기';
+/** "{changedCount}" + 이 접미사 — 선택 인원수가 아니라 서버가 실제로 반영한
+ * 인원수(changedCount)를 써야 한다(duesService.ts 주석 참고). */
+export const SNACKBAR_DUES_PAYMENT_CONFIRMED_SUFFIX = '명의 납부가 확인되었어요.';
+export const SNACKBAR_DUES_PAYMENT_CANCELLED_SUFFIX = '명의 납부가 취소되었어요.';
+
+/** 회비 요청 작성(DUE-3-PAGE-04-0) 전용 문구. 서버 API 없음(Dues.txt "회비
+ * 요청 — 서버 기능이 아닙니다") — 작성한 텍스트를 OS 공유 시트로 넘기기만 한다. */
+export const DUES_REQUEST_TITLE = '회비 요청';
+export const DUES_REQUEST_PLACEHOLDER = '회비 납부 요청 글을 작성해 주세요';
+export const DUES_REQUEST_SUBMIT_LABEL = '회비 요청하기';
+export const DUES_REQUEST_LEAVE_TITLE = '회비 요청 작성을 그만둘까요?';
+export const DUES_REQUEST_LEAVE_DESCRIPTION = '작성 중인 내용이 사라져요.';
+export const DUES_REQUEST_ENTRY_LABEL = '회비 요청하기';
+
+/** 회비 마감(DUE-3-MODAL-02-0, +DUE-4-SNACKBAR-02-0) 전용 문구. */
+export const DUES_CLOSE_CONFIRM_TITLE = '회비 수납을 마감할까요?';
+export const DUES_CLOSE_CONFIRM_DESCRIPTION =
+  '현재 금액이 전체 내역의 수입으로 기록돼요.';
+export const DUES_CLOSE_CONFIRM_LABEL = '마감';
+export const SNACKBAR_DUES_CLOSED_PREFIX = "'";
+export const SNACKBAR_DUES_CLOSED_SUFFIX = "' 회비를 마감했어요.";

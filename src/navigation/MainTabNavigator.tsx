@@ -7,7 +7,7 @@ import DashboardScreen from '../screens/Dashboard/DashboardScreen';
 import TransactionsScreen from '../screens/Transactions/TransactionsScreen';
 import FolderTabNavigator from '../screens/Folder/FolderTabNavigator';
 import DuesScreen from '../screens/Dues/DuesScreen';
-import MoreScreen from '../screens/MoreScreen';
+import MoreScreen from '../screens/More/MoreScreen';
 import BottomNavigation from '../components/Navigation/Bottom Navigation/BottomNavigation';
 import {
   TAB_DUES_LABEL,
@@ -19,9 +19,13 @@ import {
 
 export type MainTabParamList = {
   Home: undefined;
-  Transactions: { addedTransactionId?: string } | undefined;
+  Transactions: undefined;
   Folder: undefined;
-  Dues: undefined;
+  /** snackbarMessage: 회비 삭제·마감(7-B-1) 완료 후 이 화면으로 라우팅하며
+   * 스낵바를 띄우는 용도(DuesDetailScreen 참고) — 삭제된 회비는 상세 화면이
+   * 더는 존재하지 않고, 마감은 명세가 상세가 아니라 이 목록으로 돌아가도록
+   * 명시한다. */
+  Dues: { snackbarMessage?: string } | undefined;
   More: undefined;
 };
 

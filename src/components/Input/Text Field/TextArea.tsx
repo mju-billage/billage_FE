@@ -16,6 +16,7 @@ type TextAreaProps = {
   helperText?: string;
   error?: string;
   rows?: number;
+  maxLength?: number;
 };
 
 /** 여러 줄 입력이 가능한 박스형 텍스트 영역. */
@@ -26,6 +27,7 @@ function TextArea({
   helperText,
   error,
   rows = 4,
+  maxLength,
 }: TextAreaProps) {
   const [isFocused, setIsFocused] = useState(false);
   const borderColor = error
@@ -44,6 +46,7 @@ function TextArea({
         placeholderTextColor={FOREGROUND_DISABLED}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
+        maxLength={maxLength}
         multiline
         textAlignVertical="top"
       />

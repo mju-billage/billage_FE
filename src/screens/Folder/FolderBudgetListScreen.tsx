@@ -22,10 +22,12 @@ import FolderItem from '../../components/Data Display/Folder/FolderItem';
 import type { LedgerSummary } from '../../types/ledger';
 import { getActiveGroup } from '../../types/group';
 import * as ledgerService from '../../services/ledgerService';
+import * as groupService from '../../services/groupService';
 import { ApiError } from '../../services/apiClient';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
+  NO_ACTIVE_GROUP_MESSAGE,
   getApiErrorMessage,
   isNetworkError,
 } from '../../constants/apiErrorMessages';
@@ -93,12 +95,20 @@ function FolderBudgetListScreen() {
   };
 
   const load = useCallback(async () => {
-    const group = getActiveGroup();
-    if (!group) {
-      return;
-    }
     setLoadState('loading');
     try {
+      let group = getActiveGroup();
+      if (!group) {
+        // [치명1] 로그인 직후 첫 포커스처럼 모임 캐시가 아직 없는 순간 대비 —
+        // "다시 시도"가 실제로 동작하도록 여기서 한 번 더 직접 불러온다.
+        await groupService.getMyGroups();
+        group = getActiveGroup();
+      }
+      if (!group) {
+        setLoadErrorMessage(NO_ACTIVE_GROUP_MESSAGE);
+        setLoadState('error');
+        return;
+      }
       const result = await ledgerService.getAllLedgersInGroup(group.id);
       setLedgers(result);
       setLoadState('ready');
@@ -156,7 +166,7 @@ function FolderBudgetListScreen() {
       {loadState === 'error' && (
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>{loadErrorMessage}</Text>
-          <Button label={BUDGET_LIST_RETRY_LABEL} onPress={load} hierarchy="secondary" />
+          <Button label={BUDGET_LIST_RETRY_LABEL} onPress={load} hierarchy="secondary" style={{ alignSelf: 'center' }} />
         </View>
       )}
 
