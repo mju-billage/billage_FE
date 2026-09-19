@@ -153,6 +153,14 @@
 #### `SearchField` clear(X) 버튼 미지원 — 컴포넌트에 기능 자체가 없음, 승인 대기 [2026-09-19 6-11]
 - **검색 필드 clear(X) 버튼 — 보고만, 미수정**: `SearchField`(`components/Input/Search/SearchField.tsx`)는 `value/onChangeText/placeholder/size/variant/onSubmit`만 받고 **clear 지원이 없다**(우측엔 돋보기 아이콘 고정). 반대로 `TextField`는 `onClear?`(값이 있고 비활성 아닐 때 `Close.png` X 아이콘)를 갖고 있고 4개 화면(GroupProfileEdit/JoinGroupSheet/ProfileEdit/TransactionTextInputSheet)과 `Dialog`가 쓴다. `SearchField`는 8곳이 사용 중이라 §5-17의 "컴포넌트에 있는데 화면이 안 쓰는" 패턴이 아니라 **컴포넌트에 기능 자체가 없는** 경우다. 지시대로 고치지 않음 — 추가 시 `onClear` prop을 넣고 값이 있을 때 X + 돋보기 병기(시안 Case C), 폴더 화면에서 `onClear={() => setSearchQuery('')}` 연결하는 안이고, 나머지 7개 사용처에는 prop을 안 넘기면 변화 없다.
 
+#### FDR-2-PAGE-04-0 (폴더 상세) — 시안 대조 미해결 5건, 판단 보류 [2026-09-20 10-1, 조사만]
+원본 실측(1920×2842, 프레임 360px = 1dp) 대비 `FolderScreen`(`isRoot=false`) 현재 상태. **고치지 않음 — 사용자 판단 대기**.
+- **⋮ 메뉴**: 시안 3개(`선택 이동` / `폴더 이름 변경하기` / `폴더 해제하기`, 그리드·리스트 토글 없음). 앱은 폴더 메인과 **분기**한다(`menuSections`, `isRoot`): 상세 = 1섹션 5항목 `선택 이동`(`FOLDER_MENU_SELECT_MOVE`) · `폴더 이름 변경`(`FOLDER_MENU_RENAME`) · `그리드`(`VIEW_TOGGLE_GRID_LABEL`) · `리스트`(`VIEW_TOGGLE_LIST_LABEL`) · `폴더 해제`(`FOLDER_MENU_UNLINK`). 토글 2개가 더 있고 라벨에 `하기`가 없다. 토글을 뺄지는 사용자 결정.
+- **검색**: 시안은 검색 필드 터치 시 통합 검색 모드로 **화면 전환** + 시스템 키보드. 앱은 같은 화면 안 **인라인 필터**(`searchQuery` → `filteredItems`, `SearchField` 그대로, 결과 없음은 `FOLDER_SEARCH_EMPTY_TITLE`/`_SUBTITLE`). 화면 전환은 구조 변경.
+- **앱바 우측 통계 아이콘**: 시안 상세도 `통계 + ⋮`. 앱은 `isRoot`일 때만 통계 아이콘을 그리고 상세는 ⋮만(코드 주석에 "하위 폴더 화면은 이번 라운드 대조 대상 아님").
+- **`+` 버튼 위치**: 시안 검색 필드 하단·리스트 우측 상단 상시. 앱은 검색 필드 아래(`searchWrapper` marginBottom 16) `countRow`(좌 `{N} 개`, 우 `IconButton` 36×36)의 우측 끝, 로딩·에러가 아닌 `ready`에서 항상 표시(빈 화면에서도). 위치 관계는 시안과 같아 보이나 dp 실측은 안 했다.
+- **말줄임**: 아래 해결 항목(코드 반영, 실기기 확인 대기).
+
 ### 1-2. 기획 확인 필요
 
 #### <a id="add-2-sheet-07-0-일자-선택-캘린더"></a>ADD-2-SHEET-07-0 (일자 선택 캘린더) — 디자인 원본이 더미 데이터, 기획에 원본 재요청 [2026-08-29 배치 E]
@@ -707,6 +715,9 @@ DSH-1 재캡처로 "고쳐졌는지" 확인하는 절차 자체가 성립하지 
 - [해결] 2026-09-19 `ETC-4-PAGE-05-0` 공유 ID 불일치 — `ArchiveLedgerEntriesScreen`이 `SafeAreaView`+배경 미지정이라 시스템 기본색이 비침. `ScreenContainer background="primary"`로 마이그레이션(같은 화면인 `ReportLedgerEntriesScreen`과 통일, §5-18 9-9)
 - [해결] 2026-09-19 `ETC-5-PAGE-02-0` 같은 ID 두 파일 처리 차이 — `ArchiveEntryDetailScreen`을 `ScreenContainer primary`로 통일(원본 크롭 두 장이 동일해 같은 화면). §2 배경 판정은 미판정 유지, 명세 판정은 별도 (§5-18 9-9)
 - [해결] 2026-09-19 `ETC-5-PAGE-02-0` 배경 흰색 확정 — 명세 실측 v5(`내역_상세내역조회.png#0` `#FFFFFF` 89% 외 3프레임 일치) + 이 ID 크롭 2장 픽셀 `#FFFFFF`. 두 파일(`ArchiveEntryDetailScreen`·`ReportEntryDetailScreen`) 모두 `secondary`로 정정. 9-9의 `primary` 통일은 명세를 안 보고 한쪽에 맞춘 오류였음(`docs/lessons.md` 1-14, §5-18 9-10)
+- [해결] 2026-09-20 폴더 상세 개수 단위 — `FolderScreen`은 폴더 메인·상세 공용이라 이미 `FOLDER_COUNT_SUFFIX`(`개`) 하나를 쓰고 있어 코드 변경 없음(`{N} 개`, 숫자와 단위 사이 공백은 #11 결정 유지). 시안끼리 다른 점(상세 목업 `2 건`)은 **불일치 #13**으로 기록 (`design-verification.md` §5-4, `lessons.md` §3, 라운드 10-1)
+- [해결] 2026-09-20 폴더 상세 빈 화면 문구 — 폴더 메인과 같은 `FOLDER_EMPTY_TITLE`(`아직 폴더 및 장부가 존재하지 않아요.`)/`FOLDER_EMPTY_SUBTITLE`(`새로운 장부를 생성하여 내역을 관리해보세요.`)를 같은 화면에서 쓰므로 별도 정의 없음, 시안 문구와 일치 (라운드 10-1)
+- [해결] 2026-09-20 앱바 제목 말줄임 — `AppBar` 제목 `Text`에는 이미 `numberOfLines={1}`이 있었지만 제목 행(`titleRow`)과 `Text`에 `flexShrink`가 없어(RN 기본 0) 긴 제목이 우측 아이콘 쪽으로 넘칠 수 있었다. `titleRow`·`title`·`titleBold`·`detailColumn`에 `flexShrink: 1`, 제목 `Text`에 `ellipsizeMode="tail"` 명시. 10자로 자르지 않고 **폭이 모자랄 때만 `…`** (라운드 10-1, **긴 폴더명으로 실기기 확인 대기**)
 
 ## 4. 검증 방식 (파일럿 5개로 확정)
 

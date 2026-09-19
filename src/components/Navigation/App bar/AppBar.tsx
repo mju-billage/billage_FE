@@ -60,6 +60,7 @@ function AppBar({
       <Text
         style={type === 'sub' ? styles.titleBold : styles.title}
         numberOfLines={1}
+        ellipsizeMode="tail"
       >
         {title}
       </Text>
@@ -80,7 +81,7 @@ function AppBar({
 
         {type === 'detailDownload' ? (
           <View style={styles.detailColumn}>
-            <Text style={styles.detailLabel} numberOfLines={1}>
+            <Text style={styles.detailLabel} numberOfLines={1} ellipsizeMode="tail">
               {title}
             </Text>
             {subtitle && <Text style={styles.detailSubtitle}>{subtitle}</Text>}
@@ -138,16 +139,21 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
   },
+  // 폭이 모자랄 때 제목이 `…`로 잘리려면 이 행과 Text가 줄어들 수 있어야 한다(RN은
+  // flexShrink 기본 0이라 안 주면 numberOfLines만으로는 우측 아이콘 쪽으로 넘친다).
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    flexShrink: 1,
   },
   title: {
     ...TYPOGRAPHY.h2,
+    flexShrink: 1,
   },
   titleBold: {
     ...TYPOGRAPHY.h2,
+    flexShrink: 1,
   },
   dropdownIcon: {
     width: 16,
@@ -157,6 +163,7 @@ const styles = StyleSheet.create({
   },
   detailColumn: {
     gap: 2,
+    flexShrink: 1,
   },
   detailLabel: {
     ...TYPOGRAPHY.subtitle3,
