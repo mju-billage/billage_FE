@@ -12,7 +12,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -131,7 +131,7 @@ function ReceiptSearchScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="secondary">
       <AppBar type="sub" title={RECEIPT_ALBUM_TITLE} onBackPress={() => navigation.goBack()} />
 
       <View style={styles.body}>
@@ -168,14 +168,11 @@ function ReceiptSearchScreen() {
           )
         )}
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,

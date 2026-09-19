@@ -70,7 +70,7 @@ function NoticeDetailScreen() {
   );
 
   return (
-    <ScreenContainer background="primary">
+    <ScreenContainer background="secondary">
       <AppBar type="sub" title={NOTICE_LIST_TITLE} onBackPress={() => navigation.goBack()} />
 
       {loadState === 'loading' && (

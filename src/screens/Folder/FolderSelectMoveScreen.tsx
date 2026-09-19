@@ -137,7 +137,7 @@ function FolderSelectMoveScreen() {
   };
 
   return (
-    <ScreenContainer background="primary">
+    <ScreenContainer background="secondary">
       <AppBar title={SELECT_MOVE_TITLE} onBackPress={() => navigation.goBack()} />
 
       <View style={styles.body}>

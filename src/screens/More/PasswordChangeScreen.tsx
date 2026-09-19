@@ -6,7 +6,7 @@
  */
 import { useCallback, useState } from 'react';
 import { BackHandler, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -126,7 +126,7 @@ function PasswordChangeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="secondary">
       <AppBar type="sub" title={PASSWORD_CHANGE_TITLE} onBackPress={handleBack} />
 
       <View style={styles.body}>
@@ -194,14 +194,11 @@ function PasswordChangeScreen() {
           navigation.goBack();
         }}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,

@@ -163,7 +163,7 @@ function NotificationSettingsScreen() {
   const visibleRows = TOGGLE_ROWS.filter(row => viewerIsOwner || !row.ownerOnly);
 
   return (
-    <ScreenContainer background="primary">
+    <ScreenContainer background="secondary">
       <AppBar
         type="sub"
         title={NOTIFICATION_SETTINGS_TITLE}

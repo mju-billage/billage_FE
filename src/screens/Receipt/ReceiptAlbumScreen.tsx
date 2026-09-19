@@ -216,7 +216,7 @@ function ReceiptAlbumScreen() {
   };
 
   return (
-    <ScreenContainer background="primary">
+    <ScreenContainer background="secondary">
       <AppBar type="sub" title={RECEIPT_ALBUM_TITLE} onBackPress={() => navigation.goBack()} />
 
       <View style={styles.body}>

@@ -9,7 +9,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, SectionList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -156,7 +156,7 @@ function TransactionSearchScreen() {
   }));
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="secondary">
       <AppBar
         type="sub"
         title={TRANSACTIONS_TITLE}
@@ -225,14 +225,11 @@ function TransactionSearchScreen() {
           />
         )}
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingTop: 16,

@@ -70,7 +70,7 @@ function InquiryScreen() {
   );
 
   return (
-    <ScreenContainer background="primary">
+    <ScreenContainer background="secondary">
       <AppBar type="sub" title={INQUIRY_TITLE} onBackPress={() => navigation.goBack()} />
 
       {loadState === 'loading' && (
