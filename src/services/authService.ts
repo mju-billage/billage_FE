@@ -359,44 +359,23 @@ type SocialLoginResponse = {
 export async function socialLogin(
   payload: SocialLoginRequest,
 ): Promise<AuthUserResponse> {
-  console.warn('[SocialLogin][API] POST /auth/social/login 호출', {
-    provider: payload.provider,
-    hasToken: !!payload.providerToken,
-  });
-  let response: SocialLoginResponse;
-  try {
-    response = await request<SocialLoginResponse>('/api/v1/auth/social/login', {
-      method: 'POST',
-      body: JSON.stringify({ provider: payload.provider, token: payload.providerToken }),
-      skipAuth: true,
-    });
-  } catch (error) {
-    if (error instanceof ApiError) {
-      console.warn('[SocialLogin][API] 서버 거부', {
-        code: error.code,
-        message: error.message,
-      });
-    } else {
-      console.warn('[SocialLogin][API] 네트워크/요청 실패', error);
-    }
-    throw error;
-  }
-  console.warn('[SocialLogin][API] 응답 수신', {
-    status: response.status,
-    hasLogin: !!response.login,
-    email: response.email,
+  const response = await request<SocialLoginResponse>('/api/v1/auth/social/login', {
+    method: 'POST',
+    body: JSON.stringify({ provider: payload.provider, token: payload.providerToken }),
+    skipAuth: true,
   });
   if (!response.login) {
+    // 서버가 내려준 에러 코드가 아니라 클라이언트가 만든 값이다 — `login`이 없는 응답을
+    // 기존 `LoginScreen`의 분기(`SOCIAL_MEMBER_NOT_FOUND`)에 맞추려고 여기서 합성한다.
+    // 서버의 실제 코드는 미확정(실제 소셜 토큰이 필요해 실호출로 검증 못 함).
     throw new ApiError('SOCIAL_MEMBER_NOT_FOUND', '가입되지 않은 소셜 계정이에요.');
   }
   try {
     await storeTokens(response.login.tokens);
     cacheCurrentUser(response.login.user);
-  } catch (error) {
-    console.warn('[SocialLogin][API] 응답 파싱/토큰 저장 실패', error);
+  } catch {
     throw new SocialAuthParseError('소셜 로그인 응답 처리에 실패했습니다.');
   }
-  console.warn('[SocialLogin][API] 로그인 성공, 토큰 저장 완료');
   return response.login.user;
 }
 
@@ -417,39 +396,19 @@ export async function socialLogin(
 export async function socialSignup(
   payload: SocialSignupRequest,
 ): Promise<AuthUserResponse> {
-  console.warn('[SocialSignup][API] POST /auth/social/signup 호출', {
-    provider: payload.provider,
-    hasToken: !!payload.providerToken,
-    name: payload.name,
+  const response = await request<LoginResponse>('/api/v1/auth/social/signup', {
+    method: 'POST',
+    body: JSON.stringify({
+      provider: payload.provider,
+      token: payload.providerToken,
+      name: payload.name,
+    }),
+    skipAuth: true,
   });
-  let response: LoginResponse;
-  try {
-    response = await request<LoginResponse>('/api/v1/auth/social/signup', {
-      method: 'POST',
-      body: JSON.stringify({
-        provider: payload.provider,
-        token: payload.providerToken,
-        name: payload.name,
-      }),
-      skipAuth: true,
-    });
-  } catch (error) {
-    if (error instanceof ApiError) {
-      console.warn('[SocialSignup][API] 서버 거부', {
-        code: error.code,
-        message: error.message,
-      });
-    } else {
-      console.warn('[SocialSignup][API] 네트워크/요청 실패', error);
-    }
-    throw error;
-  }
-  console.warn('[SocialSignup][API] 응답 수신, 토큰 저장');
   try {
     await storeTokens(response.tokens);
     cacheCurrentUser(response.user);
-  } catch (error) {
-    console.warn('[SocialSignup][API] 응답 파싱/토큰 저장 실패', error);
+  } catch {
     throw new SocialAuthParseError('소셜 가입 응답 처리에 실패했습니다.');
   }
   return response.user;
