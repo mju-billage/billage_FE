@@ -10,7 +10,6 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -64,7 +63,6 @@ type ActiveDialog = 'rename' | 'delete' | null;
 /** 보관 기록(archive) 목록: 제목 변경·삭제, 상세("기록보기")는 보고서 상세 화면을 재사용한다. */
 function ArchiveListScreen() {
   const navigation = useNavigation<ArchiveListNavigationProp>();
-  const insets = useSafeAreaInsets();
   const snackbarTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [archives, setArchives] = useState<ArchiveSummary[]>([]);
@@ -184,7 +182,14 @@ function ArchiveListScreen() {
   };
 
   return (
-    <ScreenContainer background="primary">
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarMessage ? (
+          <Snackbar visible title={snackbarMessage} onClose={closeSnackbar} />
+        ) : undefined
+      }
+    >
       <AppBar type="sub" title={ARCHIVE_SCREEN_TITLE} onBackPress={() => navigation.goBack()} />
 
       <View style={styles.body}>
@@ -264,12 +269,6 @@ function ArchiveListScreen() {
             />
           ))}
       </View>
-
-      {snackbarMessage && (
-        <View style={[styles.snackbarWrapper, { bottom: insets.bottom + 24 }]}>
-          <Snackbar visible title={snackbarMessage} onClose={closeSnackbar} />
-        </View>
-      )}
 
       <Dialog
         visible={activeDialog === 'rename'}
@@ -391,11 +390,6 @@ const styles = StyleSheet.create({
   },
   cardLedgerCount: {
     ...TYPOGRAPHY.body2,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
   },
 });
 

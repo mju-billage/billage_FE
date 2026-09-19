@@ -10,7 +10,6 @@
  */
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -20,6 +19,7 @@ import TextField from '../../components/Input/Text Field/TextField';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import SelectionListItem from '../../components/Data Display/Lists/SelectionListItem';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import type { LedgerSummary } from '../../types/ledger';
 import { getActiveGroup } from '../../types/group';
 import * as ledgerService from '../../services/ledgerService';
@@ -44,7 +44,6 @@ import {
 } from '../../constants/folderScreenText';
 import { LEDGER_BUDGET_MAX } from '../../constants/ledgerScreenText';
 import {
-  BACKGROUND_PRIMARY,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
@@ -162,8 +161,16 @@ function FolderBudgetListScreen() {
     }
   };
 
+  // 시안(폴더_메뉴_예산설정.png)이 옅은 블루 — design-verification.md §5-7/§5-16.
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarVisible ? (
+          <Snackbar visible title={SNACKBAR_BUDGET_SAVED} />
+        ) : undefined
+      }
+    >
       <AppBar title={BUDGET_LIST_TITLE} onBackPress={() => navigation.goBack()} />
 
       {loadState === 'loading' && (
@@ -201,12 +208,6 @@ function FolderBudgetListScreen() {
           />
         ))}
 
-      {snackbarVisible && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={SNACKBAR_BUDGET_SAVED} />
-        </View>
-      )}
-
       <BottomSheet
         visible={editingLedger !== null}
         onClose={() => setEditingLedger(null)}
@@ -229,16 +230,11 @@ function FolderBudgetListScreen() {
           fullWidth
         />
       </BottomSheet>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  // 시안(폴더_메뉴_예산설정.png)이 옅은 블루 — design-verification.md §5-7/§5-16.
-  container: {
-    flex: 1,
-    backgroundColor: BACKGROUND_PRIMARY,
-  },
   listContent: {
     paddingHorizontal: 24,
     paddingBottom: 24,
@@ -270,12 +266,6 @@ const styles = StyleSheet.create({
   sheetTitle: {
     ...TYPOGRAPHY.subtitle1,
     marginBottom: 16,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

@@ -2,7 +2,6 @@
 /** @screen ETC-5-SNACKBAR-05-0 모임 전환 완료 (GroupSwitcherMenu.onSelectGroup, 시안 이미지 0장) */
 import { useCallback, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -12,6 +11,7 @@ import AvatarList from '../../components/Data Display/Avatar/AvatarList';
 import ToolsMenu from '../../components/Navigation/Menu/ToolsMenu';
 import Button from '../../components/Input/Button/Button';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import GroupSwitcherMenu from '../GroupManager/GroupSwitcherMenu';
 import { getActiveGroup, getCachedGroups, setActiveGroup } from '../../types/group';
 import * as groupService from '../../services/groupService';
@@ -39,7 +39,7 @@ import {
   SNACKBAR_GROUP_SWITCHED_SUFFIX,
 } from '../../constants/groupManagerScreenText';
 import { SETTINGS_TITLE } from '../../constants/settingsScreenText';
-import { BLUE_50, FOREGROUND_DISABLED, FOREGROUND_SECONDARY } from '../../constants/colors';
+import { FOREGROUND_DISABLED, FOREGROUND_SECONDARY } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 type LoadState = 'loading' | 'error' | 'ready';
@@ -93,28 +93,28 @@ function MoreScreen() {
 
   if (loadState === 'loading') {
     return (
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <ScreenContainer background="primary" edges={['top']} avoidKeyboard={false}>
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>{MORE_LOADING}</Text>
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
   if (loadState === 'error') {
     return (
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <ScreenContainer background="primary" edges={['top']} avoidKeyboard={false}>
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>{errorMessage}</Text>
           <Button label={MORE_RETRY_LABEL} onPress={loadGroups} hierarchy="secondary" style={{ alignSelf: 'center' }} />
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
   if (!group) {
     return (
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <ScreenContainer background="primary" edges={['top']} avoidKeyboard={false}>
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>{MORE_EMPTY_MESSAGE}</Text>
           <Button
@@ -123,7 +123,7 @@ function MoreScreen() {
             style={styles.stateButton}
           />
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
@@ -133,7 +133,16 @@ function MoreScreen() {
     .map(item => ({ id: item.id, name: item.name }));
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
+    <ScreenContainer
+      background="primary"
+      edges={['top']}
+      avoidKeyboard={false}
+      snackbar={
+        switchSnackbarMessage ? (
+          <Snackbar visible title={switchSnackbarMessage} />
+        ) : undefined
+      }
+    >
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.scrollContent}
@@ -237,21 +246,11 @@ function MoreScreen() {
           navigation.navigate('AllGroups');
         }}
       />
-
-      {switchSnackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={switchSnackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: BLUE_50,
-  },
   container: {
     flex: 1,
   },
@@ -312,12 +311,6 @@ const styles = StyleSheet.create({
   },
   stateButton: {
     alignSelf: 'center',
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

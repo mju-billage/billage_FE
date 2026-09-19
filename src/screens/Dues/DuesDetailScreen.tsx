@@ -61,7 +61,6 @@
  */
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -76,6 +75,7 @@ import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import FolderMoreMenu from '../Folder/FolderMoreMenu';
 import type { MenuItem } from '../../components/Navigation/Menu/Menu';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import type { DuesDetail, DuesMember, PaymentStatus } from '../../types/dues';
 import { getActiveGroup } from '../../types/group';
 import * as duesService from '../../services/duesService';
@@ -123,7 +123,6 @@ import {
   SNACKBAR_DUES_PAYMENT_CONFIRMED_SUFFIX,
 } from '../../constants/duesScreenText';
 import {
-  BACKGROUND_PRIMARY,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
@@ -359,7 +358,7 @@ function DuesDetailScreen() {
 
   if (loadState === 'loading' || loadState === 'error') {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="primary">
         <AppBar title="" onBackPress={() => navigation.goBack()} />
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>
@@ -374,7 +373,7 @@ function DuesDetailScreen() {
             />
           )}
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
@@ -395,8 +394,18 @@ function DuesDetailScreen() {
     !isClosed && !isScheduled ? getDDaySeverity(daysLeft) : 'neutral';
   const memberCount = tab === 'paid' ? detail.paidCount : detail.unpaidCount;
 
+  // DUE-2-PAGE-03-0(+03-1 진행중/예정/마감 상태 전부 같은 파일) 시안이 옅은
+  // 블루 — design-verification.md §5-7/§5-13.
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarMessage ? (
+          <Snackbar visible title={snackbarMessage} />
+        ) : undefined
+      }
+      snackbarOffset={canChangeStatus ? 68 : 0}
+    >
       <AppBar
         title={detail.title}
         onBackPress={() => navigation.goBack()}
@@ -530,23 +539,11 @@ function DuesDetailScreen() {
         onCancel={() => setCloseDialogVisible(false)}
         onConfirm={handleConfirmClose}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  // DUE-2-PAGE-03-0(+03-1 진행중/예정/마감 상태 전부 같은 파일) 시안이 옅은
-  // 블루 — design-verification.md §5-7/§5-13.
-  container: {
-    flex: 1,
-    backgroundColor: BACKGROUND_PRIMARY,
-  },
   content: {
     paddingHorizontal: 24,
     paddingTop: 16,
@@ -594,12 +591,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 16,
     paddingTop: 8,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

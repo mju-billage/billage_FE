@@ -41,7 +41,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -53,6 +52,7 @@ import MemberListItem from '../../components/Data Display/Lists/MemberListItem';
 import CheckBox from '../../components/Input/Control/CheckBox';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import DuesDateRangeSheet from './DuesDateRangeSheet';
 import TransactionSingleSelectSheet from '../Transactions/TransactionSingleSelectSheet';
 import { getActiveGroup } from '../../types/group';
@@ -96,7 +96,6 @@ import {
 } from '../../constants/duesScreenText';
 import { DATE_SHEET_CONFIRM_LABEL } from '../../constants/transactionScreenText';
 import {
-  BACKGROUND_SECONDARY,
   BORDER_NEUTRAL_NORMAL,
   FEEDBACK_NEGATIVE_BOLD,
   FOREGROUND_DISABLED,
@@ -370,9 +369,19 @@ function DuesCreateScreen() {
     }
   };
 
+  // DUE-2-PAGE-01-0/DUE-3-PAGE-01-0(새 회비 생성 및 모임원 선택) 둘 다 시안이
+  // 흰 배경 — design-verification.md §5-7 규칙, §2 표 갱신.
   if (step === 'members') {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer
+        background="secondary"
+        snackbar={
+          snackbarMessage ? (
+            <Snackbar visible title={snackbarMessage} />
+          ) : undefined
+        }
+        snackbarOffset={68}
+      >
         <AppBar
           type="sub"
           title={DUES_MEMBER_SELECT_TITLE}
@@ -456,18 +465,20 @@ function DuesCreateScreen() {
             navigation.goBack();
           }}
         />
-
-        {snackbarMessage && (
-          <View style={styles.snackbarWrapper}>
-            <Snackbar visible title={snackbarMessage} />
-          </View>
-        )}
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="secondary"
+      snackbar={
+        snackbarMessage ? (
+          <Snackbar visible title={snackbarMessage} />
+        ) : undefined
+      }
+      snackbarOffset={68}
+    >
       <AppBar
         type="titleOnly"
         title={DUES_CREATE_TITLE}
@@ -556,23 +567,11 @@ function DuesCreateScreen() {
           navigation.goBack();
         }}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  // DUE-2-PAGE-01-0/DUE-3-PAGE-01-0(새 회비 생성 및 모임원 선택) 둘 다 시안이
-  // 흰 배경 — design-verification.md §5-7 규칙, §2 표 갱신.
-  container: {
-    flex: 1,
-    backgroundColor: BACKGROUND_SECONDARY,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,
@@ -665,12 +664,6 @@ const styles = StyleSheet.create({
   selectAllCount: {
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

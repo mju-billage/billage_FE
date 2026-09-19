@@ -26,7 +26,6 @@
  */
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   useFocusEffect,
   useNavigation,
@@ -52,6 +51,7 @@ import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import FolderMoreMenu from './FolderMoreMenu';
 import NewItemSheet from './NewItemSheet';
 import type { MenuItem } from '../../components/Navigation/Menu/Menu';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { getActiveGroup } from '../../types/group';
 import { getChildFolders, mergeFolderListItems } from '../../utils/folderTree';
 import type { FolderListItem } from '../../utils/folderTree';
@@ -105,7 +105,7 @@ import {
   VIEW_TOGGLE_GRID_LABEL,
   VIEW_TOGGLE_LIST_LABEL,
 } from '../../constants/folderScreenText';
-import { BLUE_50, FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const MENU_ICON = require('../../assets/icons/action/MenuHorizontal.png');
@@ -389,7 +389,19 @@ function FolderScreen() {
   const dialogConfig = getDialogConfig(activeDialog);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      avoidKeyboard={false}
+      snackbar={
+        snackbar ? (
+          <Snackbar
+            visible
+            title={snackbar.title}
+            description={snackbar.description}
+          />
+        ) : undefined
+      }
+    >
       <AppBar
         type={isRoot ? 'titleOnly' : 'sub'}
         title={isRoot ? FOLDER_SCREEN_TITLE : folderName ?? ''}
@@ -477,16 +489,6 @@ function FolderScreen() {
         )}
       </View>
 
-      {snackbar && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar
-            visible
-            title={snackbar.title}
-            description={snackbar.description}
-          />
-        </View>
-      )}
-
       <NewItemSheet
         visible={newItemSheetVisible}
         onClose={() => setNewItemSheetVisible(false)}
@@ -528,7 +530,7 @@ function FolderScreen() {
         onCancel={closeDialog}
         onConfirm={handleConfirmDialog}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
@@ -587,10 +589,6 @@ function getDialogConfig(activeDialog: ActiveDialog) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: BLUE_50,
-  },
   body: {
     flex: 1,
     paddingTop: 16,
@@ -638,12 +636,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

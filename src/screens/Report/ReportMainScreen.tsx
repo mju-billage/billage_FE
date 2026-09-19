@@ -168,7 +168,18 @@ function ReportMainScreen() {
   }, [route.params?.snackbarMessage]);
 
   return (
-    <ScreenContainer background="primary">
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarMessage ? (
+          <Snackbar
+            visible
+            title={snackbarMessage}
+            onClose={() => setSnackbarMessage(null)}
+          />
+        ) : undefined
+      }
+    >
       <AppBar
         type="sub"
         title={REPORT_MAIN_TITLE}
@@ -262,16 +273,6 @@ function ReportMainScreen() {
           navigation.navigate('ReportCreateByPeriod');
         }}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar
-            visible
-            title={snackbarMessage}
-            onClose={() => setSnackbarMessage(null)}
-          />
-        </View>
-      )}
     </ScreenContainer>
   );
 }
@@ -331,12 +332,6 @@ const styles = StyleSheet.create({
   loadingMoreText: {
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

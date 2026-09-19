@@ -21,7 +21,6 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -32,6 +31,7 @@ import Button from '../../components/Input/Button/Button';
 import Tabs from '../../components/Navigation/Tabs/Tabs';
 import DuesProgressCard from '../../components/Data Display/Card/DuesProgressCard';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { getActiveGroup } from '../../types/group';
 import type { DuesSummary } from '../../types/dues';
 import * as duesService from '../../services/duesService';
@@ -57,7 +57,7 @@ import {
   DUES_TAB_ALL,
   DUES_TAB_IN_PROGRESS,
 } from '../../constants/duesScreenText';
-import { BLUE_50, FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const PLUS_ICON = require('../../assets/icons/action/Plus.png');
@@ -187,7 +187,15 @@ function DuesScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      avoidKeyboard={false}
+      snackbar={
+        snackbarMessage ? (
+          <Snackbar visible title={snackbarMessage} />
+        ) : undefined
+      }
+    >
       <AppBar
         type="titleOnly"
         title={DUES_MAIN_TITLE}
@@ -266,21 +274,11 @@ function DuesScreen() {
           </>
         )}
       </View>
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: BLUE_50,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,
@@ -314,12 +312,6 @@ const styles = StyleSheet.create({
   listContent: {
     gap: 12,
     paddingBottom: 24,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

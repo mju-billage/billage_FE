@@ -137,7 +137,14 @@ function ReportByPeriodDetailScreen() {
   }
 
   return (
-    <ScreenContainer background="primary">
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarMessage ? (
+          <Snackbar visible title={snackbarMessage} onClose={() => setSnackbarMessage(null)} />
+        ) : undefined
+      }
+    >
       <AppBar
         type="sub"
         title={report.title}
@@ -216,12 +223,6 @@ function ReportByPeriodDetailScreen() {
           />
         )}
       </View>
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} onClose={() => setSnackbarMessage(null)} />
-        </View>
-      )}
     </ScreenContainer>
   );
 }
@@ -305,12 +306,6 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 
