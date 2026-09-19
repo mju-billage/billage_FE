@@ -287,6 +287,16 @@
 - `TextField`의 `onClear`(사용처 `GroupProfileEditScreen`·`JoinGroupSheet`·`ProfileEditScreen`·`TransactionTextInputSheet`·`Dialog`)도 **같은 `Close.png`**(사각 X)를 쓴다. 그쪽 시안이 원형 ⊗인지는 미대조.
 - 에셋 요청은 `docs/asset-requests.md`에 한곳으로 모음(지우기 아이콘, 소셜 로그인 아이콘 3종, 앱 로고 아이콘 마크). 원형 ⊗를 직접 그리거나 비슷한 아이콘으로 대체하지 않는다.
 
+#### COM-1-PAGE-01-0 (로그인) — 시안 불일치 3건 (#17·#18·#19) [2026-09-20 11-2]
+- **#17** `COM-1-PAGE-01-0` 설명표 No.3은 실패 시 하단 토스트(2~3초 자동 페이드아웃)라고 하나, 같은 시트 Case A/B 목업은 필드별 빨간 밑줄 + 하단 빨간 문구(인라인 에러)다. 목업을 따라 인라인 에러 유지. 기획 확인 필요.
+- **#18** 시안 Case A는 '아이디가 올바르지 않습니다.', Case B는 '비밀번호가 올바르지 않습니다.'로 구분한다. 그러나 (1) 서버가 INVALID_CREDENTIALS 하나만 반환해 구분 불가, (2) 아이디 존재 여부가 드러나 계정 열거 공격에 취약. 보안상 통합 문구 유지. 기획·보안 확인 필요. (구현: `LOGIN_INVALID_CREDENTIALS_ERROR` 하나 = `이메일 또는 비밀번호가 올바르지 않습니다.`를 비밀번호 필드 아래에 표시)
+- **#19** 설명표 No.5는 안내 텍스트 '간편 로그인'을 명시하나 목업 프레임에는 없다. 아이콘 3개만 존재. 목업을 따라 추가하지 않음. 기획 확인 필요.
+- 세 건 모두 `design-verification.md` §5-4, `lessons.md` §3에 같은 번호로 기록.
+
+#### 신규 소셜 가입 — `termsAgreed` 누락 400 확정 + `provider` 대소문자 문제 발견 (조사만, 미수정) [2026-09-20 11-2]
+- `termsAgreed` 없이 `POST /auth/social/signup` → 400 확정(`termsAgreed:false`는 `fieldErrors[{termsAgreed, "약관 동의가 필요합니다."}]`, `true`면 401 `SOCIAL_TOKEN_INVALID`로 토큰 검증 단계까지 감). 시안 `약관동의 후 간편 가입 정보 입력`과도 어긋난다 — 플로우 변경이라 사용자 지시 대기.
+- **`provider`는 서버가 대문자(`KAKAO`/`GOOGLE`)만 받는다. 앱은 `Kakao`/`Naver`/`Google`을 그대로 보낸다** → 로그인·가입 모두 400 가능. `NAVER`는 어떤 표기로도 400(서버 지원 여부 확인 필요). 상세·실호출 결과는 `design-verification.md` §5-23 E.
+
 ### 1-3. 캡처/실측 필요
 
 #### <a id="etc-1-page-01-0-더보기-메인"></a>ETC-1-PAGE-01-0 (더보기 메인) — 카드·메뉴 여백 실측 대기 [2026-08-28 파일럿, 09-12 부분 해결]
@@ -779,6 +789,10 @@ DSH-1 재캡처로 "고쳐졌는지" 확인하는 절차 자체가 성립하지 
 - [해결] 2026-09-20 `SearchField` 시안 실측 정렬(전체 8곳) — 명세서 9개 시트 실측: 채움색 `#FFFFFF` 9곳 전부(회색 채움 없음), 높이 48dp, 좌우 24, pill, 돋보기 우측 끝, 테두리는 흰 배경 화면 `#E1E3E8` 1px / 파란 배경 화면(폴더 메인·상세) 없음. 기본값을 흰 바탕 + 48dp로 바꾸고 `variant`로 테두리를 갈랐다: `FolderScreen` = 기본, 나머지 7곳 = `outline`. `#E1E3E8`은 `colors.ts`에 없어 가장 가까운 `BORDER_NEUTRAL_NORMAL`(`#E5E7EB`) 사용, 새 색 상수 없음. `SearchField`에서 `#F3F4F6` 채움 제거 확인 (10-7, 실기기 확인 대기)
 - [조사, 수정 안 함] 2026-09-20 `SearchField` 포커스 글자색 — `inputFocused`(`#4A7FE7`)가 variant와 무관하게 포커스 시 붙음(시안 입력 글자는 어두움). 지우기 아이콘 — 원형 ⊗ 에셋 없음(`Close.png` 사각 X, `Delete.png` 휴지통만). 사용자가 시안 재확인 예정 (10-7)
 - [해결] 2026-09-20 `SearchField` 포커스 시 입력 글자색 — 시안 실측(`폴더_메인화면.png` Case C, 검색어 `학기` 입력 상태): 글자는 어두운 회색(최암부 `#67707B`, 안티앨리어싱 포함이라 실제 토큰은 더 진함), **커서만 파랑**. 앱은 `inputFocused: { color: FOREGROUND_SECONDARY }`로 포커스 시 글자 전체가 `#4A7FE7`이었다(variant 무관 — 기본 variant인 폴더 화면도). `inputFocused`의 색을 제거해 기본색(`FOREGROUND_NEUTRAL_NORMAL`)을 유지하고 `cursorColor`/`selectionColor`로 `#4A7FE7`을 줌. **`TextField`는 같은 문제 없음** — 입력 글자색은 `FOREGROUND_PRIMARY` 고정이고 포커스 시엔 밑줄 색만 파랑으로 바뀐다(커서색은 손대지 않음) (10-8, 실기기 확인 대기)
+- [해결] 2026-09-20 로그인 로고 — 워드마크만 → 심볼 + 워드마크 가로 배치. 시안 실측(픽셀 분석, 1px=1dp): 심볼 29×28 / 간격 9 / 워드마크 92×27 / 전체 130, 가운데 정렬 (11-2, 실기기 확인 대기)
+- [해결] 2026-09-20 로그인 비밀번호 눈 아이콘 토글 — `secureToggle` 켬 + `TextField` 아이콘 매핑을 시안대로 뒤집음(마스킹 중 사선 눈, 노출 중 열린 눈). 사용처 조사: `secureToggle`은 로그인·`SignupInfoScreen`(2필드)·`PasswordChangeScreen`(3필드)이고 두 시트 실측 모두 같은 방향이라 공용 수정 (11-2)
+- [해결] 2026-09-20 로그인 버튼 비활성 조건 — 이메일·비밀번호 중 하나라도 비면(`trim()` 후) 비활성. 설명표 No.3 (11-2)
+- [해결] 2026-09-20 로그인 텍스트 버튼 밑줄 — `TextButton`에 `underline` 옵션(기본 꺼짐) 추가, 로그인 두 버튼에만 적용 (11-2)
 
 ## 4. 검증 방식 (파일럿 5개로 확정)
 

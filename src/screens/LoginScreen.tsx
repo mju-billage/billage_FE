@@ -47,6 +47,9 @@ type LoginNavigationProp = NativeStackNavigationProp<
 >;
 type LoginRouteProp = RouteProp<RootStackParamList, 'Login'>;
 
+const LOGO_SYMBOL = require('../assets/images/Billage_simbol_big.png');
+const LOGO_WORDMARK = require('../assets/images/Billage_logo.png');
+
 const SOCIAL_CIRCLE_SIZE = 48;
 
 const SOCIAL_STYLE_BY_TYPE: Record<SocialType, object> = {
@@ -245,11 +248,11 @@ function LoginScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Image
-          source={require('../assets/images/Billage_logo.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
+        {/* 시안 실측(로그인_메인화면.png, 1px=1dp): 심볼 29×28 + 간격 9 + 워드마크 92×27, 전체 가운데 정렬. */}
+        <View style={styles.logoRow}>
+          <Image source={LOGO_SYMBOL} style={styles.logoSymbol} resizeMode="contain" />
+          <Image source={LOGO_WORDMARK} style={styles.logoWordmark} resizeMode="contain" />
+        </View>
 
         <View style={styles.form}>
           <TextField
@@ -270,7 +273,7 @@ function LoginScreen() {
               setLoginError(undefined);
             }}
             placeholder={LOGIN_PASSWORD_PLACEHOLDER}
-            secureTextEntry
+            secureToggle
             error={loginError}
           />
         </View>
@@ -278,7 +281,7 @@ function LoginScreen() {
         <Button
           label={LOGIN_SUBMIT_LABEL}
           onPress={handleLogin}
-          disabled={isSubmitting}
+          disabled={isSubmitting || !email.trim() || !password.trim()}
           fullWidth
         />
         <View id="hv" style={{ height: 16}} />
@@ -287,11 +290,13 @@ function LoginScreen() {
             label={LOGIN_FIND_PASSWORD_LABEL}
             onPress={handleFindPassword}
             hierarchy="tertiary"
+            underline
           />
           <TextButton
             label={LOGIN_GO_TO_SIGNUP_LABEL}
             onPress={handleGoToSignup}
             hierarchy="tertiary"
+            underline
           />
         </View>
 
@@ -338,9 +343,20 @@ const styles = StyleSheet.create({
   scrollContent: {
     alignItems: 'center',
   },
-  logo: {
-    width: 140,
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 9,
     marginBottom: 48,
+  },
+  logoSymbol: {
+    width: 29,
+    height: 28,
+  },
+  logoWordmark: {
+    width: 92,
+    height: 27,
   },
   form: {
     width: '100%',

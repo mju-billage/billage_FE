@@ -118,8 +118,9 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
         )}
         {secureToggle && !disabled && (
           <Pressable onPress={() => setIsSecure(!isSecure)}>
+            {/* 시안(로그인·가입 정보 입력·비밀번호 변경 시트 공통): 마스킹 중 = 사선 눈, 노출 중 = 열린 눈(사선 사라짐). */}
             <Image
-              source={isSecure ? EYE_ICON : EYE_CLOSED_ICON}
+              source={isSecure ? EYE_CLOSED_ICON : EYE_ICON}
               style={styles.toggleIcon}
             />
           </Pressable>

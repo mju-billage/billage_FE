@@ -25,6 +25,8 @@ type TextButtonProps = {
   hierarchy?: TextButtonHierarchy;
   icon?: ImageSourcePropType;
   disabled?: boolean;
+  /** true면 라벨에 밑줄을 긋는다(기본 false). 로그인 화면의 `비밀번호를 잊으셨나요?`/`회원가입하기`처럼 시안이 밑줄을 요구하는 곳에서만 켠다. */
+  underline?: boolean;
 };
 
 const PRESSED_BG_BY_HIERARCHY: Record<TextButtonHierarchy, object> = {
@@ -41,6 +43,7 @@ function TextButton({
   hierarchy = 'primary',
   icon,
   disabled = false,
+  underline = false,
 }: TextButtonProps) {
   const labelStyle = disabled
     ? styles.disabledLabel
@@ -67,7 +70,7 @@ function TextButton({
           style={[styles.icon, { tintColor: labelStyle.color }]}
         />
       )}
-      <Text style={[styles.label, labelStyle]}>{label}</Text>
+      <Text style={[styles.label, labelStyle, underline && styles.underline]}>{label}</Text>
     </Pressable>
   );
 }
@@ -88,6 +91,9 @@ const styles = StyleSheet.create({
   },
   label: {
     ...TYPOGRAPHY.button,
+  },
+  underline: {
+    textDecorationLine: 'underline',
   },
   primaryLabel: {
     color: FOREGROUND_PRIMARY,
