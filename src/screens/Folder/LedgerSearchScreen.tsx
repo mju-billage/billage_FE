@@ -1,6 +1,6 @@
 /** @screen FDR-3-PAGE-02-0 내역 검색_장부 */
 import { useCallback, useEffect, useState } from 'react';
-import { SectionList, StyleSheet, Text, View } from 'react-native';
+import { Keyboard, SectionList, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -112,6 +112,13 @@ function LedgerSearchScreen() {
     data: group.items,
   }));
 
+  // 설명표 No.1: 백버튼은 키보드를 내리고 검색어를 파기한 뒤 이전 화면으로 돌아간다. 검색어(`query`)는
+  // 이 화면의 로컬 상태라 화면이 pop되면 함께 사라지므로 파기를 따로 할 필요는 없다 — 키보드만 내린다.
+  const handleBack = () => {
+    Keyboard.dismiss();
+    navigation.goBack();
+  };
+
   const loadMore = () => {
     if (!isLoadingMore && hasMore) {
       search(false);
@@ -120,13 +127,16 @@ function LedgerSearchScreen() {
 
   return (
     <ScreenContainer background="secondary">
-      <AppBar type="sub" title={ledgerName} onBackPress={() => navigation.goBack()} />
+      <AppBar type="sub" title={ledgerName} onBackPress={handleBack} />
 
       <View style={styles.body}>
         <View style={styles.searchWrapper}>
           <SearchField
+            variant="outline"
+            autoFocus
             value={query}
             onChangeText={setQuery}
+            onClear={() => setQuery('')}
             placeholder={LEDGER_SEARCH_PLACEHOLDER}
           />
         </View>

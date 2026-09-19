@@ -501,6 +501,7 @@ IA상 총무 전용 61개 / 일반 전용 3개다. **총무 계정과 일반 계
 13. **[기획 확인 불필요 — 시안 내부 오기로 확정, 2026-09-20]** `FDR-2-PAGE-04-0` 메인 프레임 목업만 '2 건', 같은 시트 Case A 목업은 '2 개', 설명표는 '{N}개'. 시안 내부 오기로 판단. '개'로 구현 확정. 기획 확인 불필요.
 14. `FDR-1-PAGE-01-0`·`FDR-2-PAGE-04-0` — 검색 동작: 폴더 메인·상세가 같은 화면(`FolderScreen` `isRoot` 분기)인데 설명표가 모순. 메인 No.2 = 실시간 필터링(`하단 그리드 리스트가 검색어에 맞춰 실시간으로 필터링 및 갱신됨`), 상세 No.2 = 화면 전환(`터치 시, 통합 검색 모드로 화면이 전환되며 시스템 키보드 호출`). 구현은 둘 다 인라인 필터. 기획 확인 필요. 화면 전환이 맞다면 `LedgerSearchScreen`(`FDR-3-PAGE-02-0`)과의 관계 정리가 필요한 구조 작업이라 고치지 않음.
 15. `FDR-3-PAGE-02-0` 검색 placeholder — 목업 '내역명, 장부명을 입력해주세요.', 설명표 '검색어를 입력해주세요.', 구현 '내역명을 입력해주세요.' 셋 다 다름. 기획 확인 필요.
+16. `FDR-3-PAGE-02-0` 시안에 필터 버튼이 없으나 구현에는 있음. 제거하면 검색 결과 필터링 수단이 사라져 유지. 시안 누락인지 의도된 제외인지 기획 확인 필요.
 
 - **`더보기_보고서생성_기간보고서조회.png`(파일명에 `-1` 없음) 표 헤더의 Screen ID가 `ETC-4-PAGE-05-0`으로 적혀 있음 — 오기로 추정(2026-09-06, 7-G)**: 이 파일 내용(캐러셀 2장 + 장부명 태그가 붙은 통합 내역 리스트)은 `ETC-4-PAGE-05-0`(장부 하나만 보여주는 단일 카드 화면, `-1.png` 없는 `더보기_보고서생성_장부보고서조회.png`가 이 ID)과 명백히 다르고, IA 171행이 정의하는 "보고서_시간순"(캐러셀 + "조회 기간 전체 내역")과 정확히 일치한다. 파일명 자체(`-1` 유무)도 함정이다 — 기간별 조회 두 파일 중 **`-1`이 붙은 쪽이 목록(`ETC-3-PAGE-03-0`), 안 붙은 쪽이 통합 상세(`ETC-4-PAGE-07-0`)**로 시안 내용과 반대다. 코드는 IA 정의(07-0)를 기준으로 구현했다(`ReportPeriodEntriesScreen.tsx`). 물어볼 것: **표 헤더의 ID 표기를 07-0으로 정정할지, 아니면 실제로 05-0의 상태 변형을 의도한 것인지**(후자라면 07-0 화면 자체가 시안 없이 구현된 것이 됨).
 - **`ETC-3-PAGE-02-1`/`03-1`/`ETC-4-PAGE-05-1`/`07-1`(보고서 조회 4화면의 "-1" 변형) — 별도 화면 아님으로 판단(2026-09-06, 7-G)**: IA 165~172행 기준 이 넷은 각각 `-0` 화면의 "수입/지출 탭이 선택된 상태" 캡처로 보여 별도 라우트를 만들지 않고 `ReportEntryList.tsx`의 탭 상태로 흡수했다(§2 각 행 [구현] 처리). 다만 `ETC-3-PAGE-02-0`(장부별 보고서 상세, 장부 카드 리스트) 자체엔 탭이 없어서 `02-1`이 정말 그 화면 얘기가 맞는지 확신이 낮다 — 물어볼 것: **`ETC-3-PAGE-02-1`이 `02-0`의 탭 상태가 맞는지, 아니면 `ETC-4-PAGE-05-0`(탭이 실제로 있는 화면)의 오기인지.**
@@ -1354,6 +1355,8 @@ JSX 태그로 직접 확인해 실제 렌더 0곳임을 재확인함.)
 showDropdown/onPressDropdown/selectedCount/showSelectionCount`, `IconButton.disabled/showPushBadge`,
 `Menu.selectedKey`/`ToolsMenu.selectedKey`, `ScreenContainer.edges/style/avoidKeyboard` 등이다.
 
+**※ 갱신(2026-09-20 10-6)**: `SearchField`에 `autoFocus`·`onClear`를 추가했고 지금은 `LedgerSearchScreen`만 쓴다(나머지 사용처 7곳은 기본값 = 기존 동작). `variant="outline"`은 이 표의 미사용 목록에 없다 — 이미 구현돼 있었고 `MemberManageScreen`·`ReportLedgerSelectScreen`이 쓰고 있었으며 이번에 `LedgerSearchScreen`이 추가로 쓴다. `size`·`onSubmit`은 여전히 미사용.
+
 #### 미사용 컴포넌트 5종 — 처리 판단 자료 (2026-09-19, 삭제하지 않음)
 
 | 컴포넌트 | 파일(줄 수) | 추가 / 마지막으로 만져진 커밋 | props 시그니처 | 명세·`@screen` 흔적 | 고아화 시점(2026-09-19, `git log -S` 추적) |
@@ -1790,6 +1793,25 @@ tsv 원본 행 중복(같은 ID가 여러 행): `COM-1-SNACKBAR-02-0`(5행) 등 
 **시안 대조 때 눈여겨볼 것**(판단 아님): 앱바가 커스텀(`AppBar` 아님)이라 높이·좌우 패딩(20 vs 24)이 다른 화면과 다를 수 있음, 필터 진입점 모양(텍스트 vs 아이콘)·위치, 날짜 라벨 vs 그룹 헤더(`M월 D일 요일`), 개수 유무, 결과 없음 문구, 최근 검색어 유무, `paddingTop: 60` 하드코딩.
 
 **※ 갱신(2026-09-20 10-5)**: 위 서술 중 다음은 10-5 수정으로 바뀌었다 — 앱바는 `AppBar type="sub"` + 장부명(`route.params.ledgerName`, 장부 상세가 넘김)이고 `paddingTop: 60` 하드코딩은 사라졌다(`ScreenContainer` 기본 `edges`). 검색 필드는 앱바 아래 별도 줄(위 8·아래 12, 좌우 24). 결과는 `SectionList` + 날짜 그룹 헤더(`formatDateHeader`, `body3` bold `#9B9B9B`, 위 12·아래 6)이고 행에서 날짜 라벨이 빠져 행 높이는 약 44dp(우 열 아이콘/배지가 있으면 약 66dp), `keyboardDismissMode="on-drag"` + `keyboardShouldPersistTaps="handled"`. placeholder `내역명, 장부명을 입력해주세요.`(불일치 #15), 결과 없음 `LEDGER_ENTRY_SEARCH_EMPTY` = `해당되는 내역이 없어요`(마침표 없음). 필터 `TextButton`·자동 포커스 없음·백버튼 동작·검색어 지우기 버튼 없음은 그대로(판단 보류, `design-diff.md`).
+
+### 5-22. `SearchField` 사용처 8곳 현황 (2026-09-20, 10-6, 시안 대조용 — 조사 표)
+
+`SearchField` 스타일: **채움**(`default`) = 배경 `FILL_NEUTRAL_NORMAL` `#F3F4F6`, 테두리 없음 / **테두리**(`outline`) = 배경 `#FFFFFF` + 1px `BORDER_NEUTRAL_NORMAL` `#E5E7EB`, 포커스 시 테두리와 입력 글자가 `#4A7FE7`(파랑)로 바뀐다. 공통: `size` 기본 `lg`(높이 44) — **8곳 모두 `size`를 안 넘겨 44**, 모서리 24, 좌우 패딩 16, 입력 `body2` 14/20, 우측 돋보기 18×18. 지우기(⊗)·자동 포커스는 10-6에서 추가한 prop이라 `LedgerSearchScreen` 외에는 없다.
+
+| Screen ID | 파일 | 스타일 | placeholder(상수) | 지우기 | 자동 포커스 |
+|---|---|---|---|---|---|
+| `DUE-3-PAGE-01-0` | `Dues/DuesCreateScreen.tsx`(모임원 선택 단계) | 채움 | `검색어를 입력해주세요.`(`DUES_MEMBER_SELECT_SEARCH_PLACEHOLDER`) | 없음 | 없음 |
+| `DUE-3-PAGE-02-0` | `Dues/DuesMemberEditScreen.tsx` | 채움 | `검색어를 입력해주세요.`(`DUES_MEMBER_SELECT_SEARCH_PLACEHOLDER`) | 없음 | 없음 |
+| `FDR-1-PAGE-01-0` / `FDR-2-PAGE-04-0` | `Folder/FolderScreen.tsx`(폴더 메인·상세 공용) | 채움 | `검색어를 입력해주세요.`(`FOLDER_SEARCH_PLACEHOLDER`) | 없음 | 없음 |
+| `DUE-2-PAGE-02-0` | `Member/MemberManageScreen.tsx` | **테두리** | `검색어를 입력해주세요.`(`MEMBER_MANAGE_SEARCH_PLACEHOLDER`) | 없음 | 없음 |
+| `ETC-3-PAGE-05-0` | `Receipt/ReceiptSearchScreen.tsx` | 채움 | `검색어를 입력해주세요.`(`RECEIPT_SEARCH_PLACEHOLDER`) | 없음 | 없음 |
+| `ETC-5-PAGE-01-0` | `Report/ReportLedgerSelectScreen.tsx` | **테두리** | `검색어를 입력해주세요.`(`REPORT_LEDGER_SELECT_SEARCH_PLACEHOLDER`) | 없음 | 없음 |
+| `DTB-2-PAGE-01-0` | `Transactions/TransactionSearchScreen.tsx`(내역 검색_전체) | 채움 | `내역명, 장부명을 입력해주세요.`(`TRANSACTION_SEARCH_PLACEHOLDER`) | 없음 | 없음 |
+| `FDR-3-PAGE-02-0` | `Folder/LedgerSearchScreen.tsx`(장부 내 검색) | **테두리**(10-6에서 변경, 종전 채움) | `내역명, 장부명을 입력해주세요.`(`LEDGER_SEARCH_PLACEHOLDER`) | **있음**(값이 있을 때, 돋보기 왼쪽) | **있음** |
+
+- 지우기 아이콘은 `TextField`의 `onClear`와 같은 `assets/icons/action/Close.png`(16×16, `#9B9B9B`)다 — **동그라미 X(⊗) 에셋은 없어** 일반 X로 그렸다.
+- 참고: `TransactionSearchScreen`의 placeholder가 `내역명, 장부명을 입력해주세요.`인 것이 불일치 #15에서 장부 내 검색 목업에 "장부명"이 들어간 이유로 보인다(전체 내역 검색 시안 문구를 복사했을 가능성 — 추정, 기획 확인 필요).
+- 참고: 포커스 상태의 `outline`은 입력 글자가 파랑이다. 장부 내 검색 목업의 입력 글자(`MT`)는 어두운 색으로 보여 다를 수 있다 — 대조 때 확인(미수정).
 
 ## 6. 권장 순서
 
