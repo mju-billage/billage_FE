@@ -3,8 +3,10 @@
  * **Screen ID는 보고서 쪽(`ReportEntryDetailScreen`)과 의도적으로 같다** — 위
  * `ArchiveLedgerEntriesScreen.tsx` 주석과 같은 이유("기록 보고서 공통 로직 상속").
  * `ETC\보관함\ETC-5-PAGE-02-0.png` 크롭도 실제로 확인했다(2026-09-12) — 금액/지출일/
- * 내역명/담당자/장부/메모/증빙 자료(썸네일 2장)까지 있는 화면이라, 5필드만 보여주는
- * 보고서 쪽 크롭(`화면명세서` 표 기준 스냅샷 한계로 memo·영수증 없음)과는 내용이 다르다.
+ * 내역명/담당자/장부/메모/증빙 자료(썸네일 2장)까지 있는 화면이다. **보고서 쪽 크롭
+ * (`ETC\보고서 생성\ETC-5-PAGE-02-0.png`)도 이것과 같은 전체 항목이다**(2026-09-19
+ * 육안·픽셀 확인 — 위 서술은 틀렸었다). 보고서 쪽 화면이 5필드뿐인 건 시안 차이가
+ * 아니라 서버 스냅샷에 `memo`·`receipts`가 없어서다(`backend-requests.md` 2순위).
  *
  * 그래서 코드까지는 재사용하지 않았다 — 보고서 쪽 `ReportEntryDetailScreen`은 스냅샷에
  * `memo`/`receipts`가 없어 5개 필드만 보여주는 반쪽 화면인데(그 파일 상단 주석 참고),
@@ -63,7 +65,7 @@ function ArchiveEntryDetailScreen() {
   const { ledgerName, entry } = route.params;
 
   return (
-    <ScreenContainer background="primary">
+    <ScreenContainer background="secondary">
       <AppBar
         type="sub"
         title={ARCHIVE_ENTRY_DETAIL_TITLE}

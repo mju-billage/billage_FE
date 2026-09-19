@@ -60,7 +60,7 @@ function ReportEntryDetailScreen() {
   const { ledgerName, entry } = route.params;
 
   return (
-    <ScreenContainer background="primary">
+    <ScreenContainer background="secondary">
       <AppBar
         type="sub"
         title={REPORT_ENTRY_DETAIL_TITLE}

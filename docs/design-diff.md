@@ -706,6 +706,7 @@ DSH-1 재캡처로 "고쳐졌는지" 확인하는 절차 자체가 성립하지 
 - [해결] 2026-09-19 스캔이 채운 금액·날짜는 영수증 삭제 시 되돌리지 않음. 사용자 수정값 보호를 위해 의도적 유지 (2026-09-19 결정). 다음 스캔의 충돌은 scanApply 확인이 막음.
 - [해결] 2026-09-19 `ETC-4-PAGE-05-0` 공유 ID 불일치 — `ArchiveLedgerEntriesScreen`이 `SafeAreaView`+배경 미지정이라 시스템 기본색이 비침. `ScreenContainer background="primary"`로 마이그레이션(같은 화면인 `ReportLedgerEntriesScreen`과 통일, §5-18 9-9)
 - [해결] 2026-09-19 `ETC-5-PAGE-02-0` 같은 ID 두 파일 처리 차이 — `ArchiveEntryDetailScreen`을 `ScreenContainer primary`로 통일(원본 크롭 두 장이 동일해 같은 화면). §2 배경 판정은 미판정 유지, 명세 판정은 별도 (§5-18 9-9)
+- [해결] 2026-09-19 `ETC-5-PAGE-02-0` 배경 흰색 확정 — 명세 실측 v5(`내역_상세내역조회.png#0` `#FFFFFF` 89% 외 3프레임 일치) + 이 ID 크롭 2장 픽셀 `#FFFFFF`. 두 파일(`ArchiveEntryDetailScreen`·`ReportEntryDetailScreen`) 모두 `secondary`로 정정. 9-9의 `primary` 통일은 명세를 안 보고 한쪽에 맞춘 오류였음(`docs/lessons.md` 1-14, §5-18 9-10)
 
 ## 4. 검증 방식 (파일럿 5개로 확정)
 

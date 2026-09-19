@@ -85,15 +85,15 @@ DSH-2-PAGE-01-0(알림 목록)이 실 API 연동으로 미구현→구현, ETC �
 | 배경 판정 | 개수 | 의미 |
 |---|---:|---|
 | 블루(#F0F5FE) — `PAGE` | 32 | `BACKGROUND_PRIMARY` 적용 확정(목록/조회형 화면 배경) |
-| 흰색 — `PAGE` | 41 | `BACKGROUND_SECONDARY` 적용 확정(폼/입력형 화면 배경) |
+| 흰색 — `PAGE` | 42 | `BACKGROUND_SECONDARY` 적용 확정(폼/입력형 화면 배경) |
 | 흰색 — `MODAL`/`SHEET` 표면 | 51 | 다이얼로그·바텀시트 요소 자체의 표면색(부모 화면 색은 §2 비고) |
 | 어두움(#374151) — `SNACKBAR` 표면 | 27 | 스낵바 요소 자체의 표면색(부모 화면 색은 §2 비고) |
-| 미판정 | 15 | `PAGE` 행 중 화면 배경을 아직 확정하지 못한 것(스플래시 포함) — §5-7 "배경 미판정 목록" 참고 |
+| 미판정 | 14 | `PAGE` 행 중 화면 배경을 아직 확정하지 못한 것(스플래시 포함) — §5-7 "배경 미판정 목록" 참고 |
 | **합계** | **166** | |
 
 **2026-09-19 갱신**: 이 표의 숫자가 2026-09-12 이후 여러 라운드(DUE 묶음 4·5, 폴더 예산 설정 등)에서 개별 행만 고치고 표는 안 고쳐 낡아 있었다 — 이번에 §2 실제 행(165개, 도메인별 표 헤더 제외)의 배경 열을 직접 세어 다시 맞췄다(블루 18 / 흰색 11 / 미판정 136). **2026-09-19 6-10에서 스플래시 행(`(ID 없음)`) 1개를 추가해 합계 166 / 미판정 137**이다(§5-7 미판정 목록 136개는 Screen ID가 없어 이 행을 넣지 않았다). §5-7 "미판정 목록"은 처음 137개로 이 표의 136과 1 차이가 났으나, 2026-09-19 스크립트 집합 차로 원인을 특정해 정정했다 — 목록 쪽에만 있던 ID는 `FDR-2-PAGE-02-0`(§2 행은 이미 블루, 목록에서 안 뺀 우리 쪽 누락)이고 §2에만 있는 ID는 없다. 지금은 두 목록 모두 136개(§5-18 5번).
 
-**2026-09-19 8-5**: 8-1(v1)·8-3(v3) 명세 측정 판정은 철회했다 — v1은 파일 단위 오염, v3는 프레임 좌표 오검출(번호 마커 ①②③까지 바운딩 박스에 포함돼 여백 스트립이 프레임 밖 흰 종이를 잼, `docs/lessons.md` 1-12). 이어서 프레임 x범위를 격자(50..410 / 430..790)에 고정한 **v5**(`docs/spec-background-v5.tsv`)로 `PAGE` 행 46개를 다시 반영했다(근거는 §2 배경 칸: `명세 프레임 실측 v5 (<파일>#<idx>, 상단 <HEX>, 점유율 N%)`). 기준점 6개 검증 통과, 점유율 60% 미만은 판정에 쓰지 않고 `수동 확인 필요`. 배경 열 의미 통일(8-4)은 유지. 현재 블루 26(PAGE) / 흰색 40(PAGE) + 51(모달·시트 표면) / 어두움 27(스낵바 표면) / 미판정 22(전부 PAGE, 스플래시 포함). **8-6**: 육안 확인으로 `DSH-1-PAGE-01-0`·`ETC-2-PAGE-02-0`(블루)·`ETC-3-PAGE-04-0`(흰색)을 확정하고 `-1` 변형 4개는 부모 `-0` 판정을 상속했다 → 블루 32 / 흰색 41(PAGE) / 미판정 15(전부 PAGE, 스플래시 포함). `ETC-3-PAGE-04-0`은 구현이 어두운 배경이라 시안↔구현 불일치 #12(§5-4)로 기록하고 안 고쳤다. **8-7**: 루트 `View`+`paddingTop: 60` 화면 등 레이아웃 우려 8개를 `edges={['bottom']}`(1개는 `[]`)로 마이그레이션해 남은 코드 불일치는 22건(슬롯 대기 21 + 기획 확인 1)이다. 미판정 15(변동 없음). **9-3**: 스낵바 슬롯 검증 통과로 대기 19개 파일을 `ScreenContainer`로 마이그레이션(슬롯 12개 파일 + `bottom: 88` 래퍼 유지 7개 파일)해 코드 불일치는 22 → 1건(`ETC-3-PAGE-04-0`, 기획 확인 대기)이다. 미판정·§1 배경 표 값은 변동 없음. **9-4**: `ScreenContainer`에 `snackbarOffset`을 추가해 `bottom: 88` 래퍼 7개 파일도 슬롯으로 옮겼다(CTA 높이를 화면별로 확인 — 값은 §5-18 9-3 블록). 코드 불일치·배경 표 값은 변동 없음. **9-5**: 남은 `absolute` 스낵바 래퍼 10개 파일을 전부 슬롯으로 옮김(A 4개 슬롯만, B 6개 `ScreenContainer` 마이그레이션 + 슬롯). `src/`에 `snackbarWrapper` 0건. **9-6 ※ 정정**: 위 "코드 불일치 1건"은 공유 Screen ID의 Report 쪽 파일만 보고 센 값이었다. 파일 단위로 다시 세면 확정 판정 ID 기준 **2건**(`ETC-3-PAGE-04-0` + `ETC-4-PAGE-05-0`의 `ArchiveLedgerEntriesScreen`), 확정 PAGE 69개 중 일치 **67**이다. 판정 미확정 ID(`ETC-5-PAGE-02-0`)에서 파일끼리 처리가 다른 것이 1건 더 있다(§5-18 9-6 블록). 배경 표 값은 변동 없음. **9-9**: `ArchiveLedgerEntriesScreen`(`ETC-4-PAGE-05-0`)·`ArchiveEntryDetailScreen`(`ETC-5-PAGE-02-0`)을 `ScreenContainer primary`로 마이그레이션해 같은 ID 파일끼리 처리를 통일했다. **최종: 확정 판정 ID 기준 코드 불일치 1건(`ETC-3-PAGE-04-0`, 기획 대기), 확정 PAGE 69개 중 일치 68, 미확정 ID 내 파일 간 불일치 0건**(9-6 "2건"에서 갱신, §5-18 9-9 블록). `ETC-5-PAGE-02-0`의 §2 배경 판정은 미판정 유지.
+**2026-09-19 8-5**: 8-1(v1)·8-3(v3) 명세 측정 판정은 철회했다 — v1은 파일 단위 오염, v3는 프레임 좌표 오검출(번호 마커 ①②③까지 바운딩 박스에 포함돼 여백 스트립이 프레임 밖 흰 종이를 잼, `docs/lessons.md` 1-12). 이어서 프레임 x범위를 격자(50..410 / 430..790)에 고정한 **v5**(`docs/spec-background-v5.tsv`)로 `PAGE` 행 46개를 다시 반영했다(근거는 §2 배경 칸: `명세 프레임 실측 v5 (<파일>#<idx>, 상단 <HEX>, 점유율 N%)`). 기준점 6개 검증 통과, 점유율 60% 미만은 판정에 쓰지 않고 `수동 확인 필요`. 배경 열 의미 통일(8-4)은 유지. 현재 블루 26(PAGE) / 흰색 40(PAGE) + 51(모달·시트 표면) / 어두움 27(스낵바 표면) / 미판정 22(전부 PAGE, 스플래시 포함). **8-6**: 육안 확인으로 `DSH-1-PAGE-01-0`·`ETC-2-PAGE-02-0`(블루)·`ETC-3-PAGE-04-0`(흰색)을 확정하고 `-1` 변형 4개는 부모 `-0` 판정을 상속했다 → 블루 32 / 흰색 41(PAGE) / 미판정 15(전부 PAGE, 스플래시 포함). `ETC-3-PAGE-04-0`은 구현이 어두운 배경이라 시안↔구현 불일치 #12(§5-4)로 기록하고 안 고쳤다. **8-7**: 루트 `View`+`paddingTop: 60` 화면 등 레이아웃 우려 8개를 `edges={['bottom']}`(1개는 `[]`)로 마이그레이션해 남은 코드 불일치는 22건(슬롯 대기 21 + 기획 확인 1)이다. 미판정 15(변동 없음). **9-3**: 스낵바 슬롯 검증 통과로 대기 19개 파일을 `ScreenContainer`로 마이그레이션(슬롯 12개 파일 + `bottom: 88` 래퍼 유지 7개 파일)해 코드 불일치는 22 → 1건(`ETC-3-PAGE-04-0`, 기획 확인 대기)이다. 미판정·§1 배경 표 값은 변동 없음. **9-4**: `ScreenContainer`에 `snackbarOffset`을 추가해 `bottom: 88` 래퍼 7개 파일도 슬롯으로 옮겼다(CTA 높이를 화면별로 확인 — 값은 §5-18 9-3 블록). 코드 불일치·배경 표 값은 변동 없음. **9-5**: 남은 `absolute` 스낵바 래퍼 10개 파일을 전부 슬롯으로 옮김(A 4개 슬롯만, B 6개 `ScreenContainer` 마이그레이션 + 슬롯). `src/`에 `snackbarWrapper` 0건. **9-6 ※ 정정**: 위 "코드 불일치 1건"은 공유 Screen ID의 Report 쪽 파일만 보고 센 값이었다. 파일 단위로 다시 세면 확정 판정 ID 기준 **2건**(`ETC-3-PAGE-04-0` + `ETC-4-PAGE-05-0`의 `ArchiveLedgerEntriesScreen`), 확정 PAGE 69개 중 일치 **67**이다. 판정 미확정 ID(`ETC-5-PAGE-02-0`)에서 파일끼리 처리가 다른 것이 1건 더 있다(§5-18 9-6 블록). 배경 표 값은 변동 없음. **9-9**: `ArchiveLedgerEntriesScreen`(`ETC-4-PAGE-05-0`)·`ArchiveEntryDetailScreen`(`ETC-5-PAGE-02-0`)을 `ScreenContainer primary`로 마이그레이션해 같은 ID 파일끼리 처리를 통일했다. **최종: 확정 판정 ID 기준 코드 불일치 1건(`ETC-3-PAGE-04-0`, 기획 대기), 확정 PAGE 69개 중 일치 68, 미확정 ID 내 파일 간 불일치 0건**(9-6 "2건"에서 갱신, §5-18 9-9 블록). `ETC-5-PAGE-02-0`의 §2 배경 판정은 미판정 유지. **9-10 ※ 정정**: 위 9-9의 `primary` 통일은 **틀린 방향**이었다 — 명세 실측(v5 4프레임 #FFFFFF + 이 ID 크롭 2장 픽셀 #FFFFFF)이 흰색이라 `ETC-5-PAGE-02-0`을 **흰색으로 확정**하고 두 파일 모두 `secondary`로 고쳤다. 배경 표: 흰색 PAGE 41 → **42**, 미판정 15 → **14**(합계 166 불변). 확정 판정 PAGE 70개 중 일치 69, 코드 불일치 **1건**(`ETC-3-PAGE-04-0`, 기획 대기), 미확정 ID 내 파일 간 불일치 0건.
 
 ## 2. 화면별 체크리스트
 
@@ -269,7 +269,7 @@ DSH-2-PAGE-01-0(알림 목록)이 실 API 연동으로 미구현→구현, ETC �
 | ☐ | `ETC-4-SNACKBAR-04-0` | 모임 삭제 완료 | Snackbar | 총무 | 완료 | 1장 | `[구현]` | 어두움 #374151 (요소 표면색 — `Snackbar` 컴포넌트 GREY_700) | **2026-09-06 신규 발견** — `billage-ia.md`엔 이 ID가 없다(모임 삭제하기 시안 파일 안에 "Case A" 스낵바로 임베드돼 있었음). `screens/GroupManager/AllGroupsScreen.tsx`가 `route.params.snackbarMessage`로 받아 렌더링(발신은 `GroupManageScreen.tsx`) |
 | ☐ | `ETC-5-MODAL-01-0` | 보고서_이탈방지 | Page | 총무 | 예정 | 1장 | `[구현]` | 흰색 (요소 표면색 — `Dialog` 컴포넌트 #FFFFFF, 명세서 프레임 육안 확인) | `screens/Report/ReportCreateByLedgerScreen.tsx`·`ReportCreateByPeriodScreen.tsx` 둘 다 `leaveDialogVisible` + `Dialog`로 이탈 확인(뒤로가기·하드웨어 back 모두 경유) — 문서만 미구현으로 남아 있었다. Format이 IA엔 `Page`로 잘못 적혀 있다(§5-2 참고, 실제는 Modal/Dialog) · **부모 ETC-4-PAGE-03-0 배경: 흰색** |
 | ☐ | `ETC-5-PAGE-01-0` | 보고서_장부 선택 | Page | 총무 | 완료 | 2장 | `[구현]` | 흰색 | `screens/Report/ReportLedgerSelectScreen.tsx` — 7-E. `folderService.getFolderItems()`(`GET .../folder-items`, `folderId` 파라미터로 뎁스인)로 폴더+장부 혼합 3열 그리드 조회, 폴더 탭=뎁스인/장부 탭=다중 선택 토글. 하위 폴더 안에서 뒤로가기는 명세에 없는 동작이라(시안에 하위 진입 캡처 없음) 표준 폴더탐색기처럼 한 단계만 올라가게 판단(design-diff.md 기록), 최상위에서만 화면 이탈. **2026-09-13 결함 수정**: 검색 필드가 회색 채움 박스였는데 시안 No.2는 흰 배경+테두리 pill이다 — `SearchField`를 쓰는 다른 7개 화면(`FolderScreen` 등) 스펙시트부터 먼저 확인해보니 전부 이 화면과 달리 회색 채움이 맞았다(`FDR-1-PAGE-01-0` 등, 공용 컴포넌트 기본값 정상). 컴포넌트에 이미 있던 `variant="outline"`(흰 배경+테두리, 그동안 아무 화면도 안 쓰고 있었음)을 이 화면에만 적용 — 컴포넌트 자체는 안 고침. 배경도 `ScreenContainer background="secondary"`(흰색)로 확정. **재캡처 확인 완료(2026-09-13)**: 2026-09-12에 진단했던 "목록 0건"(§5-3, 데이터 유실 아니라 전부 백업된 상태였음)도 새 폴더/장부로 재현해 정상 노출 재확인 |
-| ☐ | `ETC-5-PAGE-02-0` | 보고서_내역 상세 — **및 보관함_내역 상세(공유 ID, 2026-09-12)** | Page | 전체/총무 | 완료 | 7장 | `[부족함]` | 미판정 (두 파일 처리 통일 (2026-09-19) — 명세 판정은 별도) | `screens/Report/ReportEntryDetailScreen.tsx` — 7-G. **2026-09-06 등급 하향**: 시안 UI 요소 6번 액션이 이 화면의 존재 이유를 "유저는 개별 거래 건의 **영수증 원본과 상세 메모까지 끝까지 추적 및 조회**할 수 있음"이라고 명시하는데, `GET /reports/{reportId}` 스냅샷엔 `memo`도 `receipts`도 없어(실호출 확인) 그 핵심 기능이 통째로 빠졌다 — 지금은 구분/금액/발생일/내역명/장부명만 보여주는 반쪽 화면이다. `docs/backend-requests.md` 1순위 항목 참고. **`TransactionDetailScreen`을 재사용하지 않은 이유는 별개**(entryId가 없어 그 화면 구조 자체를 못 붙임, 스냅샷 정책과도 안 맞음). **2026-09-12 추가**: `ETC\보관함\ETC-5-PAGE-02-0.png` 크롭도 같은 ID를 쓴다(공유 ID, `ETC-4-PAGE-05-0` 행 참고). 다만 이쪽은 보고서와 달리 **원래 요구된 영수증·메모가 실제로 있다** — 보관 스냅샷(`ArchivedEntry`)엔 `memo`/`receiptFiles[]`가 실제로 온다(2026-09-12 실호출 확인). 그래서 이 화면(보고서용)을 재사용하지 않고 `screens/Archive/ArchiveEntryDetailScreen.tsx`를 새로 만들어 영수증·메모까지 전부 보여준다 — 보관함 쪽은 이 행이 하향된 이유(스냅샷에 영수증·메모 없음)가 애초에 해당하지 않는다. 보관함 쪽 등급은 위 `ETC-3-PAGE-03-0` 행에서 별도 추적(재캡처 대기), 이 행의 등급·비고는 보고서 쪽 기준 그대로 |
+| ☐ | `ETC-5-PAGE-02-0` | 보고서_내역 상세 — **및 보관함_내역 상세(공유 ID, 2026-09-12)** | Page | 전체/총무 | 완료 | 7장 | `[부족함]` | 흰색 (명세 프레임 실측 v5 (내역_상세내역조회.png#0, #FFFFFF, 점유율 89%) + 4개 프레임 일치. 프레임은 `DTB-2-PAGE-02-0`/`03-0` 시트이고 이 ID 전용 시트는 spec-sheet-map에 없다 — 같은 "상세 내역" 레이아웃이며 이 ID의 크롭 2장(보고서 생성/보관함)도 7점 픽셀 샘플링이 전부 #FFFFFF. 두 파일 처리 통일 (2026-09-19) — 9-9의 primary는 정정, 9-10) | `screens/Report/ReportEntryDetailScreen.tsx` — 7-G. **2026-09-06 등급 하향**: 시안 UI 요소 6번 액션이 이 화면의 존재 이유를 "유저는 개별 거래 건의 **영수증 원본과 상세 메모까지 끝까지 추적 및 조회**할 수 있음"이라고 명시하는데, `GET /reports/{reportId}` 스냅샷엔 `memo`도 `receipts`도 없어(실호출 확인) 그 핵심 기능이 통째로 빠졌다 — 지금은 구분/금액/발생일/내역명/장부명만 보여주는 반쪽 화면이다. `docs/backend-requests.md` 1순위 항목 참고. **`TransactionDetailScreen`을 재사용하지 않은 이유는 별개**(entryId가 없어 그 화면 구조 자체를 못 붙임, 스냅샷 정책과도 안 맞음). **2026-09-12 추가**: `ETC\보관함\ETC-5-PAGE-02-0.png` 크롭도 같은 ID를 쓴다(공유 ID, `ETC-4-PAGE-05-0` 행 참고). 다만 이쪽은 보고서와 달리 **원래 요구된 영수증·메모가 실제로 있다** — 보관 스냅샷(`ArchivedEntry`)엔 `memo`/`receiptFiles[]`가 실제로 온다(2026-09-12 실호출 확인). 그래서 이 화면(보고서용)을 재사용하지 않고 `screens/Archive/ArchiveEntryDetailScreen.tsx`를 새로 만들어 영수증·메모까지 전부 보여준다 — 보관함 쪽은 이 행이 하향된 이유(스냅샷에 영수증·메모 없음)가 애초에 해당하지 않는다. 보관함 쪽 등급은 위 `ETC-3-PAGE-03-0` 행에서 별도 추적(재캡처 대기), 이 행의 등급·비고는 보고서 쪽 기준 그대로 |
 | ☐ | `ETC-5-SNACKBAR-01-0` | 권한 변경 완료 | Snackbar | - | 예정 | 2장 | `[확인필요]` | 어두움 #374151 (요소 표면색 — `Snackbar` 컴포넌트 GREY_700, 명세서 프레임 육안 확인) | `screens/GroupManager/GroupManagerScreen.tsx` — 권한 변경 완료 · **부모 ETC-2-PAGE-03-0 배경: 블루** |
 | ☐ | `ETC-5-SNACKBAR-02-0` | 모임 내보내기 완료 | Snackbar | - | 예정 | 1장 | `[구현]` | 어두움 #374151 (요소 표면색 — `Snackbar` 컴포넌트 GREY_700, 명세서 프레임 육안 확인) | `screens/GroupManager/GroupManagerScreen.tsx` — 렌더링은 여기, 메시지 조합은 `MemberProfileSheet.tsx`(kick). `ETC-4-MODAL-03-0`과 같이 재개 · **부모 ETC-2-PAGE-03-0 배경: 블루** |
 | ☐ | `ETC-5-SNACKBAR-03-0` | 모임 참여 완료 | Snackbar | - | 예정 | 1장 | `[구현]` | 어두움 #374151 (요소 표면색 — `Snackbar` 컴포넌트 GREY_700, 명세서 프레임 육안 확인) | `screens/GroupManager/AllGroupsScreen.tsx` — 코드 참여 성공 후(`JoinGroupSheet.onJoined`) 표시, 1.6초 뒤 이전 화면으로 복귀 · **부모 ETC-1-PAGE-01-0 배경: 블루** |
@@ -1437,9 +1437,9 @@ showDropdown/onPressDropdown/selectedCount/showSelectionCount`, `IconButton.disa
 | `ETC-4-PAGE-15-0` | `More/ProfileEditScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(TextField) | 없음 | B | ✅ 2026-09-19(9-3, secondary — 명세 실측 v5 확정, `ScreenContainer` + **스낵바 슬롯**(absolute 래퍼 제거)) |
 | `ETC-4-PAGE-17-0` | `More/PasswordChangeScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(TextField) | 없음 | B | ✅ 2026-09-19(8-6, secondary — 명세 실측 v5 확정, edges 기본값과 동일, 루트 `container{flex:1}` 제거, **키보드 회피(기본 true) 새로 적용**) · 9-3 **스크롤 추가**(`ScrollView`+`keyboardShouldPersistTaps="handled"`, CTA 고정) |
 | `ETC-4-PAGE-18-0` | `More/NoticeDetailScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | ScrollView | A | ✅ 2026-09-19(8-6, `primary`→`secondary` — 명세 실측 v5 확정, 이전 `primary`는 미판정-추정이었음) |
-| `ETC-5-PAGE-02-0` | `Report/ReportEntryDetailScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | A | ✅ 2026-09-19 |
+| `ETC-5-PAGE-02-0` | `Report/ReportEntryDetailScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | A | ✅ 2026-09-19(9-10에서 `ScreenContainer secondary`로 정정 — 명세 실측 흰색, 9-9의 primary는 오류) |
 | `ETC-4-PAGE-05-0`(보관함 공유 ID) | `Archive/ArchiveLedgerEntriesScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | A | ✅ 2026-09-19(9-9, primary — §2 블루, 같은 ID·같은 화면인 `ReportLedgerEntriesScreen`(`ScreenContainer primary`)과 처리 통일, 스낵바 없음) |
-| `ETC-5-PAGE-02-0`(보관함 공유 ID) | `Archive/ArchiveEntryDetailScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | A | ✅ 2026-09-19(9-9, primary — `ReportEntryDetailScreen`(`ScreenContainer primary`)과 두 파일 처리 통일. §2 배경 판정은 미판정 유지, 스낵바 없음) |
+| `ETC-5-PAGE-02-0`(보관함 공유 ID) | `Archive/ArchiveEntryDetailScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | A | ✅ 2026-09-19(9-10, secondary — 명세 실측 흰색, `ReportEntryDetailScreen`과 함께 `secondary`로 정정. 9-9의 primary 통일은 오류, 스낵바 없음) |
 | `ADD-3-PAGE-01-0` | `Transactions/ReceiptScanningView.tsx` | View | 해당없음(SafeAreaView 없음) | 상수 GREY_800 = #374151 | 입력없음 | 없음 | C | |
 | `ADD-4-PAGE-01-1` | `Transactions/ReceiptScanFailedView.tsx` | View | 해당없음(useSafeAreaInsets 수동) | 미지정 | 입력없음 | 없음 | C | ✅ 2026-09-19(8-7, secondary — 명세 실측 v5 확정, `edges={[]}` — 기존 `useSafeAreaInsets`로 직접 더하는 상하 패딩(`insets.top+12`/`insets.bottom+16`)을 그대로 두어 이중 적용 방지) |
 
@@ -1596,6 +1596,36 @@ C 등급 개별 사유:
 - 파일명만 적혀 있고(경로 생략) 파일은 실제로 존재: 43건(`FolderScreen.tsx`, `DuesDetailScreen.tsx`, `ReportEntryList.tsx` 등) — 죽은 경로가 아니라 표기 생략이라 그대로 뒀다.
 - 파일이 없는 것: 6건 — 전부 **삭제됐다고 서술하는 문장 안의 언급**이라 죽은 포인터가 아니다(`ADD-3-PAGE-01-0`·`ADD-3-PAGE-02-0`의 `MockCameraView.tsx`·`CameraCaptureView.tsx` 각 2건, `DTB-1-PAGE-01-0`·`DTB-3-PAGE-02-0`의 `types/transaction.ts` 각 1건). "삭제된 파일"로 읽히도록 백틱을 빼고 문구를 고쳤다.
 - 두 화면의 실제 구현 파일: `ADD-3-PAGE-01-0` = `screens/Transactions/ReceiptScanningView.tsx`(`@screen` 태그 일치, 행에 이미 기재). `ADD-3-PAGE-02-0`(사진 촬영)은 **화면 파일이 없는 게 정상**이다 — 시스템 카메라 인텐트(`utils/imagePicker.ts`의 `launchCamera()`)가 대신하고 `@screen` 태그를 단 파일도 없다(행에 이미 기재).
+
+#### 2026-09-19 9-10 — `ETC-5-PAGE-02-0` 흰색 확정 + 9-9 통일 방향 정정
+
+**※ 정정(2026-09-19): 9-9에서 primary로 통일했으나 명세 실측 결과 흰색. 통일 방향 오류.** 9-9는 §2가 미판정이라는 이유로 명세를 보지 않고 `ReportEntryDetailScreen`(그때 `primary`)에 `ArchiveEntryDetailScreen`을 맞췄다. 그 기준 파일 자체가 명세와 달랐다.
+
+**근거(`docs/spec-background-v5.tsv`, 프레임 4개 전부 흰색)**:
+
+| 프레임 | 상단 | 점유율 | 중단 | 하단 |
+|---|---|---|---|---|
+| `내역/내역_상세내역조회.png#0` | `#FFFFFF` | 89% | `#FFFFFF` | `#FFFFFF` |
+| `내역/내역_상세내역조회.png#1` | `#FFFFFF` | 100% | `#FFFFFF` | `#FFFFFF` |
+| `내역/내역_상세내역조회_납부관리수입내역.png#0` | `#FFFFFF` | 80% | `#FFFFFF` | `#FFFFFF` |
+| `내역/내역_상세내역조회_승인요청내역.png#0` | `#FFFFFF` | 79% | `#FFFFFF` | `#FFFFFF` |
+
+- 주의: 이 네 프레임은 `spec-sheet-map.tsv` 기준 `DTB-2-PAGE-02-0`(상세 내역_조회)·`DTB-2-PAGE-03-0`(승인 요청 내역 등) 시트다. **`ETC-5-PAGE-02-0` 전용 명세 시트는 매핑에 없다.** 다만 같은 "상세 내역" 레이아웃이고, 이 ID 크롭 2장(`ETC/보고서 생성/`·`ETC/보관함/ETC-5-PAGE-02-0.png`, 360×740)의 7점(모서리·좌우·중단·하단) 픽셀 샘플링도 전부 `#FFFFFF`라 흰색으로 확정한다.
+- 처리: §2 `ETC-5-PAGE-02-0` 배경 = 흰색, `ArchiveEntryDetailScreen`·`ReportEntryDetailScreen` 둘 다 `ScreenContainer background="secondary"`. §1 배경 표 흰색 PAGE 41 → 42, 미판정 15 → 14.
+- `ArchiveEntryDetailScreen` 소스 주석의 "보고서 쪽 크롭은 5필드뿐" 오기를 정정했다(보고서 쪽 크롭도 전체 항목, 5필드는 서버 스냅샷 한계).
+
+**9-9에서 `primary`로 통일한 건 재대조** (v5 실측 vs 코드):
+
+| Screen ID | 코드 | v5 실측 | 일치 여부 |
+|---|---|---|---|
+| `ETC-4-PAGE-05-0` — `Report/ReportLedgerEntriesScreen`·`Archive/ArchiveLedgerEntriesScreen` | `primary` | `더보기_보고서생성_장부보고서조회-1.png#0` 상단 `#F0F5FE` 81% 블루(중·하 `#FFFFFF`, 상하 다름), `…장부보고서조회.png#0` 블루 80%(전 구간 `#F0F5FE`) | **일치**(상단 기준, "상하 다름" 구조 결정 6개 목록과 같은 사안) |
+| `ETC-3-PAGE-03-0` — `Archive/ArchiveDetailScreen`(기록 보기) | `primary` | `더보기_기록보관_상세보기.png#0` 블루 82%, 전 구간 `#F0F5FE` | **일치** |
+| `ETC-3-PAGE-03-0` — `Report/ReportByPeriodDetailScreen` | `primary` | `더보기_보고서생성_기간보고서조회-1.png#0` 블루 80%, 전 구간 `#F0F5FE`(`…기간보고서조회.png#0`은 블루 53%·상하 다름 — 점유율 60% 미만이라 판정에 안 씀) | **일치** |
+| `ETC-5-PAGE-02-0` — 두 파일 | `secondary`(정정 후) | 위 표 + 크롭 픽셀 전부 `#FFFFFF` | **일치**(정정 후) |
+
+9-9에서 실제로 바꾼 것은 `ETC-4-PAGE-05-0`(일치)과 `ETC-5-PAGE-02-0`(정정) 두 건뿐이라 다른 재점검 대상은 없다.
+
+**최종값**: §1 배경 표 — 블루 PAGE 32 / 흰색 PAGE **42** / 흰색 모달·시트 51 / 어두움 스낵바 27 / 미판정 **14** / 합계 166(`§2` 행을 ID 포맷 기준으로 스크립트 재집계해 일치 확인). 코드 불일치 **1건**(`ETC-3-PAGE-04-0`), 확정 판정 PAGE 70개 중 일치 69.
 
 ### 5-19. 화면 목록 정합성 감사 (2026-09-19, 스크립트 집합 비교 — 목록은 안 고침, 차이만 기록)
 
