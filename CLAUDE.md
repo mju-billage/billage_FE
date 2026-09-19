@@ -1,105 +1,43 @@
-# 작업 전 필수 확인
+# Billage — 클로드 코드 지침
 
-이 프로젝트를 수정하기 전에는 **반드시 먼저 [README.md](README.md)를 읽고** 그 안의 규칙(네이밍, 프로젝트 구조, 아키텍처, 코드 스타일, Git/PR 규칙, 금지 사항, 주석 규칙)을 따른다.
+## 프로젝트
+소모임/친목회 회비·지출 관리 앱. 총무가 회비를 걷고 장부(폴더 트리)로 수입/지출을 기록하며 영수증(OCR·촬영)·보고서·보관함을 다룬다. 기획 원본 `Billage_IA.xlsx`(V0.4, 201개 정의) → [docs/billage-ia.md](docs/billage-ia.md).
+화면은 코드상 모두 존재한다(로그인/가입/이메일 인증/재설정, 대시보드, 내역, 폴더/장부, 납부관리, 모임 관리, 보고서, 보관함, 증빙 앨범, 통계, 설정, 탈퇴, 내역 추가 FAB). **남은 일 = [docs/design-verification.md](docs/design-verification.md) §2·§5의 미해결 항목**(시안 대조·판단 대기). 작업 이력은 이 파일에 쓰지 않는다.
 
-- 새 파일을 만들거나 기존 코드를 고칠 때, README의 네이밍/구조/스타일 규칙에 맞는지 확인한다.
-- Git 작업(브랜치 생성, 커밋, PR) 시 README 5장의 브랜치 전략과 커밋 컨벤션을 따른다.
-- README의 규칙과 실제 코드가 다르면, 둘 중 무엇이 최신인지 사용자에게 확인한다.
-- API를 직접 호출해 진단할 때는 `scripts/api-call.js`를 쓴다. `curl -d '...'`로 한글을
-  보내지 마라 — 셸 인코딩이 깨져 400 INVALID_REQUEST로 나타나고, 서버 버그로 오진하게
-  된다(2026-09-13 두 번 발생).
-- 새 화면을 붙일 때 선택 화면→부모 폼 복귀는 `popTo`, 완료 후 스택 정리는 `reset`을 쓴다 — 상세는 [design-verification.md §5-11](docs/design-verification.md) 참고.
-- 키보드 대응은 `react-native-keyboard-controller`로 통일한다(edge-to-edge 강제로 `adjustResize` 단독으론 안 먹음) — 전체화면 폼은 `ScreenContainer`, 모달/시트는 `Dialog`/`BottomSheet` 공용 처리를 쓴다. 화면마다 따로 `KeyboardAvoidingView` 넣지 마라 — [design-verification.md §5-12](docs/design-verification.md) 참고.
+## 작업 전 필수
+1. **[README.md](README.md)의 규칙**(네이밍·구조·아키텍처·스타일·Git·금지·주석)을 따른다. README와 코드가 다르면 무엇이 최신인지 사용자에게 확인한다.
+2. **[docs/lessons.md](docs/lessons.md)를 읽는다** — 재발성 함정(인코딩·edge-to-edge·fallback 문구·Swagger `userId`), 운영 값(BASE_URL·테스트 계정), 시안↔설명표 불일치 #1~#11, 정정 이력.
+3. 화면을 만들거나 고칠 때 파일 상단에 `/** @screen <Screen ID> <이름> */` 주석을 남긴다.
 
-# Billage (빌리지) — 프로젝트 개요
+## 기술 스택
+React Native 0.86(새 아키텍처, `targetSdk` 36 → **edge-to-edge 강제**) · React 19 · TypeScript · React Navigation v7(native-stack, bottom-tabs) · `react-native-keyboard-controller`(키보드) · `react-native-safe-area-context` · Reanimated 4 · SVG · Keychain(토큰) · react-native-config(`.env`) · 소셜 로그인(카카오/네이버/구글) · Storybook(웹). 폴더: `src/{screens,components,constants,navigation,services,types,utils}`. Android `applicationId` = `com.billage`.
 
-## 이 프로젝트는 무엇인가
+## 화면 ID 체계
+`{영역}-{Depth}-{포맷}-{일련번호}-{변형}` 예: `DUE-2-PAGE-03-0`. 영역: COM(로그인/가입/탈퇴) · DSH(대시보드) · DTB(내역) · FDR(폴더/장부) · DUE(납부관리) · ETC(더보기) · ADD(내역 추가 FAB). 포맷: `PAGE`/`MODAL`/`SHEET`/`SNACKBAR`. IA에 ID가 없는 화면(예: `SplashScreen`)은 §2에 `(ID 없음)`으로 둔다.
 
-**Billage**는 소모임/친목회의 회비와 지출을 관리하는 앱이다. 총무가 회비를 걷고, 장부(폴더 구조)로
-수입/지출 내역을 기록하며, 영수증 OCR·사진 촬영으로 증빙자료를 남기고, 기간별/장부별 보고서를
-생성하는 것이 핵심 기능이다.
+## 문서 동기화 규칙 (3표)
+화면의 상태 등급이 바뀌면 **`docs/design-verification.md`의 ① §2 해당 행 ② §1 상태 요약표 ③ §1 도메인별 표**를 함께 고친다(합계 159 = IA 고유 Screen ID와 교차검증되므로 IA에 없는 행은 상태 표에 넣지 않는다). 배경 판정은 §1 "배경 판정 현황"(§2 실제 행 기준) 별도 축. 결론을 못 내리면 등급을 바꾸지 말고 **`판단 보류 + 근거`**로 적는다.
 
-- 기획 원본: `Billage_IA.xlsx` (시트 `V0.4`, 201개 화면 정의)
-- 상세 화면 정의 표 (자동 추출): [docs/billage-ia.md](docs/billage-ia.md)
+## 명세서 위치
+- 원본 스펙시트(UI 요소 표 포함): `C:\Users\jotmd\Downloads\BILLIGE\화면명세서\` (다른 PC는 `BILLAGE_DESIGN_DIR`). ID→파일 매핑은 `scripts/spec-sheet-map.tsv`.
+- 크롭 목업(표 없음)은 `scripts/design-index.json`. **[기능]/[상태]/[액션] 판단은 원본 스펙시트로 한다.**
+- API 명세 txt: `C:\Users\jotmd\Downloads\BILLIGE\api\`, 서버 실제 목록은 Swagger(`docs/api-wiring.md`).
 
-## 현재 개발 상태
+## 절대 하지 말 것
+- **문서 정규식 일괄 치환** — 문서 앞머리가 깨진 사고가 있었다. 고유 문자열/줄 단위로만 고친다.
+- **축소 이미지로 텍스트 색·자간 판단** — 원본 픽셀 샘플링만.
+- **추측 후 단정** — 근거 없으면 `판단 보류 + 근거`. 시안 목업과 설명표가 다르면 임의로 정하지 말고 불일치 목록에 기록.
+- **`curl -d '한글'`로 API 진단** — 인코딩이 깨져 서버 버그로 오진한다. `scripts/api-call.js`를 쓴다.
+- 화면마다 `KeyboardAvoidingView` 추가 — 전체화면 폼은 `ScreenContainer`, 모달/시트는 `Dialog`/`BottomSheet` 공용 처리를 쓴다.
+- 요청받지 않은 커밋/푸시, 소스 파일·이미지 임의 삭제.
 
-**React Native (TypeScript) + React Navigation** 프로젝트이며(Android/iOS 겸용), 로그인 · 회원가입 ·
-이메일 인증 · 비밀번호 재설정 온보딩 플로우뿐 아니라 **대시보드, 내역(거래), 폴더/장부, 모임 관리
-(전체 모임 관리·모임 생성·초대코드 참여·모임원 권한 관리), 내역 추가(FAB) 플로우까지 구현돼 있다**
-(구현 현황 상세는 [docs/design-verification.md](docs/design-verification.md) §1 참고). 아직 구현되지
-않은 것은 **납부 관리(DUE) 전체, 보고서, 증빙자료 앨범, 보관함, 통계, 설정, 탈퇴 플로우**다
-(가입 완료 화면의 "모임 생성하기"/"코드로 참여하기" 버튼도 현재 빈 TODO 상태).
+## 네비게이션 규칙
+선택 화면 → 부모 폼 복귀는 `popTo`, 완료 후 스택 정리는 `reset`(상세: design-verification.md §5-11).
 
-- Android `applicationId` / iOS 관련 설정: `com.billage` 적용됨
-- 소셜 로그인: 카카오/네이버/구글 SDK 연동, 이메일/비밀번호 로그인 병행
-- 코딩 규칙(네이밍, 폴더 구조 `src/{screens,components,constants,navigation,services,types,utils}`,
-  아키텍처, 스타일, Git)은 이 문서가 아니라 **[README.md](README.md)가 단일 소스**다 — 여기서 중복
-  서술하지 않는다.
-- 화면 컴포넌트를 새로 만들 때는 파일 상단 주석에 대응하는 Screen ID(아래 참고)를 남기면
-  `docs/billage-ia.md`의 기획과 매핑하기 쉽다.
-
-## 핵심 기능 요약 (기획 기준, 항목별 구현 상태 표시)
-
-상태 표시는 [docs/design-verification.md](docs/design-verification.md) §1~2의 Screen ID별 대조 결과를 도메인 단위로 요약한 것이다.
-
-- **모임(그룹) 관리** `부분구현`: 다중 모임 가입/전환, 초대코드로 참여, 총무↔일반 권한 위임 — 핵심 CRUD는 구현됨. 모임 프로필 변경, 로그아웃 등은 미구현
-- **회비(납부) 관리** `미구현`: 회비 생성(제목/금액/장부/기간), 모임원별 납부 현황, 미납자에게 요청 공유
-- **장부/폴더** `구현`: 그리드·리스트 뷰의 폴더 트리(무한 depth), 장부별 예산 설정, 폴더 단위 백업
-- **내역(거래)** `구현`: 수입/지출 등록·수정·삭제, 검색, 필터링(기간/장부/구분/정렬), 승인요청 플로우
-- **내역 추가 (FAB)** `구현`: 금액/일자/장부/담당자/메모 입력 + 증빙자료(영수증 스캔 OCR, 사진 촬영, 앨범 선택 최대 10장)
-- **보고서** `미구현`: 장부별/기간별 보고서 생성, 시간순 조회, 보관함(히스토리 백업)
-- **증빙자료 앨범** `미구현`: 전체 증빙 이미지 조회/검색/필터
-- **설정** `미구현`: 프로필, 비밀번호 변경, 알림 설정, 공지사항, 문의하기, 약관
-
-## 권한 모델
-
-기획 문서 기준 화면 대부분에 `권한` 컬럼이 명시되어 있다 (전체 97 / 총무 61 / 일반 3 / 미지정 40).
-
-- **총무**: 회비 생성·수정·삭제·마감, 장부/폴더 생성·예산 설정, 모임원 추가/삭제, 보고서 생성 등 대부분의 쓰기 액션
-- **일반**: 조회 위주, 모임 나가기 등 제한적 액션
-- **전체**: 총무/일반 공통 접근 화면
-
-→ 향후 이런 역할 분기가 여러 화면에 반복될 것이므로, 공통 권한 체크 훅/유틸(예: `useRequireTreasurer()`)로
-추상화하는 것을 권장. (README §3 "Custom hooks"/"Architecture" 규칙에 맞춰 `src/hooks/`에 위치시킬 것 — 아직 없는 폴더이므로 실제로 필요해질 때 생성.)
-
-## 화면 ID 네이밍 규칙 (기획 문서 `docs/billage-ia.md` 기준)
-
-`{영역코드}-{Depth단계}-{포맷}-{일련번호}-{변형}` (예: `DUE-2-PAGE-03-0`)
-
-| 코드 | 영역 (Division) |
-|---|---|
-| COM | Common — 로그인/회원가입/탈퇴 |
-| DSH | GNB(H) — 대시보드 |
-| DTB | GNB — 내역(거래) |
-| FDR | GNB — 폴더(장부) |
-| DUE | GNB — 납부 관리(회비) |
-| ETC | GNB — 더보기(모임관리/보고서/증빙앨범/보관함/설정) |
-| ADD | FAB — 내역 추가 |
-
-Format 값: `Page`, `Modal`, `Bottom Sheet`, `Snackbar`.
-
-## 개발 시 주의할 미완료 항목 (기획 기준, Design 예정/진행 — 40건)
-
-와이어프레임(W/F)은 대부분 완료(185/201)이나, 디자인은 40건이 `예정`/`진행` 상태다. 눈에 띄는 것:
-
-- **대시보드 메인**, **캘린더**: 와이어프레임 자체가 `예정` — 기능 스펙이 아직 미확정. 먼저 기획 확인 필요.
-- 완료 액션에 대한 **스낵바 메시지 디자인**이 다수 `예정` (모임 전환/생성/참여 완료, 권한 변경 완료, 회비 마감/삭제/수정 완료 등) — 로직/문구는 확정된 것으로 보이나 UI 디자인만 보류 상태이므로, 기본 스타일로 우선 구현하고 디자인 완료 시 교체하면 됨.
-- 문의하기, 영수증 스캔 실패 화면: 디자인 `진행` 중.
-
-전체 목록은 [docs/billage-ia.md](docs/billage-ia.md) 참고 (각 행의 W/F, Design 컬럼 확인).
-
-## 시스템 연동이 필요한 지점
-
-- **영수증 OCR**: 스캔 시 자동 필드 입력, 수기 입력값과 충돌 시 확인 모달
-- **카메라 촬영 / 시스템 갤러리(복수 선택, 최대 10장)**
-- **공유 기능(Share)**: 회비 요청 작성 후 공유
-- (참고) 온보딩 플로우는 카카오/네이버/구글 소셜 로그인 SDK 연동까지 완료된 상태이며, 이후
-  대시보드·내역·폴더·모임 관리·내역 추가 플로우도 구현돼 있음 (위 "현재 개발 상태" 참고)
-
-## 참고
-
-- `docs/billage-ia.md`: 기획 원본에서 추출한 전 화면 상세 표 (Division별 정리)
-- `docs/design-verification.md`: 디자인 이미지 ↔ 구현 대조 체크리스트. Screen ID별 구현 상태와
-  코드 위치, 디자인 토큰 대조 결과, 문서 정합성 이슈가 정리돼 있음.
-- 엑셀 원본에는 `SnackBar`라는 이름의 시트가 하나 더 있으나 이는 이전 버전(V0.3 추정)의 백업/중복 데이터로 보이며, 현재는 `V0.4` 시트가 기준.
+## 검증 명령어
+```
+npx tsc --noEmit          # 통과해야 함
+npx eslint src App.tsx    # error 0 (warning 56개는 기존)
+npm test                  # jest
+```
+`npm run lint`(= `eslint .`)는 `scripts/make-pair.js`의 기존 `no-undef` 에러를 함께 낸다(별건). 실기기/에뮬레이터 확인은 사용자가 한다.

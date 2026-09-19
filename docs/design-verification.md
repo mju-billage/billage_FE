@@ -1678,47 +1678,7 @@ placeholder도 마찬가지로 DUE는 시트에 박힌 문구를 그대로 옮�
 
 ### 5-15. 캐러셀 페이지 스냅 결함 (2026-09-18)
 
-**증상**: 장부 상세(`FDR-2-PAGE-05-0`)와 기간 보고서 상세(`ETC-4-PAGE-07-0`) 둘 다, 캐러셀
-1면→2면으로 스크롤하면 1면 카드 잔재가 좌측에 세로로 잘려 남고 2면 카드는 우측이 화면 밖으로
-잘린다. 첫 진입(스크롤 전)엔 정상 — 스냅 위치 계산만 틀렸다는 신호.
-
-**1-1 (같은 컴포넌트인가)**: 아니다. 캐러셀을 감싸는 공용 컴포넌트가 없고, 두 화면이 각자
-`ScrollView horizontal pagingEnabled` + `CarouselIndicator`를 독립적으로 복붙해 구현하고
-있었다(`ReportPeriodEntriesScreen.tsx` 자체 주석이 "LedgerDetailScreen이 이미 쓰는 패턴
-그대로 가져왔다"고 명시). 그래서 둘 다 따로 고쳤다.
-
-**1-2 (원인 판정)**: `snapToInterval`이 스크롤뷰 `style`의 비대칭 인셋을 계산에 안 넣은
-것 — 정확히는 "contentContainerStyle의 padding이 스냅 계산에 안 들어갔다" 부류인데, 여기선
-padding이 `contentContainerStyle`이 아니라 `style`에 있었고 그마저 좌측에만 있었다
-(`paddingLeft: 24`, `paddingRight` 없음). `snapToInterval={CARD_WIDTH + 12}`는 콘텐츠 원점
-0부터 그 간격의 배수로만 스냅 지점을 계산하는데, 실제 렌더링은 그 24px 좌측 인셋만큼 밀려
-있어 페이지가 누적될수록 어긋난다. `pagingEnabled`는 있었고(카테고리 1 아님), 카드 폭
-자체도 화면 폭 기준으로는 맞았다(카테고리 4 아님) — 정확히 카테고리 3(패딩이 스냅 계산에
-누락)이 원인이다.
-
-**1-3 (왜 첫 페이지는 정상인가)**: 1면에서는 이 24px 좌측 인셋이 그냥 "카드 왼쪽 여백"처럼
-보여 정상으로 착각하기 쉽다. 스냅 자체가 어긋난 건 2페이지부터 누적된 오차가 드러나면서다 —
-초기 위치는 우연히 맞았을 뿐, 스냅 간격 계산 자체가 처음부터 틀려 있었다.
-
-**수정**: 두 화면 모두 `Dimensions.get('window')` 고정값 대신 `useWindowDimensions()`를
-쓰고, 슬라이드 하나를 화면 폭(`windowWidth`) 그대로 채우도록 바꿨다. 카드 여백은 스크롤뷰의
-`style`/음수 margin 조합이 아니라 각 슬라이드 안쪽 `paddingHorizontal: 24`로 옮겼다 —
-그러면 `pagingEnabled`의 기본 동작(뷰포트 폭 단위 스냅)만으로 항상 정확히 맞아
-`snapToInterval` 자체가 필요 없어진다. dots 인디케이터(`handleScrollEnd`의 `cardIndex`
-계산)도 나눗셈 기준을 `CARD_WIDTH + 12`에서 `windowWidth`로 맞춰 스냅과 항상 일치하게 했다.
-
-**3-2 (같은 패턴을 쓰는 다른 화면)**: 전수 조사(`snapToInterval`/`pagingEnabled` grep) 결과
-이 둘뿐이다. `DashboardScreen`/`TransactionsScreen`/`ArchiveLedgerEntriesScreen`/
-`ReportLedgerEntriesScreen`도 `AmountCard`를 쓰지만 캐러셀(가로 페이징)이 아니라 단일
-카드라 이 결함과 무관.
-
-**놓친 경위**: 2026-09-13 두 화면 다 캡처 대조를 했었는데, 그때는 "카드 하나 + dots" 구조와
-문구만 시안과 맞춰보고 실제 스크롤 동작(2면 진입 시 잘림)은 캡처 화면에 찍혀 있었는데도
-확인하지 않았다 — 정적 스크린샷 1장(1면 상태)만으로 판정해 스크롤 후 상태를 놓친 것으로
-보인다. 이후 캐러셀이 있는 화면은 반드시 스크롤 후 상태도 캡처받아 대조할 것.
-
-**확인 경로(참고용)**: 폴더 탭 → 장부 열기(캐러셀 있는 장부) → 카드 1면→2면→1면 스와이프.
-더보기 → 보고서 생성 → 기간별 보고서 조회 진입 → 캐러셀 카드 1면→2면→1면 스와이프.
+- [해결] 장부 상세(`FDR-2-PAGE-05-0`)·기간 보고서 상세(`ETC-4-PAGE-07-0`) 캐러셀 2면 스냅 어긋남 — 슬라이드 폭 = 화면 폭 + 카드 여백은 슬라이드 안쪽 padding으로 옮겨 `pagingEnabled`만으로 스냅 (2026-09-18) — 함정 기록: `docs/lessons.md` 1-8
 
 ### 5-16. 폴더 예산 설정 / 장부 이름 변경 모달 (2026-09-18)
 

@@ -1210,50 +1210,13 @@ prop 연결(컴포넌트 확장 불필요 — 기존 `rightIcons`로 충분했�
 자체가 필요 없었다). 이 테스트 계정으로 보고서 생성을 막힘 없이 검증하려면
 폴더+장부를 새로 만들어야 한다.
 
-### [치명 → 해결 확인(2026-09-12 재캡처)] DTB-3-SHEET-01-0 선택 날짜 영역 중복 렌더
+- [해결] DTB-3-SHEET-01-0 선택 날짜 영역 중복 렌더 (2026-09-12)
 
-기준 시트: `더보기_보고서생성하기_기간별_기간선택.png`(디자인 완료, No.4). 원인:
-공용 `Calendar` 컴포넌트가 기본으로 자체 `DateField`(4자리 연도, 파란색)를 하단에
-렌더하는데, `DuesDateRangeSheet.tsx`가 명세 요구사항(2자리 연도 미리보기)을 위해
-자기 `previewRow`를 별도로 이미 추가해 둔 상태라 두 블록이 겹쳐 나왔다.
-`DuesDateRangeSheet.tsx`의 `<Calendar>` 호출에 `showDateFields={false}` 추가해
-`Calendar` 쪽을 껐다 — `previewRow`(2자리 연도)만 남긴다. `TransactionFilterSheet.tsx`
-의 커스텀 기간 캘린더는 자체 `previewRow`가 없어 `Calendar`의 기본 `DateField`를
-그대로 쓰고 있고, 그 화면 스펙시트(`내역_필터링_기간선택.png`)는 4자리 연도라 이번엔
-안 건드렸다. 조치 형태: prop 추가(1줄), 공용 컴포넌트 자체는 안 고침.
+- [해결] DTB-3-SHEET-01-0 하단 버튼 겹침 / 시트 잘림 (2026-09-12)
 
-### [치명 → 해결 확인(2026-09-12 재캡처)] DTB-3-SHEET-01-0 하단 버튼 겹침 / 시트 잘림
+- [해결] DTB-3-SHEET-01-0 선택 범위 구간 표시 없음 (2026-09-12)
 
-취소 버튼이 `TextButton`(배경 없는 텍스트, hierarchy="secondary")이라 시안이 요구하는
-"좌측 회색 pill"이 아니었고, 시트 하단은 공용 `BottomSheet.tsx`가 고정
-`paddingBottom: 32`만 쓰고 있어 제스처 네비게이션 바가 있는 기기에서 그만큼 잘려나가
-버튼 행이 화면 하단 경계와 맞붙어 보이는 문제가 있었다. 두 가지로 고쳤다:
-`BottomSheet.tsx`에 `useSafeAreaInsets().bottom`을 더해(`32 + insets.bottom`)
-하단 잘림 자체를 없앴다(이 컴포넌트를 쓰는 모든 시트에 공통 적용 — 순수 여백 추가라
-다른 화면에 시각적 회귀 없음). `DuesDateRangeSheet.tsx`의 취소 버튼을
-`Button hierarchy="tertiary"`(회색 pill, `height: 52`로 확정 버튼과 높이 통일)로
-교체해 시안 No.5의 pill 형태를 맞췄다. 조치 형태: 공용 컴포넌트 여백 수정 + 버튼
-컴포넌트 교체. **2026-09-12 실기기 재캡처로 해결 확인** — 버튼 겹침·시트 잘림 둘 다 재현 안 됨.
-
-### [결함 → 해결 확인(2026-09-12 재캡처)] DTB-3-SHEET-01-0 선택 범위 구간 표시 없음
-
-명세 No.3 [액션] "시작일/종료일/사이 구간이 시각적으로 구분" — `Calendar.tsx`는
-시작일/종료일 원(사각형) 배경만 그리고 있었다. 각 날짜 셀에 `rangeBand`(옅은 배경,
-`FILL_SECONDARY_SUBTLE`)를 추가 — 구간 중간 날짜는 셀 전체 폭 사각형(양쪽 각짐),
-시작일 칸은 셀 중앙~우측 절반만(좌측 모서리 둥글게), 종료일 칸은 좌측~중앙 절반만
-(우측 모서리 둥글게) 칠해 전체 구간이 하나의 이어진 캡슐 모양으로 보이게 했다.
-기존 원(사각형) 컴포넌트가 그 위에 그대로 그려진다. 조치 형태: 스타일/렌더 로직 추가.
-
-### [결함 → 해결 확인(2026-09-12 재캡처)] DTB-3-SHEET-01-0 시트 타이틀
-
-시트 타이틀이 호출부의 폼 필드 라벨("기간")을 그대로 재사용해 "기간"으로 노출되고
-있었다(명세 No.2는 "기간 선택" 고정). 필드 라벨과 시트 타이틀은 서로 다른 텍스트인데
-그동안 하나의 상수(`DUES_CREATE_PERIOD_LABEL`/`REPORT_PERIOD_FIELD_LABEL`)를 재사용해
-합쳐져 있었다 — `DuesDateRangeSheet`의 `title` prop을 없애고 시트 내부에서
-`DATE_RANGE_SHEET_TITLE`("기간 선택") 고정값을 쓰도록 바꿨다. 호출부 3곳
-(`DuesCreateScreen`/`DuesEditScreen`/`ReportCreateByPeriodScreen`) 모두 `title` prop
-전달을 제거(필드 라벨 자체는 그대로 유지, `SelectionListItem`엔 계속 넘어간다). 조치
-형태: prop 제거 + 상수 신설.
+- [해결] DTB-3-SHEET-01-0 시트 타이틀 (2026-09-12)
 
 ### [관찰] ETC-2-PAGE-04-0 — 코드 변경 없음
 
@@ -1324,18 +1287,7 @@ prop 연결(컴포넌트 확장 불필요 — 기존 `rightIcons`로 충분했�
 `StatisticsScreen.tsx`(`expenseValue: {color: FEEDBACK_NEGATIVE_BOLD}`)도 아래
 4-2와 같은 "지출=빨간색" 패턴을 쓰고 있어 같은 의심 목록에 포함한다.
 
-### [결함 → 해결 확인(2026-09-13 재캡처)] ETC-4-PAGE-07-0 — Card 1 합계 행 제거
-
-명세(`더보기_보고서생성_기간보고서조회.png`) No.3: Card 1(수입/지출)은 2행뿐,
-합계 행은 Card 2가 아니라 ETC-4-PAGE-05-0(장부 상세)에만 있다. `AmountCard.tsx`가
-`ReportLedgerEntriesScreen`(05-0)과 `ReportPeriodEntriesScreen`(07-0) 양쪽에서
-공유되는데 항상 합계 행(+구분선)을 그리고 있었다 — 공유 컴포넌트를 임의로 고치는
-대신 `showTotal?: boolean`(기본 `true`, 기존 동작 유지) prop을 추가하고
-`ReportPeriodEntriesScreen.tsx`의 Card 1(`type="incomeExpense"`)에만
-`showTotal={false}`를 넘겼다. `ReportLedgerEntriesScreen.tsx`는 prop을 안 넘겨
-합계 행이 그대로 남는다. Card 2(잔액 흐름) 라벨도 "시작잔액"/"최종잔액"(붙여쓰기)
-→ "시작 잔액"/"최종 잔액"(띄어쓰기, 명세 표기 그대로)로 수정 — `AmountCard.tsx`의
-`balance` 타입 라벨.
+- [해결] ETC-4-PAGE-07-0 — Card 1 합계 행 제거 (2026-09-13)
 
 ### [결함 → 해결 확인(2026-09-13 재캡처)] ETC-3-PAGE-02-0 — 장부별 결산 카드 라벨/색상/정렬
 
@@ -1350,15 +1302,7 @@ prop 연결(컴포넌트 확장 불필요 — 기존 `rightIcons`로 충분했�
   쓰고 있다 — `ETC-2-PAGE-07-0` 자체 스펙시트 확인 후 별도 처리 필요.
 - "생성 일시" 메타 텍스트를 우측 정렬로 변경(`metaText`에 `textAlign: 'right'`).
 
-### [결함 → 해결 확인(2026-09-13 재캡처)] ETC-3-PAGE-03-0 — 헤더 카드 금액 (ReportByPeriodDetailScreen만, ArchiveDetailScreen 안 건드림)
-
-기준 시트: `더보기_보고서생성_기간보고서조회-1.png`. 라벨 없이 "+1,010원"/
-"-442,222원" 두 줄만 검정으로 나오던 것을 "수입"(회색 라벨, 좌측)/파란 금액(우측),
-"지출"(회색 라벨, 좌측)/검정 금액(`-` 유지, 우측)의 2행 구조로 바꿨다(`amountRow`
-신설). 수입 `+` 접두 제거, `headerIncome`에 `FEEDBACK_POSITIVE_BOLD` 적용. 같은
-Screen ID를 공유하는 `ArchiveDetailScreen.tsx`(보관함 기록 보기)는 요구하는 카드
-구조가 달라(그 화면은 지난 라운드에 이미 라벨+정렬 반영 완료) 이번엔 건드리지
-않았다.
+- [해결] ETC-3-PAGE-03-0 — 헤더 카드 금액 (ReportByPeriodDetailScreen만, ArchiveDetailScreen 안 건드림) (2026-09-13)
 
 ### [결함] DTB-3-SHEET-01-0 — 선택 날짜 좌우 배치
 
@@ -1377,15 +1321,7 @@ Screen ID를 공유하는 `ArchiveDetailScreen.tsx`(보관함 기록 보기)는 
 - 목록 건수 표기 "3건" vs 시안 "24 건"(숫자·단위 사이 공백) — 전 화면 공통
   패턴으로 보여 일괄 판단 필요, 이번엔 개별 수정 안 함.
 
-### [결함 → 해결 확인(2026-09-13 재캡처)] 화면 배경색 7개 화면 적용
-
-`ETC-2-PAGE-06-0`/`ETC-3-PAGE-03-0`(ArchiveDetailScreen)/`ETC-2-PAGE-04-0`/
-`ETC-3-PAGE-02-0`/`ETC-4-PAGE-05-0`/`ETC-3-PAGE-03-0`(ReportByPeriodDetailScreen)/
-`ETC-4-PAGE-07-0` 7개 화면에 `ScreenContainer background="primary"` 적용(공용 배경
-컴포넌트 신설, `components/Layout/ScreenContainer.tsx`) — 상세는
-`docs/design-verification.md` §5-7 참고. 2026-09-13 실기기 재캡처로 전부 해결 확인.
-
----
+- [해결] 화면 배경색 7개 화면 적용 (2026-09-13)
 
 ## 2026-09-13 보고서 생성 실패 진단 + 장부별 생성 폼 시안 대조
 
@@ -1425,11 +1361,7 @@ POST /groups/5/reports {"reportType":"BY_LEDGER","title":"Wrgv","ledgerIds":[22]
 철회하고 "프론트 자체 버그" 섹션으로 옮겼다.
 
 
-### [결함 → 반영 완료] ETC-4-PAGE-03-0 — 배경 흰색
-
-기준 시트: `더보기_보고서생성하기_장부별.png`(디자인 완료). 폼형 화면, 배경 흰색 확인 —
-`ScreenContainer background="secondary"` 적용. `design-verification.md` §5-7 확정
-목록으로 이동.
+- [해결] ETC-4-PAGE-03-0 — 배경 흰색 (2026-09-13)
 
 ### [결함 → 반영 완료] ETC-4-PAGE-03-0 — "보고서 제목" 필수 표시 누락
 
@@ -1442,24 +1374,9 @@ POST /groups/5/reports {"reportType":"BY_LEDGER","title":"Wrgv","ledgerIds":[22]
 똑같이 빨간 별표를 요구한다 — 이번 라운드 범위 밖이라 적용은 안 했다, 다음 라운드에서
 그대로 `required` prop만 켜면 된다.
 
-### [결함 → 반영 완료] ETC-4-PAGE-03-0 — "+ 선택하기" 버튼 스타일
+- [해결] ETC-4-PAGE-03-0 — "+ 선택하기" 버튼 스타일 (2026-09-13)
 
-명세 No.3 [상태]: 미선택 시 흰 배경+회색 테두리+회색 텍스트(Outlined). 기존
-`Button hierarchy="secondary"`는 옅은 파랑 채움+파란 텍스트라 시안과 다르다.
-`Button` 기존 hierarchy(primary/secondary/tertiary)엔 아웃라인 계열이 없어 새
-`outlined` hierarchy를 추가(흰 배경+회색 테두리(`BORDER_NEUTRAL_NORMAL`)+회색 텍스트
-(`FOREGROUND_NEUTRAL_SUBTLE`)), 이 버튼만 `hierarchy="outlined"`로 교체.
-
-### [결함 → 반영 완료] ETC-4-PAGE-03-0 — "구분" 세그먼트 폭/배치/미선택 색
-
-명세 No.4: 3개 pill이 내용 폭만큼만 차지하고 좌측에 모여야 하는데(현재 `flex:1`로
-화면 폭 3등분), 미선택 버튼은 회색(Disabled) 채움+회색 텍스트여야 하는데(현재 흰
-배경+검정 텍스트) 둘 다 달랐다. `OutlinePill.tsx`(공용 컴포넌트, `flex:1` 제거해
-좌측 정렬/내용 폭으로, 미선택 스타일을 `FILL_DISABLED` 배경+`FOREGROUND_DISABLED`
-텍스트로 교체 — 실제 `disabled` 처리는 안 함, 터치는 그대로 동작(명세 [액션] 그대로).
-이 컴포넌트는 `ReportCreateByPeriodScreen.tsx`도 같이 쓰는데, 그 화면 스펙시트
-(`더보기_보고서생성하기_기간별.png`)도 직접 열어 정확히 동일한 요구사항(좌측 정렬+
-미선택 회색)임을 확인한 뒤에 공유 컴포넌트를 고쳤다 — 추측 아님.
+- [해결] ETC-4-PAGE-03-0 — "구분" 세그먼트 폭/배치/미선택 색 (2026-09-13)
 
 ### [확인] 이탈 방지 모달 — 이미 구현됨, 문구 일치
 
@@ -1524,11 +1441,7 @@ GET /groups/6/ledgers       → {"data":[{"ledgerId":27,"folderId":null,...}, ..
 남아 있던 것으로 보이는 장부 2건(`ledgerId 25/26`, "Fff"/"Fcff")은 이번 라운드가 만든 게
 아니라 건드리지 않았다 — 필요하면 정리 확인 요청.
 
-### [결함 → 반영 완료] COM-1-PAGE-02-0 (WithdrawGuideScreen) — 카드 누락 + 배경 미판정
-
-시안(`글로벌설정_내프로필_탈퇴하기.png`): 안내 불릿 목록 전체가 흰 카드 하나 안에 들어있고,
-배경은 옅은 블루. 기존 구현은 배경 위에 불릿이 평면으로 얹혀 있었다. `CardBase`로 감싸고
-`ScreenContainer background="primary"` 적용.
+- [해결] COM-1-PAGE-02-0 (WithdrawGuideScreen) — 카드 누락 + 배경 미판정 (2026-09-13)
 
 ### [결함 → 반영 완료] COM-2-PAGE-04-0 (WithdrawOwnershipTransferScreen) — 카드 누락 + 배경 미판정
 
@@ -1569,19 +1482,7 @@ GET /groups/6/ledgers       → {"data":[{"ledgerId":27,"folderId":null,...}, ..
 
 ## 2026-09-13 기간별 보고서 생성 폼 + 장부 선택 화면 대조
 
-### [결함 → 반영 완료] ETC-4-PAGE-04-0 (ReportCreateByPeriodScreen) — 필수 별표 반전
-
-시안: "보고서 제목\*"에만 별표, "기간"엔 없음. 기존 구현은 정확히 반대(제목 없음, 기간 있음).
-`TextField`에 `required`를 옮기고 `SelectionListItem`(기간)의 `required`를 뗐다.
-
-**경위 조사**: 두 컴포넌트(`TextField`/`SelectionListItem`) 모두 `required`가 화면별로 독립
-지정하는 prop이라 컴포넌트 자체의 결함은 아니었다 — 화면 작성 시 어느 필드가 "진짜 필수
-표시 대상"인지(전부 필수여도 시안은 제목에만 별표를 그리는 경우가 많음)를 착각한 개별
-실수였다. `required` prop을 쓰는 전 화면(8곳)을 스펙시트와 대조한 결과, `DuesCreateScreen`/
-`DuesEditScreen`에도 같은 반전이 각 2건씩(장부·기간엔 있으면 안 되는데 있고, 제목·금액엔
-있어야 하는데 없음) 있어 함께 고쳤다. `TransactionRegisterScreen`(`ADD-1-PAGE-01-0`)은 시안
-자체가 "내역명·장부 둘 다 별표" 방식이라 원래도 정확했다 — 상세 표는
-`docs/design-verification.md` §5-3 참고.
+- [해결] ETC-4-PAGE-04-0 (ReportCreateByPeriodScreen) — 필수 별표 반전 (2026-09-13)
 
 ### [결함 → 반영 완료] ETC-4-PAGE-04-0 — 기간 필드 형태 (박스 → SelectionListItem 행이었음)
 
@@ -1605,17 +1506,7 @@ GET /groups/6/ledgers       → {"data":[{"ledgerId":27,"folderId":null,...}, ..
 두 시안 모두 배경이 흰색임을 직접 확인, `ScreenContainer background="secondary"` 적용.
 `docs/design-verification.md` §5-7 확정 목록으로 이동(흰색 5→7, 미판정 151→149).
 
-### [결함 → 반영 완료] ETC-5-PAGE-01-0 (ReportLedgerSelectScreen) — 검색 필드 형태
-
-시안 No.2: 둥근 pill, 테두리, 내부 흰색, 우측 돋보기. 기존 구현은 회색 채움 박스.
-`SearchField`를 쓰는 다른 7개 화면(`DuesCreateScreen`/`DuesMemberEditScreen`/`FolderScreen`/
-`LedgerSearchScreen`/`MemberManageScreen`/`ReceiptSearchScreen`/`TransactionSearchScreen`)
-중 스펙시트를 확보한 `FolderScreen`(`FDR-1-PAGE-01-0`, `폴더_메인화면.png`)을 대조해보니
-회색 채움 박스가 시안과 일치했다 — 즉 이 화면(`ETC-5-PAGE-01-0`)만 다른 형태를 요구하는
-경우였다. 컴포넌트를 뜯어보니 `variant="outline"`(흰 배경 `FILL_NEUTRAL_SUBTLE`=`#FFFFFF`
-+ 테두리, 포커스 시 파란 테두리)이 이미 구현돼 있는데 실제로 쓰는 화면이 하나도 없었다 —
-새로 만들 필요 없이 이 화면에만 `variant="outline"`을 지정했다. 공용 컴포넌트 기본값은
-그대로 두어 다른 7개 화면에 영향 없음.
+- [해결] ETC-5-PAGE-01-0 (ReportLedgerSelectScreen) — 검색 필드 형태 (2026-09-13)
 
 ### [관찰] ETC-5-PAGE-01-0 그리드 하위 날짜 4자리 — 앱 전체 YY/YYYY 혼재 조사로 확장
 
@@ -1648,15 +1539,7 @@ GET /groups/6/ledgers       → {"data":[{"ledgerId":27,"folderId":null,...}, ..
 (DUE-3-PAGE-01-0), `납부관리_납부요청.png`(DUE-3-PAGE-04-0), `납부관리_회비상세_수정.png`
 (DUE-3-PAGE-06-0).
 
-### [결함 → 반영 완료] DUE-2-PAGE-01-0 / DUE-3-PAGE-06-0 — 장부·기간 필드 형태
-
-`DuesCreateScreen.tsx`/`DuesEditScreen.tsx` 둘 다 장부/기간을 `SelectionListItem`(라벨+값+꺾쇠
-한 줄 행)으로 구현했었는데, 시안 No.4/No.5는 라벨 아래 테두리 박스다 — 장부는 미선택 시
-"+ 선택하기"(선택 시 장부명), 기간은 미선택 시 "YY.MM.DD ~ YY.MM.DD" placeholder + 우측
-캘린더 아이콘(선택 시 "2026.04.22 ~ 2026.04.25"). 오늘 `ETC-4-PAGE-04-0`(기간별 보고서 생성)에서
-이미 만든 박스 스타일을 그대로 재사용해 두 화면 모두 고쳤다. 기간 구분자도 " - "→" ~ "로 통일.
-`duesScreenText.ts`의 placeholder 문구도 시안 그대로("장부를 선택해주세요."→"+ 선택하기",
-"기간을 선택해주세요."→"YY.MM.DD ~ YY.MM.DD") 수정.
+- [해결] DUE-2-PAGE-01-0 / DUE-3-PAGE-06-0 — 장부·기간 필드 형태 (2026-09-13)
 
 ### [관찰] 기간 자릿수 시트 간 불일치 — 공용화 안 함
 
@@ -1699,12 +1582,7 @@ prop이 없어 미구현 상태였다(실기기 캡처에 키보드가 없던 �
 컴포넌트, 전부 코드상 정상 연결. `DuesEditScreen` 제목 필드도 `disabled` prop 없어 원래
 활성. 코드 변경 없음 — 실기기 재현 시 캐시/세션 문제로 의심(§5-12 Metro 캐시 사고 전례).
 
-### [결함 → 반영 완료] DUE-2-PAGE-03-0 — CLOSED 상태에서 "회비 수정" 메뉴까지 숨겨짐
-
-`status!=='CLOSED'` 조건이 "회비 수정"/"모임원 선택"을 묶어 숨겼는데, 시안 Case A(마감된
-회비)는 "회비 수정 / 회비 삭제" 두 개를 보여준다. "회비 수정"은 항상 노출, "모임원 선택"/
-"회비 마감"만 CLOSED에서 숨기도록 `DuesDetailScreen.tsx` 조건 분리. `DuesEditScreen.tsx`의
-"CLOSED는 진입 방법이 없다" 주석도 정정.
+- [해결] DUE-2-PAGE-03-0 — CLOSED 상태에서 "회비 수정" 메뉴까지 숨겨짐 (2026-09-17)
 
 ### [확인, 현재 동작 유지] CLOSED 상태 수정 화면 — 필드 잠금 규정 없음
 
@@ -1738,21 +1616,7 @@ prop이 없어 미구현 상태였다(실기기 캡처에 키보드가 없던 �
 사용자 실기기 캡처 보고("2면부터 카드가 잘려 보인다"). 기준 시트: 장부 상세 시안(폴더 쪽),
 `더보기_보고서생성_기간보고서조회.png` No.3.
 
-### [결함 → 반영 완료] FDR-2-PAGE-05-0 (LedgerDetailScreen) / ETC-4-PAGE-07-0 (ReportPeriodEntriesScreen) — 캐러셀 2면부터 카드 잘림
-
-두 화면 모두 캐러셀 컴포넌트를 공유하지 않고 각자 `ScrollView horizontal pagingEnabled` +
-`snapToInterval`을 독립적으로 복붙해 구현하고 있었다. 원인: `snapToInterval={CARD_WIDTH+12}`가
-스크롤뷰 `style`의 `paddingLeft:24`(우측엔 없음, 비대칭)를 스냅 계산에 안 넣었다 — 콘텐츠
-원점 0부터 간격의 배수로만 스냅 지점을 잡다 보니 실제 렌더링이 밀려 있는 24px만큼 페이지가
-누적될수록 어긋났다. 1면은 이 인셋이 그냥 카드 여백처럼 보여 정상으로 보였을 뿐이다.
-
-수정: `Dimensions.get('window')` 고정값 → `useWindowDimensions()`. 슬라이드를 화면 폭
-그대로 채우고 카드 여백을 슬라이드 안쪽 `paddingHorizontal:24`로 옮겨 `snapToInterval` 자체를
-제거 — `pagingEnabled` 기본 동작(뷰포트 폭 단위 스냅)만으로 항상 정확하게 맞도록 했다. dots
-인디케이터 계산 기준도 `windowWidth`로 맞춤.
-
-전수 조사(`snapToInterval`/`pagingEnabled` grep) 결과 캐러셀(가로 페이징)을 쓰는 화면은 이
-둘뿐 — 다른 `AmountCard` 사용처(대시보드, 내역, 보관함 장부 내역 등)는 단일 카드라 무관.
+- [해결] FDR-2-PAGE-05-0 (LedgerDetailScreen) / ETC-4-PAGE-07-0 (ReportPeriodEntriesScreen) — 캐러셀 2면부터 카드 잘림 (2026-09-18)
 
 ### [기록] 2026-09-13 대조에서 놓쳤던 이유
 
@@ -1764,20 +1628,7 @@ prop이 없어 미구현 상태였다(실기기 캡처에 키보드가 없던 �
 
 기준 시트: `화면명세서\폴더\폴더_메인화면.png` Case A("폴더 헤더 메뉴").
 
-### [결함 → 반영 완료] 앱바 통계 아이콘 누락
-
-시안 No.1: 앱바 우측에 통계/분석 아이콘 + ⋮ 두 개. 현재는 ⋮ 하나뿐이었다.
-
-**1-1 확인**: 통계 화면(`StatisticsScreen`) 진입점은 이미 `DashboardScreen`(홈 퀵서비스
-카드)과 `MoreScreen`(더보기 메뉴)에 있다 — 둘 다 시안 경로와 무관하게 정상 동작하는
-별개 진입점이라 유지, 충돌 아님. 폴더 메인엔 진입점이 아예 없었으므로 이번엔 "빠진 걸
-채우는" 경우다.
-
-**1-2 확인**: `assets/icons/content/Graph.png`가 이미 있고 `MoreScreen`이 통계 아이콘으로
-쓰고 있다 — 같은 자산 재사용, 새로 안 만듦.
-
-`FolderScreen.tsx` 앱바 `rightIcons`에 통계 아이콘 추가(루트 화면에만, `navigation.navigate
-('Statistics')`).
+- [해결] 앱바 통계 아이콘 누락 (2026-09-18)
 
 ### [결함 → 반영 완료] 헤더 메뉴 구조 — 2차 메뉴 제거, 평면 5항목·3그룹
 
@@ -1816,17 +1667,7 @@ prop이 없어 미구현 상태였다(실기기 캡처에 키보드가 없던 �
 기준 시트: `폴더_메뉴_예산설정.png`(FDR-2-PAGE-02-0), `폴더_장부상세_이름변경하기.png`
 (FDR-3-MODAL-03-0).
 
-### [결함 → 반영 완료] FDR-2-PAGE-02-0 — 예산 설정 리스트 행이 2줄+아이콘
-
-시안 No.2: 좌측 장부명, 우측 예산 금액, 그 우측 꺾쇠 — 한 줄. 현재는 `FolderItem`(아이콘 +
-장부명, 아래줄에 "예산 N원")으로 2줄이었다. `SelectionListItem type="picker"`(같은 종류
-행 전용 기존 컴포넌트)로 교체 — 새 컴포넌트 안 만듦. 예산 미설정 시 "0원" 노출로 변경(전엔
-"예산 미설정" 문구 — 공유 상수 `LEDGER_ITEM_BUDGET_UNSET`은 다른 화면도 쓰고 있어 그대로
-두고 이 화면만 로컬 처리로 분리). 정렬은 서버 응답 순서 그대로였는데 시안이 "최신 생성
-장부순"을 명시해 `createdAt` 내림차순 클라이언트 정렬 추가 — `getAllLedgersInGroup`
-매핑에서 버려지고 있던 `createdAt`을 `LedgerSummary`에 옵셔널로 살려서 썼다(다른 소비처는
-그 필드가 없어 옵셔널 처리, 영향 없음). 배경도 미지정이었어서 시안대로 `BACKGROUND_PRIMARY`
-적용.
+- [해결] FDR-2-PAGE-02-0 — 예산 설정 리스트 행이 2줄+아이콘 (2026-09-18)
 
 ### [결함 → 반영 완료] FDR-3-MODAL-03-0 — 안내 문구·자동 포커스 미구현
 

@@ -15,8 +15,8 @@
 
 ## 확인 완료 — 백엔드 노티(2026-09-06) 01-1 · 02번
 
-- **01-1 기록 보관 생성 경로/응답 필드**: `archiveService.ts`가 이미 `POST/GET /groups/{groupId}/archives`를 쓰고, 응답의 `createdAt`/`ledgerCount` 등도 코드가 그대로 매핑하고 있음을 코드 읽기로 확인. **완료.**
-- **02 `PATCH /auth/password`의 `refreshToken` 전달**: `authService.ts`의 `changePassword()`가 이미 `refreshToken`을 바디에 담아 보내고 있음을 코드 읽기로 확인. **완료.**
+- [해결] 01-1 기록 보관 생성 경로/응답 필드 (2026-09-06)
+- [해결] 02 `PATCH /auth/password`의 `refreshToken` 전달 (2026-09-06)
 
 ---
 
@@ -253,10 +253,7 @@ Auth.txt 정책상 이메일 인증(6·7번)이 회원가입 플로우의 필수
 
 ---
 
-## 확정됨(2026-09-11, Swagger 전수 대조 + 실호출) — 프론트 자체 버그 3건 (참고용, 백엔드 조치 불필요)
-
-Swagger 덤프와 코드를 대조하다 프론트가 잘못된 경로/바디로 부르고 있던 곳을 찾아 바로 고쳤습니다.
-백엔드는 이미 정상 구현돼 있었습니다 — 서버 요청이 아니라 기록 목적으로 남깁니다.
+## 확정됨(2026-09-11, Swagger 전수 대조 + 실호출) — 프론트 자체 버그 3건
 
 - **폴더 전체 백업이 항상 실패하던 원인**: `archiveService.ts`가 `POST /groups/{groupId}/folders/archive`
   (실제로는 존재하지 않는 경로)를 부르고 있었습니다 — 실호출로 `404 RESOURCE_NOT_FOUND` 확인.
@@ -266,13 +263,7 @@ Swagger 덤프와 코드를 대조하다 프론트가 잘못된 경로/바디로
   막힘), 내역이 1건이라도 있으면 성공하고 이때 빈 장부까지 전부 함께 보관됩니다 — 다이얼로그 문구
   ("현재까지 장부를 모두 보관할까요?")와 일치하는 의도된 동작으로 보여 서버 쪽 조치는 불필요합니다.
   저희 쪽 에러 문구만 조건에 맞게 고쳤습니다("아직 등록된 내역이 없어요...").
-- **이메일 인증 발송/확인 경로**: 명세 `Auth.txt`엔 `/auth/email/verification`(단수)이라 적혀 있어
-  그대로 구현했는데, 실제 서버 경로는 `/auth/email-verifications`(복수, 하이픈)입니다. 예전 경로로는
-  `401`이 나서 "서버 미구현이라 나는 에러"로 오판하기 쉬웠습니다 — 새 경로로 고친 뒤 실호출하니
-  `500 MAIL_SEND_FAILED`가 나서 **라우팅은 정상, 개발 서버 메일 발송 설정만 안 돼 있는 상태**임을
-  확인했습니다(위 1순위 참고). 확인 응답 스키마도 예전 가정(`{verificationToken}`)과 달리
-  `{email, verified, verifiedAt}`이라 회원가입 요청에서 `verificationToken` 필드를 없앴습니다
-  (`POST /auth/signup` 스키마에도 그 필드가 없었습니다).
+- [해결] 이메일 인증 발송/확인 경로 (2026-09-11)
 - **비밀번호 변경 바디 누락 필드**: `PATCH /auth/password`가 `{currentPassword, newPassword}`만
   보내고 있었는데 Swagger 스키마엔 `refreshToken`이 포함돼 있습니다 — "현재 기기를 제외한 나머지
   Refresh Token을 폐기한다"는 기존 정책 메모와 앞뒤가 맞아, 이 기기 자체를 특정하려면 필요한
@@ -294,10 +285,11 @@ Swagger 덤프와 코드를 대조하다 프론트가 잘못된 경로/바디로
   13/14/15(groupId 5, 전부 진단용 텍스트)는 Report `DELETE` API가 없어 못 지웠습니다 —
   아래 "부탁" 섹션 참고.
 
-## 확정됨(2026-09-11, Swagger 전수 대조) — 제거된 항목: "서버 미구현"이 아니라 상태 태그가 낡아 있었던 것 4건
+---
+
+## 확정됨(2026-09-11, Swagger 전수 대조) — 제거된 항목(서버 미구현 태그가 낡았던 4건)
 
 아래는 예전에 "서버 미구현"으로 요청드렸던 항목인데, 이번 Swagger 전수 대조(77개 엔드포인트)로
-전부 이미 구현돼 있음을 확인해 요청 목록에서 뺍니다. 실제로 조치가 필요하지 않습니다.
 
 - **회원 탈퇴(`DELETE /auth/me`)** — Swagger에 구현돼 있고, 바디(`{ownershipTransfers, reasons,
   reasonDetail}`)도 명세와 정확히 일치합니다. `WithdrawReasonScreen`을 이 API로 연결했습니다
@@ -308,26 +300,23 @@ Swagger 덤프와 코드를 대조하다 프론트가 잘못된 경로/바디로
   응답 스키마(`userId`/`email`/`name`/`profileImageUrl`/`loginProvider`/`createdAt`)엔 전화번호
   필드가 없습니다 — 화면 쪽은 없는 데이터를 표시할 수 없어 그 행을 빼고 구현했습니다. 전화번호를
   실제로 노출할 계획이면 응답에 필드 추가가 필요합니다(이 부분만 남은 요청입니다).
-- **통계·분석(`GET /groups/{groupId}/statistics`)** — 이미 구현돼 있습니다. 프론트는 명세대로
-  화면(`screens/Statistics/StatisticsScreen.tsx`)·서비스 함수까지 이미 만들어 뒀고, 이번에
-  서버 상태를 "구현"으로 갱신하며 정상 연결까지 확인했습니다.
-- **비밀번호 변경(`PATCH /auth/password`)** — 위 "프론트 자체 버그 3건"과 동일 건입니다. 서버는
-  원래부터 구현돼 있었고, 바디에 `refreshToken`이 빠져 있던 프론트 버그였습니다. `POST
-  /auth/password/reset`(비밀번호 찾기, 임시 비밀번호 발송)은 이것과 별개 엔드포인트로, 이건
-  Swagger 어디에도 없어 아래 5순위에 그대로 남겨둡니다.
+- [해결] 통계·분석(`GET /groups/{groupId}/statistics`) (2026-09-11)
+- [해결] 비밀번호 변경(`PATCH /auth/password`) (2026-09-11)
+
+---
 
 ## 확정됨(9/6, 실호출) — Dues 2건
 
-7-B-2(회비 납부 상태 일괄 변경) 착수 전 직접 찔러봤습니다. 둘 다 **대조표가 맞았고, 코드에 바로 반영했습니다.**
+- [해결] `PATCH /dues/{duesId}/members`(일괄) — 정상 동작 확인. (2026-09-06)
+- [해결] `GET /dues/{duesId}/members` 응답의 `amount` — 존재 확인. (2026-09-06)
 
-- **`PATCH /dues/{duesId}/members`(일괄) — 정상 동작 확인.** `{"memberIds":[11],"status":"PAID"}` → `200 {"data":{"duesId":18,"changedCount":1,"status":"PAID","paidCount":1,"unpaidCount":0,"targetCount":1,"totalCollectedAmount":5000}}`. 단건 API(`PATCH /dues/{duesId}/members/{memberId}`) 순차 호출 대신 이 API를 바로 씁니다 — `services/duesService.ts`의 `updateDuesMembersPaymentStatus()`.
-- **`GET /dues/{duesId}/members` 응답의 `amount` — 존재 확인.** `{"memberId":11,"name":"VerifyM2","status":"UNPAID","amount":0,"paidAt":null}`. 다만 프론트는 어차피 `amount`가 전원 동일(부분 납부 미지원)이라 회비 상세의 `amount`를 그대로 써왔고 그걸로 결과가 같아 화면 버그는 없었습니다 — 응답 필드를 직접 쓰도록 바꾸는 건 급하지 않은 정리 항목으로 남겨둡니다.
+---
 
 ## 확정됨(9/5, 실호출, 7-C 후속) — folder-items / 증빙자료 앨범 / Report
 
 `VerifyDues`(groupId 2)에 테스트 폴더·장부·파일·보고서를 직접 만들어 세 엔드포인트 전부 실호출로 확인했습니다. **셋 다 대조표가 맞았습니다 — 명세 "미구현" 태그가 낡은 것이었습니다.** 상세 요청/응답 전문은 `docs/api-gaps.md` "확정됨" 절 6·7·8번 참고. `receipts`는 검증 직후 같은 날 화면(증빙자료 앨범 3종)까지 만들었고, `folder-items`/Report는 이번 라운드에서 코드를 안 건드렸습니다(다음 라운드에서 화면/교체 작업).
 
-- **`GET/POST /groups/{groupId}/folder-items`(+`/move`) — 둘 다 정상 동작, 명세와 필드 하나까지 일치.** 뎁스인(`folderId` 쿼리 파라미터 — `parentId` 아닙니다, 처음에 문서 안 보고 잘못 짚었습니다), 폴더+장부 혼합 조회, `keyword`(해당 레벨 한정, 하위 폴더까지 재귀 검색 안 함), `move`의 순환 구조 방지(`409 INVALID_PARENT_FOLDER`)까지 전부 명세 그대로 동작합니다. **폴더 해제 차단 UI와 다건 순차 이동 코드를 이 API로 교체할 수 있습니다.**
+- [해결] `GET/POST /groups/{groupId}/folder-items`(+`/move`) — 둘 다 정상 동작, 명세와 필드 하나까지 일치. (2026-09-05)
 - **`GET /groups/{groupId}/receipts` — 정상 동작, 진짜 페이지네이션. 화면 3개(증빙자료 앨범/검색/자료 상세) 전부 붙였습니다.** `content`/`page`/`size`/`totalElements`/`totalPages` 전부 정상 작동하고 `keyword`(내역 제목)·`from`/`to`(발생일 기간)·`type`(INCOME/EXPENSE) 필터도 됩니다. `sort` 이슈는 위 3순위 참고.
   - (참고, 급하지 않음) 응답에 축소본 URL이 따로 없어 그리드가 원본 이미지를 그대로 씁니다 — 장수가 많으면 느려질 수 있습니다. 여유 되실 때 업로드 시점 썸네일 생성을 검토해 주시면 좋겠습니다.
 - **Report 생성 `reportType` 분기 — 정상 동작하고, 옛 스키마는 이미 막혔습니다.** `reportType` 없이 옛 4필드(`title`/`ledgerIds`/`startDate`/`endDate`)로 보내면 이제 `400`(`fieldErrors:[{"field":"reportType","reason":"보고서 유형은 필수입니다."}]`)이 옵니다 — 화면 개발 시 새 스키마(`BY_LEDGER`/`BY_PERIOD`)로 바로 시작하면 됩니다. ⚠️ **다만 `entryType:"ALL"`을 보내면 `400`(빈 `fieldErrors`)이 납니다** — `INCOME`/`EXPENSE`는 정상 동작하니, "구분: 전체"는 `entryType` 필드 자체를 생략하는 것으로 처리해야 합니다. 이것만 확인 부탁드립니다 — 의도된 제약인지, 아니면 `ALL`도 받아야 하는데 서버 enum에서 빠진 것인지요.
@@ -345,6 +334,8 @@ Swagger 덤프와 코드를 대조하다 프론트가 잘못된 경로/바디로
 
 (`PATCH /auth/password`, 로그인 상태에서의 비밀번호 변경은 이미 구현돼 있습니다 — 헷갈리지
 않도록 구분해서 적습니다. 위 "제거된 항목" 참고.)
+
+**⚠️ "완료라고 했는데 실제로는 안 되는" 건이라 압축 없이 유지한다**: 백엔드 노티(2026-09-06)는 "마이페이지 3종 구현 완료"였지만 `POST /auth/password/reset`(프론트 `authService.requestPasswordReset()`)은 2026-09-13 재확인에서도 `401 UNAUTHORIZED`였고 `API_swagger.txt`에도 경로가 없다. 서버가 완료라고 해도 이 항목은 해결로 분류하지 않는다.
 
 **2026-09-13 재확인**: 백엔드 노티(2026-09-06)가 "마이페이지 3종 구현 완료"라고 해서
 이 엔드포인트도 됐는지 다시 실호출했는데 여전히 `401 UNAUTHORIZED`("인증이 필요합니다")
