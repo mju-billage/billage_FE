@@ -93,7 +93,7 @@ DSH-2-PAGE-01-0(알림 목록)이 실 API 연동으로 미구현→구현, ETC �
 
 **2026-09-19 갱신**: 이 표의 숫자가 2026-09-12 이후 여러 라운드(DUE 묶음 4·5, 폴더 예산 설정 등)에서 개별 행만 고치고 표는 안 고쳐 낡아 있었다 — 이번에 §2 실제 행(165개, 도메인별 표 헤더 제외)의 배경 열을 직접 세어 다시 맞췄다(블루 18 / 흰색 11 / 미판정 136). **2026-09-19 6-10에서 스플래시 행(`(ID 없음)`) 1개를 추가해 합계 166 / 미판정 137**이다(§5-7 미판정 목록 136개는 Screen ID가 없어 이 행을 넣지 않았다). §5-7 "미판정 목록"은 처음 137개로 이 표의 136과 1 차이가 났으나, 2026-09-19 스크립트 집합 차로 원인을 특정해 정정했다 — 목록 쪽에만 있던 ID는 `FDR-2-PAGE-02-0`(§2 행은 이미 블루, 목록에서 안 뺀 우리 쪽 누락)이고 §2에만 있는 ID는 없다. 지금은 두 목록 모두 136개(§5-18 5번).
 
-**2026-09-19 8-5**: 8-1(v1)·8-3(v3) 명세 측정 판정은 철회했다 — v1은 파일 단위 오염, v3는 프레임 좌표 오검출(번호 마커 ①②③까지 바운딩 박스에 포함돼 여백 스트립이 프레임 밖 흰 종이를 잼, `docs/lessons.md` 1-12). 이어서 프레임 x범위를 격자(50..410 / 430..790)에 고정한 **v5**(`docs/spec-background-v5.tsv`)로 `PAGE` 행 46개를 다시 반영했다(근거는 §2 배경 칸: `명세 프레임 실측 v5 (<파일>#<idx>, 상단 <HEX>, 점유율 N%)`). 기준점 6개 검증 통과, 점유율 60% 미만은 판정에 쓰지 않고 `수동 확인 필요`. 배경 열 의미 통일(8-4)은 유지. 현재 블루 26(PAGE) / 흰색 40(PAGE) + 51(모달·시트 표면) / 어두움 27(스낵바 표면) / 미판정 22(전부 PAGE, 스플래시 포함). **8-6**: 육안 확인으로 `DSH-1-PAGE-01-0`·`ETC-2-PAGE-02-0`(블루)·`ETC-3-PAGE-04-0`(흰색)을 확정하고 `-1` 변형 4개는 부모 `-0` 판정을 상속했다 → 블루 32 / 흰색 41(PAGE) / 미판정 15(전부 PAGE, 스플래시 포함). `ETC-3-PAGE-04-0`은 구현이 어두운 배경이라 시안↔구현 불일치 #12(§5-4)로 기록하고 안 고쳤다. **8-7**: 루트 `View`+`paddingTop: 60` 화면 등 레이아웃 우려 8개를 `edges={['bottom']}`(1개는 `[]`)로 마이그레이션해 남은 코드 불일치는 22건(슬롯 대기 21 + 기획 확인 1)이다. 미판정 15(변동 없음).
+**2026-09-19 8-5**: 8-1(v1)·8-3(v3) 명세 측정 판정은 철회했다 — v1은 파일 단위 오염, v3는 프레임 좌표 오검출(번호 마커 ①②③까지 바운딩 박스에 포함돼 여백 스트립이 프레임 밖 흰 종이를 잼, `docs/lessons.md` 1-12). 이어서 프레임 x범위를 격자(50..410 / 430..790)에 고정한 **v5**(`docs/spec-background-v5.tsv`)로 `PAGE` 행 46개를 다시 반영했다(근거는 §2 배경 칸: `명세 프레임 실측 v5 (<파일>#<idx>, 상단 <HEX>, 점유율 N%)`). 기준점 6개 검증 통과, 점유율 60% 미만은 판정에 쓰지 않고 `수동 확인 필요`. 배경 열 의미 통일(8-4)은 유지. 현재 블루 26(PAGE) / 흰색 40(PAGE) + 51(모달·시트 표면) / 어두움 27(스낵바 표면) / 미판정 22(전부 PAGE, 스플래시 포함). **8-6**: 육안 확인으로 `DSH-1-PAGE-01-0`·`ETC-2-PAGE-02-0`(블루)·`ETC-3-PAGE-04-0`(흰색)을 확정하고 `-1` 변형 4개는 부모 `-0` 판정을 상속했다 → 블루 32 / 흰색 41(PAGE) / 미판정 15(전부 PAGE, 스플래시 포함). `ETC-3-PAGE-04-0`은 구현이 어두운 배경이라 시안↔구현 불일치 #12(§5-4)로 기록하고 안 고쳤다. **8-7**: 루트 `View`+`paddingTop: 60` 화면 등 레이아웃 우려 8개를 `edges={['bottom']}`(1개는 `[]`)로 마이그레이션해 남은 코드 불일치는 22건(슬롯 대기 21 + 기획 확인 1)이다. 미판정 15(변동 없음). **9-3**: 스낵바 슬롯 검증 통과로 대기 19개 파일을 `ScreenContainer`로 마이그레이션(슬롯 12개 파일 + `bottom: 88` 래퍼 유지 7개 파일)해 코드 불일치는 22 → 1건(`ETC-3-PAGE-04-0`, 기획 확인 대기)이다. 미판정·§1 배경 표 값은 변동 없음.
 
 ## 2. 화면별 체크리스트
 
@@ -216,7 +216,7 @@ DSH-2-PAGE-01-0(알림 목록)이 실 API 연동으로 미구현→구현, ETC �
 | ☐ | Screen ID | 화면명 | 형식 | 권한 | 디자인 | 이미지 | 상태 | 배경 | 코드 위치 / 비고 |
 |---|---|---|---|---|---|---:|---|---|---|
 | ☐ | `ETC-1-PAGE-01-0` | 더보기 메인 | Page | 전체 | 완료 | 2장 | `[확인필요]` | 블루 (명세 프레임 실측 v5 (더보기/메인/더보기_메인.png#0, 상단 #F0F5FE, 점유율 90%)) | `screens/More/MoreScreen.tsx` — 상세: [design-diff.md#etc-1-page-01-0-더보기-메인](design-diff.md#etc-1-page-01-0-더보기-메인). **2026-09-12 등급 확정 — `[부족함]`→`[확인필요]`**: `design-diff.md`의 `[부족함]` 사유 6개를 전부 재검토했다. 해소 확인: (1) "빈 핸들러 4개"는 지난 라운드 확인대로 여전히 전부 연결돼 있음(`ReportMain`/`ReceiptAlbum`/`Statistics`/`Archive`), (2) 아바타 미리보기 개수가 시안(4개+"+3")과 다르게 기본값(3개)으로 렌더되고 있어 `AvatarList`에 `maxVisible={4}`를 명시해 맞춤, (3) 헤더 아이콘은 재확인 결과 시안·코드 둘 다 톱니바퀴(설정)로 이미 일치 — 이전 "실제는 알림 벨" 기록이 오기였다(다만 확인 중 `accessibilityLabel`이 "알림"으로 잘못 붙어 있던 실제 버그를 발견해 "설정"으로 고침), (4) 색상·(5) 텍스트 문구는 원래도 차이 없음. **판정 불가로 남는 것 3개** — 카드-메뉴 간격의 정밀한 픽셀 차이, 타이포 스케일, 버튼 눌림 상태 — 전부 실기기 스크린샷 픽셀 비교가 있어야 확정되는데 이 세션은 앱을 직접 실행할 수 없어(세션 제약, "실행은 사용자가 함") 판정 불가. 기능적으로 알려진 누락은 더 없어 `[부족함]`("요소·연결·API가 빠짐")보다는 `[확인필요]`("대응 후보는 있으나 실제 일치 여부 미확정")가 맞는 등급이라 판단해 옮긴다 |
-| ☐ | `ETC-2-PAGE-01-0` | 전체 모임 관리 | Page | 전체 | 완료 | 1장 | `[구현]` | 블루 (명세 프레임 실측 v5 (더보기/메인/더보기_모임전환_전체모임관리.png#0, 상단 #F0F5FE, 점유율 90%)) | `screens/GroupManager/AllGroupsScreen.tsx` |
+| ☐ | `ETC-2-PAGE-01-0` | 전체 모임 관리 | Page | 전체 | 완료 | 1장 | `[구현]` | 블루 (명세 프레임 실측 v5 (더보기/메인/더보기_모임전환_전체모임관리.png#0, 상단 #F0F5FE, 점유율 90%)) | `screens/GroupManager/AllGroupsScreen.tsx` · **시안 확인 완료 (2026-09-19)**: 모임 추가 버튼이 우측 상단이 아니라 리스트 맨 아래 `+ 새로운 모임 추가하기` 카드 — 시안도 같고 코드(`EntityCard type="newGroup"`)가 맞다 |
 | ☐ | `ETC-2-PAGE-02-0` | 모임 관리 | Page | 전체 | 완료 | 1장 | `[구현]` | 블루 (육안 확인 2026-09-19, 원본 크롭 — v5 19%는 수동 확인 필요였고 이 육안 확인으로 확정) | `screens/GroupManager/GroupManageScreen.tsx` — **2026-09-06 §5-4 해결**: `design-index.json`에 `ETC-2-PAGE-02-0.png`가 `ETC-2-PAGE-03-0.png`와 별개 파일로 존재하고, 삭제 시안(`ETC-3-MODAL-02-0`)의 배경 화면도 "< 모임 관리"라는 독립 페이지 경로/제목으로 등장해 — 오기가 아니라 실제로 빠져 있던 화면이었다. 더보기 → 모임 관리를 이 화면으로 새로 연결하고, 그 아래 모임 프로필 변경/모임원 관리(→ `GroupManagerScreen`)/모임 나가기/모임 삭제하기 4개 진입 행을 붙였다 |
 | ☐ | `ETC-2-PAGE-03-0` | 모임 관리자 | Page | 전체 | 완료 | 1장 | `[구현]` | 블루 (명세 프레임 실측 v5 (더보기/모임관리자/더보기_모임관리자.png#0, 상단 #F0F5FE, 점유율 81%)) | `screens/GroupManager/GroupManagerScreen.tsx` |
 | ☐ | `ETC-2-PAGE-04-0` | 보고서 리스트 | Page | 전체/총무 | 진행 | 4장 | `[구현]` | 블루(#F0F5FE) | `screens/Report/ReportMainScreen.tsx` — 7-E(생성 플로우, 조회 플로우는 다음 단계). 장부별/기간별 탭, 무한 스크롤(2026-09-05 갱신 — 최초엔 `size=50` 단일 조회였다가, 보고서는 삭제 API가 없어 계속 누적된다는 지적으로 `TransactionsScreen`류 `onEndReached` 페이지네이션으로 교체). 카드 탭은 "보고서 상세 조회"(조회 플로우 대상)로 가야 하나 그 화면이 아직 없어 no-op. **2026-09-12 관찰(코드 변경 없음)**: 건수 표기가 "1건"인데 시안은 "2 건"(숫자·단위 사이 공백) — `docs/design-diff.md`에 [관찰]로 기록, 전 화면 공통 패턴 의심이라 일괄 판단 전까지 보류. 확인 질문 답변: `+` 버튼은 `ReportCreateSheet`(`ETC-3-SHEET-05-0`)를 정상 호출하며 장부별 화면으로 바로 가는 우회 경로 없음 |
@@ -1378,58 +1378,58 @@ showDropdown/onPressDropdown/selectedCount/showSelectionCount`, `IconButton.disa
 
 | Screen ID | 파일(`src/screens/` 기준) | 최상위 래퍼 | SafeArea edges | 배경색 지정 방식(루트) | 키보드 처리 | 스크롤 컨테이너 | 난이도 | 마이그레이션 완료(6-5) |
 |---|---|---|---|---|---|---|---|---|
-| `COM-1-PAGE-01-0` | `LoginScreen.tsx` | Pressable | 해당없음(SafeAreaView 없음) | 미지정 | 없음(TextField) | 없음 | B | |
+| `COM-1-PAGE-01-0` | `LoginScreen.tsx` | Pressable | 해당없음(SafeAreaView 없음) | 미지정 | 없음(TextField) | 없음 | B | ✅ 2026-09-19(9-3, secondary — 명세 실측 v5 확정, `ScreenContainer` + **스낵바 슬롯**(absolute 래퍼 제거), `edges={['bottom']}`(루트가 `View`+`paddingTop: 80`), **스크롤 추가**) |
 | `COM-2-PAGE-01-0` | `Signup/TermsAgreementScreen.tsx` | View | 해당없음(SafeAreaView 없음) | 미지정 | 입력없음 | 없음 | B | ✅ 2026-09-19(8-7, secondary — 명세 실측 v5 확정, `ScreenContainer background="secondary" edges={['bottom']}` — 상단 인셋을 안 줘 기존 `paddingTop: 60` 배치 유지, 루트 `style`(padding)은 그대로 전달, **키보드 회피(기본 true) 새로 적용**) |
 | `COM-2-PAGE-02-0` | `PasswordReset/PasswordResetScreen.tsx` | View | 해당없음(SafeAreaView 없음) | 미지정 | 없음(TextField) | 없음 | B | ✅ 2026-09-19(8-7, secondary — 명세 실측 v5 확정, `ScreenContainer background="secondary" edges={['bottom']}` — 상단 인셋을 안 줘 기존 `paddingTop: 60` 배치 유지, 루트 `style`(padding)은 그대로 전달, **키보드 회피(기본 true) 새로 적용**) |
 | `COM-3-PAGE-01-0` | `Signup/TermsOfServiceScreen.tsx` | LegalDocumentView → SafeAreaView | top, bottom (LegalDocumentView 내부) | 미지정 | 입력없음 | ScrollView(LegalDocumentView 내부) | A | ✅ 2026-09-19(6-6, `LegalDocumentView` 1곳 — primary, 미판정-추정 적용) |
 | `COM-3-PAGE-01-0` | `Signup/PrivacyPolicyScreen.tsx` | LegalDocumentView → SafeAreaView | top, bottom (LegalDocumentView 내부) | 미지정 | 입력없음 | ScrollView(LegalDocumentView 내부) | A | ✅ 2026-09-19(6-6, 위와 같음) |
 | `COM-3-PAGE-01-0` | `Signup/MarketingConsentScreen.tsx` | LegalDocumentView → SafeAreaView | top, bottom (LegalDocumentView 내부) | 미지정 | 입력없음 | ScrollView(LegalDocumentView 내부) | A | ✅ 2026-09-19(6-6, 위와 같음) |
-| `COM-3-PAGE-02-0` | `Signup/SocialSignupInfoScreen.tsx` | View | 해당없음(SafeAreaView 없음) | 미지정 | 없음(TextField) | 없음 | B | ✅ 2026-09-19(8-7, secondary — 명세 실측 v5 확정, `ScreenContainer background="secondary" edges={['bottom']}` — 상단 인셋을 안 줘 기존 `paddingTop: 60` 배치 유지, 루트 `style`(padding)은 그대로 전달, **키보드 회피(기본 true) 새로 적용**) |
-| `COM-3-PAGE-03-0` | `Signup/SignupInfoScreen.tsx` | View | 해당없음(SafeAreaView 없음) | 미지정 | 없음(TextField) | 없음 | B | ✅ 2026-09-19(8-7, secondary — 명세 실측 v5 확정, `ScreenContainer background="secondary" edges={['bottom']}` — 상단 인셋을 안 줘 기존 `paddingTop: 60` 배치 유지, 루트 `style`(padding)은 그대로 전달, **키보드 회피(기본 true) 새로 적용**) |
+| `COM-3-PAGE-02-0` | `Signup/SocialSignupInfoScreen.tsx` | View | 해당없음(SafeAreaView 없음) | 미지정 | 없음(TextField) | 없음 | B | ✅ 2026-09-19(8-7, secondary — 명세 실측 v5 확정, `ScreenContainer background="secondary" edges={['bottom']}` — 상단 인셋을 안 줘 기존 `paddingTop: 60` 배치 유지, 루트 `style`(padding)은 그대로 전달, **키보드 회피(기본 true) 새로 적용**) · 9-3 **스크롤 추가**(`ScrollView`+`keyboardShouldPersistTaps="handled"`, CTA 고정) |
+| `COM-3-PAGE-03-0` | `Signup/SignupInfoScreen.tsx` | View | 해당없음(SafeAreaView 없음) | 미지정 | 없음(TextField) | 없음 | B | ✅ 2026-09-19(8-7, secondary — 명세 실측 v5 확정, `ScreenContainer background="secondary" edges={['bottom']}` — 상단 인셋을 안 줘 기존 `paddingTop: 60` 배치 유지, 루트 `style`(padding)은 그대로 전달, **키보드 회피(기본 true) 새로 적용**) · 9-2 **스크롤 추가**(`ScrollView`+`keyboardShouldPersistTaps="handled"`, CTA 고정) |
 | `COM-3-PAGE-04-0` | `PasswordReset/PasswordResetSentScreen.tsx` | View | 해당없음(SafeAreaView 없음) | 미지정 | 입력없음 | 없음 | B | |
-| `COM-4-PAGE-01-0` | `Signup/EmailVerificationScreen.tsx` | View | 해당없음(SafeAreaView 없음) | 미지정 | 없음(VerificationField) | 없음 | B | |
+| `COM-4-PAGE-01-0` | `Signup/EmailVerificationScreen.tsx` | View | 해당없음(SafeAreaView 없음) | 미지정 | 없음(VerificationField) | 없음 | B | ✅ 2026-09-19(9-3, secondary — 명세 실측 v5 확정, `ScreenContainer`로 이동 — 스낵바 래퍼는 `bottom: 88`(하단 CTA 위)이라 슬롯(bottom 24)을 못 써 **absolute 래퍼 유지**, `edges={['bottom']}`(루트가 `View`+`paddingTop: 60`, 스타일 그대로)) |
 | `COM-5-PAGE-01-0` | `Signup/SignupCompleteScreen.tsx` | View | 해당없음(SafeAreaView 없음) | 미지정 | 입력없음 | 없음 | B | ✅ 2026-09-19(8-7, secondary — 명세 실측 v5 확정, `ScreenContainer background="secondary" edges={['bottom']}` — 상단 인셋을 안 줘 기존 `paddingTop: 60` 배치 유지, 루트 `style`(padding)은 그대로 전달, **키보드 회피(기본 true) 새로 적용**) |
 | `DSH-1-PAGE-01-0` | `Dashboard/DashboardScreen.tsx` | SafeAreaView | top | 상수 BACKGROUND_PRIMARY = #F0F5FE | 입력없음 | ScrollView | B | |
 | `DSH-2-PAGE-01-0` | `Notification/NotificationScreen.tsx` | SafeAreaView | top, bottom | 상수 BACKGROUND_SECONDARY = #FFFFFF | 입력없음 | FlatList | A | ✅ 2026-09-19(6-6, secondary — 코드 기존값 유지) |
 | `DSH-2-PAGE-03-0` | `Calendar/CalendarScreen.tsx` | SafeAreaView | top, bottom | 상수 BACKGROUND_SECONDARY = #FFFFFF | 입력없음 | ScrollView | A | ✅ 2026-09-19(6-6, secondary — 코드 기존값 유지) |
 | `DTB-1-PAGE-01-0` | `Transactions/TransactionsScreen.tsx` | SafeAreaView | top, bottom | 상수 BLUE_50 = #F0F5FE | 입력없음 | SectionList | A | ✅ 2026-09-19(6-6, primary — 코드 기존값 유지) |
 | `DTB-2-PAGE-01-0` | `Transactions/TransactionSearchScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(SearchField) | SectionList | B | ✅ 2026-09-19(8-6, secondary — 명세 실측 v5 확정, edges 기본값과 동일, 루트 `container{flex:1}` 제거, **키보드 회피(기본 true) 새로 적용**) |
-| `DTB-2-PAGE-02-0`<br>`DTB-2-PAGE-03-0` | `Folder/TransactionDetailScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | ScrollView | B(6-5 재분류) | — (스낵바 absolute) |
+| `DTB-2-PAGE-02-0`<br>`DTB-2-PAGE-03-0` | `Folder/TransactionDetailScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | ScrollView | B(6-5 재분류) | ✅ 2026-09-19(9-3, secondary — 명세 실측 v5 확정, `ScreenContainer` + **스낵바 슬롯**(absolute 래퍼 제거)) |
 | `DTB-3-PAGE-01-0` | `Folder/TransactionReceiptDetailScreen.tsx` | SafeAreaView | top, bottom | 상수 FILL_INVERSE = #374151 | 입력없음 | 없음 | C | |
-| `DTB-3-PAGE-02-0`<br>`ADD-1-PAGE-01-0`<br>`ADD-4-PAGE-01-0` | `Transactions/TransactionRegisterScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | ScrollView | C | |
+| `DTB-3-PAGE-02-0`<br>`ADD-1-PAGE-01-0`<br>`ADD-4-PAGE-01-0` | `Transactions/TransactionRegisterScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | ScrollView | C | ✅ 2026-09-19(9-3, secondary — 명세 실측 v5 확정, `ScreenContainer`로 이동 — 스낵바 래퍼는 `bottom: 88`(하단 CTA 위)이라 슬롯(bottom 24)을 못 써 **absolute 래퍼 유지**) |
 | `FDR-1-PAGE-01-0`<br>`FDR-2-PAGE-04-0` | `Folder/FolderScreen.tsx` | SafeAreaView | top, bottom | 상수 BLUE_50 = #F0F5FE | 없음(SearchField) | FlatList | B | |
 | `FDR-2-PAGE-01-0` | `Folder/FolderSelectMoveScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | FlatList | A | ✅ 2026-09-19(8-6, `primary`→`secondary` — 명세 실측 v5 확정, 이전 `primary`는 미판정-추정이었음) |
 | `FDR-2-PAGE-02-0` | `Folder/FolderBudgetListScreen.tsx` | SafeAreaView | top, bottom | 상수 BACKGROUND_PRIMARY = #F0F5FE | 없음(TextField) | FlatList | B | |
 | `FDR-2-PAGE-05-0` | `Folder/LedgerDetailScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | ScrollView+FlatList | B | ✅ 2026-09-19(항목 1, 원래 B) |
-| `FDR-3-PAGE-01-0` | `Folder/FolderMoveDestinationScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | FlatList | B(6-5 재분류) | — (스낵바 absolute) |
+| `FDR-3-PAGE-01-0` | `Folder/FolderMoveDestinationScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | FlatList | B(6-5 재분류) | ✅ 2026-09-19(9-3, secondary — 명세 실측 v5 확정, `ScreenContainer`로 이동 — 스낵바 래퍼는 `bottom: 88`(하단 CTA 위)이라 슬롯(bottom 24)을 못 써 **absolute 래퍼 유지**) |
 | `FDR-3-PAGE-02-0` | `Folder/LedgerSearchScreen.tsx` | View | 해당없음(SafeAreaView 없음) | 미지정 | 없음(SearchField) | FlatList | B | ✅ 2026-09-19(8-7, secondary — 명세 실측 v5 확정, `ScreenContainer background="secondary" edges={['bottom']}` — 상단 인셋을 안 줘 기존 `paddingTop: 60` 배치 유지, 루트 `style`(padding)은 그대로 전달, **키보드 회피(기본 true) 새로 적용**) |
-| `FDR-3-PAGE-03-0` | `Folder/LedgerCreateScreen.tsx` | View | 해당없음(SafeAreaView 없음) | 미지정 | 없음(TextField) | 없음 | B | |
-| `DUE-2-PAGE-02-0` | `Member/MemberManageScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(SearchField) | FlatList | B | |
-| `DUE-3-PAGE-02-0` | `Dues/DuesMemberEditScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(SearchField) | ScrollView | B | |
-| `DUE-3-PAGE-03-0` | `Member/MemberDetailScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | ScrollView | B(6-5 재분류) | — (스낵바 absolute) |
-| `DUE-4-PAGE-01-0`<br>`DUE-5-PAGE-01-0` | `Member/MemberAddIndividualScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(TextField,TextArea) | 없음 | B | |
-| `DUE-4-PAGE-02-0` | `Member/MemberAddBulkScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(TextArea) | 없음 | B | |
-| `DUE-4-PAGE-03-0` | `Member/MemberEditScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(TextField,TextArea) | 없음 | B | |
+| `FDR-3-PAGE-03-0` | `Folder/LedgerCreateScreen.tsx` | View | 해당없음(SafeAreaView 없음) | 미지정 | 없음(TextField) | 없음 | B | ✅ 2026-09-19(9-3, secondary — 명세 실측 v5 확정, `ScreenContainer`로 이동 — 스낵바 래퍼는 `bottom: 88`(하단 CTA 위)이라 슬롯(bottom 24)을 못 써 **absolute 래퍼 유지**, `edges={['bottom']}`(루트가 `View`+`paddingTop: 60`), **스크롤 추가**) |
+| `DUE-2-PAGE-02-0` | `Member/MemberManageScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(SearchField) | FlatList | B | ✅ 2026-09-19(9-3, secondary — 명세 실측 v5 확정, `ScreenContainer` + **스낵바 슬롯**(absolute 래퍼 제거)) |
+| `DUE-3-PAGE-02-0` | `Dues/DuesMemberEditScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(SearchField) | ScrollView | B | ✅ 2026-09-19(9-3, secondary — 명세 실측 v5 확정, `ScreenContainer` + **스낵바 슬롯**(absolute 래퍼 제거)) |
+| `DUE-3-PAGE-03-0` | `Member/MemberDetailScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | ScrollView | B(6-5 재분류) | ✅ 2026-09-19(9-3, primary — 명세 실측 v5 확정, `ScreenContainer` + **스낵바 슬롯**(absolute 래퍼 제거)) |
+| `DUE-4-PAGE-01-0`<br>`DUE-5-PAGE-01-0` | `Member/MemberAddIndividualScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(TextField,TextArea) | 없음 | B | ✅ 2026-09-19(9-3, secondary — 명세 실측 v5 확정, `ScreenContainer`로 이동 — 스낵바 래퍼는 `bottom: 88`(하단 CTA 위)이라 슬롯(bottom 24)을 못 써 **absolute 래퍼 유지**, **스크롤 추가**) |
+| `DUE-4-PAGE-02-0` | `Member/MemberAddBulkScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(TextArea) | 없음 | B | ✅ 2026-09-19(9-3, secondary — 명세 실측 v5 확정, `ScreenContainer`로 이동 — 스낵바 래퍼는 `bottom: 88`(하단 CTA 위)이라 슬롯(bottom 24)을 못 써 **absolute 래퍼 유지**) |
+| `DUE-4-PAGE-03-0` | `Member/MemberEditScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(TextField,TextArea) | 없음 | B | ✅ 2026-09-19(9-3, secondary — 명세 실측 v5 확정, `ScreenContainer`로 이동 — 스낵바 래퍼는 `bottom: 88`(하단 CTA 위)이라 슬롯(bottom 24)을 못 써 **absolute 래퍼 유지**, **스크롤 추가**) |
 | `DUE-4-PAGE-04-0` | `Member/MemberPaymentHistoryScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | SectionList | A | ✅ 2026-09-19(6-6, primary — 명세 실측 v5 확정(블루 75%, 상단/하단 다름), 이전 미판정-추정) |
 | `ETC-1-PAGE-01-0` | `More/MoreScreen.tsx` | SafeAreaView | top | 상수 BLUE_50 = #F0F5FE | 입력없음 | ScrollView | B | |
-| `ETC-2-PAGE-01-0` | `GroupManager/AllGroupsScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | ScrollView | B(6-5 재분류) | — (스낵바 absolute) |
-| `ETC-2-PAGE-02-0` | `GroupManager/GroupManageScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | B(6-5 재분류) | — (스낵바 absolute) |
-| `ETC-2-PAGE-03-0` | `GroupManager/GroupManagerScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | B(6-5 재분류) | — (스낵바 absolute) |
+| `ETC-2-PAGE-01-0` | `GroupManager/AllGroupsScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | ScrollView | B(6-5 재분류) | ✅ 2026-09-19(9-3, primary — 명세 실측 v5 확정, `ScreenContainer` + **스낵바 슬롯**(absolute 래퍼 제거)) |
+| `ETC-2-PAGE-02-0` | `GroupManager/GroupManageScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | B(6-5 재분류) | ✅ 2026-09-19(9-3, primary — 명세 실측 v5 확정, `ScreenContainer` + **스낵바 슬롯**(absolute 래퍼 제거)) |
+| `ETC-2-PAGE-03-0` | `GroupManager/GroupManagerScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | B(6-5 재분류) | ✅ 2026-09-19(9-3, primary — 명세 실측 v5 확정, `ScreenContainer` + **스낵바 슬롯**(absolute 래퍼 제거)) |
 | `ETC-2-PAGE-05-0` | `Receipt/ReceiptAlbumScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | A | ✅ 2026-09-19(8-6, `primary`→`secondary` — 명세 실측 v5 확정, 이전 `primary`는 미판정-추정이었음) |
 | `ETC-2-PAGE-07-0` | `Statistics/StatisticsScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | A | ✅ 2026-09-19(8-6, `primary`→`secondary` — 명세 실측 v5 확정, 이전 `primary`는 미판정-추정이었음) |
 | `ETC-2-PAGE-09-0` | `More/SettingScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | A | ✅ 2026-09-19 |
-| `ETC-3-PAGE-01-0` | `GroupManager/GroupProfileEditScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(TextField) | 없음 | B | |
+| `ETC-3-PAGE-01-0` | `GroupManager/GroupProfileEditScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(TextField) | 없음 | B | ✅ 2026-09-19(9-3, secondary — 명세 실측 v5 확정, `ScreenContainer` + **스낵바 슬롯**(absolute 래퍼 제거)) |
 | `ETC-3-PAGE-04-0` | `Receipt/ReceiptDetailScreen.tsx` | SafeAreaView | top, bottom | 상수 FILL_INVERSE = #374151 | 입력없음 | 없음 | C | |
 | `ETC-3-PAGE-05-0` | `Receipt/ReceiptSearchScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(SearchField) | 없음 | B | ✅ 2026-09-19(8-6, secondary — 명세 실측 v5 확정, edges 기본값과 동일, 루트 `container{flex:1}` 제거, **키보드 회피(기본 true) 새로 적용**) |
-| `ETC-3-PAGE-07-0` | `More/MyProfileScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | B(6-5 재분류) | — (스낵바 absolute) |
+| `ETC-3-PAGE-07-0` | `More/MyProfileScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | B(6-5 재분류) | ✅ 2026-09-19(9-3, primary — 명세 실측 v5 확정, `ScreenContainer` + **스낵바 슬롯**(absolute 래퍼 제거)) |
 | `ETC-3-PAGE-08-0` | `More/NotificationSettingsScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | ScrollView | A | ✅ 2026-09-19(8-6, `primary`→`secondary` — 명세 실측 v5 확정, 이전 `primary`는 미판정-추정이었음) |
 | `ETC-3-PAGE-09-0` | `More/NoticeListScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | FlatList | A | ✅ 2026-09-19 |
 | `ETC-3-PAGE-10-0` | `More/InquiryScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | ScrollView | A | ✅ 2026-09-19(8-6, `primary`→`secondary` — 명세 실측 v5 확정, 이전 `primary`는 미판정-추정이었음) |
 | `ETC-3-PAGE-11-0` | `More/TermsScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | A | ✅ 2026-09-19 |
 | `ETC-4-PAGE-01-0` | `GroupManager/GroupCreateScreen.tsx` | View | 해당없음(SafeAreaView 없음) | 미지정 | 없음(TextField) | 없음 | B | ✅ 2026-09-19(8-7, secondary — 명세 실측 v5 확정, `ScreenContainer background="secondary" edges={['bottom']}` — 상단 인셋을 안 줘 기존 `paddingTop: 60` 배치 유지, 루트 `style`(padding)은 그대로 전달, **키보드 회피(기본 true) 새로 적용**) |
 | `ETC-4-PAGE-02-0` | `GroupManager/GroupImagePickerScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | C | |
-| `ETC-4-PAGE-15-0` | `More/ProfileEditScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(TextField) | 없음 | B | |
-| `ETC-4-PAGE-17-0` | `More/PasswordChangeScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(TextField) | 없음 | B | ✅ 2026-09-19(8-6, secondary — 명세 실측 v5 확정, edges 기본값과 동일, 루트 `container{flex:1}` 제거, **키보드 회피(기본 true) 새로 적용**) |
+| `ETC-4-PAGE-15-0` | `More/ProfileEditScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(TextField) | 없음 | B | ✅ 2026-09-19(9-3, secondary — 명세 실측 v5 확정, `ScreenContainer` + **스낵바 슬롯**(absolute 래퍼 제거)) |
+| `ETC-4-PAGE-17-0` | `More/PasswordChangeScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 없음(TextField) | 없음 | B | ✅ 2026-09-19(8-6, secondary — 명세 실측 v5 확정, edges 기본값과 동일, 루트 `container{flex:1}` 제거, **키보드 회피(기본 true) 새로 적용**) · 9-3 **스크롤 추가**(`ScrollView`+`keyboardShouldPersistTaps="handled"`, CTA 고정) |
 | `ETC-4-PAGE-18-0` | `More/NoticeDetailScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | ScrollView | A | ✅ 2026-09-19(8-6, `primary`→`secondary` — 명세 실측 v5 확정, 이전 `primary`는 미판정-추정이었음) |
 | `ETC-5-PAGE-02-0` | `Report/ReportEntryDetailScreen.tsx` | SafeAreaView | top, bottom | 미지정 | 입력없음 | 없음 | A | ✅ 2026-09-19 |
 | `ADD-3-PAGE-01-0` | `Transactions/ReceiptScanningView.tsx` | View | 해당없음(SafeAreaView 없음) | 상수 GREY_800 = #374151 | 입력없음 | 없음 | C | |
@@ -1497,67 +1497,23 @@ C 등급 개별 사유:
 **5번 — §5-7(137) vs §2(136) 차이 1건 원인(2026-09-19, 스크립트 집합 차)**: 두 목록을 Screen ID 집합으로 뽑아 비교했다(둘 다 중복 ID 없음). §2 "미판정" 136개는 전부 §5-7 목록 137개에 들어 있고, **§5-7에만 있는 ID는 `FDR-2-PAGE-02-0` 1개**, §2에만 있는 ID는 0개였다. 원인은 우리 쪽 누락이다 — 2026-09-18 폴더 예산 설정 대조(§5-16)에서 `FolderBudgetListScreen`이 `BACKGROUND_PRIMARY`를 쓰게 돼 §2 행 배경 열을 "블루"로 고쳤지만 §5-7 미판정 목록에서 그 행을 지우지 않았다. §1 표 아래 "IA-누락 발견분 추정" 메모는 틀렸다(정정함). §5-7에서 그 행을 빼서 두 목록이 136개로 일치하고, §2 등급은 바뀌지 않아(원래 블루) 3표 동기화 대상은 없다 — 다만 §5-7 요약의 D 102→101(PAGE 59→58)은 위에서 고쳤다.
 
 
-#### 2026-09-19 8-7 — 명세 실측(v5) 판정 vs 현재 코드 배경: 수정 누적과 남은 불일치
+#### 2026-09-19 9-3 — 명세 실측(v5) 판정 vs 현재 코드 배경: 스낵바 슬롯 적용 후 남은 불일치
 
-**수정 누적 17개 화면(배치 4회, 배치마다 `tsc` 통과 · `eslint` 에러 0)**:
-- 배치 1(8-6): 색 명시가 달랐던 6화면 `"primary"` → `"secondary"` — `FolderSelectMoveScreen`·`ReceiptAlbumScreen`·`StatisticsScreen`·`NotificationSettingsScreen`·`InquiryScreen`·`NoticeDetailScreen`.
-- 배치 2(8-6): `SafeAreaView` 루트 3화면 마이그레이션 — `TransactionSearchScreen`·`ReceiptSearchScreen`·`PasswordChangeScreen`(`edges` 기본값과 동일, 루트 `container{flex:1}` 제거).
-- 배치 3(8-7): 루트 `View` + `paddingTop: 60` 4화면 — `TermsAgreementScreen`·`PasswordResetScreen`·`SocialSignupInfoScreen`·`SignupInfoScreen`. `ScreenContainer background="secondary" edges={['bottom']} style={styles.container}`(기존 padding 스타일 그대로 전달, `paddingTop: 60`은 제거하지 않음).
-- 배치 4(8-7): `SignupCompleteScreen`·`LedgerSearchScreen`·`GroupCreateScreen`(배치 3과 같은 방식) + `ReceiptScanFailedView`(`edges={[]}` — 이미 `useSafeAreaInsets`로 상하 패딩을 직접 더해 이중 적용을 피함, 기존 padding 스타일 그대로).
-- **부작용(실기기 확인 필요)**: 마이그레이션한 화면은 `ScreenContainer` 기본값(`avoidKeyboard`)으로 키보드 회피가 새로 켜진다(입력 필드가 있는 화면 다수). 하단 인셋이 새로 적용돼 하단 CTA가 시스템 내비게이션 바 위로 올라온다(의도한 효과).
+**수정 누적(8-6·8-7·9-3, 배치마다 `tsc` 통과 · `eslint` 에러 0)**: 색 명시 6화면 `secondary` 교체 + `SafeAreaView`/`View` 루트 화면 `ScreenContainer` 마이그레이션(8-6 3화면, 8-7 8화면) + **9-3: 스낵바 슬롯 대기 19개 파일 전부 `ScreenContainer` 마이그레이션 + §2 명세 배경색 적용**. 그 결과 **코드 불일치는 `ETC-3-PAGE-04-0`(기획 확인 대기, 불일치 #12) 1건뿐**이다(확정된 `PAGE` 69개 중 일치 68).
 
-**남은 불일치 22건**(확정 `PAGE` 69개 중 일치 47) — 스낵바 슬롯 검증 대기 21 / 기획 확인 대기 1.
+**스낵바 슬롯 적용 결과**(실기기 실측 — 하단 72dp = 내비 48 + 24, 좌우 24dp, 다이얼로그는 키보드 위 — 로 슬롯 검증 통과):
+- **슬롯 적용 12개 파일 / 12 Screen ID**: `absolute` 스낵바 래퍼와 `snackbarWrapper` 스타일을 지우고 `ScreenContainer snackbar={…}`로 넘겼다 — `LoginScreen`, `MemberManageScreen`, `AllGroupsScreen`, `GroupManageScreen`, `GroupManagerScreen`, `MyProfileScreen`, `MemberDetailScreen`, `DuesMemberEditScreen`, `DuesEditScreen`, `TransactionDetailScreen`, `GroupProfileEditScreen`, `ProfileEditScreen`.
+- **슬롯 미적용 7개 파일 / 9 Screen ID — 사유: 스낵바가 하단 CTA 위(`bottom: 88`)에 떠 있어 슬롯(`bottom` 24 고정)으로 옮기면 CTA와 겹친다(레이아웃 변경)**. `ScreenContainer` 마이그레이션·배경색은 적용했고 스낵바는 `absolute` 래퍼를 그대로 뒀다(래퍼가 이제 `ScreenContainer` 안쪽 `KeyboardAvoidingView` 기준이라 하단 CTA와의 간격은 유지된다) — `EmailVerificationScreen`, `TransactionRegisterScreen`(DTB-3-PAGE-02-0·ADD-1-PAGE-01-0), `FolderMoveDestinationScreen`, `LedgerCreateScreen`, `MemberAddIndividualScreen`(DUE-4-PAGE-01-0·DUE-5-PAGE-01-0), `MemberAddBulkScreen`, `MemberEditScreen`. 슬롯에 `bottomOffset` 같은 prop을 두면 옮길 수 있다(미결).
+- **루트가 `View`+`paddingTop` 하드코딩인 3개**(`LoginScreen` 80, `EmailVerificationScreen`·`LedgerCreateScreen` 60): `edges={['bottom']}`로 처리, `paddingTop`은 그대로.
+- 그 밖에 `absolute` 스낵바 래퍼가 남은 화면(이 목록 밖, 이미 `ScreenContainer`이거나 별도 판정): `ArchiveListScreen`, `DuesCreateScreen`, `DuesDetailScreen`, `DuesScreen`, `FolderBudgetListScreen`, `FolderScreen`, `MoreScreen`, `ReportByLedgerDetailScreen`, `ReportByPeriodDetailScreen`, `ReportMainScreen`.
+
+**폼 스크롤 추가(9-2 `SignupInfoScreen` 포함 7화면)**: `ScrollView` + `keyboardShouldPersistTaps="handled"`, 하단 CTA는 스크롤 밖 고정 — `SignupInfoScreen`, `SocialSignupInfoScreen`, `PasswordChangeScreen`, `LoginScreen`, `LedgerCreateScreen`, `MemberAddIndividualScreen`, `MemberEditScreen`.
+
+**남은 불일치 1건**:
 
 | Screen ID | 파일 | 명세 판정 | 코드 현재 | 미수정 사유 |
 |---|---|---|---|---|
-| `ETC-3-PAGE-04-0` | `Receipt/ReceiptDetailScreen.tsx` | 흰색 | 루트 어두움 | **기획 확인 대기(불일치 #12)** — 이번에 안 고침 |
-| `COM-1-PAGE-01-0` | `LoginScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `COM-4-PAGE-01-0` | `Signup/EmailVerificationScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `DTB-2-PAGE-02-0` | `Folder/TransactionDetailScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `DTB-3-PAGE-02-0` | `Transactions/TransactionRegisterScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `FDR-3-PAGE-01-0` | `Folder/FolderMoveDestinationScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `FDR-3-PAGE-03-0` | `Folder/LedgerCreateScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `DUE-2-PAGE-02-0` | `Member/MemberManageScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `DUE-3-PAGE-02-0` | `Dues/DuesMemberEditScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `DUE-3-PAGE-03-0` | `Member/MemberDetailScreen.tsx` | 블루 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `DUE-3-PAGE-06-0` | `Dues/DuesEditScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `DUE-4-PAGE-01-0` | `Member/MemberAddIndividualScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `DUE-4-PAGE-02-0` | `Member/MemberAddBulkScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `DUE-4-PAGE-03-0` | `Member/MemberEditScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `DUE-5-PAGE-01-0` | `Member/MemberAddIndividualScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `ETC-2-PAGE-01-0` | `GroupManager/AllGroupsScreen.tsx` | 블루 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `ETC-2-PAGE-02-0` | `GroupManager/GroupManageScreen.tsx` | 블루 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `ETC-2-PAGE-03-0` | `GroupManager/GroupManagerScreen.tsx` | 블루 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `ETC-3-PAGE-01-0` | `GroupManager/GroupProfileEditScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `ETC-3-PAGE-07-0` | `More/MyProfileScreen.tsx` | 블루 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `ETC-4-PAGE-15-0` | `More/ProfileEditScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-| `ADD-1-PAGE-01-0` | `Transactions/TransactionRegisterScreen.tsx` | 흰색 | 루트 배경 미지정(시스템 기본 #F2F2F2) | 스낵바 슬롯 검증 대기 |
-
-**스낵바 슬롯 검증 대기 — 19개 파일 / 21개 Screen ID**(`ScreenContainer.snackbar` 슬롯이 실기기에서 검증되면 한 번에 처리한다. 지금은 적용하지 않는다. 처리 방법: 파일의 `position:'absolute'` 스낵바 래퍼를 `ScreenContainer snackbar={...}`로 옮기고 `background`는 아래 판정값, `View` 루트 3개는 `paddingTop` 하드코딩도 같이 정리):
-
-| 파일 | Screen ID(명세 판정) | 루트 |
-|---|---|---|
-| `src/screens/LoginScreen.tsx` | COM-1-PAGE-01-0(흰색) | `View`/`Pressable` 루트(`paddingTop` 하드코딩) — 슬롯 + 상단 인셋 처리 둘 다 필요 |
-| `src/screens/Signup/EmailVerificationScreen.tsx` | COM-4-PAGE-01-0(흰색) | `View`/`Pressable` 루트(`paddingTop` 하드코딩) — 슬롯 + 상단 인셋 처리 둘 다 필요 |
-| `src/screens/Folder/TransactionDetailScreen.tsx` | DTB-2-PAGE-02-0(흰색) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/Transactions/TransactionRegisterScreen.tsx` | DTB-3-PAGE-02-0(흰색), ADD-1-PAGE-01-0(흰색) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/Folder/FolderMoveDestinationScreen.tsx` | FDR-3-PAGE-01-0(흰색) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/Folder/LedgerCreateScreen.tsx` | FDR-3-PAGE-03-0(흰색) | `View`/`Pressable` 루트(`paddingTop` 하드코딩) — 슬롯 + 상단 인셋 처리 둘 다 필요 |
-| `src/screens/Member/MemberManageScreen.tsx` | DUE-2-PAGE-02-0(흰색) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/Dues/DuesMemberEditScreen.tsx` | DUE-3-PAGE-02-0(흰색) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/Member/MemberDetailScreen.tsx` | DUE-3-PAGE-03-0(블루) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/Dues/DuesEditScreen.tsx` | DUE-3-PAGE-06-0(흰색) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/Member/MemberAddIndividualScreen.tsx` | DUE-4-PAGE-01-0(흰색), DUE-5-PAGE-01-0(흰색) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/Member/MemberAddBulkScreen.tsx` | DUE-4-PAGE-02-0(흰색) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/Member/MemberEditScreen.tsx` | DUE-4-PAGE-03-0(흰색) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/GroupManager/AllGroupsScreen.tsx` | ETC-2-PAGE-01-0(블루) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/GroupManager/GroupManageScreen.tsx` | ETC-2-PAGE-02-0(블루) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/GroupManager/GroupManagerScreen.tsx` | ETC-2-PAGE-03-0(블루) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/GroupManager/GroupProfileEditScreen.tsx` | ETC-3-PAGE-01-0(흰색) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/More/MyProfileScreen.tsx` | ETC-3-PAGE-07-0(블루) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-| `src/screens/More/ProfileEditScreen.tsx` | ETC-4-PAGE-15-0(흰색) | `SafeAreaView` 루트(edges `top`,`bottom`) |
-
-**`paddingTop` 하드코딩**: `ScreenContainer edges`에 `top`을 넣고 `paddingTop`을 빼는 게 정석이나 레이아웃 검증 없이는 위험해 보류 — 화면 목록은 `DEV_NOTES.md` 미해결 TODO.
+| `ETC-3-PAGE-04-0` | `Receipt/ReceiptDetailScreen.tsx` | 흰색 | 루트 어두움(`FILL_INVERSE`) | **기획 확인 대기(불일치 #12)** — 사진 뷰어 UX상 어두운 배경이 나을 수 있음, 이번에 안 고침 |
 
 **`상하 다름` 화면 6개 — 이번엔 안 고침**(파란 헤더 + 흰 리스트라 `ScreenContainer background` 하나로는 표현이 안 됨, 구조는 별도 결정): (`ETC-4-PAGE-15-0`은 9-1에서 제외 — 하단 #E6E6E6은 배경이 아니라 시안 목업에 떠 있는 키보드)
 

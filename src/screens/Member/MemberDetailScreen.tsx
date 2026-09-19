@@ -19,7 +19,7 @@
  */
 import { useCallback, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -141,7 +141,7 @@ function MemberDetailScreen() {
 
   if (loadState === 'loading' || loadState === 'error' || !member) {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="primary">
         <AppBar type="sub" title="" onBackPress={() => navigation.goBack()} />
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>
@@ -156,12 +156,23 @@ function MemberDetailScreen() {
             />
           )}
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarMessage ? (
+          <Snackbar
+            visible
+            title={snackbarMessage}
+            onClose={() => setSnackbarMessage(null)}
+          />
+        ) : undefined
+      }
+    >
       <AppBar
         type="sub"
         title={member.name}
@@ -230,24 +241,11 @@ function MemberDetailScreen() {
         onCancel={() => setDeleteDialogVisible(false)}
         onConfirm={handleConfirmDelete}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar
-            visible
-            title={snackbarMessage}
-            onClose={() => setSnackbarMessage(null)}
-          />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     paddingHorizontal: 24,
     paddingTop: 12,
@@ -284,12 +282,6 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

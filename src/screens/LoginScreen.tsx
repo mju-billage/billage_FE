@@ -1,6 +1,6 @@
 /** @screen COM-1-PAGE-01-0 로그인 */
 import { useCallback, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
@@ -9,6 +9,7 @@ import TextField from '../components/Input/Text Field/TextField';
 import Button from '../components/Input/Button/Button';
 import TextButton from '../components/Input/Button/TextButton';
 import Snackbar from '../components/Feedback/Snackbar/Snackbar';
+import ScreenContainer from '../components/Layout/ScreenContainer';
 import {
   BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_SUBTLE,
@@ -229,99 +230,113 @@ function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Image
-        source={require('../assets/images/Billage_logo.png')}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+    <ScreenContainer
+      background="secondary"
+      edges={['bottom']}
+      style={styles.container}
+      snackbar={
+        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+      }
+    >
+      {/* 키보드에 가린 필드도 스크롤로 볼 수 있게 한다(keyboardShouldPersistTaps: 키보드가 떠 있어도 첫 탭이 먹게). */}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <Image
+          source={require('../assets/images/Billage_logo.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
 
-      <View style={styles.form}>
-        <TextField
-          value={email}
-          onChangeText={text => {
-            setEmail(text);
-            setLoginError(undefined);
-          }}
-          placeholder={LOGIN_EMAIL_PLACEHOLDER}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        <View id="hv" style={{ height: 8}} />
-        <TextField
-          value={password}
-          onChangeText={text => {
-            setPassword(text);
-            setLoginError(undefined);
-          }}
-          placeholder={LOGIN_PASSWORD_PLACEHOLDER}
-          secureTextEntry
-          error={loginError}
-        />
-      </View>
-      <View id="hv" style={{ height: 16}} />
-      <Button
-        label={LOGIN_SUBMIT_LABEL}
-        onPress={handleLogin}
-        disabled={isSubmitting}
-        fullWidth
-      />
-      <View id="hv" style={{ height: 16}} />
-      <View style={styles.linkRow}>
-        <TextButton
-          label={LOGIN_FIND_PASSWORD_LABEL}
-          onPress={handleFindPassword}
-          hierarchy="tertiary"
-        />
-        <TextButton
-          label={LOGIN_GO_TO_SIGNUP_LABEL}
-          onPress={handleGoToSignup}
-          hierarchy="tertiary"
-        />
-      </View>
-
-      <View style={styles.socialRow}>
-        <SocialLoginBadge
-          type="Kakao"
-          onPress={() => handleSocialLogin('Kakao')}
-        />
-        <SocialLoginBadge
-          type="Naver"
-          onPress={() => handleSocialLogin('Naver')}
-        />
-        <SocialLoginBadge
-          type="Google"
-          onPress={() => handleSocialLogin('Google')}
-        />
-      </View>
-
-      {__DEV__ && (
-        <View style={styles.mockLoginRow}>
-          <Button
-            label={LOGIN_MOCK_BUTTON_LABEL}
-            onPress={handleMockLogin}
-            disabled={isSubmitting}
-            hierarchy="secondary"
-            fullWidth
+        <View style={styles.form}>
+          <TextField
+            value={email}
+            onChangeText={text => {
+              setEmail(text);
+              setLoginError(undefined);
+            }}
+            placeholder={LOGIN_EMAIL_PLACEHOLDER}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <View id="hv" style={{ height: 8}} />
+          <TextField
+            value={password}
+            onChangeText={text => {
+              setPassword(text);
+              setLoginError(undefined);
+            }}
+            placeholder={LOGIN_PASSWORD_PLACEHOLDER}
+            secureTextEntry
+            error={loginError}
           />
         </View>
-      )}
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
+        <View id="hv" style={{ height: 16}} />
+        <Button
+          label={LOGIN_SUBMIT_LABEL}
+          onPress={handleLogin}
+          disabled={isSubmitting}
+          fullWidth
+        />
+        <View id="hv" style={{ height: 16}} />
+        <View style={styles.linkRow}>
+          <TextButton
+            label={LOGIN_FIND_PASSWORD_LABEL}
+            onPress={handleFindPassword}
+            hierarchy="tertiary"
+          />
+          <TextButton
+            label={LOGIN_GO_TO_SIGNUP_LABEL}
+            onPress={handleGoToSignup}
+            hierarchy="tertiary"
+          />
         </View>
-      )}
-    </View>
+
+        <View style={styles.socialRow}>
+          <SocialLoginBadge
+            type="Kakao"
+            onPress={() => handleSocialLogin('Kakao')}
+          />
+          <SocialLoginBadge
+            type="Naver"
+            onPress={() => handleSocialLogin('Naver')}
+          />
+          <SocialLoginBadge
+            type="Google"
+            onPress={() => handleSocialLogin('Google')}
+          />
+        </View>
+
+        {__DEV__ && (
+          <View style={styles.mockLoginRow}>
+            <Button
+              label={LOGIN_MOCK_BUTTON_LABEL}
+              onPress={handleMockLogin}
+              disabled={isSubmitting}
+              hierarchy="secondary"
+              fullWidth
+            />
+          </View>
+        )}
+      </ScrollView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     paddingTop: 80,
     paddingHorizontal: 24,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    alignItems: 'center',
   },
   logo: {
     width: 140,
@@ -345,12 +360,6 @@ const styles = StyleSheet.create({
   mockLoginRow: {
     width: '100%',
     marginTop: 24,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

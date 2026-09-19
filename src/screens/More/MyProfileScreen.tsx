@@ -22,7 +22,7 @@
  */
 import { useCallback, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import {
   CommonActions,
   useFocusEffect,
@@ -172,7 +172,12 @@ function MyProfileScreen() {
   const isEmailLogin = profile?.loginProvider === 'EMAIL';
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+      }
+    >
       <AppBar
         type="sub"
         title={MY_PROFILE_TITLE}
@@ -263,13 +268,7 @@ function MyProfileScreen() {
         onCancel={() => setLogoutDialogVisible(false)}
         onConfirm={handleLogout}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
@@ -292,9 +291,6 @@ function MenuRow({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     paddingHorizontal: 24,
     paddingTop: 8,
@@ -380,12 +376,6 @@ const styles = StyleSheet.create({
   stateText: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_DISABLED,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

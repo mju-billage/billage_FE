@@ -153,34 +153,6 @@
 #### `SearchField` clear(X) 버튼 미지원 — 컴포넌트에 기능 자체가 없음, 승인 대기 [2026-09-19 6-11]
 - **검색 필드 clear(X) 버튼 — 보고만, 미수정**: `SearchField`(`components/Input/Search/SearchField.tsx`)는 `value/onChangeText/placeholder/size/variant/onSubmit`만 받고 **clear 지원이 없다**(우측엔 돋보기 아이콘 고정). 반대로 `TextField`는 `onClear?`(값이 있고 비활성 아닐 때 `Close.png` X 아이콘)를 갖고 있고 4개 화면(GroupProfileEdit/JoinGroupSheet/ProfileEdit/TransactionTextInputSheet)과 `Dialog`가 쓴다. `SearchField`는 8곳이 사용 중이라 §5-17의 "컴포넌트에 있는데 화면이 안 쓰는" 패턴이 아니라 **컴포넌트에 기능 자체가 없는** 경우다. 지시대로 고치지 않음 — 추가 시 `onClear` prop을 넣고 값이 있을 때 X + 돋보기 병기(시안 Case C), 폴더 화면에서 `onClear={() => setSearchQuery('')}` 연결하는 안이고, 나머지 7개 사용처에는 prop을 안 넘기면 변화 없다.
 
-#### 폼 화면 스크롤 컨테이너 없음 — 입력 필드 2개 이상 6화면 [2026-09-19 9-2, 조사만·수정 안 함]
-
-`SignupInfoScreen`(COM-3-PAGE-03-0)은 키보드 회피는 되는데 스크롤이 없어 키보드에 가린 칸이 안 보였다 → `ScrollView`(`keyboardShouldPersistTaps="handled"`, 하단 CTA는 스크롤 밖 고정)로 감싸 수정(§3). 같은 증상 후보(입력 `TextField`/`TextInput`/`TextArea` JSX 2개 이상 + `ScrollView`/`FlatList`/`SectionList` 없음)를 전수 검색한 결과, **우선순위는 사용자가 정한다**:
-
-| 파일 | Screen ID | 입력 | `ScreenContainer` | 비고 |
-|---|---|---|---|---|
-| `src/screens/Signup/SocialSignupInfoScreen.tsx` | COM-3-PAGE-02-0 | TextField 2 | 사용(8-7, 키보드 회피 새로 켜짐) | 필드 적어 가림 위험 낮음 |
-| `src/screens/More/PasswordChangeScreen.tsx` | ETC-4-PAGE-17-0 | TextField 3 | 사용(8-6, 키보드 회피 새로 켜짐) | 3필드 — `SignupInfo`와 같은 증상 후보 |
-| `src/screens/LoginScreen.tsx` | COM-1-PAGE-01-0 | TextField 2 | 미사용 | 스낵바 슬롯 대기 |
-| `src/screens/Folder/LedgerCreateScreen.tsx` | FDR-3-PAGE-03-0 | TextField 2 | 미사용 | 스낵바 슬롯 대기 |
-| `src/screens/Member/MemberAddIndividualScreen.tsx` | DUE-4-PAGE-01-0, DUE-5-PAGE-01-0 | TextField+TextArea 3 | 미사용 | 스낵바 슬롯 대기 |
-| `src/screens/Member/MemberEditScreen.tsx` | DUE-4-PAGE-03-0 | TextField+TextArea 3 | 미사용 | 스낵바 슬롯 대기, 키보드 회피 자체가 없음 |
-
-(참고: 스크롤이 이미 있는 다중 입력 화면 — `DuesCreateScreen`, `DuesEditScreen`, `SignupInfoScreen`(이번 수정).) 이 목록은 JSX 태그 개수 기준의 정적 검색이라 `.map`으로 필드를 반복하는 화면은 1개로 센다.
-
-#### 그래픽 에셋 `receipt-graphic.png` 미사용 — 영수증 스캔 실패 화면 [2026-09-19 9-2, 연결 안 함]
-
-`ReceiptScanFailedView`(ADD-4-PAGE-01-1)는 이미지 자리에 회색 `previewBox`(placeholder View)를 그린다. 그래픽 에셋 4종은 `src/assets/images/`에 모두 있고, 사용처는 아래와 같다(연결 위치는 명세서를 보고 사용자가 정한다):
-
-| 에셋 | 사용 여부 | 사용처 |
-|---|---|---|
-| `receipt-graphic.png` | **미사용** | 코드 어디에도 참조 없음(`.ts`/`.tsx`/스토리 포함 `grep` 0건) |
-| `album-graphic.png` | 사용 | `src/types/dashboard.ts` 대시보드 "간편 서비스" 카드(`증빙자료 앨범`) — 실사용은 `DashboardScreen`/`QuickServiceCard` |
-| `report-graphic.png` | 사용 | `src/types/dashboard.ts` 간편 서비스 카드(`보고서 생성`) |
-| `statistics-graphic.png` | 사용 | `src/types/dashboard.ts` 간편 서비스 카드(`통계/분석`) |
-
-미사용 에셋은 `design-verification.md` §5-17에도 기록했다.
-
 ### 1-2. 기획 확인 필요
 
 #### <a id="add-2-sheet-07-0-일자-선택-캘린더"></a>ADD-2-SHEET-07-0 (일자 선택 캘린더) — 디자인 원본이 더미 데이터, 기획에 원본 재요청 [2026-08-29 배치 E]
@@ -274,6 +246,10 @@
 #### 개수 단위 "1 개"(불일치 #11) — 같은 `건` 단위를 쓰는 다른 화면은 화면별 시안 확인 [2026-09-19 6-11]
 - **개수 단위(확정 결함)**: `FolderScreen` "1 건" → "1 개"(공백 있음, 목업 따름 — 상수 `FOLDER_COUNT_SUFFIX`). 설명표는 `(N)개`(공백 없음)라 불일치 #11.
   같은 `건` 단위를 쓰는 다른 화면(고치지 않음, 화면마다 시안이 다를 수 있음): `TransactionsScreen`(`TRANSACTIONS_COUNT_SUFFIX = ' 건'`, 공백 있음) / `DuesScreen`(`DUES_COUNT_SUFFIX`) / `MemberPaymentHistoryScreen`(`MEMBER_PAYMENT_COUNT_SUFFIX`) / `ReceiptAlbumScreen`·`ReceiptSearchScreen`(`RECEIPT_ALBUM_COUNT_SUFFIX`) / `ReportMainScreen`(`REPORT_MAIN_COUNT_SUFFIX`) / `ReportCreateByLedgerScreen`(`REPORT_LEDGER_FIELD_COUNT_SUFFIX`) / `ReportLedgerSelectScreen`(`REPORT_LEDGER_SELECT_COUNT_SUFFIX`, 폴더 그리드를 쓰는 화면인데도 `건`) / `ReportEntryList`(`REPORT_ENTRY_LIST_COUNT_SUFFIX`) / `AmountCard`("수입건수"·"지출건수" 값 `N건`). 이 중 공백 있는 건 `TransactionsScreen`뿐(나머지는 숫자 바로 뒤 `건`).
+
+#### 다이얼로그가 키보드에 간격 없이 붙음(0dp) — 시안 확인 필요 [2026-09-19 9-3, 기획 확인 필요]
+
+실기기 실측(`Screenshot_20260919_194404_BILLAGE.jpg`, 장부 이름 변경 다이얼로그 + 키보드): 다이얼로그 하단 ~ 키보드 상단 간격 **0.0dp**(다이얼로그는 가려지지 않음). 여유를 둘지 시안 확인 필요.
 
 ### 1-3. 캡처/실측 필요
 
@@ -499,21 +475,6 @@ spec-sheet-map.tsv`에 헤더확인으로 등록, `design-verification.md` §4-0
 | AppBar 크기 | 좌우 `paddingHorizontal` 20, 상하 12, `sub`는 뒤로가기 버튼 34(아이콘 20.4) + gap 12 + 제목 `h2`(semibold 20/28, ls 0.15, 색 기본 검정) → 높이 58. `titleOnly`(루트) 높이 52. 우측 아이콘 24×24, 아이콘 gap 16 | 같은 `sub` | 같은 `sub` |
 | 길게 누르기 | 없음(`FolderItem`은 `Pressable` `onPress`만) | 없음 | 없음 |
 
-#### 모임 추가 버튼 위치 — 코드 현황 (실기기 7번, 명세 확인은 사용자) [2026-09-19 9-2]
-
-`AllGroupsScreen`(ETC-2-PAGE-01-0): AppBar `type="sub"`, 제목 `ALL_GROUPS_TITLE` = `전체 모임 관리`, **우측 아이콘 없음**. 추가 버튼은 `ScrollView` 맨 아래에 모임 카드들 다음 마지막 요소로 오는 `EntityCard type="newGroup"`이다 — `CardBase variant="bordered"` + `borderStyle: 'dashed'`(테두리 1), 36×36 원형 아바타(`FILL_NEUTRAL_NORMAL`)에 `Plus.png` 16×16(`FOREGROUND_NEUTRAL_NORMAL`), 라벨 `새로운 모임 추가하기`(`subtitle3`, 색 `FOREGROUND_NEUTRAL_NORMAL`), 카드 안 gap 12, 목록 `gap` 12 · `paddingHorizontal` 24 · `paddingTop` 8. 누르면 `AddGroupSheet`(`ADD_GROUP_SHEET_TITLE` `새로운 모임 추가` — `ADD_GROUP_CREATE_LABEL` `모임 생성하기` / `ADD_GROUP_JOIN_LABEL` `코드로 참여하기`).
-
-#### 장부 길게 누르기 무반응 — 코드 현황 (실기기 12번, 명세 확인은 사용자) [2026-09-19 9-2]
-
-**long press 핸들러가 없다.** `FolderItem`은 `Pressable` `onPress`만 받고(`onLongPress`/`delayLongPress` 없음), `FolderScreen`은 `handlePressItem`(폴더 → `push`, 장부 → `LedgerDetail`)만 넘긴다. `src/` 전체에서 `onLongPress`/`delayLongPress` `grep` 결과 0건이다.
-
-#### 스낵바 슬롯 실기기 캡처 측정 — `LedgerDetailScreen` [2026-09-19 9-2, 슬롯 신규 적용은 사용자 판단 대기]
-
-`shots/`의 가장 최근 2장(파일명 시각 기준 `194407`, `194404`; 그 앞 3장 `194350`/`194352`/`194359`은 이번엔 안 쟀다) — 1080×2340 @480dpi(3px = 1dp):
-
-- **`Screenshot_20260919_194407_BILLAGE.jpg`**(장부 이름 변경 후 스낵바): 스낵바 x 72~1007 → **좌 24.0dp / 우 24.0dp**, 높이 44.0dp. 스낵바 하단 ~ 이미지 하단 = 216px = **72.0dp**. 이미지 하단 48dp(144px)는 시스템 내비게이션 바(3버튼, 회색 불투명)라 **스낵바 하단 ~ 내비게이션 바 상단 = 72px = 24.0dp**. → 하단 72dp = 24dp + 내비바 인셋 48dp, 즉 **하단 인셋이 적용돼 있다**(24dp였다면 미적용).
-- **`Screenshot_20260919_194404_BILLAGE.jpg`**(이름 변경 다이얼로그 + 키보드): 다이얼로그 x 72~1007(좌우 24.0dp), 높이 213.0dp, 다이얼로그 하단 ~ 키보드 상단 간격 **0.0dp**(키보드 342.0dp) — 다이얼로그가 키보드 **위에 가려지지 않고 있으며 키보드 상단에 붙어 있다**(취소/변경 버튼 보임).
-
 ### 1-4. 서버 블로킹
 
 #### §0 회비 생성 `POST /groups/{groupId}/dues` 500 INTERNAL_ERROR — 서버 확인 필요 [2026-09-05 배치 G]
@@ -713,6 +674,12 @@ DSH-1 재캡처로 "고쳐졌는지" 확인하는 절차 자체가 성립하지 
 - [해결] 2026-09-19 빈 화면/검색 무결과 문구 — 코드가 이미 목업과 일치(설명표 차이는 불일치 #10) (라운드 6-11)
 - [해결] 2026-09-19 폴더 메뉴 리스트 아이콘 — 시안 Case A 확인, 코드 연결됨(§2 `시안 확인 완료`) (라운드 6-11)
 - [해결] 2026-09-19 `SignupInfoScreen`(COM-3-PAGE-03-0) 키보드 회피는 되는데 스크롤이 없어 가린 칸이 안 보임 — `ScrollView`(`keyboardShouldPersistTaps="handled"`)로 감싸고 하단 CTA는 스크롤 밖에 고정 (라운드 9-2)
+- [해결] 2026-09-19 스낵바 슬롯 실기기 검증 통과(`Screenshot_20260919_194407_BILLAGE.jpg`: 하단 72dp = 내비 48 + 24, 좌우 24dp / `…194404…`: 다이얼로그가 키보드 위) → 대기 19개 파일 `ScreenContainer` 마이그레이션, 슬롯 12개 파일·`bottom: 88` 래퍼 유지 7개 파일 (라운드 9-3)
+- [해결] 2026-09-19 폼 화면 스크롤 없음 — `SocialSignupInfoScreen`·`PasswordChangeScreen`·`LoginScreen`·`LedgerCreateScreen`·`MemberAddIndividualScreen`·`MemberEditScreen`에 `ScrollView`+`keyboardShouldPersistTaps="handled"`(CTA 고정) 추가 (라운드 9-3, 전수 조사는 9-2)
+- [해결] 2026-09-19 `receipt-graphic.png` 미사용 — `ReceiptScanFailedView`(ADD-4-PAGE-01-1)의 회색 자리표시 박스(160×160)를 `Image`(`assets/images/receipt-graphic.png`, contain)로 교체. 문구(제목·부제·`다시 촬영하기` primary fullWidth)는 이미 시안과 같아 변경 없음 (라운드 9-3)
+- [해결] 2026-09-19 알림 설정·문의하기·공지사항 "일시적인 문제" 오해 — `RESOURCE_NOT_FOUND` → "요청한 정보를 찾을 수 없어요." 매핑 추가(서버 미구현 자체는 1-4에 남음, `backend-requests.md`에 확인 요청) (라운드 9-3)
+- [해결] 2026-09-19 모임 추가 버튼 위치(`AllGroupsScreen`) — 시안도 리스트 맨 아래 `+ 새로운 모임 추가하기`라 코드가 맞음, §2 `시안 확인 완료` 기록 (라운드 9-3)
+- [해결] 2026-09-19 장부 길게 누르기 무반응 — `FDR-1-PAGE-01-0` 설명표 No.5가 폴더 터치 → 뎁스인, 장부 터치 → 상세만 규정하고 이동은 ⋮ → `선택 이동`이라 long press 없는 게 맞음 (라운드 9-3)
 
 ## 4. 검증 방식 (파일럿 5개로 확정)
 

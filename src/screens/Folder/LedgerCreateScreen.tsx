@@ -1,6 +1,6 @@
 /** @screen FDR-3-PAGE-03-0 새 장부 생성 */
 import { useCallback, useState } from 'react';
-import { BackHandler, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,6 +10,7 @@ import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import * as ledgerService from '../../services/ledgerService';
 import { getActiveGroup } from '../../types/group';
 import { ApiError } from '../../services/apiClient';
@@ -129,42 +130,49 @@ function LedgerCreateScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <BackButton onPress={handleBack} />
-      </View>
+    <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
+      {/* 키보드에 가린 필드도 스크롤로 볼 수 있게 한다. 하단 CTA(footer)는 스크롤 밖에 고정. */}
+      <ScrollView
+        style={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.headerRow}>
+          <BackButton onPress={handleBack} />
+        </View>
 
-      <Text style={styles.title}>{LEDGER_CREATE_TITLE}</Text>
-      <Text style={styles.subtitle}>{LEDGER_CREATE_SUBTITLE}</Text>
+        <Text style={styles.title}>{LEDGER_CREATE_TITLE}</Text>
+        <Text style={styles.subtitle}>{LEDGER_CREATE_SUBTITLE}</Text>
 
-      <View style={styles.form}>
-        <TextField
-          label={LEDGER_NAME_LABEL}
-          value={name}
-          onChangeText={text => {
-            setName(text.slice(0, LEDGER_NAME_MAX_LENGTH));
-            setNameError(undefined);
-          }}
-          placeholder={LEDGER_NAME_PLACEHOLDER}
-          helperText={LEDGER_NAME_HELPER}
-          error={nameError}
-          maxLength={LEDGER_NAME_MAX_LENGTH}
-        />
-        <TextField
-          label={LEDGER_BUDGET_LABEL}
-          value={budget}
-          onChangeText={text => {
-            const digitsOnly = text.replace(/[^0-9]/g, '');
-            const clamped =
-              digitsOnly && Number(digitsOnly) > LEDGER_BUDGET_MAX
-                ? String(LEDGER_BUDGET_MAX)
-                : digitsOnly;
-            setBudget(clamped);
-          }}
-          placeholder={LEDGER_BUDGET_PLACEHOLDER}
-          keyboardType="number-pad"
-        />
-      </View>
+        <View style={styles.form}>
+          <TextField
+            label={LEDGER_NAME_LABEL}
+            value={name}
+            onChangeText={text => {
+              setName(text.slice(0, LEDGER_NAME_MAX_LENGTH));
+              setNameError(undefined);
+            }}
+            placeholder={LEDGER_NAME_PLACEHOLDER}
+            helperText={LEDGER_NAME_HELPER}
+            error={nameError}
+            maxLength={LEDGER_NAME_MAX_LENGTH}
+          />
+          <TextField
+            label={LEDGER_BUDGET_LABEL}
+            value={budget}
+            onChangeText={text => {
+              const digitsOnly = text.replace(/[^0-9]/g, '');
+              const clamped =
+                digitsOnly && Number(digitsOnly) > LEDGER_BUDGET_MAX
+                  ? String(LEDGER_BUDGET_MAX)
+                  : digitsOnly;
+              setBudget(clamped);
+            }}
+            placeholder={LEDGER_BUDGET_PLACEHOLDER}
+            keyboardType="number-pad"
+          />
+        </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         <Button
@@ -196,7 +204,7 @@ function LedgerCreateScreen() {
           navigation.goBack();
         }}
       />
-    </View>
+    </ScreenContainer>
   );
 }
 
@@ -205,6 +213,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 60,
     paddingHorizontal: 24,
+  },
+  scroll: {
+    flex: 1,
   },
   headerRow: {
     marginBottom: 8,

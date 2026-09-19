@@ -25,7 +25,7 @@
  */
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -173,7 +173,7 @@ function TransactionDetailScreen() {
 
   if (loadState === 'loading' || loadState === 'error') {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="secondary">
         <AppBar title={TRANSACTION_DETAIL_TITLE} onBackPress={() => navigation.goBack()} />
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>
@@ -183,7 +183,7 @@ function TransactionDetailScreen() {
             <Button label={TRANSACTION_DETAIL_RETRY_LABEL} onPress={load} hierarchy="secondary" style={{ alignSelf: 'center' }} />
           )}
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
@@ -205,7 +205,12 @@ function TransactionDetailScreen() {
   const duesId = entry.duesId;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="secondary"
+      snackbar={
+        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+      }
+    >
       <AppBar
         title={TRANSACTION_DETAIL_TITLE}
         onBackPress={() => navigation.goBack()}
@@ -321,13 +326,7 @@ function TransactionDetailScreen() {
         onCancel={() => setDeleteDialogVisible(false)}
         onConfirm={handleConfirmDelete}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
@@ -341,9 +340,6 @@ function Field({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     paddingTop: 16,
     paddingHorizontal: 24,
@@ -413,12 +409,6 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 24,
     paddingVertical: 16,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

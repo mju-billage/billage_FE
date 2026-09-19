@@ -50,3 +50,4 @@ SHA-1(콜론 형식):  5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:
   - `paddingTop: 60`(전수 `grep` 결과 10개): `Signup/TermsAgreementScreen`, `PasswordReset/PasswordResetScreen`, `PasswordReset/PasswordResetSentScreen`(← 처음 목록에 없던 것, 아직 `ScreenContainer` 미사용·배경 미판정), `Signup/SocialSignupInfoScreen`, `Signup/SignupInfoScreen`, `Signup/SignupCompleteScreen`, `Signup/EmailVerificationScreen`(슬롯 대기), `Folder/LedgerSearchScreen`, `Folder/LedgerCreateScreen`(슬롯 대기), `GroupManager/GroupCreateScreen`.
   - `paddingTop: 80`을 루트 컨테이너에 쓰는 화면: `LoginScreen`(슬롯 대기). 나머지 `paddingTop: 80`은 빈 상태 안내 영역의 값이라 인셋과 무관.
   - 예외: `Transactions/ReceiptScanFailedView`는 60이 아니라 `useSafeAreaInsets`로 직접 더한다(`insets.top + 12`) — 이미 정석이라 `edges={[]}`로 옮겼다.
+  - 9-3 갱신: `LoginScreen`(80), `EmailVerificationScreen`·`LedgerCreateScreen`(60)도 `ScreenContainer edges={['bottom']}`로 옮겼다(`paddingTop` 그대로). 이제 `paddingTop` 하드코딩 화면 중 `ScreenContainer` 미사용은 `PasswordResetSentScreen`(COM-3-PAGE-04-0) 하나다.

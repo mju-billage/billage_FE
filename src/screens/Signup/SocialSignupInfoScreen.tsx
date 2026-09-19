@@ -1,6 +1,6 @@
 /** @screen COM-3-PAGE-02-0 간편 가입 정보 입력 */
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
@@ -84,32 +84,39 @@ function SocialSignupInfoScreen() {
 
   return (
     <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
-      <View style={styles.backRow}>
-        <BackButton onPress={() => navigation.goBack()} />
-      </View>
-      <Text style={styles.title}>{SIGNUP_INFO_TITLE}</Text>
-      <View style={styles.header}>
-        <TextField
-          label={SIGNUP_NAME_LABEL}
-          value={name}
-          onChangeText={text => setName(text.slice(0, NAME_MAX_LENGTH))}
-          placeholder={SIGNUP_NAME_PLACEHOLDER}
-          helperText={SIGNUP_NAME_HELPER}
-          maxLength={NAME_MAX_LENGTH}
-        />
-        <TextField
-          label={SIGNUP_EMAIL_LABEL}
-          value={email}
-          onChangeText={text => {
-            setEmail(text);
-            setSignupError(undefined);
-          }}
-          placeholder={SIGNUP_EMAIL_PLACEHOLDER}
-          error={emailError}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-      </View>
+      {/* 키보드에 가린 필드도 스크롤로 볼 수 있게 한다. 하단 CTA(footer)는 스크롤 밖에 고정. */}
+      <ScrollView
+        style={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.backRow}>
+          <BackButton onPress={() => navigation.goBack()} />
+        </View>
+        <Text style={styles.title}>{SIGNUP_INFO_TITLE}</Text>
+        <View style={styles.header}>
+          <TextField
+            label={SIGNUP_NAME_LABEL}
+            value={name}
+            onChangeText={text => setName(text.slice(0, NAME_MAX_LENGTH))}
+            placeholder={SIGNUP_NAME_PLACEHOLDER}
+            helperText={SIGNUP_NAME_HELPER}
+            maxLength={NAME_MAX_LENGTH}
+          />
+          <TextField
+            label={SIGNUP_EMAIL_LABEL}
+            value={email}
+            onChangeText={text => {
+              setEmail(text);
+              setSignupError(undefined);
+            }}
+            placeholder={SIGNUP_EMAIL_PLACEHOLDER}
+            error={emailError}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+        </View>
+      </ScrollView>
       <View style={styles.footer}>
         <Button
           label={SOCIAL_SIGNUP_SUBMIT_LABEL}
@@ -127,6 +134,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 60,
     paddingHorizontal: 24,
+  },
+  scroll: {
+    flex: 1,
   },
   backRow: {
     marginBottom: 16,

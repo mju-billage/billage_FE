@@ -1,7 +1,7 @@
 /** @screen ETC-3-PAGE-01-0 모임 프로필 변경 */
 import { useState } from 'react';
 import { ActivityIndicator, Image, Linking, Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -180,7 +180,12 @@ function GroupProfileEditScreen() {
   const avatarImageUri = previewUri ?? group?.groupImageUrl ?? '';
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="secondary"
+      snackbar={
+        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+      }
+    >
       <AppBar
         type="sub"
         title={GROUP_PROFILE_EDIT_TITLE}
@@ -286,20 +291,11 @@ function GroupProfileEditScreen() {
           Linking.openSettings();
         }}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,
@@ -341,12 +337,6 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 24,
     paddingVertical: 16,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

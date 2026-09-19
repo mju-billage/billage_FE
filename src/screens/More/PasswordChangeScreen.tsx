@@ -5,7 +5,7 @@
  * 정상이다(서버가 열리면 코드 수정 없이 붙는다).
  */
 import { useCallback, useState } from 'react';
-import { BackHandler, StyleSheet, View } from 'react-native';
+import { BackHandler, ScrollView, StyleSheet, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -129,7 +129,11 @@ function PasswordChangeScreen() {
     <ScreenContainer background="secondary">
       <AppBar type="sub" title={PASSWORD_CHANGE_TITLE} onBackPress={handleBack} />
 
-      <View style={styles.body}>
+      <ScrollView
+        style={styles.body}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <TextField
           label={PASSWORD_CHANGE_CURRENT_LABEL}
           value={currentPassword}
@@ -170,7 +174,7 @@ function PasswordChangeScreen() {
           secureToggle
           error={confirmError}
         />
-      </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         <Button

@@ -4,7 +4,7 @@
 /** @screen ETC-5-SNACKBAR-02-0 모임 내보내기 완료 (스낵바 렌더링은 여기, 메시지 조합은 MemberProfileSheet.tsx) */
 import { useCallback, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -195,7 +195,12 @@ function GroupManagerScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+      }
+    >
       <AppBar
         type="sub"
         title={GROUP_MANAGER_TITLE}
@@ -273,20 +278,11 @@ function GroupManagerScreen() {
         // 남는데, 그 화면도 활성 모임이 없어 바로 에러 상태가 되니 의미가 없다).
         onLeftGroup={() => navigation.pop(2)}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     paddingHorizontal: 24,
     paddingTop: 8,
@@ -331,12 +327,6 @@ const styles = StyleSheet.create({
   stateText: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_DISABLED,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

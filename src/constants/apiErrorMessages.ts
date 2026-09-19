@@ -37,6 +37,9 @@ const COMMON_ERROR_MESSAGES: Record<string, string> = {
   ACCESS_DENIED: '이 작업을 할 권한이 없어요.',
   INVALID_REQUEST: '입력값을 다시 확인해주세요.',
   INVALID_QUERY_PARAMETER: '목록을 불러오지 못했어요. 다시 시도해주세요.',
+  // 404 — 서버에 라우트가 없을 때도(미구현 엔드포인트) 이 코드가 온다. 예전엔 매핑이 없어
+  // "일시적인 문제가 발생했어요" fallback으로 덮였다(2026-09-19, 알림 설정·문의하기·공지사항).
+  RESOURCE_NOT_FOUND: '요청한 정보를 찾을 수 없어요.',
 };
 
 /**

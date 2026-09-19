@@ -3,7 +3,7 @@
 /** @screen ETC-5-SNACKBAR-03-0 모임 참여 완료 */
 import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
@@ -90,7 +90,12 @@ function AllGroupsScreen() {
   }, [loadGroups]);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+      }
+    >
       <AppBar
         type="sub"
         title={ALL_GROUPS_TITLE}
@@ -157,31 +162,16 @@ function AllGroupsScreen() {
           setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
         }}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     paddingHorizontal: 24,
     paddingTop: 8,
     paddingBottom: 24,
     gap: 12,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
   stateContainer: {
     flex: 1,

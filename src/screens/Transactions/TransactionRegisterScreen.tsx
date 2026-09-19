@@ -37,7 +37,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -600,7 +600,7 @@ function TransactionRegisterScreen() {
 
   if (screenLoadState === 'loading' || screenLoadState === 'error') {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="secondary">
         <AppBar type="sub" title={TRANSACTION_REGISTER_TITLE} onBackPress={() => navigation.goBack()} />
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>
@@ -610,12 +610,12 @@ function TransactionRegisterScreen() {
             <Button label={TRANSACTION_REGISTER_RETRY_LABEL} onPress={loadReal} hierarchy="secondary" style={{ alignSelf: 'center' }} />
           )}
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="secondary">
       <AppBar
         type="sub"
         title={TRANSACTION_REGISTER_TITLE}
@@ -838,14 +838,11 @@ function TransactionRegisterScreen() {
           <Snackbar visible title={snackbarMessage} />
         </View>
       )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     paddingTop: 8,
     paddingHorizontal: 24,

@@ -22,6 +22,7 @@ import VerificationField from '../../components/Input/Verification Field/Verific
 import Button from '../../components/Input/Button/Button';
 import TextButton from '../../components/Input/Button/TextButton';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import * as authService from '../../services/authService';
 import { ApiError } from '../../services/apiClient';
 import {
@@ -181,7 +182,7 @@ function EmailVerificationScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
       <View style={styles.backRow}>
         <BackButton onPress={() => navigation.goBack()} />
       </View>
@@ -247,7 +248,7 @@ function EmailVerificationScreen() {
           <Snackbar visible title={snackbarMessage} />
         </View>
       )}
-    </View>
+    </ScreenContainer>
   );
 }
 
