@@ -1829,6 +1829,37 @@ tsv 원본 행 중복(같은 ID가 여러 행): `COM-1-SNACKBAR-02-0`(5행) 등 
 근거: 폴더_메인화면.png Case C / 내역_검색.png#0 / 더보기_모임관리_모임원관리.png#0
 ```
 
+### 5-23. `COM-1-PAGE-01-0` 로그인 통합 정리 (2026-09-20, 11-1, 조사·기록만 — 코드 수정 없음)
+
+원본 스펙시트 `화면명세서/회원가입&로그인/회원가입/로그인_메인화면.png`(`ver 0.25`, **디자인 현황 = 디자인 완료** — 다른 시트의 `디자인 중`보다 신뢰도가 높다). 이 화면의 기록이 여러 곳에 흩어져 있어 한곳에 모은다.
+
+**A. 시안 vs 앱 현재 상태 (dp, 문구 원문, 상수명)**
+
+| 항목 | 시안 | 앱 현재 |
+|---|---|---|
+| 로고 | 남색 책(큐브) 아이콘 + `Billage` 워드마크, 가로 배치 | `assets/images/Billage_logo.png`(워드마크만) `width: 140`(높이 자동, 원본 152×44), 아래 여백 48. 심볼 `Billage_simbol_big.png`(120×116)는 **미참조** — 이미지를 열어 비교한 결과 시안의 아이콘 마크와 같은 도형 → 에셋 요청 불필요, 연결만 하면 됨 |
+| No.1 이메일 | placeholder `이메일`. Default 하단 가이드 라인 그레이 / Focus 라인 강조 + 커서 / Error: 이메일 형식이 아니거나 미입력 상태로 시도 시 하단 가이드 문구 | `TextField`(밑줄형). placeholder `LOGIN_EMAIL_PLACEHOLDER` = `이메일`(일치). 밑줄: 기본 `BORDER_NEUTRAL_NORMAL` `#E5E7EB`, 포커스 `FOREGROUND_SECONDARY` `#4A7FE7`(시안 "강조"와 같은 방향). `autoCapitalize="none"`, `keyboardType="email-address"`. **이메일 형식·미입력 검증 없음** — 화면에서 막지 않고 서버로 보낸다(서버 응답으로만 실패 판단). 이 필드엔 에러 표시가 없다(에러는 비밀번호 필드 아래에만) |
+| No.2 비밀번호 | placeholder `비밀번호`. 마스킹 중 우측 **눈 아이콘에 사선**, 눈 아이콘 터치 시 평문 노출 + 사선 사라짐 | `TextField secureTextEntry`(마스킹만). placeholder `LOGIN_PASSWORD_PLACEHOLDER` = `비밀번호`(일치). **눈 아이콘 토글 없음** — `TextField`는 `secureToggle`을 지원하지만 로그인 화면이 켜지 않는다(§5-17 유형). 에셋은 있다(`system/Eye.png` 열린 눈, `system/Eye Closed.png` 사선 눈, 20×20 `#9B9B9B`). 단 `TextField`의 아이콘 매핑은 **마스킹 중 = 열린 눈(`EYE_ICON`), 노출 중 = 사선 눈**으로 시안과 반대다(시안: 마스킹 중 사선, 노출 시 사선 사라짐) — 토글을 켤 때 함께 봐야 함 |
+| No.3 버튼 | `로그인하기` fullWidth 남색. **이메일·비밀번호 중 하나라도 비면 비활성**, 둘 다 입력되면 활성 | `LOGIN_SUBMIT_LABEL` = `로그인하기`(일치). `Button primary`(`NAVY_800` `#070A23`) fullWidth 높이 52, 모서리 8. **`disabled={isSubmitting}`뿐** — 빈 입력에도 활성이고 그대로 요청이 나간다(시안과 다름). 성공: `goToMain()`(`groupService.getMyGroups()` 후 `navigation.reset` → `Main` = 대시보드, 일치) |
+| No.3 실패 | 화면 하단 **토스트** `이메일 또는 비밀번호를 다시 확인해주세요.` 약 2~3초 후 자동 페이드아웃 | **토스트가 아니다.** 비밀번호 필드 아래 인라인 에러(`TextField error`, 빨강). `INVALID_CREDENTIALS` → `LOGIN_INVALID_CREDENTIALS_ERROR` = `이메일 또는 비밀번호가 올바르지 않습니다.`, 그 밖 → `LOGIN_GENERIC_ERROR` = `로그인에 실패했습니다. 잠시 후 다시 시도해주세요.`. 자동으로 사라지지 않고 입력을 바꾸면 사라진다. 스낵바 슬롯은 다른 화면이 돌려보낸 메시지(`route.params.snackbarMessage`, 1600ms)만 띄운다 |
+| No.4 텍스트 버튼 | 좌 `비밀번호를 잊으셨나요?` → 비밀번호 재설정 / 우 `회원가입하기` → 회원가입. **밑줄**, 작은 글자 | `LOGIN_FIND_PASSWORD_LABEL` / `LOGIN_GO_TO_SIGNUP_LABEL`(문구 일치). `TextButton hierarchy="tertiary"`: 글자 `FOREGROUND_NEUTRAL_SUBTLE` `#9B9B9B`, `TYPOGRAPHY.button`, 패딩 좌우 8·상하 4, 모서리 6, **밑줄 없음**. 가운데 정렬, 둘 사이 간격 16, 위 여백 4. 이동: `PasswordReset` / `TermsAgreement` |
+| No.5 간편 로그인 | 안내 텍스트 `간편 로그인` + 아이콘 3개(카카오톡 노란 원+말풍선 / 네이버 초록 원+N / 구글 흰 원+G). 기존 가입자 → 대시보드, 신규 → 약관동의 후 간편 가입 정보 입력(`COM-3-PAGE-02-0`) | **`간편 로그인` 안내 텍스트 없음**(상수도 없음). 3종 **모두 구현**(네이버 포함, 순서 Kakao·Naver·Google = 시안 순서): `SocialLoginBadge` 48×48 원, 간격 16, 위 여백 40. Kakao `SOCIAL_KAKAO_YELLOW` `#FEE500` + 글자 `K`(`SOCIAL_KAKAO_TEXT` `#3C1E1E`), Naver `SOCIAL_NAVER_GREEN` `#03C75A` + `N`(흰), Google 흰 + 1px `BORDER_NEUTRAL_NORMAL` + `G` — **아이콘이 아니라 글자 자리표시자**(에셋: `docs/asset-requests.md` 2번, 공식 에셋 다운로드). 실제 SDK 호출(`socialAuthService.ts`: `kakao-login`·`naver-login`·`google-signin`). 기존 가입자 → `goToMain()`(일치). 신규 → `SocialSignupInfo`로 곧장 이동 — **약관동의 단계 없음**(`SocialSignupInfoScreen`에 약관 UI가 없고 서버 스키마엔 `termsAgreed` 필수 → 400 가능, 그 파일 주석). `SOCIAL_MEMBER_NOT_FOUND`는 서버 코드가 아니라 `authService.ts`가 합성한 값 |
+| 배치·기타 | 로고 아래 필드 → 버튼 → 텍스트 버튼 → 소셜 아이콘, 빈 하단 | `ScreenContainer secondary edges={['bottom']}`, 루트 `paddingTop: 80`(하드코딩) + 좌우 24, 본문 `ScrollView`. 필드 사이: `TextField` 자체 아래 여백 20 + 로그인 화면 스페이서 8 = 28. 폼 → 버튼 스페이서 16, 버튼 → 링크 스페이서 16. `__DEV__`에서만 `목 계정으로 로그인 (개발용)`(`LOGIN_MOCK_BUTTON_LABEL`) 버튼 |
+
+**B. 시안 안의 불일치 후보 (번호 미부여 — 사용자 확인 후)**
+- **설명표 No.3 실패 = 토스트, 그런데 목업 Case A/B = 필드별 인라인 에러**: Case A(아이디 불일치)는 이메일 필드 빨간 밑줄 + 아래 빨간 문구, Case B(비밀번호 불일치)는 비밀번호 필드 빨간 밑줄 + 문구 + 필드 안에 지우기(⊗)·사선 눈 아이콘. 문구(스크린샷 판독, 작은 글씨): `아이디가 올바르지 않습니다. 입력한 정보를 다시 확인해주세요.` / `비밀번호가 올바르지 않습니다. 입력한 정보를 다시 확인해주세요.` — 설명표 토스트 문구와 다르다. 어느 쪽이 맞는지는 기획 확인(앱은 인라인 방식이나 필드 구분 없이 비밀번호 아래에만 표시).
+- **설명표 No.5는 `간편 로그인` 안내 텍스트를 명시하지만 목업 프레임 3곳에는 없다**(소셜 아이콘 3개만 보임).
+- 소셜 아이콘 지름은 목업에서 약 40dp로 보인다(스크린샷 눈대중, 실측 아님) — 앱은 48.
+
+**C. 흩어진 기록 통합**
+- **배경**: 명세 흰색(v5 실측 `로그인_메인화면.png#0`, 상단 `#FFFFFF`, 점유율 88%), 코드는 배경 미지정이었다 → 9-3에서 `ScreenContainer background="secondary"`로 수정(§2 행, §5-18).
+- **`paddingTop: 80` 하드코딩**: 상단 인셋이 아니라 매직넘버. 8-7·9-3에서 `edges={['bottom']}`로 옮겼고 `paddingTop`은 그대로 둔 채 보류(`DEV_NOTES.md` "`paddingTop` 하드코딩 화면", `PasswordResetSentScreen`만 `ScreenContainer` 미사용으로 남음).
+- **폼 스크롤**: 9-3에서 `ScrollView` + `keyboardShouldPersistTaps="handled"` 추가(`design-diff.md` 2026-09-19 해결 기록).
+- **스낵바 슬롯**: 9-3에서 `ScreenContainer snackbar` 슬롯 적용(`absolute` 래퍼 제거).
+- **소셜 로그인 키 미등록**: 카카오 디벨로퍼스 / 네이버 API 센터 / 구글 클라우드 콘솔 앱 등록과 `.env`(`KAKAO_NATIVE_APP_KEY`, `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET`, `GOOGLE_WEB_CLIENT_ID`) 실제 키 채우기는 본인 진행 미완, 카카오톡/네이버 앱 연동 실기기 테스트도 미완(`DEV_NOTES.md` §3). 등록에 쓸 값: SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`, 카카오 키 해시 `Xo8WBi6jzSxKDVR4drqm84yr9iU=`, 패키지명 `com.billage`(`docs/lessons.md` §2). 그래서 신규 소셜 가입 경로(`COM-3-PAGE-02-0`)는 캡처·대조 불가로 남아 있다(`design-diff.md` 2026-08-28 배치 C).
+- **2026-08-28 파일럿 기록**(`design-diff.md` "COM-1-PAGE-01-0 (로그인) — 간격·앱 로고·소셜 아이콘"): 세로 간격 재조정 필요·로고 아이콘 마크 없음·소셜 아이콘 자리표시자. 이 중 로고는 `Billage_logo.png` 도입으로 워드마크가 들어갔고 아이콘 마크(심볼)만 남았으며 이번에 에셋이 이미 있음을 확인했다.
+- **에셋**: `docs/asset-requests.md`(소셜 아이콘 3종 = 공식 에셋 다운로드, 지우기 아이콘, 로고 심볼은 요청 불필요).
+
 ## 6. 권장 순서
 
 1. **`TYPOGRAPHY`에 `letterSpacing` 15개 추가** (§3-2) — 스크린샷 대조 전에 해야 전 화면 오탐을 막는다.
