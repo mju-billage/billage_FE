@@ -22,12 +22,12 @@
  * 한 번에 전체를 내려줌).
  */
 import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import AmountCard from '../../components/Data Display/Card/AmountCard';
 import ReportEntryList from '../Report/ReportEntryList';
 import type { ArchivedEntry } from '../../types/archive';
@@ -45,7 +45,7 @@ function ArchiveLedgerEntriesScreen() {
   const { ledgerName, startDate, endDate, totalIncome, totalExpense, entries } = route.params;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar type="sub" title={ledgerName} onBackPress={() => navigation.goBack()} />
 
       <View style={styles.body}>
@@ -68,14 +68,11 @@ function ArchiveLedgerEntriesScreen() {
           }
         />
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,

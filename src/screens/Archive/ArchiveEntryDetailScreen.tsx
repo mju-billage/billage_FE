@@ -16,12 +16,12 @@
  * 다르다(보관 스냅샷 시점엔 등록자만 남는다).
  */
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import Thumbnail from '../../components/Data Display/Image Placeholder/Thumbnail';
 import { buildAuthenticatedImageSource } from '../../utils/authenticatedImage';
 import { formatWon } from '../../utils/currency';
@@ -63,7 +63,7 @@ function ArchiveEntryDetailScreen() {
   const { ledgerName, entry } = route.params;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar
         type="sub"
         title={ARCHIVE_ENTRY_DETAIL_TITLE}
@@ -109,14 +109,11 @@ function ArchiveEntryDetailScreen() {
           </View>
         )}
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,
