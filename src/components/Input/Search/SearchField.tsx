@@ -54,7 +54,10 @@ function SearchField({
       ]}
     >
       <TextInput
-        style={[styles.input, isFocused && styles.inputFocused]}
+        style={styles.input}
+        // 시안 실측(폴더_메인화면.png Case C): 포커스 중에도 입력 글자는 기본색이고 파란색은 커서뿐이다.
+        cursorColor={FOREGROUND_SECONDARY}
+        selectionColor={FOREGROUND_SECONDARY}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
@@ -105,9 +108,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 0,
     color: FOREGROUND_NEUTRAL_NORMAL,
-  },
-  inputFocused: {
-    color: FOREGROUND_SECONDARY,
   },
   icon: {
     width: 18,

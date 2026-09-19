@@ -276,6 +276,12 @@
 
 - 앱 검색 화면의 `필터`(`TextButton`, 헤더 아래 우측)는 `LedgerFilterSheet`를 연다. 지우면 검색 결과에 구분/승인 상태/정렬을 거는 수단이 사라진다 — 기능 상실이 시안 불일치보다 나빠 **유지**. `design-verification.md` §5-4 #16.
 
+#### 검색 필드 지우기 아이콘 — 원형 ⊗ 에셋 필요 (디자이너 요청) [2026-09-20 10-8]
+검색 필드 지우기 아이콘 — 시안은 원형 ⊗(채운 회색 원 + 흰 X, #9AA1AE), 구현은 사각 X(Close.png). 원형 에셋 없음. 디자이너에게 에셋 요청 필요.
+
+- `TextField`의 `onClear`(사용처 `GroupProfileEditScreen`·`JoinGroupSheet`·`ProfileEditScreen`·`TransactionTextInputSheet`·`Dialog`)도 **같은 `Close.png`**(사각 X)를 쓴다. 그쪽 시안이 원형 ⊗인지는 미대조.
+- 에셋 요청은 `docs/asset-requests.md`에 한곳으로 모음(지우기 아이콘, 소셜 로그인 아이콘 3종, 앱 로고 아이콘 마크). 원형 ⊗를 직접 그리거나 비슷한 아이콘으로 대체하지 않는다.
+
 ### 1-3. 캡처/실측 필요
 
 #### <a id="etc-1-page-01-0-더보기-메인"></a>ETC-1-PAGE-01-0 (더보기 메인) — 카드·메뉴 여백 실측 대기 [2026-08-28 파일럿, 09-12 부분 해결]
@@ -767,6 +773,7 @@ DSH-1 재캡처로 "고쳐졌는지" 확인하는 절차 자체가 성립하지 
 - [해결] 2026-09-20 `keyboardShouldPersistTaps="handled"` 유지 — 없으면 시안의 "행 터치 시 이동"이 안 됨(사용자 판정, 10-6)
 - [해결] 2026-09-20 `SearchField` 시안 실측 정렬(전체 8곳) — 명세서 9개 시트 실측: 채움색 `#FFFFFF` 9곳 전부(회색 채움 없음), 높이 48dp, 좌우 24, pill, 돋보기 우측 끝, 테두리는 흰 배경 화면 `#E1E3E8` 1px / 파란 배경 화면(폴더 메인·상세) 없음. 기본값을 흰 바탕 + 48dp로 바꾸고 `variant`로 테두리를 갈랐다: `FolderScreen` = 기본, 나머지 7곳 = `outline`. `#E1E3E8`은 `colors.ts`에 없어 가장 가까운 `BORDER_NEUTRAL_NORMAL`(`#E5E7EB`) 사용, 새 색 상수 없음. `SearchField`에서 `#F3F4F6` 채움 제거 확인 (10-7, 실기기 확인 대기)
 - [조사, 수정 안 함] 2026-09-20 `SearchField` 포커스 글자색 — `inputFocused`(`#4A7FE7`)가 variant와 무관하게 포커스 시 붙음(시안 입력 글자는 어두움). 지우기 아이콘 — 원형 ⊗ 에셋 없음(`Close.png` 사각 X, `Delete.png` 휴지통만). 사용자가 시안 재확인 예정 (10-7)
+- [해결] 2026-09-20 `SearchField` 포커스 시 입력 글자색 — 시안 실측(`폴더_메인화면.png` Case C, 검색어 `학기` 입력 상태): 글자는 어두운 회색(최암부 `#67707B`, 안티앨리어싱 포함이라 실제 토큰은 더 진함), **커서만 파랑**. 앱은 `inputFocused: { color: FOREGROUND_SECONDARY }`로 포커스 시 글자 전체가 `#4A7FE7`이었다(variant 무관 — 기본 variant인 폴더 화면도). `inputFocused`의 색을 제거해 기본색(`FOREGROUND_NEUTRAL_NORMAL`)을 유지하고 `cursorColor`/`selectionColor`로 `#4A7FE7`을 줌. **`TextField`는 같은 문제 없음** — 입력 글자색은 `FOREGROUND_PRIMARY` 고정이고 포커스 시엔 밑줄 색만 파랑으로 바뀐다(커서색은 손대지 않음) (10-8, 실기기 확인 대기)
 
 ## 4. 검증 방식 (파일럿 5개로 확정)
 

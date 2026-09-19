@@ -1817,6 +1817,18 @@ tsv 원본 행 중복(같은 ID가 여러 행): `COM-1-SNACKBAR-02-0`(5행) 등 
 
 **조사(10-7, 수정 안 함)**: ① 입력 글자 파랑의 출처 — `SearchField`의 `inputFocused: { color: FOREGROUND_SECONDARY }`(`#4A7FE7`)가 **`variant`와 무관하게** `isFocused`일 때 `TextInput` 스타일에 붙는다(테두리 파랑 `containerOutlineFocused`만 outline 전용). 그래서 기본 variant(폴더 화면)도 포커스 중 글자가 파랑이다. ② 원형 ⊗ 에셋 — `assets/icons/`에 없다. `action/Close.png`(사각 X, 96×96)와 `action/Delete.png`(휴지통)뿐이고 지우기 아이콘은 `Close.png`를 16×16 `#9B9B9B`로 쓴다.
 
+**※ 갱신(2026-09-20 10-8)**: 위 조사 ①(포커스 글자 파랑)은 시안 실측으로 결함 확정 → 수정했다. `inputFocused` 색 제거, 글자는 포커스와 무관하게 기본색, 파랑은 `cursorColor`/`selectionColor`(`#4A7FE7`)만. ②(원형 ⊗ 에셋 없음)는 그대로 — `docs/asset-requests.md`로 요청.
+
+**시안 실측값(SearchField, 2026-09-20)**
+
+```
+채움 #FFFFFF / 높이 48dp / 좌우 24dp / 모서리 pill
+테두리: 흰 배경 화면만 #E1E3E8 1px (구현은 GREY_200 #E5E7EB — 채널당 3~4 차이)
+포커스: 글자는 기본색 유지, 커서만 #4A7FE7
+지우기: 원형 ⊗ #9AA1AE, 돋보기 왼쪽
+근거: 폴더_메인화면.png Case C / 내역_검색.png#0 / 더보기_모임관리_모임원관리.png#0
+```
+
 ## 6. 권장 순서
 
 1. **`TYPOGRAPHY`에 `letterSpacing` 15개 추가** (§3-2) — 스크린샷 대조 전에 해야 전 화면 오탐을 막는다.
