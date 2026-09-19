@@ -569,6 +569,11 @@ spec-sheet-map.tsv`에 헤더확인으로 등록, `design-verification.md` §4-0
 - 실호출: `KAKAO`/`GOOGLE`은 401 `SOCIAL_TOKEN_INVALID`(검증 통과), `NAVER`는 표기·토큰과 무관하게 400 `INVALID_REQUEST`. 요청은 `docs/backend-requests.md` "신규 — 소셜 로그인 `provider`에 `NAVER`가 통과하지 않습니다".
 - **앱의 네이버 버튼은 남겨둠**(서버 답을 받고 결정). 그때까지 네이버 로그인은 400으로 실패한다.
 
+#### 소셜 가입 스키마에 마케팅 수신 동의 필드 없음 (불일치 #20) [2026-09-20 11-4]
+`COM-2-PAGE-01-0` 약관동의 시안(디자인 완료)에는 '마케팅 정보 수신 동의 (선택)'이 있으나, 신규 소셜 가입 스키마(`POST /auth/social/signup`: provider/token/name/termsAgreed)에 해당 필드가 없어 소셜 가입 때는 마케팅 수신 동의가 서버에 저장되지 않는다(일반 가입은 `agreements.marketing`으로 전송). 백엔드 확인 필요.
+
+- 백엔드 요청: 약관동의에 '마케팅 정보 수신 동의(선택)'이 명세(COM-2-PAGE-01-0, 디자인 완료)에 있으나 소셜 가입 스키마(POST /auth/social/signup — provider/token/name/termsAgreed)에 해당 필드가 없다. 일반 가입(POST /auth/signup)의 agreements.marketing은 있다. 수집 여부와 필드명 확인 요청. (`docs/backend-requests.md` "신규 — 소셜 가입 스키마에 마케팅 수신 동의 필드가 없습니다"). 일반 가입은 `agreements.marketing`을 이미 보낸다.
+
 ## 2. 판단 대기 (⏳ 내 결정 필요)
 
 #### F-1 한국어 줄바꿈 — QuickServiceCard 카드 폭/폰트 조정 방향 결정 [배치 F]
@@ -798,6 +803,8 @@ DSH-1 재캡처로 "고쳐졌는지" 확인하는 절차 자체가 성립하지 
 - [해결] 2026-09-20 소셜 로그인·가입 `provider` 대소문자 — 서버는 대문자(`KAKAO`/`GOOGLE`)만 통과, 앱은 `Kakao`/`Naver`/`Google`을 그대로 보냈다(콘솔 키를 등록해도 400). `authService`에 `SOCIAL_PROVIDER_API_VALUE` 매핑을 두고 `socialLogin`·`socialSignup` 두 함수 모두 API 경계에서 대문자로 변환. 같은 유형(앱 내부 표기를 서버에 그대로 전송) 전수 조사: 다른 곳은 없음, 목록은 `design-verification.md` §5-23 F (11-3)
 - [해결] 2026-09-20 신규 소셜 가입 약관동의 삽입 — 소셜 인증 → 약관동의(`COM-2-PAGE-01-0`) → 간편 가입 정보 입력(`COM-3-PAGE-02-0`). `TermsAgreementScreen`을 일반·소셜 가입이 함께 쓰고(소셜은 `socialProfile` param, 동의 후 `SocialSignupInfo`로), `SocialSignupInfoScreen`이 `agreements`를 받아 가입 요청에 `termsAgreed`(필수 3종의 논리곱)를 실음. 뒤로가기는 스택상 약관동의로 돌아감. 기존 가입자는 약관을 건너뛰고 대시보드로 직행(변경 없음). **실 소셜 토큰·콘솔 키가 없어 가입 완료까지는 실행 검증 못 함 — 요청 바디 형태만 더미 토큰으로 서버 검증 단계 통과(401 `SOCIAL_TOKEN_INVALID`)까지 확인** (11-3)
 - [해결] 2026-09-20 `COM-3-PAGE-02-0` 시안 반영 — 이름 필수(빨간 *)·8자 초과 시 입력을 막지 않고 레드 라인 + `최대 8자 이내로 입력할 수 있어요.`(`SOCIAL_SIGNUP_NAME_MAX_LENGTH`·`SOCIAL_SIGNUP_NAME_TOO_LONG_ERROR`), 이메일 Read-only(`disabled`, 수정·검증 제거)·필수 표시, CTA `다음으로`(목업, 설명표는 `다음`)·이름 1~8자일 때만 활성(이메일은 조건 아님), 뒤로가기 화면 상단 고정. 상세는 `design-verification.md` §5-23 G (11-3)
+- [해결] 2026-09-20 약관동의(`COM-2-PAGE-01-0`) 시안 대조 — 문구 4종(`서비스 이용 약관 (필수)` / `개인정보 수집 및 이용에 대한 동의 (필수)` / `마케팅 정보 수신 동의 (선택)` / `만 14세 이상 회원입니다. (필수)`)·순서·`>` 유무(마지막 항목 없음)·전체 동의 양방향·CTA `다음으로`·`>` 상세 화면 3종 연결 모두 이미 시안과 일치. **불일치는 태그 색 하나**: 시안 픽셀 실측 `(필수)` 파랑 / `(선택)` 본문색, 앱은 둘 다 파랑 → `(선택)`을 본문색으로(요청서는 "회색 계열"이라 했으나 픽셀 실측이 달라 픽셀을 따름). 상세는 `design-verification.md` §5-24 (11-4)
+- [조사, 수정 안 함] 2026-09-20 약관동의 뒤로가기 — 일반·소셜 모두 로그인으로 감(시안 No.1 일치). 소셜은 프로필·토큰이 화면 param에만 있어 버려지고 저장·계정 생성 없음, 단 소셜 SDK 세션은 로그아웃하지 않아 재시도 시 SDK 재호출(재인증 여부는 SDK 동작, 콘솔 키 미등록이라 미검증) (11-4)
 
 ## 4. 검증 방식 (파일럿 5개로 확정)
 

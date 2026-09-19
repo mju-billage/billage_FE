@@ -286,6 +286,13 @@ provider=Naver / Kakao / Google (혼합 대소문자) → 400 INVALID_REQUEST
 ```
 `POST /auth/social/signup`은 `KAKAO`/`GOOGLE`(대문자)이 검증을 통과하고 혼합 대소문자가 400인 것까지 확인했고 `NAVER`는 login에서만 확인했습니다. 참고로 사용자 응답의 `loginProvider` 값에는 `NAVER`가 있는 것으로 앱이 다루고 있어(`EMAIL`/`KAKAO`/`NAVER`/`GOOGLE`) 서버 안에서도 요청 쪽 enum과 응답 쪽 enum이 다른 것으로 보입니다. Swagger 예시(`"provider": "GOOGLE"`)는 대문자 표기입니다. 프론트는 `provider`를 대문자로 보내도록 고쳤고(`KAKAO`/`GOOGLE`은 이제 서버 검증을 통과), 네이버 버튼은 서버 답을 받을 때까지 남겨 둡니다.
 
+## 신규 — 소셜 가입 스키마에 마케팅 수신 동의 필드가 없습니다 (2026-09-20)
+
+약관동의에 '마케팅 정보 수신 동의(선택)'이 명세(COM-2-PAGE-01-0, 디자인 완료)에 있으나 소셜 가입 스키마(POST /auth/social/signup — provider/token/name/termsAgreed)에 해당 필드가 없다. 일반 가입(POST /auth/signup)의 agreements.marketing은 있다. 수집 여부와 필드명 확인 요청.
+
+- 일반 가입(`Auth (인증).txt` §8, Swagger `SignupRequest`)은 `agreements: { termsOfService, privacyPolicy, ageOver14, marketing }`를 받아 `marketing`을 그대로 저장합니다(동의 시각도 함께 기록한다고 명세). 앱은 이쪽에는 `marketing`을 보냅니다.
+- 소셜 가입(Swagger `POST /auth/social/signup`)은 `termsAgreed`(필수) 하나뿐이라, 약관동의 화면에서 사용자가 마케팅 수신에 동의해도 보낼 곳이 없어 버려집니다(앱은 보내지 않음). 소셜 가입에도 `marketing`(또는 `agreements`)을 받을지 알려 주세요.
+
 ## 확정됨(2026-09-11, Swagger 전수 대조 + 실호출) — 프론트 자체 버그 3건
 
 - **폴더 전체 백업이 항상 실패하던 원인**: `archiveService.ts`가 `POST /groups/{groupId}/folders/archive`
