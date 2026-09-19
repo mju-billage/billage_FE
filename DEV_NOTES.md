@@ -1,6 +1,6 @@
-# 개발 진행 메모 (로컬 전용, git에 올리지 않음)
+# 개발 진행 메모
 
-> 개인 메모. `.gitignore`에 등록돼 커밋되지 않는다. 2026-09-19 7-1 압축 — 해결된 항목은 한 줄로, 미해결만 상세히 남겼다(압축 전 원문은 세션 스크래치패드 백업이 유일했다 — 이 파일은 git 추적 대상이 아니다).
+> 2026-09-19 7-2부터 git 추적 대상이다(공유 저장소 — 개인 정보·절대경로·키를 적지 않는다). 2026-09-19 7-1 압축 — 해결된 항목은 한 줄로, 미해결만 상세히 남겼다(압축 전 원문은 커밋 `9fb481d`).
 
 ---
 
@@ -43,4 +43,5 @@ SHA-1(콜론 형식):  5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:
 - [ ] 카카오 디벨로퍼스 / 네이버 API 센터 / 구글 클라우드 콘솔에 앱 등록하고 `.env`에 실제 키 채우기 (본인 진행)
 - [ ] 백엔드 팀과 `/api/v1/auth/social/login`, `/api/v1/auth/social/signup` 엔드포인트 및 `SOCIAL_MEMBER_NOT_FOUND` 에러 코드 확정 — ⏳ 2026-09-19 코드 확인: 엔드포인트 존재는 Swagger로 확인됐지만 `SOCIAL_MEMBER_NOT_FOUND`는 서버가 내려주는 코드가 아니라 `authService.ts:390`이 클라이언트에서 합성해 던지는 값이다 — 서버의 실제 "가입되지 않은 소셜 계정" 응답 코드는 미확정
 - [ ] 실제 키 발급 후 카카오톡/네이버 앱 연동까지 실기기 테스트 (현재는 에뮬레이터 웹 로그인 폴백까지만 확인)
-- [ ] (2026-09-19 발견) `authService.socialLogin`/`socialSignup`에 디버그용 `console.warn(...)`이 남아 있다 — README §6 "커밋에 console.log 남기지 않기" 위반 소지, 확인 후 정리
+- [x] (2026-09-19) `authService.socialLogin`/`socialSignup`의 디버그용 `console.warn(...)` 제거 완료 (7-2). `SOCIAL_MEMBER_NOT_FOUND`가 클라이언트 합성 값이라는 주석도 코드에 달았다.
+- [ ] **테스트 러너가 안 돈다 → 회귀 안전망 없음 (2026-09-19 기록, 지금 고치는 게 아니라 기록)**: `npm test`(= `jest`)가 `Validation Error: Preset @react-native/jest-preset not found`로 시작도 못 한다. 원인: `jest.config.js`가 `preset: '@react-native/jest-preset'`를 쓰는데 이 패키지가 `package.json`(dependencies/devDependencies)에도 `node_modules`에도 없다(RN 0.86에서 별도 패키지로 분리된 것으로 보이나 미확인 — `@react-native/*` 다른 패키지만 0.86.0으로 설치돼 있다). `jest`/`@types/jest`는 설치돼 있다. 실제 테스트 파일은 `__tests__/` 아래 **2개뿐**(`App.test.tsx` 1케이스 = RN 템플릿 기본 테스트, `folderTree.test.ts` 6케이스)이라 러너가 살아나도 커버리지는 `utils/folderTree`가 전부고, 화면·서비스·컴포넌트는 자동 검증이 전혀 없다. 지금 코드 변경의 유일한 자동 검증은 `tsc --noEmit`과 `eslint`(타입·린트)다.

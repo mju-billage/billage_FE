@@ -3,10 +3,10 @@
  * 디자인 원본(BILLIGE 폴더)을 재귀 순회해 Screen ID → 이미지 파일 목록 인덱스를 만든다.
  * 결과는 scripts/design-index.json에 쓴다.
  *
- * 디자인 원본 경로는 저장소 밖(개인 PC 다운로드 폴더)이라 하드코딩하지 않고
- * BILLAGE_DESIGN_DIR 환경변수로 오버라이드 가능하게 뺐다. 기본값은 이 프로젝트를
- * 만든 개발자 PC 기준이므로, 다른 PC에서 쓸 땐 환경변수로 지정해라:
- *   BILLAGE_DESIGN_DIR="D:\design\BILLIGE" node scripts/build-design-index.js
+ * 디자인 원본 경로는 저장소 밖(개인 PC)이라 코드에 박지 않고 BILLAGE_SPEC_ROOT
+ * 환경변수로만 받는다(없으면 안내 후 종료, `lib/spec-root.js`). 출력 JSON의 경로는
+ * 전부 이 루트 기준 상대경로라 개인 경로가 저장소에 남지 않는다:
+ *   BILLAGE_SPEC_ROOT="D:\design\BILLIGE" node scripts/build-design-index.js
  *
  * 같은 Screen ID에 이미지가 여러 장 있을 때(상태 변형 캡처, 폴더 중복 배치 등),
  * 파일 경로/화면명에서 상태 힌트(그리드/리스트/검색/빈 상태/로딩/에러)를 뽑아
@@ -39,8 +39,10 @@ const path = require('path');
 const { readPngSize } = require('./lib/png-size');
 const { extractTags } = require('./lib/state-tags');
 
-const DEFAULT_DESIGN_DIR = 'C:\\Users\\jotmd\\Downloads\\BILLIGE';
-const DESIGN_DIR = process.env.BILLAGE_DESIGN_DIR || DEFAULT_DESIGN_DIR;
+const { getSpecRoot, toRelative } = require('./lib/spec-root');
+
+// 모듈 로드 시점이 아니라 main()에서 채운다 — 환경변수가 없으면 거기서 안내하고 종료.
+let DESIGN_DIR = '';
 
 const OUTPUT_PATH = path.join(__dirname, 'design-index.json');
 const VERIFICATION_DOC_PATH = path.join(__dirname, '..', 'docs', 'design-verification.md');
@@ -74,7 +76,8 @@ function loadSpecSheetMap() {
       continue;
     }
     const entry = {
-      specSheetPath: path.join(DESIGN_DIR, specSheetPath.trim()),
+      // TSV의 경로는 이미 루트 기준 상대경로 — 구분자만 '/'로 통일해 그대로 싣는다.
+      specSheetPath: specSheetPath.trim().split(/[\\/]/).join('/'),
       확인방법: (확인방법 || '').trim(),
       비고: (비고 || '').trim(),
     };
@@ -196,11 +199,7 @@ function pickDefaultIndex(candidates, screenId, screenName) {
 }
 
 function main() {
-  if (!fs.existsSync(DESIGN_DIR)) {
-    console.error(`디자인 원본 경로가 없다: ${DESIGN_DIR}`);
-    console.error('BILLAGE_DESIGN_DIR 환경변수로 실제 경로를 지정해라.');
-    process.exit(1);
-  }
+  DESIGN_DIR = getSpecRoot();
 
   const screenNames = loadScreenNames();
   const { map: specSheetMap, unresolved: unresolvedSpecSheets } = loadSpecSheetMap();
@@ -236,7 +235,7 @@ function main() {
       rawGroups[screenId] = [];
     }
     rawGroups[screenId].push({
-      path: filePath,
+      path: toRelative(DESIGN_DIR, filePath),
       resolution: resolution ? `${resolution.width}x${resolution.height}` : null,
       tags: [...extractTags(filePath)],
     });
@@ -308,7 +307,7 @@ function main() {
 
   const screenIdCount = Object.keys(index).length;
   const fileCount = Object.values(index).reduce((sum, entry) => sum + entry.candidates.length, 0);
-  console.log(`디자인 원본: ${DESIGN_DIR}`);
+  console.log(`디자인 원본 루트(BILLAGE_SPEC_ROOT): ${DESIGN_DIR}`);
   console.log(`인덱싱된 Screen ID: ${screenIdCount}개 (이미지 파일 ${fileCount}개, 전부 크롭 목업)`);
   console.log(`Screen ID 없어서 제외된 이미지: ${skippedNoId.length}개 (그중 화면명세서\\ 하위 원본 스펙시트: ${skippedSpecSheetCount}개, 나머지는 아이콘/컴포넌트 시안 등)`);
   console.log(`⚠️ 원본 스펙시트(화면명세서\\)는 크롭 인덱스엔 없다 — scripts/spec-sheet-map.tsv로 손매핑 중: ${mappedSpecSheetFiles.size}/${skippedSpecSheetCount}장 매핑(ID 미확정 ${idConfirmedCount}장 포함), ${idsWithSpecSheet}/${screenIdCount}개 ID가 specSheet 보유`);

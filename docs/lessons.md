@@ -111,6 +111,14 @@
 - `react-native run-android` 전에 같은 PowerShell 호출 안에서 `$env:NoDefaultCurrentDirectoryInExePath = ''`로 지운다(그렇지 않으면 `gradlew.bat`을 못 찾는다). Metro가 이미 떠 있으면 `--no-packager`(아니면 8082 포트 프롬프트에서 멈춘다). PowerShell `Start-Job`은 호출이 끝나면 죽는다 — 백그라운드는 도구의 `run_in_background`를 쓴다.
 - Git Bash에서 `adb shell/pull`에 `/sdcard/...`를 넘길 땐 `MSYS_NO_PATHCONV=1`을 앞에 붙이고, `adb pull` 목적지는 Windows 경로(`C:\Users\...`)로 준다.
 
+### 1-12. 명세서 자동 측정의 프레임 좌표 함정 (2026-09-19, 8-1~8-5)
+
+> **명세서 자동 측정의 프레임 좌표 함정** — 명세서 목업 왼쪽에 붙은 번호 마커(①②③) 때문에 연결요소 바운딩 박스가 프레임 밖까지 잡힌다. 여백 스트립을 재면 흰 종이를 재게 되어 블루 화면이 흰색으로 판정된다. v1~v4가 전부 이 오류. 해결: 프레임 우측 테두리를 격자(x=410/790)에 스냅하고 폭 360으로 고정. **자동 측정 결과는 반드시 원본 크롭 육안 확인으로 교차검증할 것.**
+
+- 증상 모음: v1(파일 단위)은 한 파일 안의 다른 Case(스낵바가 뜬 부모 화면 등)까지 세서 폼 화면이 블루로, v3는 프레임 왼쪽이 실제 테두리(x=50)보다 18~24px 바깥(x=26/32)에 잡혀 `FDR-1-PAGE-01-0`·`DSH-1-PAGE-01-0`(둘 다 블루)이 흰색으로 나왔다.
+- 이 때문에 8-1·8-3에서 §2에 반영했던 `PAGE` 행 판정은 전부 철회했다(`docs/design-verification.md` §1). 기준점(직접 실측한 화면)이 하나라도 틀리면 그 측정 결과 전체를 쓰지 않는다.
+- 같은 사고의 부산물: 딤 처리된 모달 프레임은 측정값이 스크림 색이라 **요소 표면색이 아니라 뒤 화면**을 잰 것이다 — 모달·시트·스낵바 행의 배경 열은 요소 표면색(컴포넌트 근거)으로 통일하고 부모 색은 비고에 둔다(§1 맨 위 규칙, 8-4).
+
 ---
 
 ## 2. 운영에 필요한 값
@@ -155,7 +163,7 @@
 
 ### 디자인 원본 · 키
 
-- 디자인 원본 폴더: `C:\Users\jotmd\Downloads\BILLIGE\`(`화면명세서\` = 원본 스펙시트, 나머지 = 크롭 목업). 다른 PC에서는 `BILLAGE_DESIGN_DIR` 환경변수. 명세 원본(API txt): `C:\Users\jotmd\Downloads\BILLIGE\api\`.
+- 디자인 원본 폴더: `%BILLAGE_SPEC_ROOT%\`(`화면명세서\` = 원본 스펙시트, 나머지 = 크롭 목업; 경로는 환경변수 `BILLAGE_SPEC_ROOT`로 지정). 명세 원본(API txt): `%BILLAGE_SPEC_ROOT%\api\`.
 - 소셜 로그인 콘솔 등록용(`android/app/debug.keystore`, 팀 전원 동일): SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`, 카카오 키 해시 `Xo8WBi6jzSxKDVR4drqm84yr9iU=`, 패키지명 `com.billage`. `.env` 필수 키: `KAKAO_NATIVE_APP_KEY`, `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET`, `GOOGLE_WEB_CLIENT_ID`, `API_BASE_URL`.
 
 ---

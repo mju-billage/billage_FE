@@ -19,9 +19,9 @@ React Native 0.86(새 아키텍처, `targetSdk` 36 → **edge-to-edge 강제**) 
 화면의 상태 등급이 바뀌면 **`docs/design-verification.md`의 ① §2 해당 행 ② §1 상태 요약표 ③ §1 도메인별 표**를 함께 고친다(합계 159 = IA 고유 Screen ID와 교차검증되므로 IA에 없는 행은 상태 표에 넣지 않는다). 배경 판정은 §1 "배경 판정 현황"(§2 실제 행 기준) 별도 축. 결론을 못 내리면 등급을 바꾸지 말고 **`판단 보류 + 근거`**로 적는다.
 
 ## 명세서 위치
-- 원본 스펙시트(UI 요소 표 포함): `C:\Users\jotmd\Downloads\BILLIGE\화면명세서\` (다른 PC는 `BILLAGE_DESIGN_DIR`). ID→파일 매핑은 `scripts/spec-sheet-map.tsv`.
+- 원본 스펙시트(UI 요소 표 포함): `%BILLAGE_SPEC_ROOT%\화면명세서\` (BILLIGE 폴더 경로를 환경변수 `BILLAGE_SPEC_ROOT`로 지정 — `scripts/lib/spec-root.js`, `design-index.json`의 경로도 이 루트 기준 상대경로). ID→파일 매핑은 `scripts/spec-sheet-map.tsv`.
 - 크롭 목업(표 없음)은 `scripts/design-index.json`. **[기능]/[상태]/[액션] 판단은 원본 스펙시트로 한다.**
-- API 명세 txt: `C:\Users\jotmd\Downloads\BILLIGE\api\`, 서버 실제 목록은 Swagger(`docs/api-wiring.md`).
+- API 명세 txt: `%BILLAGE_SPEC_ROOT%\api\`, 서버 실제 목록은 Swagger(`docs/api-wiring.md`).
 
 ## 절대 하지 말 것
 - **문서 정규식 일괄 치환** — 문서 앞머리가 깨진 사고가 있었다. 고유 문자열/줄 단위로만 고친다.

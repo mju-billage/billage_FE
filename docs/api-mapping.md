@@ -1,6 +1,6 @@
 # API ↔ 화면 매핑 (api-mapping)
 
-명세 원본: `C:\Users\jotmd\Downloads\BILLIGE\api\`(txt 16개 — 공통 규칙 1 + 도메인 15, `Notification & Support`·`Statistics` 2개 신설). 화면 매핑은 `src/screens/**/*.tsx` 상단 `@screen` 주석 전수 `grep` 기준.
+명세 원본: `%BILLAGE_SPEC_ROOT%\api\`(txt 16개 — 공통 규칙 1 + 도메인 15, `Notification & Support`·`Statistics` 2개 신설). 화면 매핑은 `src/screens/**/*.tsx` 상단 `@screen` 주석 전수 `grep` 기준.
 
 참고 자료: `명세대조표.zip`(대조 2026-09-01, FE `04b6c50`/BE `245eeb4` 기준 — Figma 원문 + BE 컨트롤러·DTO를 직접 대조해 만든 문서). 이 문서 곳곳에서 "대조표"로 인용한다.
 

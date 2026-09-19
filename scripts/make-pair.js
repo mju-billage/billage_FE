@@ -12,6 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
+const { getSpecRoot, fromRelative } = require('./lib/spec-root');
 
 const SHOTS_DIR = path.join(__dirname, '..', 'shots');
 const PAIRS_DIR = path.join(SHOTS_DIR, 'pairs');
@@ -91,7 +92,8 @@ async function main() {
     process.exit(1);
   }
 
-  const designPath = chosen.path;
+  // design-index.json의 경로는 BILLAGE_SPEC_ROOT 기준 상대경로다.
+  const designPath = fromRelative(getSpecRoot(), chosen.path);
   if (!fs.existsSync(designPath)) {
     console.error(`디자인 파일이 없다: ${designPath}`);
     process.exit(1);
