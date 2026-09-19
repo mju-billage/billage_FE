@@ -93,7 +93,7 @@ DSH-2-PAGE-01-0(알림 목록)이 실 API 연동으로 미구현→구현, ETC �
 
 **2026-09-19 갱신**: 이 표의 숫자가 2026-09-12 이후 여러 라운드(DUE 묶음 4·5, 폴더 예산 설정 등)에서 개별 행만 고치고 표는 안 고쳐 낡아 있었다 — 이번에 §2 실제 행(165개, 도메인별 표 헤더 제외)의 배경 열을 직접 세어 다시 맞췄다(블루 18 / 흰색 11 / 미판정 136). **2026-09-19 6-10에서 스플래시 행(`(ID 없음)`) 1개를 추가해 합계 166 / 미판정 137**이다(§5-7 미판정 목록 136개는 Screen ID가 없어 이 행을 넣지 않았다). §5-7 "미판정 목록"은 처음 137개로 이 표의 136과 1 차이가 났으나, 2026-09-19 스크립트 집합 차로 원인을 특정해 정정했다 — 목록 쪽에만 있던 ID는 `FDR-2-PAGE-02-0`(§2 행은 이미 블루, 목록에서 안 뺀 우리 쪽 누락)이고 §2에만 있는 ID는 없다. 지금은 두 목록 모두 136개(§5-18 5번).
 
-**2026-09-19 8-5**: 8-1(v1)·8-3(v3) 명세 측정 판정은 철회했다 — v1은 파일 단위 오염, v3는 프레임 좌표 오검출(번호 마커 ①②③까지 바운딩 박스에 포함돼 여백 스트립이 프레임 밖 흰 종이를 잼, `docs/lessons.md` 1-12). 이어서 프레임 x범위를 격자(50..410 / 430..790)에 고정한 **v5**(`docs/spec-background-v5.tsv`)로 `PAGE` 행 46개를 다시 반영했다(근거는 §2 배경 칸: `명세 프레임 실측 v5 (<파일>#<idx>, 상단 <HEX>, 점유율 N%)`). 기준점 6개 검증 통과, 점유율 60% 미만은 판정에 쓰지 않고 `수동 확인 필요`. 배경 열 의미 통일(8-4)은 유지. 현재 블루 26(PAGE) / 흰색 40(PAGE) + 51(모달·시트 표면) / 어두움 27(스낵바 표면) / 미판정 22(전부 PAGE, 스플래시 포함). **8-6**: 육안 확인으로 `DSH-1-PAGE-01-0`·`ETC-2-PAGE-02-0`(블루)·`ETC-3-PAGE-04-0`(흰색)을 확정하고 `-1` 변형 4개는 부모 `-0` 판정을 상속했다 → 블루 32 / 흰색 41(PAGE) / 미판정 15(전부 PAGE, 스플래시 포함). `ETC-3-PAGE-04-0`은 구현이 어두운 배경이라 시안↔구현 불일치 #12(§5-4)로 기록하고 안 고쳤다. **8-7**: 루트 `View`+`paddingTop: 60` 화면 등 레이아웃 우려 8개를 `edges={['bottom']}`(1개는 `[]`)로 마이그레이션해 남은 코드 불일치는 22건(슬롯 대기 21 + 기획 확인 1)이다. 미판정 15(변동 없음). **9-3**: 스낵바 슬롯 검증 통과로 대기 19개 파일을 `ScreenContainer`로 마이그레이션(슬롯 12개 파일 + `bottom: 88` 래퍼 유지 7개 파일)해 코드 불일치는 22 → 1건(`ETC-3-PAGE-04-0`, 기획 확인 대기)이다. 미판정·§1 배경 표 값은 변동 없음. **9-4**: `ScreenContainer`에 `snackbarOffset`을 추가해 `bottom: 88` 래퍼 7개 파일도 슬롯으로 옮겼다(CTA 높이를 화면별로 확인 — 값은 §5-18 9-3 블록). 코드 불일치·배경 표 값은 변동 없음. **9-5**: 남은 `absolute` 스낵바 래퍼 10개 파일을 전부 슬롯으로 옮김(A 4개 슬롯만, B 6개 `ScreenContainer` 마이그레이션 + 슬롯). `src/`에 `snackbarWrapper` 0건. 코드 불일치·배경 표 값은 변동 없음.
+**2026-09-19 8-5**: 8-1(v1)·8-3(v3) 명세 측정 판정은 철회했다 — v1은 파일 단위 오염, v3는 프레임 좌표 오검출(번호 마커 ①②③까지 바운딩 박스에 포함돼 여백 스트립이 프레임 밖 흰 종이를 잼, `docs/lessons.md` 1-12). 이어서 프레임 x범위를 격자(50..410 / 430..790)에 고정한 **v5**(`docs/spec-background-v5.tsv`)로 `PAGE` 행 46개를 다시 반영했다(근거는 §2 배경 칸: `명세 프레임 실측 v5 (<파일>#<idx>, 상단 <HEX>, 점유율 N%)`). 기준점 6개 검증 통과, 점유율 60% 미만은 판정에 쓰지 않고 `수동 확인 필요`. 배경 열 의미 통일(8-4)은 유지. 현재 블루 26(PAGE) / 흰색 40(PAGE) + 51(모달·시트 표면) / 어두움 27(스낵바 표면) / 미판정 22(전부 PAGE, 스플래시 포함). **8-6**: 육안 확인으로 `DSH-1-PAGE-01-0`·`ETC-2-PAGE-02-0`(블루)·`ETC-3-PAGE-04-0`(흰색)을 확정하고 `-1` 변형 4개는 부모 `-0` 판정을 상속했다 → 블루 32 / 흰색 41(PAGE) / 미판정 15(전부 PAGE, 스플래시 포함). `ETC-3-PAGE-04-0`은 구현이 어두운 배경이라 시안↔구현 불일치 #12(§5-4)로 기록하고 안 고쳤다. **8-7**: 루트 `View`+`paddingTop: 60` 화면 등 레이아웃 우려 8개를 `edges={['bottom']}`(1개는 `[]`)로 마이그레이션해 남은 코드 불일치는 22건(슬롯 대기 21 + 기획 확인 1)이다. 미판정 15(변동 없음). **9-3**: 스낵바 슬롯 검증 통과로 대기 19개 파일을 `ScreenContainer`로 마이그레이션(슬롯 12개 파일 + `bottom: 88` 래퍼 유지 7개 파일)해 코드 불일치는 22 → 1건(`ETC-3-PAGE-04-0`, 기획 확인 대기)이다. 미판정·§1 배경 표 값은 변동 없음. **9-4**: `ScreenContainer`에 `snackbarOffset`을 추가해 `bottom: 88` 래퍼 7개 파일도 슬롯으로 옮겼다(CTA 높이를 화면별로 확인 — 값은 §5-18 9-3 블록). 코드 불일치·배경 표 값은 변동 없음. **9-5**: 남은 `absolute` 스낵바 래퍼 10개 파일을 전부 슬롯으로 옮김(A 4개 슬롯만, B 6개 `ScreenContainer` 마이그레이션 + 슬롯). `src/`에 `snackbarWrapper` 0건. **9-6 ※ 정정**: 위 "코드 불일치 1건"은 공유 Screen ID의 Report 쪽 파일만 보고 센 값이었다. 파일 단위로 다시 세면 확정 판정 ID 기준 **2건**(`ETC-3-PAGE-04-0` + `ETC-4-PAGE-05-0`의 `ArchiveLedgerEntriesScreen`), 확정 PAGE 69개 중 일치 **67**이다. 판정 미확정 ID(`ETC-5-PAGE-02-0`)에서 파일끼리 처리가 다른 것이 1건 더 있다(§5-18 9-6 블록). 배경 표 값은 변동 없음.
 
 ## 2. 화면별 체크리스트
 
@@ -1255,6 +1255,8 @@ Mac 개발 환경에서 한 번 실행 필요.
 
 **명세 근거(2026-09-19 확인)**: 키보드 회피는 명세 동작이다 — `ETC-4-PAGE-15-0`(`글로벌설정_내프로필_프로필변경.png#0`) 목업에 키보드가 뜬 상태로 `저장하기` 버튼이 키보드 위에 그려져 있음(하단 `#E6E6E6`이 키보드). 다른 시안의 키보드 목업은 미조사(사용자가 별도 확인).
 
+**탭 화면은 `avoidKeyboard={false}`가 맞다 — 실기기 확인 (2026-09-19)**: 폴더 탭(`FolderScreen`, 검색창)에서 키보드가 떠도 하단 탭바가 밀리지 않았다. 탭 화면(`FolderScreen`·`DuesScreen`·`MoreScreen`)을 `ScreenContainer`로 옮길 때 `avoidKeyboard={false}`로 종전 구조를 유지한 9-5 판단이 실기기에서 맞는 것으로 확인됐다.
+
 ### 5-13. DUE 도메인 묶음 4 대조 — 필드 형태·배경·관찰 (2026-09-13)
 
 §5-13: 장부·기간 필드를 라벨 아래 박스형으로 수정(`DuesCreate`/`DuesEdit`), `TextArea.autoFocus` 추가(`DuesRequestScreen`), 배경 5건 확정(§5-7), **기간 자릿수는 시트별로 따른다(DUE 4자리 / 보고서 2자리) — 임의로 통일하면 결함**, 앱바 문구 불일치는 §5-4 #4 → §2 / design-diff.md §3.
@@ -1547,7 +1549,7 @@ C 등급 개별 사유:
 |---|---|---|
 | `DSH-1-PAGE-01-0` | `Dashboard/DashboardScreen.tsx` | `SafeAreaView`(`edges: top`), 탭 화면. 배경 `BACKGROUND_PRIMARY`가 §2 블루와 일치. 스낵바 없어 이번 범위 밖 |
 | `DUE-3-PAGE-04-0` | `Dues/DuesRequestScreen.tsx` | `SafeAreaView`. 배경 `BACKGROUND_PRIMARY`가 §2 블루와 일치. 스낵바 없어 이번 범위 밖 |
-| `ETC-4-PAGE-05-0`(보관함 공유 ID) | `Archive/ArchiveLedgerEntriesScreen.tsx` | `SafeAreaView`, **루트 배경 미지정**인데 §2는 블루(`ETC-4-PAGE-05-0`) → 코드 불일치일 수 있음(§1 "코드 불일치 1건"은 이 파일을 세지 않았다 — 공유 ID를 `Report/ReportLedgerEntriesScreen.tsx`로만 판정한 것으로 보이나 미확인) |
+| `ETC-4-PAGE-05-0`(보관함 공유 ID) | `Archive/ArchiveLedgerEntriesScreen.tsx` | `SafeAreaView`, **루트 배경 미지정**인데 §2는 블루(`ETC-4-PAGE-05-0`) → **코드 불일치 확정**(9-6 공유 ID 전수 검증, 아래 정정). Report 쪽 파일은 `ScreenContainer background="primary"` |
 | `ETC-5-PAGE-02-0`(보관함 공유 ID) | `Archive/ArchiveEntryDetailScreen.tsx` | `SafeAreaView`, 배경 미지정. §2 배경 미판정 |
 | `DTB-3-PAGE-01-0` | `Folder/TransactionReceiptDetailScreen.tsx` | `SafeAreaView`, 배경 `FILL_INVERSE`(어두움). §2 배경 미판정 |
 | `ETC-3-PAGE-04-0` | `Receipt/ReceiptDetailScreen.tsx` | `SafeAreaView`, 배경 `FILL_INVERSE`(어두움) ↔ 명세 흰색 — **불일치 #12, 기획 확인 대기** |
@@ -1557,6 +1559,24 @@ C 등급 개별 사유:
 | `COM-3-PAGE-04-0` | `PasswordReset/PasswordResetSentScreen.tsx` | 루트가 `View` + `paddingTop: 60`(`edges={['bottom']}` 방식 후보). §2 배경 미판정 |
 | `ADD-3-PAGE-01-0` | `Transactions/ReceiptScanningView.tsx` | 루트 `View`, 배경 `GREY_800`(어두움) — 스캔 진행 뷰라 배경 판정 대상 아님(§2 미판정) |
 | (ID 없음) | `SplashScreen.tsx` | 루트 `View`, 배경 `BASIC_0`. 라우트 화면 아님·시안 없음 |
+
+#### 2026-09-19 9-6 — 공유 Screen ID 전수 검증 (조사만 — 코드 수정 없음)
+
+**방법**: §2 PAGE 행의 코드 위치 열에 적힌 `.tsx` 파일 + 소스 `@screen` PAGE 태그를 합쳐, **한 Screen ID에 파일이 2개 이상 걸린 경우**를 스크립트로 뽑았다. 그 뒤 행 문구에서 우연히 잡힌 컴포넌트(`Divider`, `AmountCard`, `Accordion`, `MoreScreen`, `FolderScreen` 언급 등)는 화면 매핑이 아니라서 손으로 걸렀다. 각 파일은 `ScreenContainer` 사용 여부·`background` 값·루트 배경 미지정 여부를 소스에서 읽었다.
+
+| Screen ID | §2 배경 | 파일 (처리) | 같은 화면인가 | 판정 |
+|---|---|---|---|---|
+| `ETC-4-PAGE-05-0` | 블루 | `Report/ReportLedgerEntriesScreen`(`ScreenContainer primary`) · `Archive/ArchiveLedgerEntriesScreen`(**`SafeAreaView`, 배경 미지정**) | **같은 화면** — 레이아웃 동일(앱바 장부명+기간+수입/지출 카드+`ReportEntryList`), 스펙시트 UI 요소 3번 [상태]에 "기록 보고서 공통 로직 상속" 명시, 크롭도 동일(파일 상단 주석, 2026-09-12). 다른 점은 데이터(`ArchivedEntry`)·탭 시 이동처뿐 | **불일치** — Archive 쪽이 §2 블루와 다름 |
+| `ETC-5-PAGE-02-0` | 미판정 | `Report/ReportEntryDetailScreen`(`ScreenContainer primary`) · `Archive/ArchiveEntryDetailScreen`(**`SafeAreaView`, 배경 미지정**) | **같은 ID, 내용은 다름** — 보고서 쪽은 5필드, 보관함 쪽 크롭은 담당자·메모·증빙 썸네일까지(코드 주석의 2026-09-12 크롭 확인). 같은 화면 개념을 두 도메인이 공유한다는 코드 작성자의 판단은 있으나 스펙 원본 재확인은 안 함 | **ID 내 처리 불일치**(§2가 미판정이라 어느 쪽이 맞는지는 미확정) |
+| `ETC-3-PAGE-03-0` | 블루 | `Report/ReportByPeriodDetailScreen`(primary) · `Archive/ArchiveDetailScreen`(primary) | **다른 화면** — UI 구성이 전혀 다름(보관함 "기록 보기"). 이미 §2·소스 주석에 "진짜 ID 충돌"로 기록됨(2026-09-11 재확인) | 배경 처리는 일치. **ID 부여 자체는 별도 이슈(기존 기록)** |
+| `ETC-4-PAGE-02-0` | 미판정 | `GroupManager/GroupImagePickerScreen`(`SafeAreaView`, 미지정) · `Transactions/ReceiptGalleryPickerScreen`(`SafeAreaView`, 미지정 — 코드 태그는 `ADD-2-SHEET-05-0`) | **다른 화면** — 단일 선택(탭 즉시) vs 다중 선택(체크박스+"선택" 버튼). `§2` 행에 "Screen ID 충돌 주의"로 이미 기록됨 | 처리는 같음(둘 다 미지정). ID 부여 문제는 기존 기록 |
+| `COM-3-PAGE-01-0` | 미판정 | `TermsOfServiceScreen`·`PrivacyPolicyScreen`·`MarketingConsentScreen`(전부 `LegalDocumentView` → `ScreenContainer primary`) | 같은 화면(약관 상세 3종) | 일치 |
+| `ETC-3-PAGE-11-0`(행 매핑만) | 미판정 | `More/TermsScreen`(`ScreenContainer primary`) · `More/TermDetailScreen`(`SafeAreaView`, 미지정 — 코드 태그는 자리표시 `ETC-4-PAGE-XX-0`) | **다른 화면**(목록 vs 상세). 태그 ID는 서로 다름 | 처리 다름 — 상세 화면 ID가 없어서 생긴 차이. 참고 |
+| `ETC-4-PAGE-05-1`·`ETC-4-PAGE-07-1`(자식) | 블루(부모 상속) | `ReportEntryList` 탭 상태. `Archive/ArchiveLedgerEntriesScreen`도 같은 컴포넌트를 씀 | 별도 화면 아님 | 부모(`ETC-4-PAGE-05-0`) 판정 따름 |
+
+**기타 발견**: `ADD-3-PAGE-01-0`·`ADD-3-PAGE-02-0` 행이 가리키는 `MockCameraView.tsx`·`CameraCaptureView.tsx`는 `src/`에 파일이 없다(행 문구가 옛 파일명으로 남은 것으로 보임, 확인 필요). `ReceiptScanningView.tsx`만 실제 파일이다.
+
+**※ 정정 — 불일치 집계**: 9-3·§1 문단·이 문서 §5-18 9-3 블록의 "코드 불일치 1건(`ETC-3-PAGE-04-0`)"은 **Report 쪽 파일만 보고 센 값**이었다. 공유 ID를 파일 단위로 다시 세면 **확정 판정(블루/흰색) ID 기준 2건**이다 — `ETC-3-PAGE-04-0`(기획 확인 대기, 불일치 #12) + `ETC-4-PAGE-05-0`(`ArchiveLedgerEntriesScreen`, 배경 미지정 vs 블루). 확정 판정 PAGE 69개 기준 **일치 68 → 67**. 그 밖에 §2 판정이 미확정인 ID에서 파일끼리 처리가 다른 것이 **1건 더** 있다(`ETC-5-PAGE-02-0`). 이 조사는 조사만 했고 코드는 안 고쳤다.
 
 ### 5-19. 화면 목록 정합성 감사 (2026-09-19, 스크립트 집합 비교 — 목록은 안 고침, 차이만 기록)
 

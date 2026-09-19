@@ -169,13 +169,16 @@ type LedgerOption = { id: string; name: string };
 
 /** 증빙 한 장. 새로 촬영/선택한 항목은 `uploading:true`로 시작해 업로드가
  * 끝나면 `fileId`가 채워진다 — `fileId`가 없는 항목(업로드 중/스캔 mock)은
- * 제출 시 자동으로 빠진다. */
+ * 제출 시 자동으로 빠진다. `fromScan`은 영수증 스캔이 만든 항목 표시다 — "이미
+ * 스캔한 적 있는가"(재스캔 덮어쓰기 확인)는 이 항목이 목록에 남아 있는지로 판단해서,
+ * 썸네일을 지우면 그 판정도 함께 사라진다. */
 type ReceiptItem = {
   key: string;
   previewUri: string;
   previewHeaders?: Record<string, string>;
   fileId?: number;
   uploading: boolean;
+  fromScan?: boolean;
 };
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
@@ -248,7 +251,6 @@ function TransactionRegisterScreen() {
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>('none');
   const [activeDialog, setActiveDialog] = useState<ActiveDialog>('none');
   const [pendingScanResult, setPendingScanResult] = useState<MockScanResult | null>(null);
-  const [hasScannedOnce, setHasScannedOnce] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
@@ -322,6 +324,7 @@ function TransactionRegisterScreen() {
 
   const canChangeLedger = mode !== 'editReal';
   const isUploadingReceipt = receiptItems.some(item => item.uploading);
+  const hasScanReceipt = receiptItems.some(item => item.fromScan);
   const canSubmit =
     itemName.trim().length > 0 &&
     ledgerId.length > 0 &&
@@ -506,7 +509,7 @@ function TransactionRegisterScreen() {
   const handleSelectAttachMenu = (key: AttachMenuKey) => {
     setActiveSheet('none');
     if (key === 'scan') {
-      if (hasScannedOnce) {
+      if (hasScanReceipt) {
         setActiveDialog('scanRescan');
       } else {
         handleTakePhoto('scan');
@@ -532,10 +535,9 @@ function TransactionRegisterScreen() {
     if (receiptItems.length < TRANSACTION_REGISTER_RECEIPT_MAX) {
       setReceiptItems(current => [
         ...current,
-        { key: `scan-${Date.now()}`, previewUri: '', uploading: false },
+        { key: `scan-${Date.now()}`, previewUri: '', uploading: false, fromScan: true },
       ]);
     }
-    setHasScannedOnce(true);
 
     const amountConflict = amount !== 0 && amount !== result.amount;
     const dateConflict = date !== todayKey() && date !== result.date;
