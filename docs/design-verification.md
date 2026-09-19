@@ -154,7 +154,7 @@ DSH-2-PAGE-01-0(알림 목록)이 실 API 연동으로 미구현→구현, ETC �
 | ☐ | `FDR-2-MODAL-02-0` | 폴더 전체 백업 | Modal | 총무 | 완료 | 2장 | `[구현]` | 흰색 (요소 표면색 — `Dialog` 컴포넌트 #FFFFFF, 명세서 프레임 육안 확인) | `screens/Folder/FolderScreen.tsx`(activeDialog='backup', 2026-09-11 확인) — 제목·설명·placeholder·"보관" 버튼까지 일치. **주의**: `design-index.json`에 등록된 후보(`FDR\폴더\FDR-2-MODAL-02-0.png`)는 실제로는 "새 폴더 생성" 다이얼로그라 오배치이고, 진짜 시안은 `FDR\폴더\백업\` 하위에 같은 이름으로 따로 있다(§5-4 참고) · **부모 FDR-1-PAGE-01-0 배경: 블루** |
 | ☐ | `FDR-2-PAGE-01-0` | 이동 대상 선택 (그리드 뷰) / 이동 대상 선택 (리스트 뷰) | Page | 전체 | 완료 | 1장 | `[구현]` | 흰색 (명세 프레임 실측 v5 (폴더/폴더_메뉴_폴더/장부선택이동.png#0, 상단 #FFFFFF, 점유율 79%)) | `screens/Folder/FolderSelectMoveScreen.tsx` — **2026-09-13 회귀 수정**: 최상위(folderId null)에서 장부 조회를 빈 배열로 하드코딩해뒀던 게 남아 있어, `POST /groups/{groupId}/ledgers`로 만든 최상위 장부를 이동 대상으로 선택할 수 없었다(`FolderScreen.tsx`와 동일 패턴의 회귀). `ledgerService.getAllLedgersInGroup()`으로 모임 전체 장부를 받아 `folderId === null`인 것만 걸러 쓰도록 수정, 실호출로 확인 |
 | ☐ | `FDR-2-PAGE-02-0` | 전체 예산 설정 목록 | Page | 전체 | 완료 | 2장 | `[구현]` | 블루(#F0F5FE) | `screens/Folder/FolderBudgetListScreen.tsx` — **2026-09-18 결함 → 수정**: 리스트 행이 `FolderItem`(아이콘+장부명, 아래줄에 "예산 N원" 2줄)이었는데 시안 No.2는 아이콘 없이 좌측 장부명·우측 예산 금액·꺾쇠 한 줄이다 → `SelectionListItem type="picker"`로 교체(같은 종류 행 전용 기존 컴포넌트 재사용, 새로 안 만듦). 예산 미설정 시 "0원" 노출(전엔 "예산 미설정" 문구 — 공유 상수 `LEDGER_ITEM_BUDGET_UNSET`은 다른 화면도 쓰고 있어 그대로 두고 이 화면만 로컬 처리로 분리). 정렬은 서버 응답 순서를 그대로 믿고 있었는데 시안 No.2 [상태]가 "최신 생성된 장부순"을 명시해 `createdAt` 내림차순 클라이언트 정렬을 추가(`getAllLedgersInGroup` 응답에서 버려지고 있던 `createdAt`을 `LedgerSummary`에 옵셔널로 살림). 배경도 시안이 옅은 블루라 `BACKGROUND_PRIMARY` 명시 적용. 빈 화면 문구는 이미 시안과 일치("'폴더'에서 장부를 생성해주세요.") — §5-16 참고 · 8-5 수동 재확인(v5 프레임 미검출): 프레임 x=50..410·430..790 안쪽 스트립 모두 #F0F5FE(빈 상태 프레임 포함) — 기존 블루와 일치 |
-| ☐ | `FDR-2-PAGE-04-0` | 폴더 상세 (그리드 뷰) / 폴더 상세 (리스트 뷰) | Page | 전체 | 완료 | 1장 | `[구현]` | 블루 (명세 프레임 실측 v5 (폴더/폴더_폴더상세.png#0, 상단 #F0F5FE, 점유율 76%)) | `screens/Folder/FolderScreen.tsx` — 폴더 진입 시 동일 화면 재사용. 위 `FDR-1-PAGE-01-0` 2026-09-13 회귀 수정과 같은 화면(같은 파일) — 이 화면(하위 폴더 안)은 애초에 `folderId` 값이 있어 영향 없었음 |
+| ☐ | `FDR-2-PAGE-04-0` | 폴더 상세 (그리드 뷰) / 폴더 상세 (리스트 뷰) | Page | 전체 | 완료 | 1장 | `[구현]` | 블루 (명세 프레임 실측 v5 (폴더/폴더_폴더상세.png#0, 상단 #F0F5FE, 점유율 76%)) | `screens/Folder/FolderScreen.tsx` — 폴더 진입 시 동일 화면 재사용. 위 `FDR-1-PAGE-01-0` 2026-09-13 회귀 수정과 같은 화면(같은 파일) — 이 화면(하위 폴더 안)은 애초에 `folderId` 값이 있어 영향 없었음 **앱바 우측(2026-09-20 10-2)**: Case A 목업이 통계 아이콘 + ⋮ 둘 다이므로 폴더 상세에서도 둘 다 표시한다(`FolderScreen`의 `isRoot` 조건 제거). 통계 아이콘을 누르면 폴더 메인과 같은 `Statistics`(모임 전체 통계, `ETC-2-PAGE-07-0`, route params 없음)로 간다 — 폴더 범위 통계는 명세에 없어 **폴더 메인과 같은 동작**으로 둠. ⋮ 메뉴는 5항목(`선택 이동`/`폴더 이름 변경`/구분선/`그리드`·`리스트`/구분선/`폴더 해제`)이 시안 Case A와 일치. |
 | ☐ | `FDR-2-PAGE-05-0` | 장부 상세 | Page | 전체 | 완료 | 5장 | `[구현]` | 블루 (명세 프레임 실측 v5 (폴더/폴더_장부상세.png#0, 상단 #F0F5FE, 점유율 87%)) | `screens/Folder/LedgerDetailScreen.tsx`. **2026-09-18 결함 → 수정**: 캐러셀(수입/지출 카드, 예산 카드) 1면→2면 스냅이 어긋나 2면부터 1면 잔재가 좌측에 잘려 남고 2면 카드 우측이 화면 밖으로 잘렸다 — 원인은 `snapToInterval`이 스크롤뷰 `style`의 `paddingLeft:24`(우측엔 없음)를 계산에 안 넣은 것(1페이지는 이 인셋이 그냥 여백처럼 보여 정상으로 착각하기 쉬웠음). 슬라이드를 `useWindowDimensions` 기준 화면 폭 그대로 채우고 카드 여백을 슬라이드 안쪽 padding으로 옮겨 `snapToInterval` 자체를 없앴다(`pagingEnabled` 기본 동작만으로 항상 정확). 2026-09-13 이 화면 캡처 때 구조(2면+dots)만 보고 이 잘림을 놓쳤다 — `design-diff.md` 참고 · 배경 상하 다름 — 상단 #F0F5FE / 하단 #FFFFFF(v5, 구현 시 유의) |
 | ☐ | `FDR-2-SHEET-01-0` | 새 장부 생성 | Bottom Sheet | 총무 | 완료 | 2장 | `[확인필요]` | 흰색 (요소 표면색 — `BottomSheet` 컴포넌트 #FFFFFF) | `screens/Folder/NewItemSheet.tsx` |
 | ☐ | `FDR-3-MODAL-01-0` | 폴더 이름 변경 | Modal | 총무 | 완료 | 1장 | `[확인필요]` | 흰색 (요소 표면색 — `Dialog` 컴포넌트 #FFFFFF, 명세서 프레임 육안 확인) | `screens/Folder/FolderScreen.tsx dialogConfig` — 폴더 이름 변경 · **부모 FDR-1-PAGE-01-0 배경: 블루** |
@@ -498,7 +498,8 @@ IA상 총무 전용 61개 / 일반 전용 3개다. **총무 계정과 일반 계
 10. `FDR-1-PAGE-01-0`(폴더 메인) — 빈 화면(Case B) 문구: 설명표 No.5-1 "생성한 폴더/장부가 없어요" vs 시안 목업 제목 "아직 폴더 및 장부가 존재하지 않아요." + 부제 "새로운 장부를 생성하여 내역을 관리해보세요.". **구현은 목업을 따른다**(2026-09-19 확인 — 앱 문구는 이미 목업과 일치, 코드 변경 없음). 검색 무결과(Case D) 문구는 표에 별도 서술이 없고 목업 "해당 검색어에 대한 내역이 없어요." / "검색어를 다시 입력해주세요."와 앱이 일치. 표 쪽이 낡은 문구로 보이나 기획 확인 필요.
 11. `FDR-1-PAGE-01-0`(폴더 메인) — 목록 개수 표기: 목업 "6 개"(숫자와 단위 사이 공백 있음) vs 설명표 No.3 "{N}개"(형식 `(N)개`, 예 `6개`, 공백 없음). 앱은 그동안 "1 건"(단위도 다름)이었고 2026-09-19 목업을 따라 **"N 개"(공백 있음)** 로 고쳤다 — 표기 자체(공백 유무)는 목업·표 불일치라 기획 확인 필요.
 12. `ETC-3-PAGE-04-0`(증빙자료 상세) — 배경: 시안(원본 크롭 육안 확인, 2026-09-19) 흰색 — 앱바·하단 버튼 영역이 흰색이고 중앙은 사진 자리표시자 vs 구현 `FILL_INVERSE`(어두운 배경, `ReceiptDetailScreen`). 사진 뷰어 UX상 어두운 배경이 나을 수 있어 **기획 확인 필요**. 이번엔 고치지 않는다.
-13. `FDR-2-PAGE-04-0` 폴더 상세 목업은 '2 건', 같은 시트 설명표 No.3은 '{N}개'. FDR-1-PAGE-01-0 목업은 '6 개'. 목업끼리도 다름. 설명표를 따라 '개'로 구현. 기획 확인 필요.
+13. **[기획 확인 불필요 — 시안 내부 오기로 확정, 2026-09-20]** `FDR-2-PAGE-04-0` 메인 프레임 목업만 '2 건', 같은 시트 Case A 목업은 '2 개', 설명표는 '{N}개'. 시안 내부 오기로 판단. '개'로 구현 확정. 기획 확인 불필요.
+14. `FDR-1-PAGE-01-0`·`FDR-2-PAGE-04-0` — 검색 동작: 폴더 메인·상세가 같은 화면(`FolderScreen` `isRoot` 분기)인데 설명표가 모순. 메인 No.2 = 실시간 필터링(`하단 그리드 리스트가 검색어에 맞춰 실시간으로 필터링 및 갱신됨`), 상세 No.2 = 화면 전환(`터치 시, 통합 검색 모드로 화면이 전환되며 시스템 키보드 호출`). 구현은 둘 다 인라인 필터. 기획 확인 필요. 화면 전환이 맞다면 `LedgerSearchScreen`(`FDR-3-PAGE-02-0`)과의 관계 정리가 필요한 구조 작업이라 고치지 않음.
 
 - **`더보기_보고서생성_기간보고서조회.png`(파일명에 `-1` 없음) 표 헤더의 Screen ID가 `ETC-4-PAGE-05-0`으로 적혀 있음 — 오기로 추정(2026-09-06, 7-G)**: 이 파일 내용(캐러셀 2장 + 장부명 태그가 붙은 통합 내역 리스트)은 `ETC-4-PAGE-05-0`(장부 하나만 보여주는 단일 카드 화면, `-1.png` 없는 `더보기_보고서생성_장부보고서조회.png`가 이 ID)과 명백히 다르고, IA 171행이 정의하는 "보고서_시간순"(캐러셀 + "조회 기간 전체 내역")과 정확히 일치한다. 파일명 자체(`-1` 유무)도 함정이다 — 기간별 조회 두 파일 중 **`-1`이 붙은 쪽이 목록(`ETC-3-PAGE-03-0`), 안 붙은 쪽이 통합 상세(`ETC-4-PAGE-07-0`)**로 시안 내용과 반대다. 코드는 IA 정의(07-0)를 기준으로 구현했다(`ReportPeriodEntriesScreen.tsx`). 물어볼 것: **표 헤더의 ID 표기를 07-0으로 정정할지, 아니면 실제로 05-0의 상태 변형을 의도한 것인지**(후자라면 07-0 화면 자체가 시안 없이 구현된 것이 됨).
 - **`ETC-3-PAGE-02-1`/`03-1`/`ETC-4-PAGE-05-1`/`07-1`(보고서 조회 4화면의 "-1" 변형) — 별도 화면 아님으로 판단(2026-09-06, 7-G)**: IA 165~172행 기준 이 넷은 각각 `-0` 화면의 "수입/지출 탭이 선택된 상태" 캡처로 보여 별도 라우트를 만들지 않고 `ReportEntryList.tsx`의 탭 상태로 흡수했다(§2 각 행 [구현] 처리). 다만 `ETC-3-PAGE-02-0`(장부별 보고서 상세, 장부 카드 리스트) 자체엔 탭이 없어서 `02-1`이 정말 그 화면 얘기가 맞는지 확신이 낮다 — 물어볼 것: **`ETC-3-PAGE-02-1`이 `02-0`의 탭 상태가 맞는지, 아니면 `ETC-4-PAGE-05-0`(탭이 실제로 있는 화면)의 오기인지.**
@@ -1729,6 +1730,39 @@ tsv 원본 행 중복(같은 ID가 여러 행): `COM-1-SNACKBAR-02-0`(5행) 등 
 | `COM-1-SNACKBAR-02-0` | tsv 오기 의심 | §5-2가 이미 "실제로는 `ETC-5-SNACKBAR-06-0`(프로필 변경 완료)의 오기, 스펙 문서 전반의 복붙 실수"로 기록 — tsv에는 서로 다른 부모 시트 5행이 같은 ID로 들어 있음(소스엔 `MemberEditScreen`이 이 ID로 주석) |
 | `ETC-4-MODAL-05-0` | ID 변경됨 | tsv 비고가 "IA의 `ETC-4-SHEET-01-0`과 불일치 가능" — §2 `ETC-4-SHEET-01-0`(모임 참여, `JoinGroupSheet`)이 같은 "코드로 참여하기" 화면으로 보임(IA는 SHEET-01-0, 시안 헤더는 MODAL-05-0) |
 | `ETC-7-PAGE-01-0` | 미구현 화면 | §5-2에 "사진 편집(원형 크롭)"로 기록된 IA-누락 신규 ID(depth 7) — 대응 코드 없음(`src`에서 사진 편집 화면 검색 0건) |
+
+### 5-20. 장부 상세(`FDR-2-PAGE-05-0`) 코드 현황 — 다음 시안 대조용 사전 조사 (2026-09-20, 10-2, 조사만 — 소스 수정 없음)
+
+`LedgerDetailScreen.tsx` 기준. 9-1 조사 이후 배경(`ScreenContainer background="primary"`, 9-3)·스낵바(슬롯, 9-3)가 바뀌어 다시 읽었다. **dp는 코드의 값과 그로부터 계산한 값**이고 시안 실측과 대조하기 전이다. 색은 상수명 + HEX.
+
+**앱바** (`AppBar` `type` 미지정 → 기본 `sub`)
+- 제목 소스: `ledger.name`(`ledgerService.getLedgerDetail`). 로딩·에러 상태의 앱바 제목은 `""`. 제목 `TYPOGRAPHY.h2`(20/28 semibold), `numberOfLines={1}` `ellipsizeMode="tail"`(10-1 이후 `flexShrink: 1`).
+- 좌: `BackButton` size 34. 컨테이너 좌우 패딩 20, 상하 12.
+- 우측 액션 순서: ① 검색 아이콘(`assets/icons/system/Search.png`, 24×24 → `LedgerSearch`) ② ⋮ 아이콘(`assets/icons/action/MenuHorizontal.png`, 24×24 → 장부 메뉴). 아이콘 간격 16.
+- ⋮ 메뉴 3항목: `예산 설정`(`LEDGER_MENU_BUDGET`) / `장부 이름 변경`(`LEDGER_MENU_RENAME`) / `장부 삭제`(`LEDGER_MENU_DELETE`).
+
+**캐러셀** (`ScrollView horizontal pagingEnabled`, `decelerationRate="fast"`)
+- 슬라이드 2장, 각 슬라이드 폭 = 화면 폭(`useWindowDimensions`), 안쪽 좌우 패딩 24 → **카드 폭 = 화면 폭 − 48**. 캐러셀 위 여백 16(`carousel.marginTop`). 인접 카드 미리보기(peek) 없음, 카드 사이 간격 개념 없음(페이지 스냅).
+- 슬라이드 1 = `AmountCard type="incomeExpense"`(수입/지출/합계). 슬라이드 2 = 예산이 있으면 `BudgetCard`(default), 없으면 `BudgetCard state="empty"`.
+- 페이지 인디케이터 `CarouselIndicator count={2}`: 점 5×5(`FOREGROUND_DISABLED` `#C1C5CD`), 선택 점 8×8(`FOREGROUND_SECONDARY` `#4A7FE7`), 점 간격 6. 위 여백 12, 아래 여백 16(`indicatorRow`), 가운데 정렬.
+- 카드 공통(`CardBase` filled): 모서리 12, 안쪽 패딩 16, 배경 `FILL_NEUTRAL_SUBTLE` `#FFFFFF`, 테두리 없음.
+- `AmountCard`(수입/지출): 행 상하 패딩 6. 라벨 `TYPOGRAPHY.body3`(12/16) `FOREGROUND_NEUTRAL_SUBTLE` `#9B9B9B`, 값 `body3` + `fontWeight: bold`. 행: `수입` `{N}원`(값 색 `FEEDBACK_POSITIVE_BOLD` `#4A7FE7`), `지출` `-{N}원`(`formatExpense`, 0이면 `0원`, 기본색), 점선 구분선(`Divider dashed`, 1dp, `BORDER_NEUTRAL_NORMAL` `#E5E7EB`, 위아래 여백 8), `합계` `{수입−지출}원`(라벨 기본 색). **계산 높이 ≈ 133dp**(패딩 32 + 행 3×28 + 구분선 17).
+- `BudgetCard`(default): 제목 `남은 예산 {N}원` `TYPOGRAPHY.h3`(18/24); `Divider`(full-width, 위아래 여백 12); 통계 행 = `지출`(라벨 `body3` `#9B9B9B`, 값 `subtitle3` 14/20 `formatExpense`) | 세로 `Divider`(좌우 여백 16) | `예산`(값 `{N}원`), 행 아래 여백 12, 열 내부 간격 4; `ProgressBar showLabel`(높이 8, round 모서리 4, 채움 `#4A7FE7`, 트랙 `FILL_NEUTRAL_NORMAL` `#F3F4F6`, 라벨 `body3` `#9B9B9B` 우측 정렬 아래 여백 4). `BudgetCard state="empty"`: 문구 `예산을 설정하고 장부를 체계적으로 관리해보세요!`(`body3`, `#9B9B9B`, 가운데, 상하 패딩 24). **두 카드 높이가 서로 다르다**(수입/지출 ≈133, 예산 default는 그보다 큼, empty는 더 작음) — 캐러셀 높이는 가장 큰 슬라이드에 맞춰진다.
+
+**내역 리스트** (`FlatList`, 무한 스크롤 `onEndReached` threshold 0.4, 하단 `불러오는 중...`(`LEDGER_ENTRIES_LOADING_MORE`))
+- **날짜 그룹 헤더 없음.** 각 행이 자기 날짜를 작은 라벨로 든다. 라벨 = `item.occurredOn` 서버 문자열 그대로(`YYYY-MM-DD`, 점 표기 변환 없음).
+- 행 = `TransactionListItem`: 상하 패딩 12, 좌우 패딩 12(단 `marginHorizontal: -12`로 상쇄 → 콘텐츠 폭은 리스트 폭 = 화면 폭 − 48, 눌림 배경 `#F3F4F6` 모서리 8만 좌우로 12씩 번짐). 좌 열(간격 4): 날짜 `TYPOGRAPHY.caption`(**fontSize 8**, lineHeight 16) `FOREGROUND_NEUTRAL_NORMAL` `#4B5563`, 내역명 `subtitle3`(14/20 semibold). 우 열(오른쪽 정렬, 간격 4): 승인 대기면 `Badge`(`CALENDAR_APPROVAL_BADGE_LABEL`, warning), 아니고 증빙이 있으면 영수증 아이콘 18×18(`#9B9B9B`), 그 아래 금액 `subtitle3` — 수입 `{N}원` `#4A7FE7`, 지출 `-{N}원` 기본색. **행 높이 ≈ 64dp**(12+16+4+20+12), 우 열에 아이콘/배지가 있으면 ≈ 66dp. 행 사이 **구분선 없음**, 행 간격 없음.
+- 리스트 좌우 패딩 24, 아래 24. 배경은 화면 배경 그대로(카드 흰색 아님).
+
+**필터·검색 진입점**: 앱바 검색 아이콘 → `LedgerSearch`(`LedgerSearchScreen`, `FDR-3-PAGE-02-0`) 하나뿐. **필터 진입점은 이 화면에 없다** — `LedgerFilterSheet`(`FDR-3-SHEET-03-0`)는 `LedgerSearchScreen`에서만 쓰인다.
+
+**빈 상태**(`entries.length === 0`, 캐러셀·인디케이터는 그대로 위에 남음): 제목 `LEDGER_LIST_EMPTY_TITLE` = `아직 내역이 존재하지 않아요.`(`subtitle3`), 부제 `LEDGER_LIST_EMPTY_SUBTITLE` = `내역을 추가하여 모임 장부를 정리해보세요.`(`body2` `#9B9B9B`, 제목과 간격 6), 위 여백 80, 가운데 정렬.
+
+**FAB·하단 CTA**: 이 화면 파일에는 없다. 하단 고정 버튼 없음(그래서 `snackbarOffset` 없이 슬롯 기본 위치).
+
+**기타**: 로딩 `LEDGER_DETAIL_LOADING` = `장부 정보를 불러오는 중이에요.`, 에러 시 `다시 시도`(`LEDGER_DETAIL_RETRY_LABEL`). 다이얼로그 3종(이름 변경·예산 설정·삭제)과 스낵바(이름 변경/삭제/예산 저장 완료)는 슬롯 사용. `ScreenContainer background="primary"`, `edges` 기본(top, bottom).
+
+**시안 대조 때 눈여겨볼 것**(판단 아님): 날짜 그룹 헤더 유무, 날짜 표기(`YYYY-MM-DD` vs 점 표기), `caption` 8pt, 필터 진입점 유무, 캐러셀 카드 높이 차이, 행 구분선 유무.
 
 ## 6. 권장 순서
 

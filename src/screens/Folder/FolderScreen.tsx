@@ -407,11 +407,10 @@ function FolderScreen() {
         title={isRoot ? FOLDER_SCREEN_TITLE : folderName ?? ''}
         onBackPress={() => navigation.goBack()}
         rightIcons={[
-          // 시안 No.1: 통계/분석 아이콘 + ⋮ 메뉴 두 개. 루트 폴더 메인
-          // 화면에만(하위 폴더 화면은 이번 라운드 대조 대상 아님).
-          ...(isRoot
-            ? [{ icon: STATISTICS_ICON, onPress: () => navigation.navigate('Statistics') }]
-            : []),
+          // 시안 No.1: 통계/분석 아이콘 + ⋮ 메뉴 두 개. 폴더 메인과 폴더 상세
+          // (FDR-2-PAGE-04-0 Case A 목업) 모두 둘 다 있다. 상세에서 누르면 폴더 메인과
+          // 같은 동작(모임 전체 통계 화면) — 폴더 범위 통계는 명세에 없다.
+          { icon: STATISTICS_ICON, onPress: () => navigation.navigate('Statistics') },
           { icon: MENU_ICON, onPress: () => setMoreMenuVisible(true) },
         ]}
       />

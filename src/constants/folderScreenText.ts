@@ -6,7 +6,7 @@ export const FOLDER_EMPTY_SUBTITLE =
   '새로운 장부를 생성하여 내역을 관리해보세요.';
 /** 목록 개수 단위. 시안 목업은 "6 개"(숫자와 단위 사이 공백 있음), 설명표는 "{N}개" — 불일치 #11, 목업을 따른다.
  * 폴더 메인·폴더 상세는 같은 화면(`FolderScreen`)이라 이 상수 하나를 쓴다. 폴더 상세 목업만 "2 건"인데
- * 설명표(No.3 "{N}개")를 따라 단위는 `개`로 통일 — 불일치 #13. */
+ * 설명표(No.3 "{N}개")를 따라 단위는 `개`로 통일 — 불일치 #13(같은 시트 Case A 목업은 "2 개", 메인 프레임만 "2 건"이라 시안 내부 오기로 확정, 기획 확인 불필요). */
 export const FOLDER_COUNT_SUFFIX = '개';
 export const FOLDER_SEARCH_EMPTY_TITLE = '해당 검색어에 대한 내역이 없어요.';
 export const FOLDER_SEARCH_EMPTY_SUBTITLE = '검색어를 다시 입력해주세요.';
