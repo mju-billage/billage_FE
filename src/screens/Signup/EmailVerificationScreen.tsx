@@ -182,7 +182,13 @@ function EmailVerificationScreen() {
   };
 
   return (
-    <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
+    <ScreenContainer
+      background="secondary"
+      edges={['bottom']}
+      style={styles.container}
+      snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
+      snackbarOffset={76}
+    >
       <View style={styles.backRow}>
         <BackButton onPress={() => navigation.goBack()} />
       </View>
@@ -242,12 +248,6 @@ function EmailVerificationScreen() {
           disabled={code.length !== CODE_LENGTH || isConfirming}
         />
       </View>
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
     </ScreenContainer>
   );
 }
@@ -296,12 +296,6 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: 'auto',
     paddingBottom: 24,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 88,
   },
 });
 

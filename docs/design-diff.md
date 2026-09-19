@@ -494,6 +494,12 @@ spec-sheet-map.tsv`에 헤더확인으로 등록, `design-verification.md` §4-0
 
 `scripts/api-call.js`로 직접 호출(`docs/backend-requests.md` §5-2에 표 기록). 세 화면이 호출하는 `GET /api/v1/notifications/settings`(알림 설정), `GET /api/v1/faqs`(문의하기), `GET /api/v1/notices`(공지사항 목록) 전부 **HTTP 404 `RESOURCE_NOT_FOUND`**(`요청한 리소스를 찾을 수 없습니다.`)이고, 존재하지 않는 임의 경로(`/api/v1/zzz-not-a-route`)와 응답이 완전히 같다 → **라우트 없음(미구현)**. 500(서버 오류)도, 200인데 클라이언트 파싱 실패도 아니다. 프론트는 `RESOURCE_NOT_FOUND`를 매핑하지 않아 fallback 문구가 그대로 뜬다(`lessons.md` 1-3) — 매핑을 추가할지는 미결.
 
+#### `RESOURCE_NOT_FOUND` 매핑이 미구현 API와 정상 404를 구분하지 못함 [2026-09-19 9-4]
+
+`RESOURCE_NOT_FOUND 매핑이 미구현 API와 정상 404를 구분하지 못함. 서버가 미구현에 404를 주는 게 원인. 백엔드 회신 후 재검토.`
+
+(9-3에서 `COMMON_ERROR_MESSAGES`에 `RESOURCE_NOT_FOUND: '요청한 정보를 찾을 수 없어요.'`를 추가한 부작용. 위 항목대로 서버가 미구현 엔드포인트에도 404 `RESOURCE_NOT_FOUND`를 주기 때문에, 앱에서는 "미구현 API"와 "존재하지 않는 리소스를 조회한 정상 404"가 같은 문구로 보인다. 백엔드 요청: `docs/backend-requests.md` §5-2.)
+
 #### 공지사항 목록 배경 파란색 — 가설 확인 결과: 문제 없음 [2026-09-19 9-2]
 
 `NoticeListScreen`(ETC-3-PAGE-09-0) 코드 `ScreenContainer background="primary"`, §2 명세 판정 블루(v5 90%) → **일치**. 목록이 에러라 항목을 못 누르므로 본 화면은 목록이고 파란 배경이 맞다. 상세(`NoticeDetailScreen`, ETC-4-PAGE-18-0)는 명세 흰색이라 8-6에서 `secondary`로 고쳤다.

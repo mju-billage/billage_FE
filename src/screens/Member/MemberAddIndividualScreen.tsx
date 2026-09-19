@@ -172,7 +172,11 @@ function MemberAddIndividualScreen() {
   }
 
   return (
-    <ScreenContainer background="secondary">
+    <ScreenContainer
+      background="secondary"
+      snackbar={snackbarVisible ? <Snackbar visible title={SNACKBAR_MEMBER_ADDED} /> : undefined}
+      snackbarOffset={68}
+    >
       <AppBar
         type="sub"
         title={MEMBER_ADD_INDIVIDUAL_TITLE}
@@ -233,12 +237,6 @@ function MemberAddIndividualScreen() {
           onPress={handleSubmit}
         />
       </View>
-
-      {snackbarVisible && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={SNACKBAR_MEMBER_ADDED} />
-        </View>
-      )}
     </ScreenContainer>
   );
 }
@@ -269,12 +267,6 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 24,
     paddingVertical: 16,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 88,
   },
 });
 

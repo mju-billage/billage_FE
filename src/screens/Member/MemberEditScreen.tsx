@@ -278,7 +278,11 @@ function MemberEditScreen() {
   }
 
   return (
-    <ScreenContainer background="secondary">
+    <ScreenContainer
+      background="secondary"
+      snackbar={snackbarVisible ? <Snackbar visible title={SNACKBAR_MEMBER_UPDATED} /> : undefined}
+      snackbarOffset={68}
+    >
       <AppBar type="sub" title={MEMBER_EDIT_TITLE} onBackPress={() => navigation.goBack()} />
       <ScrollView
         style={styles.content}
@@ -335,12 +339,6 @@ function MemberEditScreen() {
           onPress={handleSubmit}
         />
       </View>
-
-      {snackbarVisible && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={SNACKBAR_MEMBER_UPDATED} />
-        </View>
-      )}
     </ScreenContainer>
   );
 }
@@ -381,12 +379,6 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 24,
     paddingVertical: 16,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 88,
   },
 });
 

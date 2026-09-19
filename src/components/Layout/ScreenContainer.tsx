@@ -18,6 +18,10 @@ type ScreenContainerProps = {
   /** 화면 하단(안전영역 위)에 띄울 스낵바 노드. 화면마다 absolute 래퍼를 따로 두지 않게 여기서 배치한다.
    * 콘텐츠와 같은 KeyboardAvoidingView 안에 있어 키보드가 뜨면 콘텐츠 영역과 함께 키보드 위로 올라간다. */
   snackbar?: ReactNode;
+  /** 스낵바 슬롯을 기본 위치(하단 인셋 + 24)에서 위로 더 올리는 값(dp). 기본 0.
+   * 하단 고정 CTA가 있는 화면에서 스낵바를 CTA 위로 올리기 위한 값.
+   * 기존 bottom:88 = 24(기본) + 64(CTA 높이)에서 유래. */
+  snackbarOffset?: number;
   children: React.ReactNode;
 };
 
@@ -28,6 +32,7 @@ function ScreenContainer({
   style,
   avoidKeyboard = true,
   snackbar,
+  snackbarOffset = 0,
   children,
 }: ScreenContainerProps) {
   return (
@@ -42,7 +47,10 @@ function ScreenContainer({
       <KeyboardAvoidingView style={styles.container} enabled={avoidKeyboard} behavior="height">
         {children}
         {snackbar != null && (
-          <View style={styles.snackbarSlot} pointerEvents="box-none">
+          <View
+            style={[styles.snackbarSlot, { bottom: SNACKBAR_SLOT_INSET + snackbarOffset }]}
+            pointerEvents="box-none"
+          >
             {snackbar}
           </View>
         )}
@@ -62,7 +70,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: SNACKBAR_SLOT_INSET,
     right: SNACKBAR_SLOT_INSET,
-    bottom: SNACKBAR_SLOT_INSET,
   },
   primary: {
     backgroundColor: BACKGROUND_PRIMARY,

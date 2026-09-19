@@ -130,7 +130,17 @@ function LedgerCreateScreen() {
   };
 
   return (
-    <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
+    <ScreenContainer
+      background="secondary"
+      edges={['bottom']}
+      style={styles.container}
+      snackbar={
+        snackbarVisible ? (
+          <Snackbar visible title={`'${name.trim()}'${SNACKBAR_LEDGER_CREATED_SUFFIX}`} />
+        ) : undefined
+      }
+      snackbarOffset={68}
+    >
       {/* 키보드에 가린 필드도 스크롤로 볼 수 있게 한다. 하단 CTA(footer)는 스크롤 밖에 고정. */}
       <ScrollView
         style={styles.scroll}
@@ -183,15 +193,6 @@ function LedgerCreateScreen() {
         />
       </View>
 
-      {snackbarVisible && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar
-            visible
-            title={`'${name.trim()}'${SNACKBAR_LEDGER_CREATED_SUFFIX}`}
-          />
-        </View>
-      )}
-
       <Dialog
         visible={leaveConfirmVisible}
         title={LEDGER_LEAVE_CONFIRM_TITLE}
@@ -234,12 +235,6 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: 'auto',
     paddingVertical: 16,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 88,
   },
 });
 

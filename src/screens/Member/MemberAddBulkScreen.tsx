@@ -98,7 +98,19 @@ function MemberAddBulkScreen() {
   };
 
   return (
-    <ScreenContainer background="secondary">
+    <ScreenContainer
+      background="secondary"
+      snackbar={
+        snackbarInfo ? (
+          <Snackbar
+            visible
+            title={`${snackbarInfo.count}${SNACKBAR_MEMBER_BULK_ADDED_SUFFIX}`}
+            description={SNACKBAR_MEMBER_BULK_ADDED_DESCRIPTION}
+          />
+        ) : undefined
+      }
+      snackbarOffset={68}
+    >
       <AppBar
         type="sub"
         title={MEMBER_ADD_BULK_TITLE}
@@ -123,16 +135,6 @@ function MemberAddBulkScreen() {
           onPress={handleSubmit}
         />
       </View>
-
-      {snackbarInfo && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar
-            visible
-            title={`${snackbarInfo.count}${SNACKBAR_MEMBER_BULK_ADDED_SUFFIX}`}
-            description={SNACKBAR_MEMBER_BULK_ADDED_DESCRIPTION}
-          />
-        </View>
-      )}
     </ScreenContainer>
   );
 }
@@ -146,12 +148,6 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 24,
     paddingVertical: 16,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 88,
   },
 });
 

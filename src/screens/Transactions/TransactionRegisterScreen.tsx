@@ -615,7 +615,11 @@ function TransactionRegisterScreen() {
   }
 
   return (
-    <ScreenContainer background="secondary">
+    <ScreenContainer
+      background="secondary"
+      snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
+      snackbarOffset={68}
+    >
       <AppBar
         type="sub"
         title={TRANSACTION_REGISTER_TITLE}
@@ -832,12 +836,6 @@ function TransactionRegisterScreen() {
           Linking.openSettings();
         }}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
     </ScreenContainer>
   );
 }
@@ -891,12 +889,6 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 24,
     paddingBottom: 16,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 88,
   },
 });
 
