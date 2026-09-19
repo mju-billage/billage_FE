@@ -46,6 +46,49 @@ const BASE_URL = process.env.API_CALL_BASE_URL || 'https://52-78-148-114.nip.io'
 const DEFAULT_EMAIL = 'billage.verify.dues.test@example.com';
 const DEFAULT_PASSWORD = 'Billage1!Verify';
 
+// --- 민감 값 마스킹 ---------------------------------------------------------
+// 이 스크립트의 콘솔 출력은 그대로 대화에 붙는 워크플로에서 쓰인다. 로그인 응답의 토큰이나
+// 요청 바디의 비밀번호가 원문으로 찍히면 그대로 노출되므로(2026-09-20 액세스 토큰 노출 사고)
+// 출력 직전에 항상 가린다. 서버로 나가는 요청/응답 자체는 건드리지 않고 출력만 바꾼다.
+const TOKEN_KEYS = new Set(['accesstoken', 'refreshtoken', 'token', 'idtoken', 'authorization', 'cookie', 'set-cookie']);
+const SECRET_KEYS = new Set(['password', 'newpassword', 'currentpassword', 'passwordconfirm', 'confirmpassword', 'secret']);
+
+function maskToken(value) {
+  const text = String(value);
+  return text.length > 6 ? `${text.slice(0, 6)}...` : '***';
+}
+
+/** 객체/배열을 재귀로 훑어 토큰은 앞 6자 + '...', 비밀번호는 '***'로 바꾼 복사본을 돌려준다. */
+function maskSensitive(value) {
+  if (Array.isArray(value)) {
+    return value.map(maskSensitive);
+  }
+  if (value && typeof value === 'object') {
+    const out = {};
+    for (const [key, inner] of Object.entries(value)) {
+      const lower = key.toLowerCase();
+      if (SECRET_KEYS.has(lower) && inner != null) {
+        out[key] = '***';
+      } else if (TOKEN_KEYS.has(lower) && inner != null) {
+        out[key] = Array.isArray(inner) ? inner.map(maskToken) : maskToken(inner);
+      } else {
+        out[key] = maskSensitive(inner);
+      }
+    }
+    return out;
+  }
+  return value;
+}
+
+/** 응답 바디 원문(JSON 문자열)을 가려서 다시 문자열로. JSON이 아니면 그대로 둔다. */
+function maskBodyText(text) {
+  try {
+    return JSON.stringify(maskSensitive(JSON.parse(text)));
+  } catch {
+    return text;
+  }
+}
+
 
 
 function rawRequest(method, urlStr, bodyBuffer, extraHeaders) {
@@ -87,7 +130,7 @@ function printRequest(method, fullUrl, bodyObj, bodyBuffer) {
   console.log('--- 요청 ---');
   console.log(`${method} ${fullUrl}`);
   if (bodyObj !== undefined) {
-    console.log('바디:', JSON.stringify(bodyObj, null, 2));
+    console.log('바디:', JSON.stringify(maskSensitive(bodyObj), null, 2));
     console.log(`바디 바이트 길이: ${bodyBuffer.length}`);
   }
 }
@@ -95,11 +138,11 @@ function printRequest(method, fullUrl, bodyObj, bodyBuffer) {
 function printResponse(result) {
   console.log('--- 응답 ---');
   console.log(`상태코드: ${result.statusCode}`);
-  console.log('헤더:', JSON.stringify(result.headers, null, 2));
-  console.log('바디 원문:', result.bodyText);
+  console.log('헤더:', JSON.stringify(maskSensitive(result.headers), null, 2));
+  console.log('바디 원문:', maskBodyText(result.bodyText));
   try {
     const parsed = JSON.parse(result.bodyText);
-    console.log('바디(파싱):', JSON.stringify(parsed, null, 2));
+    console.log('바디(파싱):', JSON.stringify(maskSensitive(parsed), null, 2));
   } catch {
     // 바디가 JSON이 아니면(204 등) 그냥 원문만 보여준다.
   }
@@ -160,4 +203,4 @@ if (require.main === module) {
 
 // api-verify.js가 로그인/원시 호출 로직을 재사용한다 — 두 스크립트가 같은 curl-셸-인코딩
 // 함정을 두 번 겪지 않도록 요청 바디 처리(Buffer.from(..., 'utf8')) 경로를 하나로 묶는다.
-module.exports = { rawRequest, login, BASE_URL, DEFAULT_EMAIL, DEFAULT_PASSWORD };
+module.exports = { rawRequest, login, maskSensitive, maskBodyText, BASE_URL, DEFAULT_EMAIL, DEFAULT_PASSWORD };

@@ -406,7 +406,7 @@ function LedgerDetailScreen() {
                 <Image source={FILTER_ICON} style={styles.toolIcon} />
               </Pressable>
               <Pressable
-                onPress={() => navigation.navigate('LedgerSearch', { ledgerId })}
+                onPress={() => navigation.navigate('LedgerSearch', { ledgerId, ledgerName: ledger.name })}
                 hitSlop={8}
                 accessibilityLabel="검색"
               >

@@ -34,7 +34,15 @@
  */
 
 const path = require('path');
-const { rawRequest, login, BASE_URL, DEFAULT_EMAIL, DEFAULT_PASSWORD } = require('./api-call.js');
+const {
+  rawRequest,
+  login,
+  maskSensitive,
+  maskBodyText,
+  BASE_URL,
+  DEFAULT_EMAIL,
+  DEFAULT_PASSWORD,
+} = require('./api-call.js');
 
 function getByPath(obj, dotPath) {
   return dotPath.split('.').reduce((acc, key) => {
@@ -138,8 +146,8 @@ async function runCase(ctx, testCase, results) {
     ? `기대 상태코드 ${expectStatuses.join('|')}, 실제 ${result.statusCode}`
     : `응답에 필드 누락: ${missingFields.join(', ')}`;
   console.log(`FAIL  ${testCase.name} — ${label} — ${reason}`);
-  console.log(`      요청 바디: ${bodyObj !== undefined ? JSON.stringify(bodyObj) : '(없음)'}`);
-  console.log(`      응답 원문: ${result.bodyText}`);
+  console.log(`      요청 바디: ${bodyObj !== undefined ? JSON.stringify(maskSensitive(bodyObj)) : '(없음)'}`);
+  console.log(`      응답 원문: ${maskBodyText(result.bodyText)}`);
   results.push({
     name: testCase.name,
     outcome: 'FAIL',

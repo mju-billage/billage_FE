@@ -59,8 +59,15 @@ export const LEDGER_ENTRIES_LOADING_MORE = '불러오는 중...';
 
 /** keyword 파라미터는 제목·메모만 검색한다(Entry.txt) — "장부명"은 뺐다(이미 그
  * 장부 안에서 검색 중이라 의미가 없다). */
-export const LEDGER_SEARCH_PLACEHOLDER = '내역명을 입력해주세요.';
+/** 시안 목업 문구를 따른다(설명표는 '검색어를 입력해주세요.', 예전 구현은 '내역명을 입력해주세요.') —
+ * 불일치 #15. 장부 안 검색인데 '장부명'이 들어가는 이유는 기획 확인 필요. */
+export const LEDGER_SEARCH_PLACEHOLDER = '내역명, 장부명을 입력해주세요.';
+/** 내역 검색(`TransactionSearchScreen`)의 결과 없음 문구. 장부 안 검색(`FDR-3-PAGE-02-0`)은 마침표 없는
+ * `LEDGER_ENTRY_SEARCH_EMPTY`를 따로 쓴다 — 이 상수는 다른 화면이 같이 써서 바꾸지 않았다. */
 export const LEDGER_SEARCH_EMPTY = '해당되는 내역이 없어요.';
+/** 장부 안 검색 결과 없음. 시안(원본 스펙시트 Case B, 크롭 `FDR-3-PAGE-02-0-3.png`)과 설명표 3-1 모두
+ * 마침표 없음(2026-09-20 확대 확인). */
+export const LEDGER_ENTRY_SEARCH_EMPTY = '해당되는 내역이 없어요';
 
 export const FILTER_SHEET_TITLE = '필터 선택';
 export const FILTER_PERIOD_LABEL = '기간';

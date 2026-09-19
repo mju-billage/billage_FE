@@ -112,7 +112,7 @@ export type RootStackParamList = {
   Statistics: undefined;
   LedgerCreate: { parentId: string | null };
   LedgerDetail: { ledgerId: string };
-  LedgerSearch: { ledgerId: string };
+  LedgerSearch: { ledgerId: string; ledgerName: string };
   TransactionDetail: { transactionId: string };
   TransactionReceiptDetail: { fileUrl: string };
   TransactionSearch: undefined;
