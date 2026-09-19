@@ -355,94 +355,99 @@ function LedgerDetailScreen() {
         rightIcons={[{ icon: MENU_ICON, onPress: () => setMoreMenuVisible(true) }]}
       />
 
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={handleScrollEnd}
-        style={styles.carousel}
-        decelerationRate="fast"
-      >
-        <View style={[styles.cardSlide, { width: windowWidth }]}>
-          <AmountCard
-            type="incomeExpense"
-            income={ledger.totalIncome}
-            expense={ledger.totalExpense}
+      {/* 시안 [상태] Scroll-away: 카드·인디케이터·필터/검색 줄·개수가 리스트 헤더라 리스트를 올리면 같이
+          화면 위로 사라진다. 앱바는 리스트 밖이라 최상단에 고정. */}
+      <SectionList
+        sections={sections}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.listContent}
+        stickySectionHeadersEnabled={false}
+        onEndReachedThreshold={0.4}
+        onEndReached={loadMoreEntries}
+        ListHeaderComponent={
+          <>
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={handleScrollEnd}
+              style={styles.carousel}
+              decelerationRate="fast"
+            >
+              <View style={[styles.cardSlide, { width: windowWidth }]}>
+                <AmountCard
+                  type="incomeExpense"
+                  income={ledger.totalIncome}
+                  expense={ledger.totalExpense}
+                />
+              </View>
+              <View style={[styles.cardSlide, { width: windowWidth }]}>
+                {ledger.budget != null ? (
+                  <BudgetCard
+                    remainingBudget={ledger.remainingBudget ?? ledger.budget - ledger.totalExpense}
+                    expense={ledger.totalExpense}
+                    budget={ledger.budget}
+                  />
+                ) : (
+                  <BudgetCard state="empty" />
+                )}
+              </View>
+            </ScrollView>
+            <View style={styles.indicatorRow}>
+              <CarouselIndicator count={2} selectedIndex={cardIndex} />
+            </View>
+
+            <View style={styles.toolRow}>
+              <Pressable
+                onPress={() => setFilterSheetVisible(true)}
+                hitSlop={8}
+                accessibilityLabel="필터"
+              >
+                <Image source={FILTER_ICON} style={styles.toolIcon} />
+              </Pressable>
+              <Pressable
+                onPress={() => navigation.navigate('LedgerSearch', { ledgerId })}
+                hitSlop={8}
+                accessibilityLabel="검색"
+              >
+                <Image source={SEARCH_ICON} style={styles.toolIcon} />
+              </Pressable>
+            </View>
+
+            <Text style={styles.countText}>
+              {entryTotal}
+              {LEDGER_COUNT_SUFFIX}
+            </Text>
+          </>
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>{LEDGER_LIST_EMPTY_TITLE}</Text>
+            <Text style={styles.emptySubtitle}>{LEDGER_LIST_EMPTY_SUBTITLE}</Text>
+          </View>
+        }
+        ListFooterComponent={
+          isLoadingMore ? (
+            <Text style={styles.loadingMoreText}>{LEDGER_ENTRIES_LOADING_MORE}</Text>
+          ) : null
+        }
+        renderSectionHeader={({ section }) => (
+          <Text style={styles.sectionHeader}>{section.title}</Text>
+        )}
+        renderItem={({ item }) => (
+          <TransactionListItem
+            itemName={item.title}
+            amount={item.type === 'INCOME' ? item.amount : -item.amount}
+            hasReceipt={item.receiptCount > 0}
+            isPendingApproval={item.approvalStatus === 'PENDING'}
+            onPress={() =>
+              navigation.navigate('TransactionDetail', {
+                transactionId: item.id,
+              })
+            }
           />
-        </View>
-        <View style={[styles.cardSlide, { width: windowWidth }]}>
-          {ledger.budget != null ? (
-            <BudgetCard
-              remainingBudget={ledger.remainingBudget ?? ledger.budget - ledger.totalExpense}
-              expense={ledger.totalExpense}
-              budget={ledger.budget}
-            />
-          ) : (
-            <BudgetCard state="empty" />
-          )}
-        </View>
-      </ScrollView>
-      <View style={styles.indicatorRow}>
-        <CarouselIndicator count={2} selectedIndex={cardIndex} />
-      </View>
-
-      <View style={styles.toolRow}>
-        <Pressable
-          onPress={() => setFilterSheetVisible(true)}
-          hitSlop={8}
-          accessibilityLabel="필터"
-        >
-          <Image source={FILTER_ICON} style={styles.toolIcon} />
-        </Pressable>
-        <Pressable
-          onPress={() => navigation.navigate('LedgerSearch', { ledgerId })}
-          hitSlop={8}
-          accessibilityLabel="검색"
-        >
-          <Image source={SEARCH_ICON} style={styles.toolIcon} />
-        </Pressable>
-      </View>
-
-      <Text style={styles.countText}>
-        {entryTotal}
-        {LEDGER_COUNT_SUFFIX}
-      </Text>
-
-      {entries.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>{LEDGER_LIST_EMPTY_TITLE}</Text>
-          <Text style={styles.emptySubtitle}>{LEDGER_LIST_EMPTY_SUBTITLE}</Text>
-        </View>
-      ) : (
-        <SectionList
-          sections={sections}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.listContent}
-          onEndReachedThreshold={0.4}
-          onEndReached={loadMoreEntries}
-          ListFooterComponent={
-            isLoadingMore ? (
-              <Text style={styles.loadingMoreText}>{LEDGER_ENTRIES_LOADING_MORE}</Text>
-            ) : null
-          }
-          renderSectionHeader={({ section }) => (
-            <Text style={styles.sectionHeader}>{section.title}</Text>
-          )}
-          renderItem={({ item }) => (
-            <TransactionListItem
-              itemName={item.title}
-              amount={item.type === 'INCOME' ? item.amount : -item.amount}
-              hasReceipt={item.receiptCount > 0}
-              isPendingApproval={item.approvalStatus === 'PENDING'}
-              onPress={() =>
-                navigation.navigate('TransactionDetail', {
-                  transactionId: item.id,
-                })
-              }
-            />
-          )}
-        />
-      )}
+        )}
+      />
 
       <LedgerFilterSheet
         visible={filterSheetVisible}
@@ -534,9 +539,12 @@ function getDialogConfig(activeDialog: ActiveDialog) {
 }
 
 const styles = StyleSheet.create({
+  // 리스트 콘텐츠의 좌우 패딩 24 안에 있으므로 캐러셀만 화면 폭 전체로 되돌린다(슬라이드가
+  // 화면 폭이라 페이지 스냅이 그대로 맞는다).
   carousel: {
     flexGrow: 0,
     marginTop: 16,
+    marginHorizontal: -24,
   },
   // 슬라이드 하나 = 화면 폭 전체(JSX에서 width: windowWidth로 덮어씀) — 카드
   // 여백은 스크롤뷰가 아니라 이 안쪽 padding으로 준다(캐러셀 스냅 결함 수정,
@@ -554,7 +562,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
     marginBottom: 8,
   },
   toolIcon: {
@@ -564,7 +571,6 @@ const styles = StyleSheet.create({
   countText: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
-    paddingHorizontal: 24,
     marginBottom: 8,
   },
   listContent: {
@@ -590,7 +596,6 @@ const styles = StyleSheet.create({
     color: FOREGROUND_DISABLED,
   },
   emptyState: {
-    flex: 1,
     alignItems: 'center',
     paddingTop: 80,
   },

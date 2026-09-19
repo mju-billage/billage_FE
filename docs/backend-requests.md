@@ -259,6 +259,18 @@ Auth.txt 정책상 이메일 인증(6·7번)이 회원가입 플로우의 필수
 
 ---
 
+## 신규 — `GET /ledgers/{ledgerId}/entries`의 날짜 범위(`from`/`to`)가 동작하지 않습니다 (2026-09-20)
+
+내역 목록 조회에 날짜 범위 파라미터 필요. FDR-2-PAGE-05-0 필터 기본값이 '기간(전체)'로 명세돼 있으나 현재 API에 해당 파라미터가 없어 필터 시트에서 기간 항목을 뺐다. from/to 추가 요청.
+
+**실호출 확인(2026-09-20, `scripts/api-call.js`, 장부 21 — 내역 3건, 전부 `occurredOn=2026-09-12`)**:
+```
+GET /api/v1/ledgers/21/entries?from=2030-01-01&to=2030-12-31 → 200, 3건 (전부 2026-09-12)
+GET /api/v1/ledgers/21/entries?from=2026-09-13&to=2026-09-30 → 200, 3건 (범위 밖인데 그대로)
+GET /api/v1/ledgers/21/entries?zzz=1                          → 200, 3건 (모르는 파라미터는 조용히 무시)
+```
+`Entry (내역).txt` §4 쿼리 파라미터 목록에는 `from`·`to`(발생일 기간)가 있는데 **실서버는 무시**합니다(앱의 `LedgerFilterSheet` 주석은 Swagger 쪽에도 없다고 적혀 있으나 이번엔 Swagger를 다시 열어보지 않았습니다). 명세대로 구현해 주시거나, 안 할 거면 명세에서 빼 주세요. 프론트는 이 파라미터가 동작하기 전까지 필터 시트에 기간을 넣지 않습니다.
+
 ## 확정됨(2026-09-11, Swagger 전수 대조 + 실호출) — 프론트 자체 버그 3건
 
 - **폴더 전체 백업이 항상 실패하던 원인**: `archiveService.ts`가 `POST /groups/{groupId}/folders/archive`

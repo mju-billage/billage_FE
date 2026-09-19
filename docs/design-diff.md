@@ -153,15 +153,9 @@
 #### `SearchField` clear(X) 버튼 미지원 — 컴포넌트에 기능 자체가 없음, 승인 대기 [2026-09-19 6-11]
 - **검색 필드 clear(X) 버튼 — 보고만, 미수정**: `SearchField`(`components/Input/Search/SearchField.tsx`)는 `value/onChangeText/placeholder/size/variant/onSubmit`만 받고 **clear 지원이 없다**(우측엔 돋보기 아이콘 고정). 반대로 `TextField`는 `onClear?`(값이 있고 비활성 아닐 때 `Close.png` X 아이콘)를 갖고 있고 4개 화면(GroupProfileEdit/JoinGroupSheet/ProfileEdit/TransactionTextInputSheet)과 `Dialog`가 쓴다. `SearchField`는 8곳이 사용 중이라 §5-17의 "컴포넌트에 있는데 화면이 안 쓰는" 패턴이 아니라 **컴포넌트에 기능 자체가 없는** 경우다. 지시대로 고치지 않음 — 추가 시 `onClear` prop을 넣고 값이 있을 때 X + 돋보기 병기(시안 Case C), 폴더 화면에서 `onClear={() => setSearchQuery('')}` 연결하는 안이고, 나머지 7개 사용처에는 prop을 안 넘기면 변화 없다.
 
-#### FDR-2-PAGE-05-0 (장부 상세) — 시안 대조 잔여, 판단 보류 [2026-09-20 10-3, 조사만]
-수정하지 않은 항목. 사용자 판단 대기.
-- **Scroll-away**: 설명표 No.2 "하단 리스트 스크롤 시 카드가 화면 위로 자연스럽게 사라짐". 앱은 **안 그렇다** — 카드 `ScrollView`(캐러셀)·인디케이터·필터/검색 줄·개수가 리스트 `SectionList`의 **형제**라 고정돼 있고 리스트만 스크롤한다. 카드를 `ListHeaderComponent`로 옮기는 구조 변경이 필요.
-- **⋮ 메뉴 라벨**: 설명표 `예산 설정`/`장부 이름 변경`/`삭제`. 앱은 `예산 설정`(`LEDGER_MENU_BUDGET`) / `장부 이름 변경`(`LEDGER_MENU_RENAME`) / `장부 삭제`(`LEDGER_MENU_DELETE`). Case A 목업 라벨은 사용자가 확인 예정.
-- **수입/지출 색**: 카드 수입 값 `FEEDBACK_POSITIVE_BOLD`(=`BLUE_500` `#4A7FE7`), 행 수입 금액 `FOREGROUND_SECONDARY`(=`BLUE_500` `#4A7FE7`). 지출은 색을 따로 안 줘서 기본 텍스트색, 표기 `-N원`(`formatExpense`, 0원은 부호 없음). 시안(수입 파랑 / 지출 검정 마이너스)과 같은 방향.
-- **승인 요청 건**: 앱에 개념 있음 — `EntrySummary.approvalStatus`(`PENDING`/`APPROVED`), 내역 메인 `승인요청` 탭(`status=PENDING`), 행 배지 `승인요청`(`CALENDAR_APPROVAL_BADGE_LABEL`). 다만 장부 상세는 `status`를 안 걸고 조회해서 서버가 승인 대기 건도 내려주면 **목록에 섞여 배지로 나온다**(설명표 No.6은 승인되면 장부로 들어온다고 함). 서버가 실제로 어떻게 내려주는지는 미확인.
-- **필터 시트에 `기간` 없음**: 시안 기본값 `기간(전체)/구분(전체)/정렬순서(최신순)`인데 `LedgerFilterSheet`는 `구분/승인 상태/정렬 순서`다. 서버 `GET /ledgers/{id}/entries`에 날짜 범위 파라미터가 없어서 뺐다(파일 주석) — 백엔드 요청 후보.
-- **`LedgerSearchScreen`(`FDR-3-PAGE-02-0`)은 그대로**: 행마다 날짜 라벨(`TYPOGRAPHY.caption` 8/16)을 아직 단다. 장부 상세와 같은 그룹 헤더로 맞출지는 별도 대조 사안.
-- **`fontSize: 8`**: `src/`에서 리터럴은 `constants/typography.ts`의 `caption` 토큰 하나뿐이다(§3-2 PDF 대조에서 일치). 장부 상세 행에서는 더 안 쓰지만 `caption` 토큰 자체는 `TransactionListItem` 라벨(장부명)·`Calendar`·`FolderItem`·`Tooltip`·`BottomNavigation`·`StatisticsScreen`이 쓴다.
+#### FDR-2-PAGE-05-0 (장부 상세) — 시안 대조 잔여 판단 보류 2건 [2026-09-20 10-4]
+- **승인 요청 건 노출 (판단 보류)**: 장부 상세는 `status` 없이 `GET /ledgers/{id}/entries`를 부른다. 실호출(10-4, 장부 21·35): `status` 없음 = 3건·1건, `status=APPROVED` = 3건·1건(전부 `APPROVED`), `status=PENDING` = 0건. 모임 단위(`/groups/{5,6}/entries?status=PENDING`)도 0건 — **테스트 데이터에 승인 대기 건이 없어서**(총무 계정이라 자동 승인, 대기 건은 `MEMBER` 계정이 등록해야 생김) 승인 대기가 섞여 나오는지는 실응답으로 확인하지 못했다. `Entry (내역).txt` §4는 `status`를 선택 파라미터로만 두고 장부 내역 목록의 승인 정책 메모는 없다. 설명표 No.6 "승인 요청 건은 승인 탭에서 관리되며 … 승인했을 경우 해당 장부로 들어옴"은 "승인된 것만"으로 읽히지만, `status=APPROVED`를 상시 붙이면 필터 시트의 `승인 상태`(전체/승인 대기/승인 완료)가 의미를 잃고 시안 필터(기간/구분/정렬)에도 승인 상태가 없다 — 그래서 **고치지 않았다**. 권장: `MEMBER` 계정으로 대기 건을 하나 만들어 섞임을 확인한 뒤, 맞으면 기본 조회에 `APPROVED`를 붙이고 시트에서 `승인 상태`를 뺀다.
+- **`LedgerSearchScreen`(`FDR-3-PAGE-02-0`)은 그대로**: 행마다 날짜 라벨(`TYPOGRAPHY.caption` 8/16)을 아직 단다. 장부 상세와 같은 그룹 헤더로 맞출지는 시안 대조 때 결정(코드 현황은 `design-verification.md` §5-21).
 
 ### 1-2. 기획 확인 필요
 
@@ -530,6 +524,13 @@ spec-sheet-map.tsv`에 헤더확인으로 등록, `design-verification.md` §4-0
 - 재전송이 fullWidth 버튼이어야 하는지 텍스트 링크가 맞는지는 별도 명세 확인 사안(사용자 확인 예정) — 서버 복구 뒤 재확인할 때 함께 본다.
 - 영향 범위는 `docs/backend-requests.md` 1순위(`MAIL_SEND_FAILED`)에 추가.
 
+#### 내역 목록 날짜 범위(`from`/`to`) 미동작 — 장부 상세 필터 시트에 `기간`을 못 넣음 [2026-09-20 10-4]
+내역 목록 조회에 날짜 범위 파라미터 필요. FDR-2-PAGE-05-0 필터 기본값이 '기간(전체)'로 명세돼 있으나 현재 API에 해당 파라미터가 없어 필터 시트에서 기간 항목을 뺐다. from/to 추가 요청.
+
+- 시안 `FDR-2-PAGE-05-0` 필터 기본값 `기간(전체) / 구분(전체) / 정렬순서(최신순)`. 앱 `LedgerFilterSheet`는 `구분 / 승인 상태 / 정렬 순서`다.
+- 실호출: `GET /ledgers/21/entries?from=2030-01-01&to=2030-12-31`이 범위와 무관하게 전 건(2026-09-12)을 돌려준다. 모르는 파라미터(`zzz=1`)도 200으로 무시. `Entry (내역).txt` §4엔 `from`/`to`가 있어 **명세와 실서버가 다르다**. 요청은 `docs/backend-requests.md` "신규 — `GET /ledgers/{ledgerId}/entries`의 날짜 범위".
+- **시트에 기간을 임의로 만들지 않는다**(서버가 거르지 못하는 필터를 클라이언트가 페이지 안에서만 거르면 부정확).
+
 ## 2. 판단 대기 (⏳ 내 결정 필요)
 
 #### F-1 한국어 줄바꿈 — QuickServiceCard 카드 폭/폰트 조정 방향 결정 [배치 F]
@@ -735,6 +736,10 @@ DSH-1 재캡처로 "고쳐졌는지" 확인하는 절차 자체가 성립하지 
 - [해결] 2026-09-20 장부 상세 필터+검색 줄 신설 — 카드 아래·개수 위, 좌 필터(`Filter.png`) → `LedgerFilterSheet`, 우 검색(`Search.png`) → `LedgerSearch`. 필터 시트는 값(`value`/`onApply`)만 주고받는 독립 컴포넌트라 재사용, 필터 상태는 화면이 들고 서버 조회 조건(`toEntryFilterQuery`: `type`/`status`/`sort`)으로 반영해 목록만 다시 받음(카드·앱바는 유지). 검색 화면도 같은 변환 함수를 쓰도록 공용화 (10-3)
 - [해결] 2026-09-20 장부 상세 날짜 그룹 헤더 — 행마다 `YYYY-MM-DD`를 `caption`(8pt)으로 달던 것을 `M월 D일 요일` 그룹 헤더로. `ReportEntryList` 전체는 재사용 불가(구분 탭·클라이언트 정렬·스냅샷 타입)라 **헤더 포맷 함수만 `utils/dateHeader.ts`로 공용화**(같은 함수를 로컬로 들고 있던 `TransactionsScreen`·`TransactionSearchScreen`·`MemberPaymentHistoryScreen`·`ReportEntryList` 4곳도 교체; `CalendarScreen`은 인라인이라 그대로). `TransactionListItem`의 `label`은 선택 prop으로 (10-3)
 - [해결] 2026-09-20 장부 상세 개수 `24 건` — 이전엔 개수 표기 자체가 없었다. 서버 `totalElements`(필터 반영 전체 건수)를 `EntryListPage`에 추가해 `{N} 건`(`LEDGER_COUNT_SUFFIX`, 공백 한 칸, 0건이면 `0 건`). **폴더는 `개`, 장부는 `건`이 의도된 구분**임을 두 상수 주석에 남김 (10-3)
+- [해결] 2026-09-20 `fontSize: 8` — 정상 토큰. `typography.ts`의 `caption`은 디자인 PDF와 일치(§3-2)하는 토큰이라 유지. 장부 상세 행에서 안 쓰게 된 것으로 충분 (10-3 판단 보류에서 철회, 사용자 결정)
+- [해결] 2026-09-20 장부 상세 ⋮ 메뉴 라벨 — Case A 목업이 `예산 설정` / `장부 이름 변경` / `장부 삭제`라 앱이 맞다. 설명표의 `삭제`는 축약 표기 (10-3 판단 보류에서 해결로)
+- [해결] 2026-09-20 `formatDateHeader` 공용화 5곳 — 같은 함수를 로컬로 들고 있던 4곳(`TransactionsScreen`·`TransactionSearchScreen`·`MemberPaymentHistoryScreen`·`ReportEntryList`)을 `utils/dateHeader.ts` 하나로 교체, 장부 상세가 5번째 사용처 (10-3 정리, 사용자 확인)
+- [해결] 2026-09-20 장부 상세 Scroll-away — 설명표 No.2 `[상태]`. 카드 캐러셀·인디케이터·필터/검색 줄·개수를 `SectionList`의 `ListHeaderComponent`로 옮겨 리스트를 올리면 같이 사라진다. 앱바는 리스트 밖이라 최상단 고정(설명표 No.1), `stickySectionHeadersEnabled={false}`. 캐러셀은 리스트 콘텐츠 좌우 패딩 24 안이라 음수 마진(`-24`)으로 화면 폭을 되찾아 페이지 스냅 유지. **가로 캐러셀 제스처 충돌은 코드만으로는 확인 못 함 — 실기기 확인 대기, 문제 있으면 되돌림** (10-4)
 
 ## 4. 검증 방식 (파일럿 5개로 확정)
 

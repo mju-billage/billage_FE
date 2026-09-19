@@ -1766,6 +1766,28 @@ tsv 원본 행 중복(같은 ID가 여러 행): `COM-1-SNACKBAR-02-0`(5행) 등 
 
 **※ 갱신(2026-09-20 10-3)**: 위 서술 중 다음은 10-3 수정으로 바뀌었다 — 앱바 우측은 ⋮ 하나뿐(검색 아이콘 제거, `Search.png`는 카드 아래 줄로 이동), 카드 아래에 필터 아이콘(`Filter.png` 24×24, 좌) · 검색 아이콘(`Search.png` 24×24, 우) 줄(좌우 패딩 24, 아래 여백 8)이 생겼고 그 아래 개수 `{totalElements} 건`(`LEDGER_COUNT_SUFFIX`, `body2` `#9B9B9B`, 아래 여백 8), 리스트는 `SectionList`로 날짜 그룹 헤더(`formatDateHeader` → `4월 16일 목요일`, `body3` bold `#9B9B9B`, 위 12·아래 6)를 쓰고 행은 날짜 라벨 없이 내역명 + 금액이다(행 높이는 라벨이 빠져 약 44dp = 12 + 내역명 20 + 12, 우 열에 영수증 아이콘/배지가 있으면 약 66dp = 12 + (18+4+20) + 12 — 계산값, 시안 대조 때 실측). 필터 값은 화면 상태(`filter`, 최신값은 `filterRef`)이고 바뀌면 `getEntries`에 `type`/`status`/`sort`를 얹어 목록만 다시 받는다.
 
+**※ 갱신(2026-09-20 10-4)**: 카드 캐러셀·인디케이터·필터/검색 줄·개수는 이제 `SectionList`의 `ListHeaderComponent`다(Scroll-away). 앱바는 리스트 밖이라 고정, 캐러셀은 리스트 콘텐츠 좌우 패딩(24) 안이라 `marginHorizontal: -24`로 화면 폭을 되찾는다. `stickySectionHeadersEnabled={false}`. 빈 상태는 `ListEmptyComponent`(위 여백 80). 위 "카드 사이 간격 개념 없음"·"인접 카드 미리보기 없음"은 그대로.
+
+### 5-21. 장부 내 검색(`FDR-3-PAGE-02-0`) 코드 현황 — 다음 시안 대조용 사전 조사 (2026-09-20, 10-4, 조사만 — 소스 수정 없음)
+
+`LedgerSearchScreen.tsx` 기준. **dp는 코드의 값과 계산값**, 시안 실측과 대조하기 전이다. 색은 상수명 + HEX.
+
+**루트·앱바**: `ScreenContainer background="secondary"`(흰색) `edges={['bottom']}`, `container` = `paddingTop: 60`(하드코딩, 유지) + `paddingHorizontal: 24`. **`AppBar` 컴포넌트를 쓰지 않는다** — 헤더 행을 직접 만든다: `BackButton`(기본 size 28 → 아이콘 약 16.8) + `SearchField`(`flex: 1`), 둘 사이 간격 8, 행 아래 여백 12. 제목·우측 아이콘 없음.
+
+**검색 필드**(`SearchField` 기본 `size="lg"`, `variant="default"`): 높이 44, 모서리 24, 좌우 패딩 16, 배경 `FILL_NEUTRAL_NORMAL` `#F3F4F6`(테두리 없음), 입력 `TYPOGRAPHY.body2`(14/20) `FOREGROUND_NEUTRAL_NORMAL` `#4B5563`, 검색 아이콘 18×18 `tintColor` `#9B9B9B`(입력 뒤 = 우측). placeholder `LEDGER_SEARCH_PLACEHOLDER` = `내역명을 입력해주세요.`(색 `FOREGROUND_DISABLED` `#C1C5CD`). 입력이 바뀔 때마다(`query` 상태) `keyword`로 서버에 다시 조회한다(디바운스 없음). 서버 `keyword`는 제목과 메모를 함께 검색(`Entry (내역).txt`).
+
+**필터 진입점**: 헤더 행 아래 별도 행(`filterRow`, 우측 정렬, 아래 여백 8)에 `TextButton` 하나 — 라벨 `필터`(파일 안 로컬 상수 `FILTER_LABEL`, 다른 상수 파일에 없음), `hierarchy="tertiary"`(배경 `#F3F4F6`, 글자 `FOREGROUND_NEUTRAL_SUBTLE` `#9B9B9B`, `TYPOGRAPHY.button`, 상하 패딩 4). 아이콘 없이 텍스트 버튼이다(장부 상세는 `Filter.png` 아이콘). 누르면 `LedgerFilterSheet`(`FDR-3-SHEET-03-0`)가 열리고, 이 화면이 필터 값(`DEFAULT_LEDGER_FILTER`: 구분 전체/승인 상태 전체/정렬 최신)을 들고 검색과 함께 서버 조건으로 넘긴다.
+
+**결과 리스트**: `FlatList`, 무한 스크롤(`onEndReachedThreshold` 0.4, 하단 `LEDGER_ENTRIES_LOADING_MORE` = `불러오는 중...`), 콘텐츠 아래 패딩 24. **날짜 그룹 헤더 없음 — 행마다 날짜 라벨**: `TransactionListItem label={item.occurredOn}`(서버 문자열 `YYYY-MM-DD` 그대로, `TYPOGRAPHY.caption` 8/16 `#4B5563`) + 내역명(`subtitle3` 14/20) + 우측 금액(수입 `#4A7FE7`, 지출 `-N원` 기본색) / 영수증 아이콘 18×18 또는 `승인요청` 배지. **행 높이 ≈ 64dp**(12 + 16 + 4 + 20 + 12), 아이콘/배지가 있으면 ≈ 66dp. 행 구분선·간격 없음. 행 좌우는 화면 패딩 24 안(눌림 배경만 좌우 12씩 번짐).
+
+**개수 표기**: 없다(단위도 없음).
+
+**결과 없음**: `LEDGER_SEARCH_EMPTY` = `해당되는 내역이 없어요.`(`TYPOGRAPHY.subtitle3` 14/20, 색 `FOREGROUND_NEUTRAL_SUBTLE` `#9B9B9B`, 위 여백 80, 가운데 정렬). 부제 없음. **요청 실패**는 별도 — 오류 문구(`getApiErrorMessage`/네트워크 문구) + `다시 시도`(`LEDGER_DETAIL_RETRY_LABEL`) `Button hierarchy="secondary"`, 문구와 버튼 간격 12.
+
+**최근 검색어**: 없다(저장·표시 코드 없음). **자동완성·검색어 지우기 버튼**도 없음(`SearchField`에 clear 버튼 없음).
+
+**시안 대조 때 눈여겨볼 것**(판단 아님): 앱바가 커스텀(`AppBar` 아님)이라 높이·좌우 패딩(20 vs 24)이 다른 화면과 다를 수 있음, 필터 진입점 모양(텍스트 vs 아이콘)·위치, 날짜 라벨 vs 그룹 헤더(`M월 D일 요일`), 개수 유무, 결과 없음 문구, 최근 검색어 유무, `paddingTop: 60` 하드코딩.
+
 ## 6. 권장 순서
 
 1. **`TYPOGRAPHY`에 `letterSpacing` 15개 추가** (§3-2) — 스크린샷 대조 전에 해야 전 화면 오탐을 막는다.
