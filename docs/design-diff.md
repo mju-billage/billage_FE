@@ -293,10 +293,6 @@
 - **#19** 설명표 No.5는 안내 텍스트 '간편 로그인'을 명시하나 목업 프레임에는 없다. 아이콘 3개만 존재. 목업을 따라 추가하지 않음. 기획 확인 필요.
 - 세 건 모두 `design-verification.md` §5-4, `lessons.md` §3에 같은 번호로 기록.
 
-#### 신규 소셜 가입 — `termsAgreed` 누락 400 확정 + `provider` 대소문자 문제 발견 (조사만, 미수정) [2026-09-20 11-2]
-- `termsAgreed` 없이 `POST /auth/social/signup` → 400 확정(`termsAgreed:false`는 `fieldErrors[{termsAgreed, "약관 동의가 필요합니다."}]`, `true`면 401 `SOCIAL_TOKEN_INVALID`로 토큰 검증 단계까지 감). 시안 `약관동의 후 간편 가입 정보 입력`과도 어긋난다 — 플로우 변경이라 사용자 지시 대기.
-- **`provider`는 서버가 대문자(`KAKAO`/`GOOGLE`)만 받는다. 앱은 `Kakao`/`Naver`/`Google`을 그대로 보낸다** → 로그인·가입 모두 400 가능. `NAVER`는 어떤 표기로도 400(서버 지원 여부 확인 필요). 상세·실호출 결과는 `design-verification.md` §5-23 E.
-
 ### 1-3. 캡처/실측 필요
 
 #### <a id="etc-1-page-01-0-더보기-메인"></a>ETC-1-PAGE-01-0 (더보기 메인) — 카드·메뉴 여백 실측 대기 [2026-08-28 파일럿, 09-12 부분 해결]
@@ -567,6 +563,12 @@ spec-sheet-map.tsv`에 헤더확인으로 등록, `design-verification.md` §4-0
 - 실호출: `GET /ledgers/21/entries?from=2030-01-01&to=2030-12-31`이 범위와 무관하게 전 건(2026-09-12)을 돌려준다. 모르는 파라미터(`zzz=1`)도 200으로 무시. `Entry (내역).txt` §4엔 `from`/`to`가 있어 **명세와 실서버가 다르다**. 요청은 `docs/backend-requests.md` "신규 — `GET /ledgers/{ledgerId}/entries`의 날짜 범위".
 - **시트에 기간을 임의로 만들지 않는다**(서버가 거르지 못하는 필터를 클라이언트가 페이지 안에서만 거르면 부정확).
 
+#### 소셜 로그인 `provider`에 `NAVER`가 통과하지 않음 — 네이버 로그인 서버 지원 확인 대기 [2026-09-20 11-3]
+소셜 로그인 provider에 NAVER가 없다. KAKAO/GOOGLE만 통과하고 NAVER는 표기와 무관하게 400. 시안(COM-1-PAGE-01-0, 디자인 완료)에는 네이버 아이콘이 포함돼 있다. 서버 지원 여부와 일정 확인 요청.
+
+- 실호출: `KAKAO`/`GOOGLE`은 401 `SOCIAL_TOKEN_INVALID`(검증 통과), `NAVER`는 표기·토큰과 무관하게 400 `INVALID_REQUEST`. 요청은 `docs/backend-requests.md` "신규 — 소셜 로그인 `provider`에 `NAVER`가 통과하지 않습니다".
+- **앱의 네이버 버튼은 남겨둠**(서버 답을 받고 결정). 그때까지 네이버 로그인은 400으로 실패한다.
+
 ## 2. 판단 대기 (⏳ 내 결정 필요)
 
 #### F-1 한국어 줄바꿈 — QuickServiceCard 카드 폭/폰트 조정 방향 결정 [배치 F]
@@ -793,6 +795,9 @@ DSH-1 재캡처로 "고쳐졌는지" 확인하는 절차 자체가 성립하지 
 - [해결] 2026-09-20 로그인 비밀번호 눈 아이콘 토글 — `secureToggle` 켬 + `TextField` 아이콘 매핑을 시안대로 뒤집음(마스킹 중 사선 눈, 노출 중 열린 눈). 사용처 조사: `secureToggle`은 로그인·`SignupInfoScreen`(2필드)·`PasswordChangeScreen`(3필드)이고 두 시트 실측 모두 같은 방향이라 공용 수정 (11-2)
 - [해결] 2026-09-20 로그인 버튼 비활성 조건 — 이메일·비밀번호 중 하나라도 비면(`trim()` 후) 비활성. 설명표 No.3 (11-2)
 - [해결] 2026-09-20 로그인 텍스트 버튼 밑줄 — `TextButton`에 `underline` 옵션(기본 꺼짐) 추가, 로그인 두 버튼에만 적용 (11-2)
+- [해결] 2026-09-20 소셜 로그인·가입 `provider` 대소문자 — 서버는 대문자(`KAKAO`/`GOOGLE`)만 통과, 앱은 `Kakao`/`Naver`/`Google`을 그대로 보냈다(콘솔 키를 등록해도 400). `authService`에 `SOCIAL_PROVIDER_API_VALUE` 매핑을 두고 `socialLogin`·`socialSignup` 두 함수 모두 API 경계에서 대문자로 변환. 같은 유형(앱 내부 표기를 서버에 그대로 전송) 전수 조사: 다른 곳은 없음, 목록은 `design-verification.md` §5-23 F (11-3)
+- [해결] 2026-09-20 신규 소셜 가입 약관동의 삽입 — 소셜 인증 → 약관동의(`COM-2-PAGE-01-0`) → 간편 가입 정보 입력(`COM-3-PAGE-02-0`). `TermsAgreementScreen`을 일반·소셜 가입이 함께 쓰고(소셜은 `socialProfile` param, 동의 후 `SocialSignupInfo`로), `SocialSignupInfoScreen`이 `agreements`를 받아 가입 요청에 `termsAgreed`(필수 3종의 논리곱)를 실음. 뒤로가기는 스택상 약관동의로 돌아감. 기존 가입자는 약관을 건너뛰고 대시보드로 직행(변경 없음). **실 소셜 토큰·콘솔 키가 없어 가입 완료까지는 실행 검증 못 함 — 요청 바디 형태만 더미 토큰으로 서버 검증 단계 통과(401 `SOCIAL_TOKEN_INVALID`)까지 확인** (11-3)
+- [해결] 2026-09-20 `COM-3-PAGE-02-0` 시안 반영 — 이름 필수(빨간 *)·8자 초과 시 입력을 막지 않고 레드 라인 + `최대 8자 이내로 입력할 수 있어요.`(`SOCIAL_SIGNUP_NAME_MAX_LENGTH`·`SOCIAL_SIGNUP_NAME_TOO_LONG_ERROR`), 이메일 Read-only(`disabled`, 수정·검증 제거)·필수 표시, CTA `다음으로`(목업, 설명표는 `다음`)·이름 1~8자일 때만 활성(이메일은 조건 아님), 뒤로가기 화면 상단 고정. 상세는 `design-verification.md` §5-23 G (11-3)
 
 ## 4. 검증 방식 (파일럿 5개로 확정)
 

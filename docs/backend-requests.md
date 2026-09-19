@@ -273,6 +273,19 @@ GET /api/v1/ledgers/21/entries?zzz=1                          → 200, 3건 (모
 
 **보강(2026-09-20)**: 명세(Entry.txt §4)에는 from/to가 있으나 실서버가 무시한다. from=2030-01-01&to=2030-12-31로 호출해도 2026-09-12 내역이 그대로 반환됨. 미구현 파라미터도 400 없이 200으로 무시된다. 구현 여부 확인 요청.
 
+## 신규 — 소셜 로그인 `provider`에 `NAVER`가 통과하지 않습니다 (2026-09-20)
+
+소셜 로그인 provider에 NAVER가 없다. KAKAO/GOOGLE만 통과하고 NAVER는 표기와 무관하게 400. 시안(COM-1-PAGE-01-0, 디자인 완료)에는 네이버 아이콘이 포함돼 있다. 서버 지원 여부와 일정 확인 요청.
+
+**실호출(2026-09-20, `scripts/api-call.js`, 더미 토큰)** — `POST /api/v1/auth/social/login`:
+```
+provider=KAKAO  → 401 SOCIAL_TOKEN_INVALID   (요청 검증 통과, 토큰 검증 단계까지 감)
+provider=GOOGLE → 401 SOCIAL_TOKEN_INVALID
+provider=NAVER  → 400 INVALID_REQUEST        (토큰 값을 바꿔도 동일, fieldErrors 비어 있음)
+provider=Naver / Kakao / Google (혼합 대소문자) → 400 INVALID_REQUEST
+```
+`POST /auth/social/signup`은 `KAKAO`/`GOOGLE`(대문자)이 검증을 통과하고 혼합 대소문자가 400인 것까지 확인했고 `NAVER`는 login에서만 확인했습니다. 참고로 사용자 응답의 `loginProvider` 값에는 `NAVER`가 있는 것으로 앱이 다루고 있어(`EMAIL`/`KAKAO`/`NAVER`/`GOOGLE`) 서버 안에서도 요청 쪽 enum과 응답 쪽 enum이 다른 것으로 보입니다. Swagger 예시(`"provider": "GOOGLE"`)는 대문자 표기입니다. 프론트는 `provider`를 대문자로 보내도록 고쳤고(`KAKAO`/`GOOGLE`은 이제 서버 검증을 통과), 네이버 버튼은 서버 답을 받을 때까지 남겨 둡니다.
+
 ## 확정됨(2026-09-11, Swagger 전수 대조 + 실호출) — 프론트 자체 버그 3건
 
 - **폴더 전체 백업이 항상 실패하던 원인**: `archiveService.ts`가 `POST /groups/{groupId}/folders/archive`

@@ -199,7 +199,9 @@ function LoginScreen() {
       goToMain();
     } catch (error) {
       if (error instanceof ApiError && error.code === 'SOCIAL_MEMBER_NOT_FOUND') {
-        navigation.navigate('SocialSignupInfo', { profile });
+        // 신규 소셜 가입자: 소셜 인증 → 약관동의(COM-2-PAGE-01-0) → 간편 가입 정보 입력(COM-3-PAGE-02-0)
+        // (시안 `COM-3-PAGE-02-0` 페이지 경로·뒤로가기 = 약관동의). 약관 없이 가입하면 서버가 400을 준다.
+        navigation.navigate('TermsAgreement', { socialProfile: profile });
       } else if (error instanceof SocialAuthParseError) {
         setLoginError(LOGIN_SOCIAL_PARSE_ERROR);
       } else if (error instanceof ApiError) {

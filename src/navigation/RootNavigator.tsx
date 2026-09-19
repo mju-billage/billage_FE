@@ -84,11 +84,12 @@ import * as groupService from '../services/groupService';
 
 export type RootStackParamList = {
   Login: { snackbarMessage?: string } | undefined;
-  TermsAgreement: undefined;
+  // 일반 가입은 params 없이, 신규 소셜 가입자는 `socialProfile`을 들고 온다(약관동의 뒤 `SocialSignupInfo`로 이어짐).
+  TermsAgreement: { socialProfile?: SocialProfile } | undefined;
   TermsOfService: undefined;
   PrivacyPolicy: undefined;
   MarketingConsent: undefined;
-  SocialSignupInfo: { profile: SocialProfile };
+  SocialSignupInfo: { profile: SocialProfile; agreements: authService.SignupAgreements };
   SignupInfo: { agreements: authService.SignupAgreements };
   EmailVerification: {
     email: string;

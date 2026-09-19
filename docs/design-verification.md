@@ -1874,6 +1874,30 @@ tsv 원본 행 중복(같은 ID가 여러 행): `COM-1-SNACKBAR-02-0`(5행) 등 
 - `POST /auth/social/signup`에 `termsAgreed`를 안 보내면 **400 `INVALID_REQUEST`**, `termsAgreed:false`는 **400 + `fieldErrors: [{field:"termsAgreed", reason:"약관 동의가 필요합니다."}]`**, `termsAgreed:true`(더미 토큰)는 400을 넘어 **401 `SOCIAL_TOKEN_INVALID`**(토큰 검증 단계까지 감). → **앱은 `termsAgreed`를 안 보내므로 실제 토큰으로 가입하면 400이 확정**(시안 `약관동의 후 간편 가입 정보 입력` + `Auth (인증).txt` 흐름 서술 "소셜 가입은 약관 동의 → 간편 가입 정보 입력 → 가입 완료"와도 어긋남). 고치지 않음 — 플로우 변경이라 사용자 지시 대기.
 - **같이 발견한 문제(확정 결함 가능성 높음)**: 서버 `provider`는 **대문자 `KAKAO`/`GOOGLE`만 통과**한다(`/auth/social/login`·`/social/signup` 모두, 더미 토큰 기준 대문자 = 401 `SOCIAL_TOKEN_INVALID`, 그 밖 표기 = 400 `INVALID_REQUEST`). **앱은 `SocialType`을 `Kakao`/`Naver`/`Google`(혼합 대소문자)로 그대로 보낸다**(`authService.ts` `provider: payload.provider`) → 실 토큰이 있어도 요청이 400으로 막힐 가능성. 콘솔 키가 미등록이라 지금까지 서버까지 못 가서 드러나지 않았다. **`NAVER`는 어떤 표기·토큰으로도 400** — 서버가 네이버를 지원하는지 확인 필요(`backend-requests.md` 후보). 고치지 않음(4번은 조사만).
 
+**E-2. ※ 갱신(2026-09-20 11-3)**: 위 두 결함(`termsAgreed` 누락, `provider` 대소문자)은 11-3에서 고쳤다(`design-diff.md` 해결). `NAVER` 400은 서버 문제라 `backend-requests.md`에 요청하고 앱 네이버 버튼은 남겨뒀다.
+
+**F. API 경계 표기 전수 조사 (11-3, 조사만 — 수정은 `provider` 한 건뿐)**: 앱 내부 표기를 서버로 그대로 보내는 곳을 찾았다(전송 바디·쿼리를 만드는 `services/*.ts` 전부 + 전송값이 되는 유니온 타입).
+- **같은 유형 결함: `provider`(소셜 로그인·가입) 하나뿐** — 수정 완료.
+- 앱 내부 표기를 쓰지만 호출부에서 서버 값으로 **이미 매핑하는 곳(문제 없음)**: 내역 등록 `income`/`expense` → `INCOME`/`EXPENSE`(`TransactionRegisterScreen`), 장부 필터(`toEntryFilterQuery`: `type`/`status`/`sort`), 내역 메인 탭 `pending` → `PENDING`(`TransactionsScreen`), 납부관리 필터 `inProgress` → `OPEN`(`DuesScreen`), 회비 상세 탭 `unpaid`/`paid` → `UNPAID`/`PAID`(`DuesDetailScreen`), 증빙 앨범 필터 → `INCOME`/`EXPENSE`(`ReceiptAlbumScreen`).
+- 전송값 타입 자체가 서버 값(대문자)인 것: `DuesStatus`, `PaymentStatus`, `EntryType`, `EntryApprovalStatus`, `GroupRole`, `ReportType`(`BY_LEDGER`/`BY_PERIOD`), `FilePurpose`, `TermType`, `NotificationTargetType`.
+- 응답 쪽: `LoginProvider`(`EMAIL`/`KAKAO`/`NAVER`/`GOOGLE`)는 서버 응답 값(대문자)이고 `MyProfileScreen`의 소셜 배지가 대문자 키로 조회해 일치한다. 참고 — 응답에는 `NAVER`가 있는데 요청은 `NAVER`를 400으로 거부해 서버 안에서 요청/응답 enum이 다른 것으로 보인다.
+- **값 자체가 미검증(형태 문제는 아님)**: `WithdrawReasonCode`(`USAGE_UNCLEAR`/`REJOIN`/`MISSING_FEATURE`/`NO_LONGER_NEEDED`/`ETC`) — 파괴적 엔드포인트라 실호출로 확인 안 했고 코드 주석도 "서버가 다른 값을 쓰면 갈아 끼워야 할 수 있다"고 적어 둠.
+- 한계: 정적 조사(유니온 타입 검색 + 호출부 확인). 쿼리의 자유 문자열 상수는 개별 검증하지 않았다.
+
+**G. `COM-3-PAGE-02-0` 간편 가입 정보 입력 — 시안 vs 앱 (11-3)** — 시트 `화면명세서/회원가입&로그인/회원가입/SNS 간편 회원가입_가입 정보 입력.png`(디자인 완료)
+
+| 항목 | 시안 | 수정 전 앱 | 수정 후 |
+|---|---|---|---|
+| 상단 | 뒤로가기 `<`만(타이틀 없음), 화면 상단 고정, 터치 시 약관동의(`COM-2-PAGE-01-0`)로 | `BackButton`이 `ScrollView` 안이라 스크롤과 함께 움직임. 이동은 `goBack()` — 앞 화면이 약관동의가 아니라 로그인이었음(약관동의 단계 없음) | 스크롤 밖 고정. 스택이 로그인 → 약관동의 → 이 화면이라 `goBack()` = 약관동의 |
+| 타이틀 | `가입 정보 입력` 큰 글씨 | `SIGNUP_INFO_TITLE` = `가입 정보 입력`, `TYPOGRAPHY.h1`(일치) | 변경 없음 |
+| 이름 | 라벨 `이름` + 빨간 * / placeholder `이름을 입력해주세요.` / 미입력 그레이 라인 / **8자 초과 시 라인 레드 + `최대 8자 이내로 입력할 수 있어요.`** / 입력·삭제 가능 | 라벨만(빨간 * 없음). placeholder `SIGNUP_NAME_PLACEHOLDER`(일치). **8자 제한은 있었다** — 화면 안 로컬 상수 `NAME_MAX_LENGTH = 8` + 입력을 `slice`·`maxLength`로 막아서 **에러 상태가 나올 수 없었고**, 대신 항상 `SIGNUP_NAME_HELPER`(`* 최대 8자 이내로 입력할 수 있어요.`)가 보였음 | 상수 `SOCIAL_SIGNUP_NAME_MAX_LENGTH = 8`(`signupInfoText.ts`)로 옮김. `required`(빨간 *). 입력을 막지 않고 8자 초과 시 `error` = `SOCIAL_SIGNUP_NAME_TOO_LONG_ERROR`(레드 라인 + 문구). 항상 보이던 도움말 제거(목업 프레임에 없음). 소셜 프로필 이름을 프리필할 때만 8자로 잘라 시작 |
+| 이메일 | 라벨 `이메일` + 빨간 * / **Read-only**(터치·키보드 입력 불가), SNS 계정 이메일 바인딩 값 | **수정 가능했음**: `TextField`에 입력·`isValidEmail` 검증·`이메일 형식` 에러, CTA 조건에 이메일 형식이 들어 있었음(서버 스키마엔 `email` 필드가 없어 어차피 서버로 안 보냄) | `disabled`(수정·키보드 불가, 회색 표시) + `required`. 표시값은 `profile.email`. 검증·입력 핸들러 제거 |
+| CTA | `다음으로` fullWidth, 이름 1~8자일 때 활성, 활성 시 가입 처리 후 `가입 완료` | 라벨 `SOCIAL_SIGNUP_SUBMIT_LABEL` = **`다음`**. 활성 조건 = 이름 1자 이상 **그리고 이메일 형식 통과** | 라벨 `다음으로`(목업 — 설명표 No.5는 `다음`이라 시트 안에서 목업/표가 다름, 목업을 따름). 활성 = 이름(`trim` 후) 1~8자만, 이메일은 조건 아님. 가입 성공 → `SignupComplete` |
+
+- 이메일이 비어 있는 소셜 계정(제공 동의를 안 한 경우 등)은 이제 빈 Read-only 필드로 보이고 가입은 막히지 않는다(이름만 조건).
+- **소셜 가입 요청 바디**(`authService.socialSignup`): `{ provider: "KAKAO"|"NAVER"|"GOOGLE", token, name, termsAgreed }`. `termsAgreed`는 약관동의 화면이 넘긴 `agreements`의 필수 3종(`termsOfService`·`privacyPolicy`·`ageOver14`) 논리곱이다. 필수 3종을 모두 체크해야 약관동의 화면의 `다음으로`가 활성이라 이 화면에선 항상 `true`. Swagger 스키마에는 `marketing` 필드가 없어 보내지 않는다.
+- 실행 검증 한계: 콘솔 키·실 소셜 토큰이 없어 **가입 완료까지 실행해 보지 못했다**. 서버가 같은 형태(`provider` 대문자 + `termsAgreed:true`)를 받아 400을 넘기고 토큰 검증 단계(401)까지 가는 것만 더미 토큰으로 확인했다.
+
 ## 6. 권장 순서
 
 1. **`TYPOGRAPHY`에 `letterSpacing` 15개 추가** (§3-2) — 스크린샷 대조 전에 해야 전 화면 오탐을 막는다.

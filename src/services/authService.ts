@@ -325,6 +325,16 @@ export async function restoreSession(): Promise<AuthUserResponse | null> {
   }
 }
 
+/** 서버가 받는 `provider` 값. 앱 내부 표기(`SocialType`, `Kakao`)와 달리 **대문자만** 통과한다 —
+ * 2026-09-20 실호출: `KAKAO`/`GOOGLE`은 토큰 검증(401 `SOCIAL_TOKEN_INVALID`)까지 가고 `Kakao` 같은
+ * 표기는 400 `INVALID_REQUEST`. `NAVER`는 어떤 표기로도 400(서버 지원 여부 확인 요청 중,
+ * `docs/backend-requests.md`). 소셜 요청 바디를 만들 때는 반드시 이 매핑을 거친다. */
+const SOCIAL_PROVIDER_API_VALUE: Record<SocialType, string> = {
+  Kakao: 'KAKAO',
+  Naver: 'NAVER',
+  Google: 'GOOGLE',
+};
+
 export type SocialLoginRequest = {
   provider: SocialType;
   providerToken: string;
@@ -332,6 +342,9 @@ export type SocialLoginRequest = {
 
 export type SocialSignupRequest = SocialLoginRequest & {
   name: string;
+  /** 필수 약관(서비스 이용약관·개인정보 처리방침·만 14세 이상)에 모두 동의했는가. 서버는 `true`가 아니면
+   * 400 `INVALID_REQUEST`(`fieldErrors: termsAgreed`)를 준다. */
+  termsAgreed: boolean;
 };
 
 type SocialLoginResponse = {
@@ -361,7 +374,10 @@ export async function socialLogin(
 ): Promise<AuthUserResponse> {
   const response = await request<SocialLoginResponse>('/api/v1/auth/social/login', {
     method: 'POST',
-    body: JSON.stringify({ provider: payload.provider, token: payload.providerToken }),
+    body: JSON.stringify({
+      provider: SOCIAL_PROVIDER_API_VALUE[payload.provider],
+      token: payload.providerToken,
+    }),
     skipAuth: true,
   });
   if (!response.login) {
@@ -386,12 +402,10 @@ export async function socialLogin(
  * 가입과 동시에 로그인된다 — 이전엔 이걸 저장 안 해 가입 직후 세션이 없었다.
  * 바디 필드명도 `providerToken`→`token`으로, `email`은 스키마에 없어 뺐다.
  *
- * ⚠️ **`termsAgreed`(필수)를 아직 안 보낸다** — 이 화면(간편 가입)은 이름·이메일만
- * 받고 약관 동의 체크박스가 없다(이메일 가입의 `TermsAgreementScreen`과 달리
- * 생략된 흐름). 임의로 `true`를 보내면 실제 동의 없이 동의 처리한 게 되어
- * 값을 정하지 않았다 — 이 화면에 약관 동의 UI를 추가할지, 소셜 가입은 다른
- * 방식으로 동의를 받을지 기획 확인이 먼저 필요하다(`docs/backend-requests.md`).
- * 지금 이대로 실제 서버에 호출하면 `termsAgreed` 누락으로 `400`이 날 수 있다.
+ * **2026-09-20**: `termsAgreed`(필수)를 실어 보낸다 — 신규 소셜 가입은 소셜 인증 → 약관동의
+ * (`TermsAgreementScreen`) → 간편 가입 정보 입력 순이고, 약관동의 화면이 필수 3종을 모두 체크해야
+ * 다음으로 넘어가므로 그 결과를 호출부(`SocialSignupInfoScreen`)가 넘긴다. 없거나 `false`면 서버가
+ * 400을 준다(실호출 확인).
  */
 export async function socialSignup(
   payload: SocialSignupRequest,
@@ -399,9 +413,10 @@ export async function socialSignup(
   const response = await request<LoginResponse>('/api/v1/auth/social/signup', {
     method: 'POST',
     body: JSON.stringify({
-      provider: payload.provider,
+      provider: SOCIAL_PROVIDER_API_VALUE[payload.provider],
       token: payload.providerToken,
       name: payload.name,
+      termsAgreed: payload.termsAgreed,
     }),
     skipAuth: true,
   });
