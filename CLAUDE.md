@@ -5,6 +5,11 @@
 - 새 파일을 만들거나 기존 코드를 고칠 때, README의 네이밍/구조/스타일 규칙에 맞는지 확인한다.
 - Git 작업(브랜치 생성, 커밋, PR) 시 README 5장의 브랜치 전략과 커밋 컨벤션을 따른다.
 - README의 규칙과 실제 코드가 다르면, 둘 중 무엇이 최신인지 사용자에게 확인한다.
+- API를 직접 호출해 진단할 때는 `scripts/api-call.js`를 쓴다. `curl -d '...'`로 한글을
+  보내지 마라 — 셸 인코딩이 깨져 400 INVALID_REQUEST로 나타나고, 서버 버그로 오진하게
+  된다(2026-09-13 두 번 발생).
+- 새 화면을 붙일 때 선택 화면→부모 폼 복귀는 `popTo`, 완료 후 스택 정리는 `reset`을 쓴다 — 상세는 [design-verification.md §5-11](docs/design-verification.md) 참고.
+- 키보드 대응은 `react-native-keyboard-controller`로 통일한다(edge-to-edge 강제로 `adjustResize` 단독으론 안 먹음) — 전체화면 폼은 `ScreenContainer`, 모달/시트는 `Dialog`/`BottomSheet` 공용 처리를 쓴다. 화면마다 따로 `KeyboardAvoidingView` 넣지 마라 — [design-verification.md §5-12](docs/design-verification.md) 참고.
 
 # Billage (빌리지) — 프로젝트 개요
 

@@ -1,4 +1,6 @@
 /** @screen ETC-4-PAGE-04-0 기간별 보고서 생성 */
+/** @screen ETC-5-MODAL-01-0 보고서_이탈방지 (leaveDialogVisible) */
+/** @screen ETC-5-SNACKBAR-08-0 보고서_생성완료 (SNACKBAR_REPORT_CREATED, ReportMainScreen에서 렌더) */
 /**
  * "기간별 보고서 생성하기"에서 들어오는 생성 폼. 장부를 받지 않는다 — 지정한
  * 기간 안에 내역이 있는 모든 장부를 서버가 자동으로 담는다(Report.txt).
@@ -17,15 +19,14 @@
  * 자체는 4자리가 맞다고 확인됨(시트 안 미리보기만 2자리가 의도).
  */
 import { useCallback, useState } from 'react';
-import { BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { BackHandler, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
-import SelectionListItem from '../../components/Data Display/Lists/SelectionListItem';
 import OutlinePill from '../../components/Input/Filter/OutlinePill';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import DuesDateRangeSheet from '../Dues/DuesDateRangeSheet';
@@ -60,14 +61,28 @@ import {
   REPORT_TYPE_FIELD_LABEL,
   SNACKBAR_REPORT_CREATED,
 } from '../../constants/reportScreenText';
-import { FEEDBACK_NEGATIVE_BOLD } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FEEDBACK_NEGATIVE_BOLD,
+  FOREGROUND_DISABLED,
+  FOREGROUND_PRIMARY,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+
+const CALENDAR_ICON = require('../../assets/icons/system/Calendar.png');
 
 type ReportCreateByPeriodNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 /** 'YYYY.MM.DD' → 'YYYY-MM-DD'(Report API 형식, Dues와 동일 관례). */
 function toIsoDate(dotDate: string): string {
   return dotDate.replace(/\./g, '-');
+}
+
+/** 'YYYY.MM.DD' → 'YY.MM.DD'(시안 ETC-4-PAGE-04-0 No.3 표기, 2자리 연도) — 실제
+ * API 전송용 `startDate`/`endDate` 상태값(4자리)은 그대로 두고 화면 표시에만 쓴다. */
+function toShortDate(dotDate: string): string {
+  const [year, month, day] = dotDate.split('.');
+  return `${year.slice(2)}.${month}.${day}`;
 }
 
 function ReportCreateByPeriodScreen() {
@@ -135,13 +150,26 @@ function ReportCreateByPeriodScreen() {
     setFormError(undefined);
     setIsSubmitting(true);
     try {
-      await reportService.createReportByPeriod(group.id, {
+      const created = await reportService.createReportByPeriod(group.id, {
         title: title.trim(),
         startDate: toIsoDate(startDate),
         endDate: toIsoDate(endDate),
         entryType,
       });
-      navigation.navigate('ReportMain', { snackbarMessage: SNACKBAR_REPORT_CREATED });
+      // ETC-4-PAGE-04-0: 성공 시 생성 완료된 보고서 상세로 이동한다(ReportCreateByLedgerScreen과
+      // 같은 근거 — design-verification.md §5-11). navigate가 아니라 reset으로 생성 폼을
+      // 스택에서 걷어내 뒤로가기가 폼이 아니라 보고서 목록으로 가게 한다.
+      navigation.reset({
+        index: 2,
+        routes: [
+          { name: 'Main', params: { screen: 'More' } },
+          { name: 'ReportMain' },
+          {
+            name: 'ReportByPeriodDetail',
+            params: { reportId: created.reportId, snackbarMessage: SNACKBAR_REPORT_CREATED },
+          },
+        ],
+      });
     } catch (error) {
       if (error instanceof ApiError) {
         const titleFieldError = error.fieldErrors.find(fe => fe.field === 'title');
@@ -159,12 +187,13 @@ function ReportCreateByPeriodScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="secondary">
       <AppBar type="sub" title={REPORT_BY_PERIOD_TITLE} onBackPress={handleBack} />
 
       <ScrollView contentContainerStyle={styles.body}>
         <TextField
           label={REPORT_TITLE_FIELD_LABEL}
+          required
           value={title}
           onChangeText={text => {
             setTitle(text.slice(0, REPORT_TITLE_MAX_LENGTH));
@@ -175,13 +204,19 @@ function ReportCreateByPeriodScreen() {
           error={titleError}
         />
 
-        <SelectionListItem
-          type="picker"
-          title={REPORT_PERIOD_FIELD_LABEL}
-          required
-          value={startDate && endDate ? `${startDate} - ${endDate}` : REPORT_PERIOD_PLACEHOLDER}
-          onPress={() => setPeriodSheetVisible(true)}
-        />
+        <View style={styles.fieldGroup}>
+          <Text style={styles.fieldLabel}>{REPORT_PERIOD_FIELD_LABEL}</Text>
+          <Pressable style={styles.periodBox} onPress={() => setPeriodSheetVisible(true)}>
+            <Text
+              style={startDate && endDate ? styles.periodValue : styles.periodPlaceholder}
+            >
+              {startDate && endDate
+                ? `${toShortDate(startDate)} ~ ${toShortDate(endDate)}`
+                : REPORT_PERIOD_PLACEHOLDER}
+            </Text>
+            <Image source={CALENDAR_ICON} style={styles.periodIcon} />
+          </Pressable>
+        </View>
 
         <View style={styles.fieldGroup}>
           <Text style={styles.fieldLabel}>{REPORT_TYPE_FIELD_LABEL}</Text>
@@ -218,7 +253,6 @@ function ReportCreateByPeriodScreen() {
 
       <DuesDateRangeSheet
         visible={periodSheetVisible}
-        title={REPORT_PERIOD_FIELD_LABEL}
         confirmLabel={DATE_SHEET_CONFIRM_LABEL}
         startDate={startDate || undefined}
         endDate={endDate || undefined}
@@ -242,14 +276,11 @@ function ReportCreateByPeriodScreen() {
           navigation.goBack();
         }}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,
@@ -262,6 +293,29 @@ const styles = StyleSheet.create({
   },
   fieldLabel: {
     ...TYPOGRAPHY.subtitle3,
+  },
+  periodBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: BORDER_NEUTRAL_NORMAL,
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  periodPlaceholder: {
+    ...TYPOGRAPHY.body1,
+    color: FOREGROUND_DISABLED,
+  },
+  periodValue: {
+    ...TYPOGRAPHY.body1,
+    color: FOREGROUND_PRIMARY,
+  },
+  periodIcon: {
+    width: 20,
+    height: 20,
+    tintColor: FOREGROUND_DISABLED,
   },
   pillRow: {
     flexDirection: 'row',

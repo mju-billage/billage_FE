@@ -20,6 +20,7 @@ import { isValidPassword } from '../../utils/validators';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
+  getApiErrorMessage,
   isNetworkError,
 } from '../../constants/apiErrorMessages';
 import {
@@ -114,6 +115,8 @@ function PasswordChangeScreen() {
         setCurrentPasswordError(API_NETWORK_ERROR_MESSAGE);
       } else if (error instanceof ApiError && error.code === 'INVALID_CREDENTIALS') {
         setCurrentPasswordError(PASSWORD_CHANGE_CURRENT_MISMATCH_ERROR);
+      } else if (error instanceof ApiError) {
+        setCurrentPasswordError(getApiErrorMessage(error.code));
       } else {
         setCurrentPasswordError(API_ERROR_DEFAULT_MESSAGE);
       }

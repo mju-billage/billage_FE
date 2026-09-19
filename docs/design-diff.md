@@ -133,22 +133,27 @@ Screen ID별 섹션에 실제 대조 결과를 적는다. 비교 이미지는 `s
   "소비 통계/분석"(L124)·"보관함"(L130) 4개는 여전히 `onPress: () => {}` 빈 핸들러다(대상 화면
   자체가 아직 없음). **이전 버전의 이 섹션이 "빈 핸들러 문제가 해소됨"이라고 과장 서술한 것을
   A-3 stale 점검 중 자체 발견해 정정함.** 아래 대조는 실제 화면 기준.
-- **레이아웃/여백·간격**: 차이 있음. 디자인은 "모임 관리자" 카드 아래 아바타가 4개+"+3" 형태로
-  나열되고 "모임 관리" 항목과 카드 사이 간격이 실제보다 좁다. 실제 구현은 아바타 미리보기가
-  "김 2"(이니셜 칩 1개+숫자) 형태로 단순화돼 있고, 카드와 하단 메뉴 사이 간격도 디자인보다 넓다.
-  `src/screens/MoreScreen.tsx`의 모임 관리자 카드 아바타 미리보기 부분, 모임원 리스트를 몇 명까지
-  아바타로 펼쳐 보여줄지 로직 확인 필요.
-- **타이포**: 판별 불가(스케일 사유).
+- **레이아웃/여백·간격 — 2026-09-12 부분 해결**: 시안(`ETC-1-PAGE-01-0.png`)을 다시 캡처해 보니
+  "모임 관리자" 카드 아래 아바타가 "김 김 김 김 +3"(4개 노출 + 오버플로)였는데, 코드
+  (`AvatarList` 기본값 `maxVisible=3`)는 3개까지만 보여주고 있었다 — 수치가 실제로 달랐다.
+  `MoreScreen.tsx`의 `<AvatarList members={cachedGroups} />` 호출에 `maxVisible={4}`를 명시해
+  맞췄다. **카드-메뉴 간격(카드/메뉴 사이, 메뉴-하단 카드군 사이)의 정밀한 여백 차이는 여전히
+  판별 불가** — 실기기 스크린샷 픽셀 비교가 있어야 확정되는데 이 세션은 앱을 직접 실행할 수
+  없어(세션 제약) 코드의 `marginTop` 값만으론 몇 px 차이인지 못 잰다. 다음 실기기 캡처 때 재확인.
+- **타이포**: 여전히 판별 불가(스케일 사유) — 실기기 캡처 필요.
 - **색상**: 차이 없음. 배지/아이콘/텍스트 색 모두 일치(회색조 아이콘, 파랑 "전체보기" 링크).
-- **아이콘·이미지 에셋**: 차이 있음. 헤더 우측 아이콘이 디자인은 톱니바퀴(설정) 아이콘, 실제는
-  종(알림) 아이콘이다. 이건 디자인 이미지가 다른 변형(설정 진입점 버전)일 가능성과, 실제 구현이
-  알림 벨을 쓰는 게 "더보기 메인"이 아니라 다른 화면(DSH 대시보드) 패턴을 재사용한 것일 가능성
-  둘 다 있음 — `src/screens/MoreScreen.tsx` 헤더 아이콘과 `docs/billage-ia.md`의 ETC-1-PAGE-01-0
-  기획 의도(설정 아이콘인지 알림 아이콘인지) 재확인 필요.
+- **아이콘·이미지 에셋 — 2026-09-12 해결**: 재확인 결과 시안·코드 둘 다 톱니바퀴(설정) 아이콘이다
+  (`MoreScreen.tsx`의 `SETTING_ICON` → `navigation.navigate('Settings')`) — 이전 기록의 "실제는
+  알림 벨"은 오기이거나 다른 캡처 시점의 착오였다. 다만 확인 중 실제 버그를 하나 발견해 고쳤다:
+  이 아이콘의 `accessibilityLabel`이 `DASHBOARD_NOTIFICATION_ACCESSIBILITY_LABEL`("알림")로
+  잘못 붙어 있었다(설정 아이콘인데 스크린리더는 "알림"이라고 읽음) — `SETTINGS_TITLE`("설정")로
+  교체.
 - **텍스트 문구**: 차이 없음. "모임 관리자", "전체보기", "모임 관리", "보고서 생성", "증빙자료 앨범",
   "소비 통계/분석", "보관함" 전부 일치.
-- **인터랙션·상태**: 기본 상태만 확보. 눌림 상태 미캡처.
-- **빈 목록/로딩/에러/긴 텍스트**: 해당 없음(정적 메뉴 화면).
+- **인터랙션·상태**: 기본 상태만 확보. 눌림 상태 여전히 미캡처(실기기 필요).
+- **빈 목록/로딩/에러/긴 텍스트**: 해당 없음(정적 메뉴 화면) — 단, 로딩/에러/모임없음 상태는
+  코드에 존재한다(`docs/design-verification.md` §5-4 "시안 없음 — 로딩/에러/빈 목록 상태" 항목,
+  표준 패턴으로 처리, 이 화면 고유 이슈 아님).
 
 ---
 
@@ -299,12 +304,23 @@ Screen ID별 섹션에 실제 대조 결과를 적는다. 비교 이미지는 `s
   ("방금 전", "1일 전", "5월 22일") 전부 일치.
 - **화면 상태**: 차이 없음(목록 있는 상태끼리 비교).
 
-## DSH-2-PAGE-03-0 (대시보드 캘린더) — 디자인 없음
+## DSH-2-PAGE-03-0 (대시보드 캘린더)
 
-`design-index.json`에 이 Screen ID 자체가 없음 — `docs/design-verification.md` §2에 이미 "디자인
-'예정' + 이미지 0장"으로 기재된 것과 정확히 일치(디자인 원본 자체가 아직 안 나온 상태). 화면
-캡처(`shots/DSH-2-PAGE-03-0.png`)는 확보했으나 대조할 디자인이 없어 항목별 대조 불가 — 실제 화면
-자체는 정상 렌더링됨(캘린더 월 이동, 날짜별 내역 리스트까지 확인)만 기록해둔다.
+**2026-09-12 정정 — "디자인 없음"은 오류였다.** `design-index.json`(크롭 목업 인덱스)엔 이
+Screen ID가 없었던 게 맞지만, 원본 스펙시트(`화면명세서\대시보드\대시보드_캘린더.png`)는
+실제로 존재한다 — 크롭 전용 인덱스만 보고 "시안 자체가 없다"로 오판했던 것(`scripts/
+spec-sheet-map.tsv`에 헤더확인으로 등록, `design-verification.md` §4-0 참고).
+
+화면 캡처(`shots/DSH-2-PAGE-03-0.png`)와 이 스펙시트를 대조하면:
+
+- **레이아웃**: 시안은 일자별로 수입(+, 블루)/지출(-, 그레이) 금액을 **두 줄로 따로** 표기하는데,
+  실제 구현(`CalendarScreen.tsx`)은 `income - expense` 합산값 한 줄만 표시한다 — 차이 있음,
+  픽셀 재대조 필요.
+- **인터랙션**: 시안은 날짜 선택 시 하단에 "일별 상세 내역 리스트"(장부명/내역명/증빙아이콘/
+  상태뱃지/금액, 항목 탭 시 상세 화면 이동)를 요구한다. 실제 화면도 날짜 선택 시 그 날의 내역
+  목록을 보여주고 탭하면 상세로 이동해 기능적으로는 일치 — 다만 증빙 아이콘·상태뱃지까지
+  리스트 행에 그리는지는 재캡처해서 확인 필요.
+- 그 외(색상·문구·화면 상태)는 아직 항목별로 다시 대조 안 함 — 다음 캡처 라운드 대상.
 
 ---
 
@@ -967,3 +983,1093 @@ IA 201개 목록에 없는 화면이라 화면명세서에만 정의돼 있음, 
 - **모임원 개별 추가 화면의 한글 태그 실기기 재입력** — `adb shell input text`가 비ASCII(한글)
   텍스트에서 `NullPointerException`을 던져 이번 라운드엔 영문 태그(`team`, `vip`)로만
   검증했다. 한글 태그는 이전 세션에 이미 별도로 검증된 사항.
+
+---
+
+## 2026-09-11 배치 — 묶음 1(회원탈퇴 + 보관함 + 이미지업로드, 15개 중 9개 대조)
+
+**방법 차이 기록**: 이번엔 `npm run shot`/`npm run pair` 파이프라인을 안 거쳤다 — 사용자가 실기기
+갤러리 스크린샷(`Screenshot_YYYYMMDD_HHMMSS_BILLAGE.jpg`, 실제 해상도 1080x2340)을 `shots/`에 직접
+넣었다. `shots/pairs/*.png`가 없어 디자인 원본과 실기기 캡처를 각각 따로 열어 육안 대조했다 —
+나란히 배치된 이미지가 아니라는 점 참고. 15개 대상 중 실제로 도달한 화면은 9개고, 나머지 6개는
+테스트 데이터 부족/기능 오류로 도달하지 못했다(아래 "재캡처 목록" 참고).
+
+### [치명] 없음
+
+### [결함]
+
+#### `ETC-3-PAGE-01-0` (모임 프로필 변경)
+
+디자인: `ETC\모임 관리\ETC-3-PAGE-01-0.png`. 실기기: `Screenshot_20260911_202733_BILLAGE.jpg`.
+
+- **필수 표시(`*`) 누락**: 시안은 "모임명" 라벨 옆에 빨간 별표(`*`, 필수 필드 표시)가 있다. 실기기는
+  "모임명"만 있고 별표가 없다. `screens/GroupManager/GroupProfileEditScreen.tsx`의
+  `TextField label={GROUP_PROFILE_EDIT_NAME_LABEL}` 호출부 — `TextField`가 `required` prop을
+  지원하는지 확인하고(다른 화면의 `SelectionListItem`은 이미 `required` prop이 있다, 위 DUE 배치
+  기록 참고 — 디자인 시스템 내부 불일치일 수 있음) 있으면 켜야 한다.
+- **아바타 빈 상태 배경색**: 시안은 중립 회색 톤(연한 회색 배경 + 진회색 사람 아이콘)인데, 실기기는
+  파란 톤(연한 하늘색 배경 + 파란 아이콘)이다. 코드: `Avatar` 컴포넌트 `type="icon"`에 `style` prop을
+  안 넘겨 기본값(`default` = `FILL_SECONDARY_SUBTLER`/`BLUE_50`)을 쓰고 있다 — 시안대로면
+  `style="neutral"`(`FILL_NEUTRAL_NORMAL`/`GREY_100`)을 넘겨야 한다.
+  `GroupProfileEditScreen.tsx`의 `<Avatar type={...} imageUri={...} size="lg" />` 호출부.
+
+#### `ETC-4-PAGE-15-0` (프로필 변경)
+
+디자인: `ETC\설정\ETC-4-PAGE-15-0.png`. 실기기: `Screenshot_20260911_202917_BILLAGE.jpg`.
+
+- **필드 라벨 문구 불일치**: 시안 라벨은 "이름"(필수 표시 `*` 포함)인데, 실기기는 "닉네임"으로
+  뜬다. `constants/settingsScreenText.ts`의 `PROFILE_EDIT_NAME_LABEL` 값과 시안 문구가 다르다 —
+  시안 문구("이름")로 맞출지, 의도적 변경("닉네임"이 더 명확하다고 판단했을 수 있음)인지 기획
+  확인 필요(§5-4로 내림).
+- **아바타 빈 상태 배경색**: 위 `ETC-3-PAGE-01-0`과 동일한 문제 — 시안은 중립 회색, 실기기는 파란
+  톤. `screens/More/ProfileEditScreen.tsx`의 `<Avatar type="icon" .../>` 호출부도 `style` prop이
+  없다. **`Avatar` 기본값 자체를 바꿀지, 호출부마다 `style="neutral"`을 넘길지는 다른 화면(예:
+  모임원 리스트 아바타)이 파란 톤을 의도했는지부터 확인해야 한다** — 이번 배치 범위에서는 판단
+  보류, §5-4에 기록.
+
+### [관찰]
+
+#### `FDR-2-MODAL-02-0` (폴더 전체 백업) — 다이얼로그 자체는 시안과 일치, 실행 시 서버 오류
+
+디자인: `FDR\폴더\백업\FDR-2-MODAL-02-0.png`. 실기기: `Screenshot_20260911_203215/203219/203234_BILLAGE.jpg`.
+
+- **다이얼로그 UI**: 차이 없음. 제목("현재까지 장부를 모두 보관할까요?"), 설명("보관된 장부는
+  수정이 불가합니다."), placeholder("보관 제목을 입력해주세요."), 버튼("취소"/"보관") 전부 일치.
+- **[관찰] 백업 실행 시 에러**: 제목 입력 후 "보관" 확정 시 "일시적인 문제가 발생했어요. 잠시 후
+  다시 시도해주세요."(일반 에러 폴백 문구)가 뜬다. 테스트 계정의 폴더가 완전히 비어 있는 상태
+  (폴더 0건)에서 시도한 것이라 **"백업할 장부가 없어서 나는 에러"인지, 진짜 API 버그인지 구분이
+  안 된다** — 디자인 결함이 아니라 기능 이슈이므로 이 문서 범위 밖. 장부가 1개 이상 있는 계정으로
+  재현해보고, 그래도 나면 `archiveService.createArchive()`/서버 쪽을 조사해야 한다(별도 이슈로
+  분리, §5-4 기록).
+
+### 차이 없음 (시안·실기기 일치 확인)
+
+- **`COM-1-PAGE-02-0`** 탈퇴_안내사항 — 디자인 `글로벌설정_내프로필_탈퇴하기.png` vs
+  `Screenshot_20260911_203534_BILLAGE.jpg`. 제목, 불릿 6개 문구, "확인했어요" 버튼, 우상단 X
+  아이콘까지 전부 일치.
+- **`COM-2-PAGE-05-0`** 탈퇴_사유 입력 — 디자인 `내프로필_탈퇴하기_권한이전_사유선택.png` vs
+  `Screenshot_20260911_203538/203558_BILLAGE.jpg`. 체크박스 5개 문구·순서, 미체크/체크 상태 스타일
+  (빈 사각형 / 파란 배경+흰 체크), "직접 입력할게요" 텍스트 필드 노출 조건 전부 일치. 제출 버튼
+  문구는 지난 라운드에 "탈퇴하기"로 확정한 대로 정확히 그렇게 뜬다.
+- **`COM-3-MODAL-01-0`** 탈퇴_최종 확인 모달 — 디자인 `..._사유선택_탈퇴하기.png` vs
+  `Screenshot_20260911_203601_BILLAGE.jpg`. 제목("정말 탈퇴하시겠어요?"), 설명, 버튼 배치·색(취소
+  회색 텍스트 / 탈퇴하기 빨간 텍스트) 전부 일치.
+- **`ETC-2-PAGE-06-0`** 보관함(빈 상태) — 디자인 스펙시트 Case A("보관 내역이 없을 경우") vs
+  `Screenshot_20260911_202709_BILLAGE.jpg`. "보관된 내역이 없어요." 문구 일치. **카드가 있는 상태는
+  이번에 캡처 못 함**(테스트 데이터 없음, 아래 재캡처 목록 참고).
+- **`ETC-2-PAGE-07-0`** 통계/분석(빈 상태) — 디자인 `ETC-2-PAGE-07-0-1.png` vs
+  `Screenshot_20260911_202314_BILLAGE.jpg`. "아직 분석할 데이터가 없어요!" + 서브 문구 2줄 전부
+  일치. **데이터 있는 상태는 이번에 캡처 못 함**(장부/내역이 없는 계정이라 재현 불가 — 별도
+  테스트 데이터 필요).
+- **`ETC-4-SHEET-02-0`** 프로필 변경_사진 변경(바텀시트) — 디자인 `ETC\모임 관리\ETC-4-SHEET-02-0.png`
+  vs `Screenshot_20260911_202757_BILLAGE.jpg`. "사진 촬영하기"/"사진 선택하기" 2행, 아이콘, 드래그
+  핸들, 딤(dim) 배경 처리까지 전부 일치.
+
+### 재캡처 목록 (이번 배치에서 도달 못 함 — 구현 결함 아님)
+
+| Screen ID | 이유 |
+|---|---|
+| ~~`COM-2-PAGE-04-0`(탈퇴_권한 넘기기)~~ | **2026-09-13 조건 마련 완료 — 재캡처 가능.** `groupId 6`("탈퇴테스트모임")을 새로 만들어 `VerifyDues`(주 테스트 계정)를 단독 총무로 두고, 두 번째 계정(`billage.verify.newcheck9999@example.com`, `userId 9`)을 `membershipId 11`(MEMBER)로 참여시켰다 — `docs/api-integration-plan.md` 참고. 사용자가 앱에서 밟을 경로: **더보기 탭 → 화면 우측 상단 톱니바퀴(설정) 아이콘 → 설정 화면 상단 프로필 카드(아바타+이름) 터치 → 내 프로필 화면 하단 "회원탈퇴" → "탈퇴하기" 화면 "확인했어요" → 권한 넘기기 화면([Case A])** — 이때 로그인 계정이 `billage.verify.dues.test@example.com`(비밀번호 `Billage1!Verify`)이고 모임 전환이 "탈퇴테스트모임"으로 돼 있어야 한다 |
+| `ETC-3-MODAL-03-0`(보관함 기록 삭제) | 보관함이 빈 상태라 삭제할 카드 자체가 없음 — `FDR-2-MODAL-02-0` 백업이 에러로 안 끝나 보관 기록이 하나도 안 생김 |
+| `ETC-3-MODAL-04-0`(기록 제목 변경) | 위와 동일 사유 |
+| `ETC-4-SNACKBAR-01-0`(보관함 기록 삭제 완료) | 위와 동일 사유 |
+| `ETC-4-SNACKBAR-02-0`(기록 제목 변경 완료) | 위와 동일 사유 |
+| `FDR-3-SNACKBAR-02-0`(폴더 백업 완료) | 백업 자체가 에러로 끝나 완료 스낵바까지 못 감(위 `FDR-2-MODAL-02-0` [관찰] 참고) |
+
+**재캡처 전 선행 조건**: 위 6개 중 5개(`ETC-3-MODAL-03/04-0`, `ETC-4-SNACKBAR-01/02-0`,
+`FDR-3-SNACKBAR-02-0`)는 전부 백업이 최소 1번 성공해야 풀린다 — 장부 1개 이상 있는 계정에서
+백업을 먼저 성공시키고 나서 재시도할 것. `COM-2-PAGE-04-0`은 별도로 유일 총무 모임을 가진 계정
+준비가 필요하다.
+
+---
+
+## 2026-09-12 "보관함 묶음 1" 시안 재대조 — 9건 반영 (0-1/1-1/1-2/1-3/1-4는 철회)
+
+### [철회(요청자 오류)] 1-1/1-2/1-3/1-4 — 헤더카드/심플리스트 통일/entries 필터/공유아이콘
+
+원 지시엔 13건이 있었으나 0-1의 전제("`더보기_기록보관_상세보기.png` 없음")가 틀렸고,
+그 파생인 1-1(헤더카드 추가)/1-2(심플리스트 통일)/1-3(entries 필터)/1-4(공유아이콘)는
+잘못된 스펙시트(보고서 도메인 `더보기_보고서생성_기간보고서조회-1.png` — 같은 Screen ID를
+공유하는 **다른 화면**, 이미 `ReportByPeriodDetailScreen.tsx`로 구현됨)를 근거로 작성된
+것이었다. **2026-09-12 재대조로 확정**: 미적용 판단이 옳았다 — 올바른 스펙시트
+(`더보기_기록보관_상세보기.png`)로 재대조한 결과 1-5(메타 우측 정렬)만 유효했고 이미
+적용됐으며, 나머지(닫기 버튼 누락·수입 색상/부호)는 아래 새 섹션으로 별도 발견·반영했다.
+상세 사유는 `docs/design-verification.md` §5-3 참고. 아래는 그날 실제로 적용한 9건.
+
+### ETC-3-PAGE-03-0 (ArchiveDetailScreen) — 1건
+
+- **레이아웃/정렬**: 메타 텍스트("백업 일시 …")가 기본 정렬(좌측)이었다. 스펙시트
+  `더보기_기록보관_상세보기.png` UI 요소 2번 [상태] "우측 정렬 노출" 명시.
+  `src/screens/Archive/ArchiveDetailScreen.tsx`의 `metaText` 스타일에
+  `textAlign: 'right'` 추가. 조치 형태: 스타일 수정.
+
+### ETC-2-PAGE-06-0 (ArchiveListScreen) — 3건
+
+- **레이아웃**: "기록보기" 버튼이 auto-width였다. 스펙시트 `더보기_기록보관.png` UI 요소
+  3번 [상태] "각 기록 카드 내 하단에 상시 활성화 상태로 위치" + 시안도 full-width.
+  `src/screens/Archive/ArchiveListScreen.tsx`의 `Button`에 `fullWidth` prop 추가.
+  조치 형태: prop 추가.
+- **레이아웃/아이콘 배치**: 연필(수정) 아이콘이 `cardTitle`의 `flex:1` 때문에 카드 우측
+  끝으로 밀려 있었다(X 아이콘 바로 옆). 스펙시트 UI 요소 2번 기준 제목 바로 오른쪽에
+  붙어야 한다. `cardTitleGroup`(제목+연필, `flex:1`)을 신설해 묶고, X는 그 바깥
+  카드 우측 끝에 남겼다. 조치 형태: 구조 변경(뷰 계층 재구성).
+- **문구/화면 상태**: 제목 말줄임이 `numberOfLines={1}`(폭 기준)이었다. 스펙시트 UI 요소
+  2번 [기능] "제목의 글자수는 10자 이상이 넘어갈 시 말줄임(...) 처리함"은 글자수 기준.
+  `truncateArchiveTitle()` 신설(10자 초과 시 앞 10자 + `…`), `numberOfLines={1}`은
+  안전장치로 유지. 조치 형태: 로직 추가.
+
+### ETC-4-SNACKBAR-01-0 / 02-0 (ArchiveListScreen 공용 스낵바) — 3건
+
+- **화면 상태(지속시간)**: `SNACKBAR_AUTO_HIDE_MS`가 1600ms였다. 두 스펙시트 모두
+  "3초 후 자동 소멸" 명시. 3000ms로 수정(이 화면 로컬 상수 — 다른 화면의 동명 상수는
+  각자 별도 정의라 영향 없음, 이번 라운드에서 안 건드림). 조치 형태: 상수 값 수정.
+- **인터랙션(닫기 버튼)**: `Snackbar` 컴포넌트는 이미 `onClose` prop을 지원하는데
+  호출부가 안 넘겨서 X 닫기 버튼이 안 뜨고 있었다. `onClose={closeSnackbar}` 연결,
+  `closeSnackbar`는 즉시 `setSnackbarMessage(null)` + 예약된 자동 소멸 타이머
+  `clearTimeout`. 조치 형태: prop 연결 + 핸들러 추가.
+- **버그(타이머 누수)**: `showSnackbar`의 `setTimeout` 핸들을 변수에 저장하지 않아
+  재호출/언마운트 시 이전 타이머가 취소되지 않고 있었다. `useRef`로 핸들 보관,
+  `showSnackbar` 재호출 시와 컴포넌트 언마운트 시 `clearTimeout`. 조치 형태: 버그 수정.
+
+### ETC-3-MODAL-04-0 (기록 제목 변경 다이얼로그) — 2건
+
+(자동 포커스·clear 아이콘·버튼 활성 조건·placeholder·최대 길이 5개 항목 중 실제로
+코드 변경이 필요했던 건 아래 2건 — 나머지 3개는 이미 시안대로였거나(최대 길이 20자)
+컴포넌트에 지원 기능이 이미 있어 연결만 하면 됐다(clear 아이콘), 상세는
+`docs/design-verification.md` §2 `ETC-3-MODAL-04-0` 행 참고.)
+
+- **인터랙션(자동 포커스)**: 다이얼로그가 열려도 입력 필드에 포커스/키보드가 자동으로
+  뜨지 않았다. 스펙시트 UI 요소 3번 [상태] "자동 포커스" 명시. `Dialog`에
+  `autoFocusTextField?: boolean` prop 신설, `TextField`엔 `autoFocus?: boolean`
+  prop을 신설해 내부 `TextInput`의 `autoFocus`로 전달. 조치 형태: 컴포넌트 prop 신설.
+- **상태(버튼 활성 조건)**: `변경` 버튼이 `isSubmittingDialog`만 보고 있어 입력값이
+  비어 있거나 기존 제목과 동일해도 활성 상태였다. 스펙시트 UI 요소 4번 [상태] 기준
+  "비어 있거나 기존 제목과 동일하면 비활성"으로 조건 추가(`confirmDisabled`에 OR).
+  조치 형태: 조건문 수정.
+- (참고) placeholder에 시안엔 없는 마침표가 붙어 있어(`...입력해주세요.`)
+  `archiveScreenText.ts`에서 제거 — 문구 자체가 아니라 부호 하나 차이라 위 표엔
+  별도 항목으로 세지 않았다.
+
+---
+
+## 2026-09-12 ETC-3-PAGE-03-0 (ArchiveDetailScreen) 재대조 — 상세보기 시트 기준, 2건 반영 + 관찰 2건
+
+대조 기준 시트: `화면명세서\더보기\기록보관\더보기_기록보관_상세보기.png`(ver 0.25,
+페이지명 "기록 보관_상세") — 위 철회분과 달리 이번엔 올바른 시트로 재대조했다.
+
+### [결함] 앱바 우측 닫기(X) 버튼 누락
+
+시트 No.1 [데이터]/[액션]: 좌측 백 버튼(직전 화면 복귀) / 우측 닫기(뷰어 모드 종료,
+보관함 메인으로 이동). `AppBar`는 이미 `rightIcons` prop으로 우측 아이콘을 지원하고
+있어 새 타입/prop 없이 그대로 썼다(기존 4개 타입 렌더 결과 불변). `ArchiveDetailScreen.tsx`
+의 두 `AppBar` 호출(로딩/에러 상태, ready 상태) 모두에 `Close.png` 아이콘의
+`rightIcons` 추가, `onPress`는 `navigation.goBack()` — 이 화면은 보관함 메인에서
+1뎁스로만 진입해(다른 진입점 없음) 백버튼과 목적지가 같고, `goBack()`이 `navigate`처럼
+새 인스턴스를 push하지 않아 스택이 안 쌓인다(코드 주석으로도 남김). 조치 형태:
+prop 연결(컴포넌트 확장 불필요 — 기존 `rightIcons`로 충분했음).
+
+### [결함] 확장형 카드 금액 표기 — 색상 분기 및 부호
+
+시트 No.3 [데이터]: 수입 금액 파란(포인트) 컬러·부호 없음 / 지출 금액 기본색·`-` 접두.
+실제 구현은 수입에 `+`를 붙이고 있었고(시안엔 없음), 수입/지출 둘 다 색 지정이 없어
+기본색이었다. `ArchiveDetailScreen.tsx`: 수입 텍스트에서 `+` 제거,
+`ledgerIncome` 스타일에 `FEEDBACK_POSITIVE_BOLD`(리터럴 hex 대신 기존 색상 토큰 —
+`ReportByLedgerDetailScreen.tsx`가 같은 용도로 이미 쓰고 있어 일관성 확보) 적용.
+`ledgerExpense`는 시안대로 기본색 유지, 지출은 원래부터 `-` 접두가 있어 변경 없음.
+이번 변경은 `ArchiveDetailScreen`에 한정 — 보고서 상세 등 다른 화면의 동일 표기는
+각자 스펙시트 확인 전까지 안 건드림. 조치 형태: 스타일/문구 수정.
+
+### [관찰] 코드 변경 없음 — 2건
+
+- 확장형 카드 기간 표기 공백 차이: 시안 그림은 "YYYY.MM.DD-YYYY.MM.DD"(하이픈 양옆
+  공백 없음), 설명표 No.3 [데이터]는 "{YYYY.MM.DD} - {YYYY.MM.DD}"(공백 있음) —
+  표와 그림이 다른 스펙 문서 내부 불일치. 현재 구현(`periodText`)은 표를 따른다.
+  기획 확인 전까지 코드 변경 안 함.
+- 확장형 카드 내 장부명+기간 블록과 수입/지출 블록 사이 얕은 구분선: 시안엔 있으나
+  현재 구현(`ledgerCard`)엔 없다. 360px 다운스케일 캡처 기준이라 단독 판정 근거가
+  약함 — 원본 해상도 재캡처 후 재확인 대상, 이번엔 코드 변경 안 함.
+
+---
+
+## 2026-09-12 보고서 생성 진단 + DTB-3-SHEET-01-0 재대조
+
+### [진단] ETC-5-PAGE-01-0 장부 선택 화면 0건 — 데이터 유실 아님, (a) 서버에 실제로 없음
+
+`GET /api/v1/groups/5/folder-items`·`GET /api/v1/groups/5/folders` 둘 다 실호출로
+빈 배열 확인. 같은 계정의 `GET /api/v1/groups/5/archives`엔 archiveId 5/6이 남아 있고,
+그 상세(`GET /api/v1/archives/{id}`)에 폴더명·장부명·내역까지 온전히 보인다 — 즉
+**폴더가 사라진 게 아니라 이전 검증 라운드에서 이미 전부 백업(archive)했다.**
+`FDR-2-MODAL-02-0` 명세 "보관된 장부는 수정이 불가합니다"대로 백업이 원본을
+활성 폴더 트리에서 제거하는 것이 의도된 동작이다. **2026-09-12 사실관계 정정**:
+`ETC-3-MODAL-03-0`(보관 기록 삭제)은 실제로 "보관함 묶음 1" 캡처 과정에서 호출됐다
+— 삭제 다이얼로그 확인 → "보관된 내역이 없어요" 빈 화면까지 실기기로 확인했다.
+지금 조회되는 archiveId 5/6은 그 삭제 **이후에** 새로 만든 백업이다(당시 대조용으로
+다시 폴더/장부/내역을 만들어 백업한 것). 결론(데이터 유실 아님)은 바뀌지 않는다 —
+삭제로 없어졌던 건 이전 백업 기록이었을 뿐, 원본 폴더/장부가 삭제된 적은 없다.
+`docs/backend-requests.md`에 올릴 사항 없음. 코드 변경 없음(결론이 (a)라 (b) 분기
+자체가 필요 없었다). 이 테스트 계정으로 보고서 생성을 막힘 없이 검증하려면
+폴더+장부를 새로 만들어야 한다.
+
+### [치명 → 해결 확인(2026-09-12 재캡처)] DTB-3-SHEET-01-0 선택 날짜 영역 중복 렌더
+
+기준 시트: `더보기_보고서생성하기_기간별_기간선택.png`(디자인 완료, No.4). 원인:
+공용 `Calendar` 컴포넌트가 기본으로 자체 `DateField`(4자리 연도, 파란색)를 하단에
+렌더하는데, `DuesDateRangeSheet.tsx`가 명세 요구사항(2자리 연도 미리보기)을 위해
+자기 `previewRow`를 별도로 이미 추가해 둔 상태라 두 블록이 겹쳐 나왔다.
+`DuesDateRangeSheet.tsx`의 `<Calendar>` 호출에 `showDateFields={false}` 추가해
+`Calendar` 쪽을 껐다 — `previewRow`(2자리 연도)만 남긴다. `TransactionFilterSheet.tsx`
+의 커스텀 기간 캘린더는 자체 `previewRow`가 없어 `Calendar`의 기본 `DateField`를
+그대로 쓰고 있고, 그 화면 스펙시트(`내역_필터링_기간선택.png`)는 4자리 연도라 이번엔
+안 건드렸다. 조치 형태: prop 추가(1줄), 공용 컴포넌트 자체는 안 고침.
+
+### [치명 → 해결 확인(2026-09-12 재캡처)] DTB-3-SHEET-01-0 하단 버튼 겹침 / 시트 잘림
+
+취소 버튼이 `TextButton`(배경 없는 텍스트, hierarchy="secondary")이라 시안이 요구하는
+"좌측 회색 pill"이 아니었고, 시트 하단은 공용 `BottomSheet.tsx`가 고정
+`paddingBottom: 32`만 쓰고 있어 제스처 네비게이션 바가 있는 기기에서 그만큼 잘려나가
+버튼 행이 화면 하단 경계와 맞붙어 보이는 문제가 있었다. 두 가지로 고쳤다:
+`BottomSheet.tsx`에 `useSafeAreaInsets().bottom`을 더해(`32 + insets.bottom`)
+하단 잘림 자체를 없앴다(이 컴포넌트를 쓰는 모든 시트에 공통 적용 — 순수 여백 추가라
+다른 화면에 시각적 회귀 없음). `DuesDateRangeSheet.tsx`의 취소 버튼을
+`Button hierarchy="tertiary"`(회색 pill, `height: 52`로 확정 버튼과 높이 통일)로
+교체해 시안 No.5의 pill 형태를 맞췄다. 조치 형태: 공용 컴포넌트 여백 수정 + 버튼
+컴포넌트 교체. **2026-09-12 실기기 재캡처로 해결 확인** — 버튼 겹침·시트 잘림 둘 다 재현 안 됨.
+
+### [결함 → 해결 확인(2026-09-12 재캡처)] DTB-3-SHEET-01-0 선택 범위 구간 표시 없음
+
+명세 No.3 [액션] "시작일/종료일/사이 구간이 시각적으로 구분" — `Calendar.tsx`는
+시작일/종료일 원(사각형) 배경만 그리고 있었다. 각 날짜 셀에 `rangeBand`(옅은 배경,
+`FILL_SECONDARY_SUBTLE`)를 추가 — 구간 중간 날짜는 셀 전체 폭 사각형(양쪽 각짐),
+시작일 칸은 셀 중앙~우측 절반만(좌측 모서리 둥글게), 종료일 칸은 좌측~중앙 절반만
+(우측 모서리 둥글게) 칠해 전체 구간이 하나의 이어진 캡슐 모양으로 보이게 했다.
+기존 원(사각형) 컴포넌트가 그 위에 그대로 그려진다. 조치 형태: 스타일/렌더 로직 추가.
+
+### [결함 → 해결 확인(2026-09-12 재캡처)] DTB-3-SHEET-01-0 시트 타이틀
+
+시트 타이틀이 호출부의 폼 필드 라벨("기간")을 그대로 재사용해 "기간"으로 노출되고
+있었다(명세 No.2는 "기간 선택" 고정). 필드 라벨과 시트 타이틀은 서로 다른 텍스트인데
+그동안 하나의 상수(`DUES_CREATE_PERIOD_LABEL`/`REPORT_PERIOD_FIELD_LABEL`)를 재사용해
+합쳐져 있었다 — `DuesDateRangeSheet`의 `title` prop을 없애고 시트 내부에서
+`DATE_RANGE_SHEET_TITLE`("기간 선택") 고정값을 쓰도록 바꿨다. 호출부 3곳
+(`DuesCreateScreen`/`DuesEditScreen`/`ReportCreateByPeriodScreen`) 모두 `title` prop
+전달을 제거(필드 라벨 자체는 그대로 유지, `SelectionListItem`엔 계속 넘어간다). 조치
+형태: prop 제거 + 상수 신설.
+
+### [관찰] ETC-2-PAGE-04-0 — 코드 변경 없음
+
+건수 표기가 "1건"인데 시안은 "2 건"(숫자와 단위 사이 공백). 그 외 앱바/탭/카드는
+시안과 일치. 기획 확인 전까지 코드 변경 안 함.
+
+### 확인 질문 답변 — ETC-3-SHEET-05-0 (보고서 유형 선택 바텀시트)
+
+살아 있음. `ReportMainScreen.tsx`의 AppBar `rightIcons`(+ 버튼) → `setCreateSheetVisible(true)`
+→ `<ReportCreateSheet visible={createSheetVisible} .../>`(`@screen ETC-3-SHEET-05-0`)가
+"장부별"/"기간별" 두 옵션을 보여주고 각각 `ReportCreateByLedger`/`ReportCreateByPeriod`로
+라우팅한다 — 명세 No.1 [액션]대로 + 버튼이 즉시 액션 바텀시트를 호출하며, +가 장부별
+화면으로 바로 가는 우회 경로는 없다.
+
+---
+
+## 2026-09-12 보고서 도메인 묶음 2
+
+### [조사만] 화면 배경색 — #F0F5FE vs #F2F2F2, 코드 변경 안 함
+
+`constants/colors.ts`의 `BACKGROUND_PRIMARY`(=`BLUE_50`=`#F0F5FE`)를 실제로 쓰는
+화면은 (컴포넌트 내부 카드 배경 등 screen-bg 아닌 용도 제외) 전체 62개 root-level
+`SafeAreaView` 화면 중 **9개뿐**(`BLUE_50`/`BACKGROUND_PRIMARY` 직접 지정 5개,
+`BACKGROUND_SECONDARY`(흰색) 2개, `FILL_INVERSE`(어두운 회색, 이미지 뷰어) 2개) —
+나머지 **53개는 배경색을 아예 지정하지 않는다.** 그 53개가 실기기에서 보이는
+`#F2F2F2`는 우리 토큰이 아니라 **RN Modal/SafeAreaView 미지정 시 안드로이드
+시스템 윈도우 기본 배경색**이다. 즉 이건 "잘못된 토큰을 썼다"가 아니라
+"토큰 자체를 안 쓴 화면이 85%"라는 문제다.
+
+시안 4장 표본 확인 결과, **전 화면 일괄 `#F0F5FE` 적용은 틀린 결론이다**:
+- 로그인(`COM-1-PAGE-01-0`, `로그인_메인화면.png`): 배경 **흰색**
+- 기간별 보고서 생성 폼(`ETC-4-PAGE-04-0`, `더보기_보고서생성하기_기간별_기간선택.png`
+  뒷장): 배경 **흰색**
+- 보고서 생성 메인 리스트(`ETC-2-PAGE-04-0`, `더보기_보고서생성.png`): 배경 **블루 틴트**(`#F0F5FE`로 추정)
+- 보관함 목록(`ETC-2-PAGE-06-0`, `더보기_기록보관.png`): 배경 **블루 틴트**
+
+패턴: **목록/브라우징형 화면은 블루 틴트, 입력폼/로그인형 화면은 흰색**으로
+보인다 — 화면 타입에 따라 갈리므로 `BACKGROUND_PRIMARY`를 전 화면에 일괄
+적용하면 로그인·회원가입·각종 생성/수정 폼 화면들이 전부 잘못된 색으로
+바뀐다. 안전한 다음 단계는 화면을 "목록형"/"폼형"으로 먼저 분류하고 각
+그룹의 스펙시트를 표본이 아니라 전수로 확인하는 것 — 이번 턴엔 지시대로
+코드를 바꾸지 않았다.
+
+### [결함 → 해결 확인(2026-09-13 재캡처)] 금액 표기 — '원' 누락 및 '+' 접두 (ETC-3-PAGE-02-0/03-0/ETC-4-PAGE-05-0/07-0)
+
+원인이 파일마다 달라 개별 조치:
+- `components/Data Display/Card/AmountCard.tsx`(ETC-4-PAGE-05-0/07-0의 요약 카드 —
+  `ReportLedgerEntriesScreen`/`ReportPeriodEntriesScreen` 공용): 모든 행·합계 값에
+  '원'이 아예 없었고 수입 행에 `+` 접두가 있었다 — '원' 추가, `+` 제거.
+- `components/Data Display/Lists/TransactionListItem.tsx`(ETC-4-PAGE-05-0/07-0의
+  내역 리스트 — `ReportEntryList.tsx`가 재사용): `formatWon(amount)`만 쓰고 '원'이
+  없었다. 이 컴포넌트는 8개 다른 화면(아래 "동일 이슈 의심" 참고)도 쓰는 공용
+  컴포넌트라 기본 동작은 그대로 두고 `amountSuffix?: string`(기본 `''`) prop을
+  새로 추가, `ReportEntryList.tsx`에서만 `amountSuffix="원"`을 넘겼다. 원래도 `+`
+  접두는 없었다(음수는 `toLocaleString()`이 `-` 부호를 이미 포함해서 냄) — 이 부분은
+  원래부터 시안과 일치.
+- `screens/Report/ReportByLedgerDetailScreen.tsx`(ETC-3-PAGE-02-0): 수입에 `+`
+  접두 — 제거.
+- `screens/Report/ReportByPeriodDetailScreen.tsx`(ETC-3-PAGE-03-0): 헤더 카드
+  수입에 `+` 접두 — 제거. 둘 다 '원'은 원래부터 붙어 있었다(누락 아님).
+- `formatWon` 유틸 자체는 시그니처를 안 바꿨다(`toLocaleString()`만 반환, '원'
+  없음) — 각 호출부가 이미 문자열 뒤에 `원`을 붙이는 기존 관례를 그대로 따랐다.
+
+**동일 이슈 의심 화면(이번엔 안 건드림 — 각자 스펙시트 확인 필요)**: `TransactionListItem`
+을 쓰는 나머지 8개 화면 전부 `amountSuffix` 없이 호출 중이라 '원' 없이 뜬다 —
+`DashboardScreen`, `CalendarScreen`, `TransactionsScreen`, `TransactionSearchScreen`,
+`MemberPaymentHistoryScreen`, `LedgerDetailScreen`, `LedgerSearchScreen`. 추가로
+`StatisticsScreen.tsx`(`expenseValue: {color: FEEDBACK_NEGATIVE_BOLD}`)도 아래
+4-2와 같은 "지출=빨간색" 패턴을 쓰고 있어 같은 의심 목록에 포함한다.
+
+### [결함 → 해결 확인(2026-09-13 재캡처)] ETC-4-PAGE-07-0 — Card 1 합계 행 제거
+
+명세(`더보기_보고서생성_기간보고서조회.png`) No.3: Card 1(수입/지출)은 2행뿐,
+합계 행은 Card 2가 아니라 ETC-4-PAGE-05-0(장부 상세)에만 있다. `AmountCard.tsx`가
+`ReportLedgerEntriesScreen`(05-0)과 `ReportPeriodEntriesScreen`(07-0) 양쪽에서
+공유되는데 항상 합계 행(+구분선)을 그리고 있었다 — 공유 컴포넌트를 임의로 고치는
+대신 `showTotal?: boolean`(기본 `true`, 기존 동작 유지) prop을 추가하고
+`ReportPeriodEntriesScreen.tsx`의 Card 1(`type="incomeExpense"`)에만
+`showTotal={false}`를 넘겼다. `ReportLedgerEntriesScreen.tsx`는 prop을 안 넘겨
+합계 행이 그대로 남는다. Card 2(잔액 흐름) 라벨도 "시작잔액"/"최종잔액"(붙여쓰기)
+→ "시작 잔액"/"최종 잔액"(띄어쓰기, 명세 표기 그대로)로 수정 — `AmountCard.tsx`의
+`balance` 타입 라벨.
+
+### [결함 → 해결 확인(2026-09-13 재캡처)] ETC-3-PAGE-02-0 — 장부별 결산 카드 라벨/색상/정렬
+
+`ReportByLedgerDetailScreen.tsx`:
+- 라벨 없이 금액만 좌측 정렬로 나오던 것을 "수입"/"지출" 라벨(회색, 좌측) +
+  금액(우측 정렬)의 행 구조로 바꿨다(`amountRow`/`amountLabel` 스타일 신설,
+  `ledgerCardTextColumn`에 `flex:1` 추가해 내부 `space-between`이 실제로 벌어지게
+  했다).
+- 지출 금액 색상이 `FEEDBACK_NEGATIVE_BOLD`(빨강)였다 — 명세엔 지출도 기본
+  전경색(검정)이다, 색 지정 제거(기본 텍스트 색 상속). **다른 화면의 같은 오용
+  의심**: `StatisticsScreen.tsx`가 `expenseValue`에 같은 `FEEDBACK_NEGATIVE_BOLD`를
+  쓰고 있다 — `ETC-2-PAGE-07-0` 자체 스펙시트 확인 후 별도 처리 필요.
+- "생성 일시" 메타 텍스트를 우측 정렬로 변경(`metaText`에 `textAlign: 'right'`).
+
+### [결함 → 해결 확인(2026-09-13 재캡처)] ETC-3-PAGE-03-0 — 헤더 카드 금액 (ReportByPeriodDetailScreen만, ArchiveDetailScreen 안 건드림)
+
+기준 시트: `더보기_보고서생성_기간보고서조회-1.png`. 라벨 없이 "+1,010원"/
+"-442,222원" 두 줄만 검정으로 나오던 것을 "수입"(회색 라벨, 좌측)/파란 금액(우측),
+"지출"(회색 라벨, 좌측)/검정 금액(`-` 유지, 우측)의 2행 구조로 바꿨다(`amountRow`
+신설). 수입 `+` 접두 제거, `headerIncome`에 `FEEDBACK_POSITIVE_BOLD` 적용. 같은
+Screen ID를 공유하는 `ArchiveDetailScreen.tsx`(보관함 기록 보기)는 요구하는 카드
+구조가 달라(그 화면은 지난 라운드에 이미 라벨+정렬 반영 완료) 이번엔 건드리지
+않았다.
+
+### [결함] DTB-3-SHEET-01-0 — 선택 날짜 좌우 배치
+
+명세 No.4: 시작 날짜는 좌측 끝, 종료 날짜는 우측 끝. `DuesDateRangeSheet.tsx`의
+`previewRow`가 `marginLeft: 32`로 종료 날짜를 살짝만 띄우고 있어 둘 다 왼쪽에
+붙어 보였다 — `previewRow`에 `justifyContent: 'space-between'`을 주고
+`previewEnd`는 `alignItems: 'flex-end'`(라벨+값 모두 우측 정렬)로 바꿔 시작/종료가
+카드 양 끝으로 벌어지게 했다.
+
+### [관찰] 코드 변경 없음 — 3건
+
+- `ETC-4-PAGE-05-0` 내역 리스트 내역명이 regular인데 시안은 bold — 360px
+  다운스케일이라 단독 판정 보류.
+- `ETC-4-PAGE-05-0` 영수증 첨부 아이콘 미확인 — 첨부 있는 내역이 없어 판정 불가,
+  다음 라운드 재확인 대상.
+- 목록 건수 표기 "3건" vs 시안 "24 건"(숫자·단위 사이 공백) — 전 화면 공통
+  패턴으로 보여 일괄 판단 필요, 이번엔 개별 수정 안 함.
+
+### [결함 → 해결 확인(2026-09-13 재캡처)] 화면 배경색 7개 화면 적용
+
+`ETC-2-PAGE-06-0`/`ETC-3-PAGE-03-0`(ArchiveDetailScreen)/`ETC-2-PAGE-04-0`/
+`ETC-3-PAGE-02-0`/`ETC-4-PAGE-05-0`/`ETC-3-PAGE-03-0`(ReportByPeriodDetailScreen)/
+`ETC-4-PAGE-07-0` 7개 화면에 `ScreenContainer background="primary"` 적용(공용 배경
+컴포넌트 신설, `components/Layout/ScreenContainer.tsx`) — 상세는
+`docs/design-verification.md` §5-7 참고. 2026-09-13 실기기 재캡처로 전부 해결 확인.
+
+---
+
+## 2026-09-13 보고서 생성 실패 진단 + 장부별 생성 폼 시안 대조
+
+### [진단, 정정] 장부별 보고서 생성 실패 — (c) 데이터 조건 + 프론트 에러 문구 매핑 누락, 서버 버그 아님
+
+**최초 결론(서버가 한글 제목을 거절한다)은 틀렸다 — 철회.** curl 셸 리터럴(`-d '...'`)로
+한글을 보내면 Windows 환경에서 인코딩이 깨질 수 있다는 걸 안 걷어내고 성급히 결론
+냈었다. UTF-8 파일(BOM 없음)로 다시 보내 검증했다:
+
+- 바이트 확인: `{"reportType":"BY_LEDGER","title":"진단테스트","ledgerIds":[21]}`를
+  담은 파일에서 "진단테스트" 부분이 `ec a7 84 eb 8b a8 ed 85 8c ec 8a a4 ed 8a b8`
+  (5글자 × 3바이트 = 15바이트) — 정확한 UTF-8, CP949(글자당 2바이트=10바이트)가 아니다.
+- `curl --data-binary @req.json -H "Content-Type: application/json; charset=UTF-8"`로
+  같은 groupId 5·ledgerId 21에 재호출 → **`201 Created`, reportId 14로 정상 생성**.
+  같은 방식으로 "테스트"(3글자×3바이트=9바이트)도 reportId 15로 정상 생성.
+  **서버는 UTF-8 한글 제목을 문제없이 받는다 — 서버 버그 아니다.**
+
+그럼 최초 실패 캡처(제목 "Wrgv", ASCII)는 왜 실패했나 — 캡처 속 장부가 "B"였다.
+같은 groupId 5에서 ledgerId 22("B")로 재현하니:
+
+```
+POST /groups/5/reports {"reportType":"BY_LEDGER","title":"Wrgv","ledgerIds":[22]}
+→ {"code":"REPORT_RANGE_EMPTY","message":"선택한 기간에 보고서로 만들 내역이 없습니다.",...}
+```
+
+**장부 "B"에 내역이 0건이라 서버가 정확히 `REPORT_RANGE_EMPTY`(명세에 이미 정의된 정상
+에러 코드)를 돌려준 것 — 데이터 조건 문제이지 버그가 아니다.** `ledgerIds`가 문자열로
+새는 게 아닌지도 코드로 확인했다 — `reportService.createReportByLedger`가 이미
+`input.ledgerIds.map(Number)`로 숫자 배열로 바꿔 보낸다, 이 가설은 기각.
+
+**진짜 프론트 버그는 따로 있었다**: `constants/apiErrorMessages.ts`에 Report 도메인
+에러 블록 자체가 없어서 `REPORT_RANGE_EMPTY`가 매핑 안 된 코드로 취급돼 기본 fallback
+문구("일시적인 문제가 발생했어요...")로 덮이고 있었다 — 사용자가 "빈 장부를 선택했다"는
+진짜 원인을 알 방법이 없었다. `REPORT_ERROR_MESSAGES`(`REPORT_RANGE_EMPTY`/
+`REPORT_NOT_FOUND`) 블록을 새로 추가해 고쳤다. 등급(`ETC-4-PAGE-03-0`)은 화면 자체
+결함이 아니라 안 올리고 그대로 뒀다. `docs/backend-requests.md`의 "0순위" 항목은
+철회하고 "프론트 자체 버그" 섹션으로 옮겼다.
+
+
+### [결함 → 반영 완료] ETC-4-PAGE-03-0 — 배경 흰색
+
+기준 시트: `더보기_보고서생성하기_장부별.png`(디자인 완료). 폼형 화면, 배경 흰색 확인 —
+`ScreenContainer background="secondary"` 적용. `design-verification.md` §5-7 확정
+목록으로 이동.
+
+### [결함 → 반영 완료] ETC-4-PAGE-03-0 — "보고서 제목" 필수 표시 누락
+
+명세 No.2: 라벨 우측에 빨간 별표(필수). 기존 `SelectionListItem`에 `required` prop이
+있었지만 파란색 별표라 이 화면(빨간 별표 요구)엔 그대로 못 썼고, 애초에 `TextField`
+기반 필드라 다른 컴포넌트다 — `TextField`에 `required?: boolean` prop을 새로 추가하고
+`FEEDBACK_NEGATIVE_BOLD`(빨강)로 렌더. 이 화면에만 적용(다른 `TextField` 사용처는 안
+건드림 — 각자 스펙시트 확인 필요). **동일 패턴 의심**: 같은 "보고서 제목" 필드를 쓰는
+`ReportCreateByPeriodScreen.tsx`(`더보기_보고서생성하기_기간별.png`)도 직접 열어보니
+똑같이 빨간 별표를 요구한다 — 이번 라운드 범위 밖이라 적용은 안 했다, 다음 라운드에서
+그대로 `required` prop만 켜면 된다.
+
+### [결함 → 반영 완료] ETC-4-PAGE-03-0 — "+ 선택하기" 버튼 스타일
+
+명세 No.3 [상태]: 미선택 시 흰 배경+회색 테두리+회색 텍스트(Outlined). 기존
+`Button hierarchy="secondary"`는 옅은 파랑 채움+파란 텍스트라 시안과 다르다.
+`Button` 기존 hierarchy(primary/secondary/tertiary)엔 아웃라인 계열이 없어 새
+`outlined` hierarchy를 추가(흰 배경+회색 테두리(`BORDER_NEUTRAL_NORMAL`)+회색 텍스트
+(`FOREGROUND_NEUTRAL_SUBTLE`)), 이 버튼만 `hierarchy="outlined"`로 교체.
+
+### [결함 → 반영 완료] ETC-4-PAGE-03-0 — "구분" 세그먼트 폭/배치/미선택 색
+
+명세 No.4: 3개 pill이 내용 폭만큼만 차지하고 좌측에 모여야 하는데(현재 `flex:1`로
+화면 폭 3등분), 미선택 버튼은 회색(Disabled) 채움+회색 텍스트여야 하는데(현재 흰
+배경+검정 텍스트) 둘 다 달랐다. `OutlinePill.tsx`(공용 컴포넌트, `flex:1` 제거해
+좌측 정렬/내용 폭으로, 미선택 스타일을 `FILL_DISABLED` 배경+`FOREGROUND_DISABLED`
+텍스트로 교체 — 실제 `disabled` 처리는 안 함, 터치는 그대로 동작(명세 [액션] 그대로).
+이 컴포넌트는 `ReportCreateByPeriodScreen.tsx`도 같이 쓰는데, 그 화면 스펙시트
+(`더보기_보고서생성하기_기간별.png`)도 직접 열어 정확히 동일한 요구사항(좌측 정렬+
+미선택 회색)임을 확인한 뒤에 공유 컴포넌트를 고쳤다 — 추측 아님.
+
+### [확인] 이탈 방지 모달 — 이미 구현됨, 문구 일치
+
+명세 No.1 [액션] + Case B(`ETC-5-MODAL-01-0`, "보고서 생성을 그만둘까요?" /
+"작성중인 내용은 저장되지 않아요."). `ReportCreateByLedgerScreen.tsx`에
+`leaveDialogVisible` + `REPORT_LEAVE_TITLE`/`REPORT_LEAVE_DESCRIPTION`으로 이미
+구현돼 있고 문구도 정확히 일치, 안드로이드 하드웨어 뒤로가기도 같은 조건으로
+가로챈다(`BackHandler`). 코드 변경 없음.
+
+### [관찰] "장부 1건" vs 시안 "장부 2 건" — 코드 변경 없음
+
+숫자와 단위 사이 공백 차이. 전 화면 공통 패턴 의심이라(§7-3 등 다른 라운드에서도 같은
+관찰 반복) 개별 수정 안 하고 기록만 남긴다.
+
+---
+
+## 2026-09-13 최상위 장부 조회 회귀 수정 + 탈퇴 플로우 3화면 카드/배경 대조
+
+### [치명, 결함 → 반영 완료] FolderScreen / FolderSelectMoveScreen — 최상위 장부 미노출
+
+**증상**: 폴더 최상위에서 "새 장부 생성하기"로 장부를 만들면 생성 자체는 성공(`201`)하는데
+폴더 메인 화면 목록에 전혀 안 보임. 이동 대상 선택 화면에서도 최상위 장부를 선택 대상으로
+못 골랐음.
+
+**실호출로 원인 확인** (`scripts/api-call.js`, groupId 6, 최상위 장부 `ledgerId 27` 생성 후):
+
+```
+GET /groups/6/folders       → {"data":[],"message":"조회된 데이터가 없습니다."}
+GET /groups/6/folder-items  → {"data":{"totalCount":3,"items":[..., {"itemType":"LEDGER","id":27,"name":"폴더화면누락테스트",...}]}}
+GET /groups/6/ledgers       → {"data":[{"ledgerId":27,"folderId":null,...}, ...]}
+```
+
+`/folders`는 폴더만 반환하고 장부 자체를 아예 안 준다(빈 배열). `/folder-items`와
+`/ledgers` 둘 다 최상위 장부를 포함한다 — 가설대로였다.
+
+**근본 원인**: `FolderScreen.tsx`와 `FolderSelectMoveScreen.tsx` 둘 다
+`folderId ? ledgerService.getLedgersInFolder(folderId) : Promise.resolve([])`로 최상위일
+때 장부 조회 자체를 빈 배열로 하드코딩해뒀다. 예전엔 최상위 장부 조회 API가 없어 어쩔 수
+없었는데, 지난 라운드에 `GET /groups/{groupId}/ledgers`가 신설되고 `getAllLedgersInGroup()`
+을 그걸로 교체하면서도 이 두 화면은 그 함수를 안 쓰고 있어서 놓쳤다 — 호출부 6곳만 grep해서
+훑고 "이 함수를 우회하는 다른 코드"까지는 못 봤다.
+
+**수정**: 두 화면 모두 최상위(`folderId === null`)일 땐 `ledgerService.getAllLedgersInGroup()`
+으로 모임 전체 장부를 받아 `ledger.folderId === null`인 것만 걸러 쓰도록 변경. 폴더 안(`folderId`
+있음)일 땐 기존 `getLedgersInFolder(folderId)`를 그대로 씀 — 동작 변화 없음.
+
+**빈 상태 문구 확인**: `FOLDER_EMPTY_TITLE`("아직 폴더 및 장부가 존재하지 않아요.")는 원래도
+"폴더 및 장부" 둘 다 언급하는 일반 문구였고, 렌더 조건도 `filteredItems.length === 0`(폴더+
+장부 합친 목록)이라 위 수정으로 장부가 목록에 들어오면 자동으로 문제가 사라진다 — 별도 문구
+수정 불필요.
+
+**최상위 장부 UI 표시 방식**: `화면명세서\폴더\폴더_메인화면.png` Case A/C를 직접 확인 —
+폴더와 장부가 같은 그리드에 아이콘만 다르게(폴더 아이콘 vs 흰 문서 아이콘) 이름순으로 섞여
+있고, 최상위 장부 전용 UI 규정은 없다. 기존 `FolderItem kind='folder'/'ledger'` 혼합 렌더링이
+이미 이 요구사항과 일치해 추가 UI 변경 없음.
+
+**전수 점검**: `getFolderTree`/`getFolderItems` 사용처를 grep해 `FolderScreen.tsx`,
+`FolderSelectMoveScreen.tsx`(둘 다 수정), `ReportLedgerSelectScreen.tsx`(이미 `folder-items`
+사용, 최상위 포함 기확인 — 문제없음) 3곳뿐임을 확인. 같은 누락은 더 없다.
+
+**검증 후 정리**: 테스트 장부(`ledgerId 27`)는 삭제 완료(`204`). groupId 6에 이전 라운드부터
+남아 있던 것으로 보이는 장부 2건(`ledgerId 25/26`, "Fff"/"Fcff")은 이번 라운드가 만든 게
+아니라 건드리지 않았다 — 필요하면 정리 확인 요청.
+
+### [결함 → 반영 완료] COM-1-PAGE-02-0 (WithdrawGuideScreen) — 카드 누락 + 배경 미판정
+
+시안(`글로벌설정_내프로필_탈퇴하기.png`): 안내 불릿 목록 전체가 흰 카드 하나 안에 들어있고,
+배경은 옅은 블루. 기존 구현은 배경 위에 불릿이 평면으로 얹혀 있었다. `CardBase`로 감싸고
+`ScreenContainer background="primary"` 적용.
+
+### [결함 → 반영 완료] COM-2-PAGE-04-0 (WithdrawOwnershipTransferScreen) — 카드 누락 + 배경 미판정
+
+시안(`내프로필_탈퇴하기_권한이전.png`): 모임명("김둘봉이"/"땅동")은 카드 밖 라벨, 그 아래
+멤버 리스트가 모임마다 카드 하나 안에 들어있다. 기존 구현은 멤버 리스트가 평면으로
+얹혀 있었다. 모임(그룹)별로 `CardBase`를 씌우고, 화면 전체엔
+`ScreenContainer background="primary"` 적용.
+
+**[확인] 멤버 선택 상태**: 명세 3번 [액션] "선택된 멤버 우측 체크(✓) 아이콘이 포인트 컬러로
+활성화" — 코드 확인 결과 `selections`가 모임(groupId)별로 단일 `userId` 하나만 저장하는
+구조라 다른 멤버 선택 시 자동으로 이전 선택이 해제되고(단일 선택 그대로 구현됨), 체크
+아이콘 색상도 `FOREGROUND_SECONDARY`(`BLUE_500`, 포인트 컬러)로 이미 일치. 지난 라운드
+캡처가 선택 전 상태라 판정 못 했던 것 — 이번엔 코드 자체로 확인, 수정 불필요.
+
+### [결함 → 반영 완료] COM-2-PAGE-05-0 (WithdrawReasonScreen) — 카드 누락 + 배경 미판정
+
+시안(`내프로필_탈퇴하기_권한이전_사유선택.png`): 사유 체크박스 목록 전체가 흰 카드 하나
+안에 들어있고, "직접 입력할게요" 선택 시 나타나는 입력 필드도 같은 카드 안에서 아래로
+확장된다(Case A 캡처 확인). 기존 구현은 체크박스 목록이 평면으로 얹혀 있었다. 체크박스
+목록 + 조건부 입력 필드 전체를 하나의 `CardBase`로 감쌈(입력 필드가 이미 목록과 같은
+`View` 트리 안에 있어 별도 구조 변경 없이 자연스럽게 같은 카드 안에 들어감).
+`ScreenContainer background="primary"` 적용.
+
+**[확인] "직접 입력할게요" 조건부 입력 필드**: 명세 No.3 — 체크 시에만 노출(✓, `etcSelected`
+조건부 렌더링), placeholder "탈퇴 사유를 입력해주세요"(`WITHDRAW_REASON_ETC_PLACEHOLDER`
+정확히 일치), 최대 30자(`WITHDRAW_REASON_ETC_MAX_LENGTH = 30` 일치). 이미 정확히 구현돼
+있었다 — 수정 불필요.
+
+**[관찰] 명세 내부 모순 2건 — 코드 변경 없음** (상세는 `docs/design-verification.md` §5-3
+참고):
+- 사유 문구: 시안 메인 프레임 "다시 가입 예정이에요" vs 설명표(및 Case A 캡처) "다시 가입할
+  거예요". 현재 구현은 표를 따름(`WITHDRAW_REASON_REJOIN_LABEL`).
+- CTA 문구: 시안 메인 프레임 3곳 "탈퇴하기" vs 설명표·Case A "선택 완료". 현재 구현은
+  시안(시각적 다수)을 따름(`WITHDRAW_REASON_SUBMIT_LABEL`, 2026-09-11 기존 결정 재확인).
+- 같은 시트 안에서 시안과 표가 어긋나는 사례가 이 세션에서 세 번째다.
+
+---
+
+## 2026-09-13 기간별 보고서 생성 폼 + 장부 선택 화면 대조
+
+### [결함 → 반영 완료] ETC-4-PAGE-04-0 (ReportCreateByPeriodScreen) — 필수 별표 반전
+
+시안: "보고서 제목\*"에만 별표, "기간"엔 없음. 기존 구현은 정확히 반대(제목 없음, 기간 있음).
+`TextField`에 `required`를 옮기고 `SelectionListItem`(기간)의 `required`를 뗐다.
+
+**경위 조사**: 두 컴포넌트(`TextField`/`SelectionListItem`) 모두 `required`가 화면별로 독립
+지정하는 prop이라 컴포넌트 자체의 결함은 아니었다 — 화면 작성 시 어느 필드가 "진짜 필수
+표시 대상"인지(전부 필수여도 시안은 제목에만 별표를 그리는 경우가 많음)를 착각한 개별
+실수였다. `required` prop을 쓰는 전 화면(8곳)을 스펙시트와 대조한 결과, `DuesCreateScreen`/
+`DuesEditScreen`에도 같은 반전이 각 2건씩(장부·기간엔 있으면 안 되는데 있고, 제목·금액엔
+있어야 하는데 없음) 있어 함께 고쳤다. `TransactionRegisterScreen`(`ADD-1-PAGE-01-0`)은 시안
+자체가 "내역명·장부 둘 다 별표" 방식이라 원래도 정확했다 — 상세 표는
+`docs/design-verification.md` §5-3 참고.
+
+### [결함 → 반영 완료] ETC-4-PAGE-04-0 — 기간 필드 형태 (박스 → SelectionListItem 행이었음)
+
+시안 No.3: 회색 테두리 박스, placeholder "YY.MM.DD ~ YY.MM.DD", 우측 캘린더 아이콘, 선택
+완료 시 "26.01.01 ~ 26.06.30" 식 2자리 연도 텍스트. 기존 구현은 `SelectionListItem`(라벨
+좌측 "기간\*" + 값 우측 파란 텍스트 + 꺾쇠) 한 줄짜리 행이었다 — 형태 자체가 달랐다.
+`assets/icons/system/Calendar.png`가 이미 있어 새로 만들 필요 없었다. `Pressable` 박스로
+새로 짜고(테두리 `BORDER_NEUTRAL_NORMAL`, radius 8) 우측에 캘린더 아이콘을 넣었다. 날짜
+표기도 `toShortDate()`(로컬 헬퍼, `DuesDateRangeSheet`의 것과 동일 로직)로 2자리 연도로
+바꿨다 — API 전송용 `startDate`/`endDate` 상태값 자체는 4자리(`YYYY.MM.DD`)로 그대로 두고
+화면 표시에만 적용(`toIsoDate()` 변환이 이 4자리 값을 그대로 쓰고 있어서 상태 형식을
+바꾸면 API 호출까지 건드리게 된다 — 표시만 분리).
+
+**지난 라운드 판단 철회**: 지난 라운드에 "폼 필드 자체는 4자리가 맞다고 확인됨(시트 안
+미리보기만 2자리가 의도)"라고 적어뒀던 게 틀렸다 — 시안 No.3 예시를 다시 보니 "26.01.01 ~
+26.06.30"으로 명확히 2자리이고, 애초에 필드 형태(박스 vs 행)부터 확인 안 하고 표기만 봤던
+게 오판의 원인이었다. `docs/design-verification.md`의 해당 서술도 정정했다.
+
+### [배경 판정] ETC-4-PAGE-04-0 / ETC-5-PAGE-01-0 — 흰색 확정
+
+두 시안 모두 배경이 흰색임을 직접 확인, `ScreenContainer background="secondary"` 적용.
+`docs/design-verification.md` §5-7 확정 목록으로 이동(흰색 5→7, 미판정 151→149).
+
+### [결함 → 반영 완료] ETC-5-PAGE-01-0 (ReportLedgerSelectScreen) — 검색 필드 형태
+
+시안 No.2: 둥근 pill, 테두리, 내부 흰색, 우측 돋보기. 기존 구현은 회색 채움 박스.
+`SearchField`를 쓰는 다른 7개 화면(`DuesCreateScreen`/`DuesMemberEditScreen`/`FolderScreen`/
+`LedgerSearchScreen`/`MemberManageScreen`/`ReceiptSearchScreen`/`TransactionSearchScreen`)
+중 스펙시트를 확보한 `FolderScreen`(`FDR-1-PAGE-01-0`, `폴더_메인화면.png`)을 대조해보니
+회색 채움 박스가 시안과 일치했다 — 즉 이 화면(`ETC-5-PAGE-01-0`)만 다른 형태를 요구하는
+경우였다. 컴포넌트를 뜯어보니 `variant="outline"`(흰 배경 `FILL_NEUTRAL_SUBTLE`=`#FFFFFF`
++ 테두리, 포커스 시 파란 테두리)이 이미 구현돼 있는데 실제로 쓰는 화면이 하나도 없었다 —
+새로 만들 필요 없이 이 화면에만 `variant="outline"`을 지정했다. 공용 컴포넌트 기본값은
+그대로 두어 다른 7개 화면에 영향 없음.
+
+### [관찰] ETC-5-PAGE-01-0 그리드 하위 날짜 4자리 — 앱 전체 YY/YYYY 혼재 조사로 확장
+
+이 화면 자체엔 날짜 표기 규정이 없어 관찰로만 남긴다(코드 변경 없음). 다만 앱 전체를
+훑어 2자리/4자리 혼용 현황을 `docs/design-verification.md` §5-3에 기록했다 — 4자리 13곳,
+2자리 3곳(모두 폼/미리보기 맥락), 우연한 혼재라기보다 암묵적 구분이 있어 보이지만 명문화된
+규칙은 없어 기획 확인이 필요한 상태로 남겨둔다.
+
+### [관찰, 중복 아님] 건수 표기 "2건" — 기존 관찰과 동일 건, 재기록 안 함
+
+기존 `docs/design-diff.md`/`design-verification.md` §5-3의 "숫자·단위 사이 공백" 관찰과
+같은 패턴(`ETC-5-PAGE-01-0`의 "6 건" vs 구현 "6건"). 이미 기록된 항목이라 중복 기록하지
+않는다.
+
+### 재캡처 확인 완료 (2026-09-13, 이전 라운드 수정분 재검증)
+
+아래 4건은 실기기 재캡처로 시안과 일치함을 재확인했다 — 상세는 각 항목의
+`docs/design-verification.md` 행 참고:
+
+- 최상위 장부 폴더 화면 노출(치명, `FDR-1-PAGE-01-0`/`FDR-2-PAGE-01-0`)
+- `ETC-4-PAGE-03-0` 시안 재대조 5건(배경/필수표시/버튼 hierarchy/세그먼트/이탈모달)
+- `COM-1-PAGE-02-0` / `COM-2-PAGE-04-0` / `COM-2-PAGE-05-0` 카드·배경 결함 수정
+- `ETC-5-PAGE-01-0` 목록 "0건" — 데이터 유실 아니었음(2026-09-12 진단), 이번 라운드에
+  새 폴더/장부로 재현해 정상 노출 확인
+
+## 2026-09-13 DUE 도메인 묶음 4 대조
+
+기준 시트: `납부관리_메인.png`(DUE-1-PAGE-01-0), `납부관리_메인_새회비생성.png`(DUE-2-PAGE-01-0),
+`납부관리_메인_새회비생성_장부선택.png`(ADD-2-SHEET-03-0), `납부관리_메인_새회비생성_모임원선택.png`
+(DUE-3-PAGE-01-0), `납부관리_납부요청.png`(DUE-3-PAGE-04-0), `납부관리_회비상세_수정.png`
+(DUE-3-PAGE-06-0).
+
+### [결함 → 반영 완료] DUE-2-PAGE-01-0 / DUE-3-PAGE-06-0 — 장부·기간 필드 형태
+
+`DuesCreateScreen.tsx`/`DuesEditScreen.tsx` 둘 다 장부/기간을 `SelectionListItem`(라벨+값+꺾쇠
+한 줄 행)으로 구현했었는데, 시안 No.4/No.5는 라벨 아래 테두리 박스다 — 장부는 미선택 시
+"+ 선택하기"(선택 시 장부명), 기간은 미선택 시 "YY.MM.DD ~ YY.MM.DD" placeholder + 우측
+캘린더 아이콘(선택 시 "2026.04.22 ~ 2026.04.25"). 오늘 `ETC-4-PAGE-04-0`(기간별 보고서 생성)에서
+이미 만든 박스 스타일을 그대로 재사용해 두 화면 모두 고쳤다. 기간 구분자도 " - "→" ~ "로 통일.
+`duesScreenText.ts`의 placeholder 문구도 시안 그대로("장부를 선택해주세요."→"+ 선택하기",
+"기간을 선택해주세요."→"YY.MM.DD ~ YY.MM.DD") 수정.
+
+### [관찰] 기간 자릿수 시트 간 불일치 — 공용화 안 함
+
+DUE 시트는 채워진 값이 4자리 연도, 보고서 쪽(`ETC-4-PAGE-04-0`)은 2자리 — 시트가 다르므로
+날짜 포맷 함수를 하나로 묶지 않고 각 화면이 자기 시트를 따르게 뒀다. 상세는
+`design-verification.md` §5-13.
+
+### [결함 → 반영 완료] DUE-3-PAGE-04-0 (DuesRequestScreen) — 자동 포커스 미구현
+
+명세 No.2 "화면 진입 시 자동 포커스+키보드 노출"인데 `TextArea` 컴포넌트 자체에 `autoFocus`
+prop이 없어 미구현 상태였다(실기기 캡처에 키보드가 없던 게 진짜 미구현 때문이었음, 캡처
+직전에 내린 게 아니었다). `TextArea`에 `autoFocus` prop을 추가하고 이 화면에서 켰다.
+
+### [배경 판정] DUE 5건 확정
+
+| Screen ID | 화면명 | 배경 |
+|---|---|---|
+| `DUE-1-PAGE-01-0` | 납부 관리 메인 | 블루(#F0F5FE), 기존 코드 이미 일치(변경 없음) |
+| `DUE-2-PAGE-01-0` | 회비 생성 | 흰색 (신규 명시) |
+| `DUE-3-PAGE-01-0` | 새 회비 생성_모임원 선택 | 흰색 (신규 명시, 같은 컨테이너) |
+| `DUE-3-PAGE-04-0` | 회비 요청 작성 | 블루(#F0F5FE) (신규 명시) |
+| `DUE-3-PAGE-06-0` | 회비 수정 | 흰색 (신규 명시) |
+
+`DUE-2-PAGE-03-0`/`DUE-2-PAGE-03-1`(회비 상세)은 이번 라운드 캡처를 못 받아 미판정 유지,
+다음 라운드로 이월.
+
+### [관찰만, 고치지 않음] DUE-3-PAGE-04-0 앱바 문구 — 시안 목업 "회비 요청" vs 설명표 "납부 요청"
+
+구현은 목업을 따른다(기존 결정 유지, 변경 없음). 시안 목업↔설명표 문구 불일치 누적 사례
+네 번째(오늘 `ETC-2-PAGE-06-0` 날짜, `COM-2-PAGE-05-0` 사유·CTA 문구에 이어).
+
+## 2026-09-17 DUE 도메인 묶음 5 — 회비 상세 5상태 대조
+
+사용자 보고("모임원 수정이 안 된다")를 계기로 시작. 기준 시트: `납부관리_회비상세.png`
+(Case A/B), `납부관리_회비상세_마감.png`, `_마감된회비.png`, `_예정된회비.png`, `_삭제.png`.
+
+### [조사 완료, 결함 아님] 모임원 선택 진입 경로 / 회비 수정 제목 활성
+
+`DuesDetailScreen`의 ⋮ 메뉴 "모임원 선택" → `navigate('DuesMemberEdit')` → 라우트 등록 →
+컴포넌트, 전부 코드상 정상 연결. `DuesEditScreen` 제목 필드도 `disabled` prop 없어 원래
+활성. 코드 변경 없음 — 실기기 재현 시 캐시/세션 문제로 의심(§5-12 Metro 캐시 사고 전례).
+
+### [결함 → 반영 완료] DUE-2-PAGE-03-0 — CLOSED 상태에서 "회비 수정" 메뉴까지 숨겨짐
+
+`status!=='CLOSED'` 조건이 "회비 수정"/"모임원 선택"을 묶어 숨겼는데, 시안 Case A(마감된
+회비)는 "회비 수정 / 회비 삭제" 두 개를 보여준다. "회비 수정"은 항상 노출, "모임원 선택"/
+"회비 마감"만 CLOSED에서 숨기도록 `DuesDetailScreen.tsx` 조건 분리. `DuesEditScreen.tsx`의
+"CLOSED는 진입 방법이 없다" 주석도 정정.
+
+### [확인, 현재 동작 유지] CLOSED 상태 수정 화면 — 필드 잠금 규정 없음
+
+시안에 CLOSED 전용 필드 잠금 규정이 없어 제목/장부/기간을 그대로 편집 가능하게 뒀다(금액만
+항상 비활성). 제출은 서버가 `DUES_ALREADY_CLOSED(409)`로 막는다. 임의로 추가 잠금 안 함.
+
+### [결함 → 반영 완료] DUE-2-PAGE-03-0/03-1 — 배경 미지정
+
+`DuesDetailScreen.tsx` container에 배경색이 없어 시스템 기본값이 나오고 있었다. 이 파일
+하나가 진행중/예정/마감 5개 상태를 다 그려서 `BACKGROUND_PRIMARY` 한 번으로 전부 해결.
+
+### [확인, 결함 아님] 예정된 회비 배지 — 날짜 표기 맞음
+
+시안이 D-배지가 아니라 날짜("07.28")다. 코드(`formatDateDot(detail.startDate)`)가 이미
+그렇게 구현돼 있어 일치.
+
+### [확인] 나머지 전부 일치
+
+마감/삭제 확인 모달 문구·버튼·색상, 캐러셀 카드, 탭, 리스트, 회비 요청하기 노출 조건 전부
+시안과 일치. 코드 변경 없음.
+
+### [관찰만] 시안↔설명표 불일치 다섯·여섯 번째
+
+- 회비 수정 앱바: 표 "우측 X" vs 목업 좌측 백버튼만 — 목업 따름(기존 유지).
+- `DUE-3-PAGE-02-0` 페이지 경로: 표는 "회비 상세 > 회비 수정하기 > 모임원 선택"인데 실제
+  진입은 "회비 상세 > 모임원 선택"(한 단계 얕음, Case A 메뉴가 근거) — 실제 구현이 맞다고
+  판단.
+
+## 2026-09-18 캐러셀 페이지 스냅 결함 — 장부 상세 / 기간 보고서 상세
+
+사용자 실기기 캡처 보고("2면부터 카드가 잘려 보인다"). 기준 시트: 장부 상세 시안(폴더 쪽),
+`더보기_보고서생성_기간보고서조회.png` No.3.
+
+### [결함 → 반영 완료] FDR-2-PAGE-05-0 (LedgerDetailScreen) / ETC-4-PAGE-07-0 (ReportPeriodEntriesScreen) — 캐러셀 2면부터 카드 잘림
+
+두 화면 모두 캐러셀 컴포넌트를 공유하지 않고 각자 `ScrollView horizontal pagingEnabled` +
+`snapToInterval`을 독립적으로 복붙해 구현하고 있었다. 원인: `snapToInterval={CARD_WIDTH+12}`가
+스크롤뷰 `style`의 `paddingLeft:24`(우측엔 없음, 비대칭)를 스냅 계산에 안 넣었다 — 콘텐츠
+원점 0부터 간격의 배수로만 스냅 지점을 잡다 보니 실제 렌더링이 밀려 있는 24px만큼 페이지가
+누적될수록 어긋났다. 1면은 이 인셋이 그냥 카드 여백처럼 보여 정상으로 보였을 뿐이다.
+
+수정: `Dimensions.get('window')` 고정값 → `useWindowDimensions()`. 슬라이드를 화면 폭
+그대로 채우고 카드 여백을 슬라이드 안쪽 `paddingHorizontal:24`로 옮겨 `snapToInterval` 자체를
+제거 — `pagingEnabled` 기본 동작(뷰포트 폭 단위 스냅)만으로 항상 정확하게 맞도록 했다. dots
+인디케이터 계산 기준도 `windowWidth`로 맞춤.
+
+전수 조사(`snapToInterval`/`pagingEnabled` grep) 결과 캐러셀(가로 페이징)을 쓰는 화면은 이
+둘뿐 — 다른 `AmountCard` 사용처(대시보드, 내역, 보관함 장부 내역 등)는 단일 카드라 무관.
+
+### [기록] 2026-09-13 대조에서 놓쳤던 이유
+
+두 화면 다 그날 캡처 대조를 했는데, "카드 + dots" 구조와 문구만 시안과 맞춰보고 스크롤 후
+상태(2면 진입 시 잘림)는 확인하지 않았다 — 같은 캡처 세트에 찍혀 있었을 가능성이 높은데
+정적 1면 스크린샷만 보고 판정한 것으로 보인다. 상세는 `design-verification.md` §5-15.
+
+## 2026-09-18 폴더 메인 헤더 메뉴·앱바 (FDR-1-PAGE-01-0, Case A)
+
+기준 시트: `화면명세서\폴더\폴더_메인화면.png` Case A("폴더 헤더 메뉴").
+
+### [결함 → 반영 완료] 앱바 통계 아이콘 누락
+
+시안 No.1: 앱바 우측에 통계/분석 아이콘 + ⋮ 두 개. 현재는 ⋮ 하나뿐이었다.
+
+**1-1 확인**: 통계 화면(`StatisticsScreen`) 진입점은 이미 `DashboardScreen`(홈 퀵서비스
+카드)과 `MoreScreen`(더보기 메뉴)에 있다 — 둘 다 시안 경로와 무관하게 정상 동작하는
+별개 진입점이라 유지, 충돌 아님. 폴더 메인엔 진입점이 아예 없었으므로 이번엔 "빠진 걸
+채우는" 경우다.
+
+**1-2 확인**: `assets/icons/content/Graph.png`가 이미 있고 `MoreScreen`이 통계 아이콘으로
+쓰고 있다 — 같은 자산 재사용, 새로 안 만듦.
+
+`FolderScreen.tsx` 앱바 `rightIcons`에 통계 아이콘 추가(루트 화면에만, `navigation.navigate
+('Statistics')`).
+
+### [결함 → 반영 완료] 헤더 메뉴 구조 — 2차 메뉴 제거, 평면 5항목·3그룹
+
+시안 Case A: "선택 이동 / 예산 설정 / ── / 그리드 / 리스트 / ── / 전체 백업" — 구분선 2개로
+3그룹, 2차 메뉴 없음. 현재는 "선택 이동 / 그리드·리스트 / 전체 예산 설정 / 전체 백업" 4항목
+평면이고 "그리드·리스트"를 누르면 2차 메뉴가 한 단계 더 열렸다.
+
+`Menu` 컴포넌트가 이미 `sections: MenuItem[][]`(그룹별 구분선)와 항목별 `icon` prop을
+지원하고 있어서 그대로 재사용 — `FolderMoreMenu`에 `sections`/`showIcon` prop을 추가하고
+(기존 `items` prop은 하위호환 유지, `DuesDetailScreen`/`LedgerDetailScreen`은 안 건드림),
+`FolderScreen.tsx`의 `menuMode`(2차 메뉴) 상태를 통째로 제거, 그리드/리스트를 평면 항목
+2개로 펼쳤다.
+
+- 그리드/리스트 아이콘: `assets/icons/system/Grid.png`/`List.png` — 이미 있던 자산, 새로
+  안 만듦.
+- 문구: "전체 예산 설정" → "예산 설정"(`FOLDER_MENU_BUDGET_LIST` 상수 수정).
+- 현재 보기 방식(그리드/리스트) 체크 표시: 시안에 없어 안 넣음(`Menu`가 `selectedKey`로
+  지원은 하지만 이 메뉴엔 안 씀).
+- 하위 폴더(비root) 헤더 메뉴는 이번 라운드 대조 대상이 아니라 그룹 구분 없이 기존 순서
+  그대로 두고, "그리드·리스트" 진입점만 같은 방식으로 평면 2항목으로 바꿨다(2차 메뉴
+  메커니즘을 통째로 없앤 결과로 자연히 같이 바뀜 — 그 화면 콘텐츠 자체를 새로 판단한 것
+  아님).
+
+### [확인] 일치 — 기록만
+
+빈 상태 두 개 전부 시안과 일치, 코드 변경 없음:
+- "아직 폴더 및 장부가 존재하지 않아요." / "새로운 장부를 생성하여 내역을 관리해보세요."
+- "해당 검색어에 대한 내역이 없어요." / "검색어를 다시 입력해주세요."
+
+### 다음 라운드로 미룸
+
+리스트 보기 레이아웃, 장부 상세, 이름 변경/삭제 모달, 예산 설정 화면 — 이번엔 안 건드림.
+
+## 2026-09-18 폴더 예산 설정 / 장부 이름 변경 모달
+
+기준 시트: `폴더_메뉴_예산설정.png`(FDR-2-PAGE-02-0), `폴더_장부상세_이름변경하기.png`
+(FDR-3-MODAL-03-0).
+
+### [결함 → 반영 완료] FDR-2-PAGE-02-0 — 예산 설정 리스트 행이 2줄+아이콘
+
+시안 No.2: 좌측 장부명, 우측 예산 금액, 그 우측 꺾쇠 — 한 줄. 현재는 `FolderItem`(아이콘 +
+장부명, 아래줄에 "예산 N원")으로 2줄이었다. `SelectionListItem type="picker"`(같은 종류
+행 전용 기존 컴포넌트)로 교체 — 새 컴포넌트 안 만듦. 예산 미설정 시 "0원" 노출로 변경(전엔
+"예산 미설정" 문구 — 공유 상수 `LEDGER_ITEM_BUDGET_UNSET`은 다른 화면도 쓰고 있어 그대로
+두고 이 화면만 로컬 처리로 분리). 정렬은 서버 응답 순서 그대로였는데 시안이 "최신 생성
+장부순"을 명시해 `createdAt` 내림차순 클라이언트 정렬 추가 — `getAllLedgersInGroup`
+매핑에서 버려지고 있던 `createdAt`을 `LedgerSummary`에 옵셔널로 살려서 썼다(다른 소비처는
+그 필드가 없어 옵셔널 처리, 영향 없음). 배경도 미지정이었어서 시안대로 `BACKGROUND_PRIMARY`
+적용.
+
+### [결함 → 반영 완료] FDR-3-MODAL-03-0 — 안내 문구·자동 포커스 미구현
+
+타이틀 아래 안내 문구가 시안엔 있는데 코드엔 없었다(`description: undefined`) →
+`Dialog.description`에 연결. 자동 포커스도 `autoFocusTextField`를 아예 안 넘기고 있어
+미구현이었다 → `activeDialog==='rename'`일 때 켬. 덧붙여 발견: placeholder가 원래 길이
+제한 문구("최대 20자 이내로 입력해주세요.")로 잘못 들어가 있었는데 시안 No.3 Placeholder
+규정은 "변경할 이름을 입력해주세요."다 — 안내 문구와 placeholder를 서로 맞는 자리로
+옮겼다. 기존 이름 프리필·X 전체삭제·취소/변경 버튼은 이미 일치해 안 건드림.
+
+### [판단 필요, 결론 안 내림] 이름 변경 글자수 — 시안 10자 vs 표·서버 확정값 20자
+
+| 출처 | 값 |
+|---|---|
+| 시안 목업 원문 | "최대 10자 이내로 입력해주세요." |
+| 같은 시트 설명표 No.2/No.3 | "최대 20자까지 입력할 수 있어요." / "최대 20자까지만 입력 가능" |
+| 현재 코드 `LEDGER_NAME_MAX_LENGTH` | 20 |
+| 폴더 이름 변경(`FOLDER_NAME_MAX_LENGTH`) | 20 — `Folder.txt "최대 20자"` |
+| 장부 생성(`LEDGER_NAME_MAX_LENGTH`) | 20 — `Ledger.txt "최대 20자"`(서버 확정, 2026-08-30) |
+| 회비 제목(`DUES_TITLE_MAX_LENGTH`) | 20 — `Dues.txt "최대 20자"` |
+
+이름/제목류 4곳 전부 20자, 그중 셋은 서버 도메인 문서 확정값 — 이 목업만 10자로 유일하게
+다르다. 지금까지 나온 시안↔표 불일치는 전부 문구 차이였는데 이번엔 숫자라 임의로 안 정했다.
+코드에 쓴 문구 숫자는 현재 `maxLength`(20)와 일치시켜 뒀다 — 화면에 쓰인 숫자와 실제 제한이
+다른 채로 두지 않았다.
+
+### [관찰만] 시안↔표 불일치 누적 일곱·여덟 번째
+
+- 예산 설정 빈 화면: 시안 "'폴더'에서 장부를 생성해주세요." vs 표 "장부를 먼저 생성해주세요"
+  — 구현은 시안과 이미 일치, 코드 변경 없음.
+- 이름 변경 글자수 10자 vs 20자 — 위 표.
+
+## 2026-09-19 묶음 6-5 — 장부 상세 배경·금액 표기·폴더 메뉴 아이콘
+
+### [수정] 장부 상세 배경 `#F2F2F2` — 원인: 루트 배경 미지정
+
+`LedgerDetailScreen`의 루트 `SafeAreaView`는 `styles.container = { flex: 1 }`뿐이라 배경색을
+아무도 지정하지 않았다(하드코딩도 상수도 아님). `android/.../styles.xml`의 `AppTheme`도
+`windowBackground`를 안 바꾸는 `Theme.AppCompat.DayNight.NoActionBar`라 안드로이드 시스템
+기본 윈도우 배경(`#F2F2F2` 근처)이 그대로 비친 것 — 2026-09-12 기록과 같은 원인이다.
+로딩/에러 분기와 본 화면 두 곳 모두 `<ScreenContainer background="primary">`로 교체했다.
+색 값은 코드 원인 규명이라 캡처 픽셀은 새로 샘플링하지 않았다(사용자 실측 `#F2F2F2` 신뢰).
+부수 효과: `snackbarWrapper`(absolute, bottom 24)가 `ScreenContainer` 내부로 들어가 하단
+인셋만큼 위로 올라올 수 있다(실기기 미확인).
+
+### [수정] 금액 표기 — 보고서 상세가 쓰는 함수는 원래 `formatWon` 하나
+
+보고서 상세·장부 상세 모두 `utils/currency.ts`의 `formatWon`을 쓴다. 그런데 이 함수는 주석과
+달리 **'원'을 안 붙인다**(콤마만) — 보고서 쪽은 호출부에서 `${formatWon(x)}원`으로 붙이고,
+`BudgetCard`만 안 붙이고 있었다. `-0`은 어느 화면에서도 처리하지 않는다: 보고서 상세의
+`0원`은 `startBalance`(부호 없는 0), `-3,000원`은 `endBalance`가 원래 음수라 `toLocaleString`이
+낸 것이라, "보고서 상세는 -0을 안 낸다"는 전제와 달리 그쪽도 지출 0이면 `-0원`이 나오는 구조다
+(`-${formatWon(expense)}원` 수동 접두). 새 포맷 함수는 안 만들고 `BudgetCard`/`AmountCard`에서
+`expense > 0 ? '-' : ''` 접두 + 기존 `formatWon` + `원`으로 맞췄다. `formatWon` 주석은 실제
+동작에 맞게 고쳤다(동작은 그대로).
+
+- 영향 받는 화면(컴포넌트 수정): `BudgetCard` ← `LedgerDetailScreen`만 사용.
+  `AmountCard incomeExpense` ← `LedgerDetail`, `TransactionsScreen`, `ReportLedgerEntries`,
+  `ReportPeriodEntries`, `ArchiveLedgerEntries` — 지출 0일 때 `-0원` → `0원`.
+- 같은 `-0` 수동 접두 패턴이 남은 곳(고치지 않음): `ReportByLedgerDetailScreen:195`,
+  `ReportByPeriodDetailScreen:180`, `ArchiveDetailScreen:206`, `ReportCard:57`,
+  `StatisticsScreen:192·270`(자체 `formatWon` 재정의 — 이 파일만 함수가 별도),
+  `TransactionListItem`(부호는 amount 값 자체) 등.
+
+### [판단 보류] 폴더 ⋮ 메뉴 `리스트` 아이콘
+
+`src/assets/icons/system/List.png`(464B, 가로 3줄 아이콘)와 `Grid.png` 둘 다 에셋이 있고 육안으로
+정상 확인했다. 코드도 이미 `FolderScreen`에서 `{ key: 'list', icon: LIST_ICON }` + `showIcon`으로
+연결돼 있어 **이번엔 수정 사항이 없다**. 지시한 캡처 `Screenshot_20260918_165358_BILLAGE.jpg`는
+`shots/`에 없다(있는 건 `..._165353_...` 하나, 폴더 루트만 찍혔고 메뉴는 안 열려 있음).
+증상이 지금 코드와 다른 번들(아이콘 연결 전)에서 찍혔는지, 다른 화면(하위 폴더)인지 확인
+불가 — 메뉴가 열린 캡처가 다시 필요하다.
+
+## 2026-09-19 묶음 6-7 — 폴더 그리드 좌측 정렬
+
+### [수정] `FolderScreen` 그리드가 좌우로 벌어짐 — `gridRow`가 `space-between`
+
+`FolderScreen.gridRow`는 폴더 탭 최초 구현(`53b6a80`, 2026-08-05)부터 `justifyContent: 'space-between'`였고
+그 뒤 한 번도 손대지 않았다. `ReportLedgerSelectScreen`의 `gridRow`(`flex-start` + `gap: 8`)는
+파일이 처음 들어온 `6de0cbf`("all about", 2026-09-06)에 이미 그 값으로 있었다 — `git log -S"space-between"`
+로 보면 이 파일엔 `space-between`이 있었던 적이 없다. 즉 "한 곳만 고치고 다른 곳을 빠뜨린" 것이 아니라
+**두 화면이 서로 독립적으로 작성됐고 `FolderItem` 사용처를 전수로 훑는 작업이 없었다**. 지시하신 "지난 좌측 정렬
+작업"은 `design-diff.md`에도 기록이 없고(좌측 정렬 언급은 OutlinePill 칩 1건뿐), git에서도 `6de0cbf`라는
+대형 일괄 커밋 하나만 보여서 어느 프롬프트가 원인인지는 **판단 보류**.
+
+**전제 정정 2건**: (1) `FolderItem`의 `layout="grid"` 스타일은 `flex: 1`이 아니라 이미 `width: 100`(고정)이었다 —
+그래서 한 줄에 2개만 있으면 `space-between`이 첫 아이템을 왼쪽 끝, 둘째를 오른쪽 끝(x≈212~312)으로 갈라놓았고, 3개일 땐 100×3=300이 312에 차지 않아 남는 12dp를 열 사이에 나눠 줬다(gap 6). (2) `FolderSelectMoveScreen`은 grid를 쓰지 않는다
+(`layout="list"`). 실제 grid 사용처는 `FolderScreen`(viewMode에 따라)과 `ReportLedgerSelectScreen` 2곳뿐이다.
+
+| 화면 | `FolderItem` layout | `columnWrapperStyle` | body `paddingHorizontal` |
+|---|---|---|---|
+| `FolderScreen` | `grid`/`list` 토글 | `gridRow`(`space-between` → `flex-start` + gap) | 24 |
+| `ReportLedgerSelectScreen` | `grid` | `gridRow`(`flex-start` + gap 8, 이미 정상) | 24 |
+| `FolderSelectMoveScreen` | `list` | 없음 | 24 |
+| `FolderMoveDestinationScreen` | `list` | 없음 | 24 |
+| `StatisticsScreen` | `list` | 없음 | 20 |
+
+전제(24) 위반 없음 → 그대로 진행. `FolderItem`에 `FOLDER_GRID_COLUMNS = 3`, `FOLDER_GRID_COLUMN_GAP = 8`(**실측 필요** —
+시안에서 재지 못해 임시값), 모듈 상단 계산 `GRID_ITEM_WIDTH = (window.width - 24*2 - gap*2) / 3`(24를 빼는 이유는
+호출 화면 body 패딩 전제라고 주석)를 두고 두 화면이 같은 상수를 쓴다. 360dp 좌표 계산(산술 시뮬레이션, 렌더 아님):
+w=98.67, 1개 x=24 / 2개 x=24·130.67 / 3개 x=24·130.67·237.33(우측 끝 336) / 4개 줄1 3개 + 줄2 x=24 / 5개 줄2 x=24·130.67 —
+기대값과 일치. 창 너비는 모듈 로드 시 1회 고정이라 회전·분할 화면에선 갱신되지 않는다.
+
+### [조사] "공유 컴포넌트 일부 화면만 고침" 사례 (고치지 않음)
+
+| 사례 | 위치 | 상태 |
+|---|---|---|
+| `TransactionListItem` '원' 접미 — `amountSuffix`를 `ReportEntryList`에만 넘김 | 위 2026-09-13 금액 표기 절 | 나머지 6개 호출 화면(Calendar, LedgerDetail, LedgerSearch, MemberPaymentHistory, TransactionSearch, Transactions)은 지금도 '원' 없음 — **미해결** |
+| 보고서 제목 필수 별표(`required`) — `ReportCreateByLedgerScreen`만 적용, `ReportCreateByPeriodScreen`은 "다음 라운드" | 2026-09-12 보고서 도메인 절 | 지금 코드는 두 화면 모두 `required` — 해결됨 |
+| 보관함 `ArchiveDetailScreen`에 보고서 카드 구조 미적용 | 같은 Screen ID 공유 절 | 카드 구조가 달라 의도적 제외로 근거 기록됨 |
+| `-0`/`원` — `BudgetCard`·`AmountCard`만 고침 | 2026-09-19 6-5 | 6-6에서 나머지 4곳 통일, `StatisticsScreen`은 아래 보류 |
+| `ScreenContainer` 마이그레이션 — 7개가 스낵바 absolute로 B 재분류 | design-verification §5-18 | `LedgerDetailScreen` 슬롯 실기기 확인 대기 |
+| 대조 방식이 좋았던 반례: `OutlinePill`(공용 컴포넌트 수정 전에 사용처 스펙시트 확인), `getFolderItems` 사용처 grep 전수 | 2026-09-12 / 폴더 도메인 절 | 참고 |
+
+## 2026-09-19 묶음 6-6 — 스낵바 슬롯 · 색 유지 · `-0` 통일
+
+### [수정] `ScreenContainer` 스낵바 슬롯
+
+`snackbar?: ReactNode` prop 추가 — 콘텐츠와 같은 `KeyboardAvoidingView`(behavior=`height`) **안**에
+`position:'absolute'; left/right/bottom: 24`(`pointerEvents="box-none"`)로 렌더한다. 키보드가 뜨면 KAV 높이가
+줄어드는 대로 스낵바도 콘텐츠와 함께 키보드 위로 올라가는 동작이다(가려지지 않음) — 지시대로 현재 키보드 처리
+방식과 같은 경로에 뒀을 뿐 새로 정한 정책이 아니다. 기존 화면 래퍼는 `SafeAreaView` 바로 아래에 있어 하단 인셋을
+무시하고 화면 끝 기준이었을 가능성이 있는데(Yoga absolute는 padding box 기준), 이 슬롯은 안전영역 안쪽 기준이라
+**기존보다 인셋만큼 위**다 — 실기기 확인 전. `LedgerDetailScreen`에만 적용(`snackbarWrapper` 스타일 제거).
+
+### [수정] 색 유지 마이그레이션 3개
+
+`NotificationScreen`/`CalendarScreen`(흰색→`secondary`), `TransactionsScreen`(블루→`primary`), 코드 기존값 유지.
+§2는 `미판정` 유지 + `캡처 필요`. 이유: 코드가 명시한 색을 미판정 추정값으로 덮으면 근거 있는 값을 근거 없는 값으로
+바꾸는 것.
+
+### [수정] 지출 표기 `formatExpense` (utils/currency.ts)
+
+`formatExpense(amount)` = 양수면 `-` 접두, 0이면 부호 없음, 항상 `원`. `BudgetCard`, `AmountCard`,
+`ReportCard`, `ReportByLedgerDetailScreen`, `ReportByPeriodDetailScreen`, `ArchiveDetailScreen`이 사용.
+
+표기가 바뀌는 화면(지출 0일 때만 바뀌고 양수는 동일, `ReportCard` 제외):
+
+| 화면 | 바뀌기 전 | 바뀐 후 |
+|---|---|---|
+| `ReportByLedgerDetailScreen` 장부별 지출 행 | `-0원` | `0원` |
+| `ReportByPeriodDetailScreen` 헤더 지출 | `-0원` | `0원` |
+| `ArchiveDetailScreen` 장부별 지출 행 | `-0원` | `0원` |
+| `ReportCard`(현재 렌더하는 화면 없음) 지출 | `-0` / `-1,000` | `0원` / `-1,000원`('원' 추가) |
+| `BudgetCard`·`AmountCard`(6-5에서 이미 반영) | — | 변화 없음 |
+
+**`StatisticsScreen` — 차이 보고 후 보류(고치지 않음)**: 이 파일의 로컬 `formatWon`은 `${amount.toLocaleString()}원`(**'원'
+포함**)이고 공용 `utils/currency`의 `formatWon`은 `${amount.toLocaleString()}`(**'원' 없음**)이라 동작이 다르다.
+로컬본을 지우고 공용본으로 바꾸면 이 화면의 수입(`+…원`)·지출(`-…`)·예산·지출 비중 4곳에서 '원'이 사라지거나
+호출부마다 `원`을 붙여야 한다. 지시("동작이 다르면 고치기 전에 차이를 보고하고 멈춰라")대로 손대지 않았다. 지출 두
+곳(`-{formatWon(mostActiveLedger.totalExpense)}`, `-{formatWon(item.totalExpense)}`)은 `-0원` 위험이 그대로 남아 있다.
+로컬본을 없애고 수입은 `${formatWon(x)}원`, 지출은 `formatExpense`로 바꾸는 안이 자연스러우나 승인 대기.
+
+**수입 쪽 현재 표기(조사만)**: `AmountCard`/`ReportByLedgerDetail`/`ReportByPeriodDetail`/`ArchiveDetail` — 부호 없이
+`{금액}원`(2026-09-13에 `+` 제거). `ReportCard` — `+{금액}`('원' 없음). `StatisticsScreen` — `+{금액}원`(로컬 formatWon).
+`ReportEntryDetailScreen`/`ArchiveEntryDetailScreen` — 내역 유형이 INCOME이면 `+`, 아니면 `-`(둘 다 `원`).
+`TransactionListItem` — 부호는 값 자체(음수만 `-`), '원'은 `ReportEntryList`만. 수입 0의 `+0`/`-0` 문제는
+`ReportCard`·`StatisticsScreen`(`+0`)에만 있고 나머지는 `0원`이라 `-0` 문제는 지출 쪽 한정이다.
+
+## 2026-09-19 묶음 6-8 — 승인 건 처리
+
+- **`StatisticsScreen` 로컬 `formatWon` 제거**: 공용 `utils/currency`의 `formatWon`/`formatExpense` 사용. 지시 1의 수입 표기(`${formatWon(x)}원`)와 지시 2("`+`를 쓸지는 결정 금지, 지금 상태 유지")가 부딪혀 **`+` 접두는 그대로 두고** 0일 때만 부호를 뺐다(`total > 0 ? '+' : ''`). 4곳 출력(입력 0 / 1000 / -1000):
+
+| 위치 | 제거 전(로컬 formatWon = `toLocaleString()+원`) | 제거 후 |
+|---|---|---|
+| 수입(가장 활발한 장부) | `+0원` / `+1,000원` / `+-1,000원` | `0원` / `+1,000원` / `-1,000원` |
+| 지출(같은 카드) | `-0원` / `-1,000원` / `--1,000원` | `0원` / `-1,000원` / `-1,000원` |
+| 예산 | `0원` / `1,000원` / `-1,000원` | 동일(`${formatWon(x)}원`) |
+| 지출 비중 금액 | `-0원` / `-1,000원` / `--1,000원` | `0원` / `-1,000원` / `-1,000원` |
+
+  음수 입력은 실제로 안 들어오는 값이라 표기 비교용이다.
+- **`+0` 수정**: `ReportCard`(`+N`, '원' 없음 그대로)·`StatisticsScreen`. 부호 규칙 불일치는 design-verification §5-4 불일치 #9로 기록 — 요청서의 "부호 없음 6 / `+` 2" 집계는 코드로 재현되지 않아(내역 상세 2곳은 `+` 사용) 실제 현황으로 적었다.
+- **`TransactionListItem` '원' 통일**: 컴포넌트 안에서 `{formatWon(amount)}원`으로 붙이고 `amountSuffix` prop과 `ReportEntryList`의 중복 전달을 제거. 호출 7곳 전부 `formatWon`(부호는 값 자체)을 쓰고 `formatExpense`는 쓰지 않는다:
+
+| 호출 화면 | 이전 '원' | 이후 |
+|---|---|---|
+| `ReportEntryList` | 있음(`amountSuffix`) | 있음(컴포넌트) |
+| `CalendarScreen`·`LedgerDetailScreen`·`LedgerSearchScreen`·`MemberPaymentHistoryScreen`·`TransactionSearchScreen`·`TransactionsScreen` | 없음 | 있음 |
+
+  판단 보류: 지출 금액이 0인 내역은 `-item.amount`가 `-0`이라 `-0원`으로 나올 수 있다(0원 내역이 서버에서 가능한지 확인 안 함).
+- **`FolderItem` `useWindowDimensions`**: 그리드 폭을 `useMemo`로 컴포넌트 안에서 계산(`FOLDER_GRID_COLUMNS`/`FOLDER_GRID_COLUMN_GAP` export 유지). 같은 모듈 스코프 `Dimensions.get` 패턴이 남은 곳(고치지 않음): `components/Data Display/Zoomable Image/ZoomableImage.tsx:11`(`SCREEN_WIDTH/HEIGHT` 구조분해), `screens/Receipt/ReceiptGrid.tsx:22`(`TILE_SIZE` — 3열·gap 8·패딩 24로 `FolderItem`과 같은 계산).
+- **화면 목록 감사**: design-verification §5-19(차이만 기록, 목록엔 추가 안 함).
+- **스낵바 슬롯 7개**: 대기 — 이번 턴 손대지 않음.
+
+## 2026-09-19 묶음 6-9 — 리스트 아이콘 크기 · 캐러셀 peek · 캡처 인덱스
+
+### [조사만] `FolderItem` 리스트 — 아이콘 크기는 layout과 무관
+
+`FolderGraphic`(65×51)/`LedgerGraphic`(60×50)은 `layout`을 안 받는 고정 크기 하나이고, list일 땐 그걸 `iconSlot`(폭 65, 가운데 정렬)에 넣을 뿐이다. 그리드/리스트 아이콘이 같은 크기인 건 코드대로다.
+
+| 컴포넌트 | 아이콘 | 행 패딩/좌우 | 행 높이(코드로 계산) | 행 구분선 |
+|---|---|---|---|---|
+| `FolderItem list` | 폴더 65×51 / 장부 60×50 | 컨테이너 padding 12(상하좌우) + 화면 body 24 = **좌측 36** | 24 + max(아이콘 51, 텍스트 16+2+16=34) = **75dp** | 없음 |
+| `SelectionListItem` | 셰브론 14×14(우측) | paddingVertical 14 | 28 + 20 = 48(부제 있으면 +18 = 66) | 없음 |
+| `CheckListItem` | 체크 18×18(우측) | paddingV 12, paddingH 16 | 24 + 20 = 44 | 없음 |
+| `MemberListItem` | 없음 | paddingV 12 | 24 + 20 = 44 | 없음 |
+| `TransactionListItem` | 영수증 18×18(우측 열) | paddingV 12, paddingH 12(−12 마진 상쇄) | 24 + max(좌 16+4+20=40, 우 18+4+20=42) = 66(아이콘 없으면 64) | 없음 |
+
+실측(132306 캡처, 표시 좌표×1.17÷3): 아이콘 폭 ≈65dp·높이 ≈51dp·좌측 ≈36dp·행 피치 ≈75dp로 코드값과 일치(±1dp). 리스트 행 아이콘의 앱 내 표준은 없다 — 다른 리스트형은 아이콘이 14~18dp 우측 보조 아이콘이고, 좌측 대형(65dp) 그래픽은 `FolderItem list`뿐이다. 65dp가 맞는지는 시안 대조 대기(수정 안 함).
+
+### [조사 → 수정 없음] 캐러셀 peek 비대칭 — 현재 코드/캡처엔 peek이 없다
+
+대상 캐러셀은 `LedgerDetailScreen`, `ReportPeriodEntriesScreen` 2곳(둘 다 2026-09-18 스냅 결함 수정본): `ScrollView horizontal pagingEnabled`, 슬라이드 폭 = `windowWidth`, 슬라이드 `paddingHorizontal: 24`(카드 폭 312), 스크롤뷰 자체 패딩/`snapToInterval`/gap 없음. 360dp 검산:
+
+| | scrollX | 카드1 x범위 | 카드2 x범위 |
+|---|---:|---|---|
+| 페이지 0 | 0 | 24–336 | 384–696 (화면 밖, peek 없음) |
+| 페이지 1 | 360 | −336–−24 (화면 밖, peek 없음) | 24–336 |
+
+즉 **양쪽 모두 peek이 없고 대칭**이다. `132315` 캡처를 원본 픽셀로 샘플링해도 y≈380px 행에서 카드가 24dp에서 시작해 336dp에서 끝나고 336–360dp는 배경색이라 카드 2 sliver가 없다. 요청서의 "카드2가 348dp부터"(24+312+12)는 **2026-09-18 수정 전 코드**(스크롤뷰 paddingLeft 24 + 카드 312 + gap 12, `snapToInterval` 324)의 값과 일치하고 현재 캡처·코드와는 안 맞는다 — 그 수치가 어느 번들에서 나왔는지는 확인 불가(캡처 파일에서는 재현 안 됨). 현재 상태가 "peek 없는 페이지 스냅"이라는 설계 자체가 의도인지 시안 확인이 필요해 **수정하지 않고 판단 보류**. 만약 peek을 원한다면 안: **(A)** peek을 두는 구조(카드 폭 312 + gap 12 단위 `snapToInterval`, 스크롤뷰 양쪽 `contentInset`/패딩 24)로 재설계 — 단 2026-09-18 스냅 결함이 바로 이 구조(좌측 인셋을 스냅 간격에 반영 못 함)에서 났으므로 양 끝 페이지의 인셋 보정이 필요, **(B)** 지금처럼 페이지 스냅을 유지하고 peek 없음을 명세화. 어느 쪽인지는 시안(예: `더보기_보고서생성_기간보고서조회.png`, 장부 상세 명세)에 peek 표현이 있는지에 달려 있다.
+
+### [해소] 폴더 ⋮ 메뉴 리스트 아이콘 — 캡처에서 확인
+
+6-5에서 판단 보류로 남겼던 항목이다. `shots/Screenshot_20260919_132310_BILLAGE.jpg`(메뉴 열림)에 `그리드`·`리스트` 둘 다 아이콘이 나온다 — 코드는 처음부터 연결돼 있었고(6-5 결론 그대로), 이전 캡처(`..._165358_`)는 존재하지 않았거나 아이콘 연결 전 번들이었다.
+
+### [기록] 삭제 모달 — 실기기 확인
+
+§2 `FDR-3-MODAL-04-0` 행에 `2026-09-19 실기기 확인` 추가(등급 변경 없음). 캡처 인덱스는 `shots/INDEX.md`.
+
+## 2026-09-19 묶음 6-10 — 0원 부호 · 그리드 계산 중복 · ZoomableImage
+
+- **`TransactionListItem` 0원**: 컴포넌트 안에서 `amount < 0 ? formatExpense(-amount) : \`${formatWon(Math.abs(amount))}원\``. 수입/지출이 부호로 갈리는 컴포넌트라 `formatExpense`(항상 `-` 접두 규칙, 입력은 양수 지출액)를 그대로 `amount`에 쓸 수 없어, 음수(지출)일 때만 `-amount`를 넘기고 그 외엔 기존 `formatWon`을 썼다(새 함수 없음). 이 컴포넌트는 원래 `+`를 붙인 적이 없다(수입 색만 파랑) — 지시문의 `+0원`은 존재하지 않았고 실제 결함은 호출부 `-item.amount`가 0일 때 만드는 JS `-0`(`(-0).toLocaleString()` = `"-0"`)뿐이었다. 0원 입력 출력: **수입 `0원`(이전과 동일) / 지출 `0원`(이전 `-0원`)**. 1,000원 입력은 수입 `1,000원` / 지출 `-1,000원`으로 변화 없음. 7개 호출 화면 전부 적용.
+- **그리드 계산 — 묶지 않음**: `FolderItem`(폴더 메인 `FDR-1-PAGE-01-0`)과 `ReceiptGrid`(증빙자료 앨범 `ETC-2-PAGE-05-0`) 시안(`화면명세서\폴더\폴더_메인화면.png`, `…\증빙자료\더보기_증빙자료앨범.png`)을 직접 열어 봤다. 열 수는 **두 시안 모두 "3열 그리드"로 명시**(폴더 시안 No.5 / 앨범 시안 No.6)돼 근거가 있다. 그러나 간격·좌우 여백은 앨범 목업만 재어졌고(좌우 여백 약 20dp, 타일 사이 약 7~8dp, 축소 이미지라 ±1dp) 앱은 24dp를 쓴다 — 폴더 목업은 카드 경계가 없어 간격을 못 잰다. 두 화면이 같은 값이어야 한다는 근거가 없고 오히려 여백이 다를 가능성이 있어 **공용 상수로 올리지 않고** 각 파일에 "같은 값을 우연히 쓰는 중, 의도적으로 안 묶음" 주석만 달았다. (앨범 여백 20 vs 24는 시안 대조 대기 항목으로 남김 — 이번엔 값 변경 없음.) `ReceiptGrid`는 `useWindowDimensions` + `useMemo`로 전환.
+- **`ZoomableImage` `useWindowDimensions` 전환**: 모듈 스코프 `SCREEN_WIDTH/HEIGHT` 제거. `PanResponder`가 최초 렌더에서 한 번만 만들어져 핸들러가 그 시점 값을 붙잡으므로 훅 값을 직접 쓰면 회전 후에도 옛 값이라, 매 렌더 갱신되는 `windowSizeRef`를 통해 읽게 했다. 화면 크기에 의존하는 부분은 **팬 한계(`maxOffsetX/Y = 화면크기 × (scale−1) / 2`) 계산 하나뿐**이다. 회전 시 동작: (1) 이후 팬 제스처부터 새 화면 크기로 한계가 계산됨, (2) 이미 확대·이동한 상태에서 회전하면 `scale`/`translate`가 그대로 남아 새 크기 기준 한계를 넘는 위치일 수 있고 다음 팬 제스처 전까지 클램프되지 않음(자동 리셋 없음 — 추가하지 않음), (3) 한계는 창 크기 기준이라 실제 뷰어 영역(앱바 제외)과는 원래도 약간 어긋난다(기존 동작). 안드로이드는 `screenOrientation` 고정이 없어(`AndroidManifest` `configChanges`에 orientation 포함) 회전은 실제로 일어날 수 있다.
+- **§5-19 분류 확정 / §2↔tsv 37·7 분류**: design-verification §5-19. 요약: §2에만 있는 37개 = tsv 누락 25 / 시안 없는 화면(정상) 7 / ID 오타 의심 3(형식 열과 ID 종류 불일치) / 판단 보류 2(IA 디자인 완료인데 이미지 0장). tsv에만 있는 7개 = 판단 보류 4(자리표시 2 + 부모 표기뿐인 스낵바 2) / tsv 오기 의심 1 / ID 변경됨 1 / 미구현 화면 1.
+
+
+## 2026-09-19 묶음 6-11 — 폴더 메인 시안 대조 (FDR-1-PAGE-01-0)
+
+명세서 원본(`화면명세서폴더폴더_메인화면.png`, 1920×3778, 목업 프레임 360px = 360dp)에서 사용자가 실측한 값을 반영했다.
+
+- **그리드 기하(확정)**: `FOLDER_GRID_COLUMN_GAP` 8→16, 아이템 폭 `(W − 48 − 32) / 3` = 360dp에서 93.33dp. 주석 `실측 필요` → `시안 실측값 (FDR-1-PAGE-01-0, 2026-09-19)`. 산술 재계산(360dp): 1개 x=24 / 2개 x=24·133.33 / 3개 x=24·133.33·242.67(우측 끝 336) / 4개 줄2 x=24 / 5개 줄2 x=24·133.33, 폭 93.33 — 기대값과 일치. `ReceiptGrid`는 로직을 안 건드리고 주석만 "폴더는 시안 실측 16으로 변경됨, 앨범은 미실측"으로 갱신. **영향 범위**: `FOLDER_GRID_COLUMN_GAP`을 같이 쓰는 `ReportLedgerSelectScreen`(보고서_장부 선택, `ETC-5-PAGE-01-0`) 그리드도 gap 8→16이 되었다 — 그 화면 시안의 간격은 실측 안 됨(폴더 시안 값을 공유 중, 필요하면 분리).
+- **개수 단위(확정 결함)**: `FolderScreen` "1 건" → "1 개"(공백 있음, 목업 따름 — 상수 `FOLDER_COUNT_SUFFIX`). 설명표는 `(N)개`(공백 없음)라 불일치 #11.
+  같은 `건` 단위를 쓰는 다른 화면(고치지 않음, 화면마다 시안이 다를 수 있음): `TransactionsScreen`(`TRANSACTIONS_COUNT_SUFFIX = ' 건'`, 공백 있음) / `DuesScreen`(`DUES_COUNT_SUFFIX`) / `MemberPaymentHistoryScreen`(`MEMBER_PAYMENT_COUNT_SUFFIX`) / `ReceiptAlbumScreen`·`ReceiptSearchScreen`(`RECEIPT_ALBUM_COUNT_SUFFIX`) / `ReportMainScreen`(`REPORT_MAIN_COUNT_SUFFIX`) / `ReportCreateByLedgerScreen`(`REPORT_LEDGER_FIELD_COUNT_SUFFIX`) / `ReportLedgerSelectScreen`(`REPORT_LEDGER_SELECT_COUNT_SUFFIX`, 폴더 그리드를 쓰는 화면인데도 `건`) / `ReportEntryList`(`REPORT_ENTRY_LIST_COUNT_SUFFIX`) / `AmountCard`("수입건수"·"지출건수" 값 `N건`). 이 중 공백 있는 건 `TransactionsScreen`뿐(나머지는 숫자 바로 뒤 `건`).
+- **빈 화면/검색 무결과 문구(확정)**: 현재 앱 문구는 이미 목업과 같다 — `FOLDER_EMPTY_TITLE` "아직 폴더 및 장부가 존재하지 않아요." / `FOLDER_EMPTY_SUBTITLE` "새로운 장부를 생성하여 내역을 관리해보세요." / `FOLDER_SEARCH_EMPTY_TITLE` "해당 검색어에 대한 내역이 없어요." / `FOLDER_SEARCH_EMPTY_SUBTITLE` "검색어를 다시 입력해주세요." — 코드 변경 없음. 설명표 No.5-1("생성한 폴더/장부가 없어요")과의 차이는 불일치 #10.
+- **검색 필드 clear(X) 버튼 — 보고만, 미수정**: `SearchField`(`components/Input/Search/SearchField.tsx`)는 `value/onChangeText/placeholder/size/variant/onSubmit`만 받고 **clear 지원이 없다**(우측엔 돋보기 아이콘 고정). 반대로 `TextField`는 `onClear?`(값이 있고 비활성 아닐 때 `Close.png` X 아이콘)를 갖고 있고 4개 화면(GroupProfileEdit/JoinGroupSheet/ProfileEdit/TransactionTextInputSheet)과 `Dialog`가 쓴다. `SearchField`는 8곳이 사용 중이라 §5-17의 "컴포넌트에 있는데 화면이 안 쓰는" 패턴이 아니라 **컴포넌트에 기능 자체가 없는** 경우다. 지시대로 고치지 않음 — 추가 시 `onClear` prop을 넣고 값이 있을 때 X + 돋보기 병기(시안 Case C), 폴더 화면에서 `onClear={() => setSearchQuery('')}` 연결하는 안이고, 나머지 7개 사용처에는 prop을 안 넘기면 변화 없다.
+- **말줄임 규칙(조사만)**: `FolderItem` 이름 `Text`는 `numberOfLines={1}`이고 `ellipsizeMode`는 안 줘서 RN 기본값 `tail`(끝 "…")이다. 텍스트 영역 = 아이템 폭 − 패딩 12×2. 앱 폰트 `Pyeojin Gothic` TTF(`android/.../fonts/PyeojinGothic-Regular/Bold.ttf`)의 `hmtx`/`cmap`에서 직접 뽑은 12sp + letterSpacing 0.25 기준 글자 폭: 한글 10.62dp(전 음절 동일), 영문 소문자 a 6.64(Bold 6.85), 숫자 0 7.35(Bold 7.93), "…" 9.29(Bold 10.08).
+
+  | 아이템 폭 | 텍스트 영역 | 한글 통째로 들어가는 최대 글자 | 초과 시 표시(한글+…) | 영문 소문자 |
+  |---|---:|---:|---:|---:|
+  | 100(6-7 이전 고정) | 76.00 | 7 | 6자+… | 11 |
+  | 98.67(6-7) | 74.67 | 7 | 6자+… | 11(Bold 10) |
+  | **93.33(6-11)** | 69.33 | **6** | **5자+…** | 10 |
+
+  즉 한글 이름이 **7글자부터** 말줄임이 걸린다(이전 8글자부터). 산술 근사이고 실제 안드로이드 텍스트 측정(fontScale, 커닝)·Bold 파일 사용 여부는 확인 못 했다. 부제(`caption`, `numberOfLines` 없음)는 "1개의 항목" 등 짧아 한 줄이지만 줄바꿈 방지 처리가 없어 매우 큰 항목 수(자릿수↑)에선 2줄이 될 수 있다(설명표는 이름만 말줄임 규정).
+- **리스트 아이콘 — 작업 없음**: 시안 Case A 메뉴에 `그리드`·`리스트` 아이콘이 둘 다 있고 코드는 `LIST_ICON`을 이미 연결. §2 `FDR-1-PAGE-01-0` 행에 `시안 확인 완료 (2026-09-19)` 기록.

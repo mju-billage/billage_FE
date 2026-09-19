@@ -24,7 +24,7 @@
  */
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, SectionList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -75,7 +75,7 @@ import {
   TRANSACTIONS_TAB_PENDING,
   TRANSACTIONS_TITLE,
 } from '../../constants/transactionScreenText';
-import { BLUE_50, FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const FILTER_ICON = require('../../assets/icons/system/Filter.png');
@@ -283,7 +283,7 @@ function TransactionsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar type="titleOnly" title={TRANSACTIONS_TITLE} />
 
       <View style={styles.body}>
@@ -401,15 +401,11 @@ function TransactionsScreen() {
           navigation.navigate('LedgerCreate', { parentId: null })
         }
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: BLUE_50,
-  },
   body: {
     flex: 1,
     paddingTop: 12,

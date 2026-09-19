@@ -1,18 +1,24 @@
 import { StyleSheet, Text, View } from 'react-native';
 import CardBase from './CardBase';
 import Divider from '../Divider/Divider';
-import { formatWon } from '../../../utils/currency';
+import { formatExpense, formatWon } from '../../../utils/currency';
 import { FEEDBACK_POSITIVE_BOLD, FOREGROUND_NEUTRAL_SUBTLE } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
 
-type AmountCardProps =
+type AmountCardProps = (
   | { type: 'incomeExpense'; income: number; expense: number }
   | { type: 'balance'; startBalance: number; endBalance: number }
   | { type: 'income'; income: number; incomeCount: number }
-  | { type: 'expense'; expense: number; expenseCount: number };
+  | { type: 'expense'; expense: number; expenseCount: number }
+) & {
+  /** false면 합계 행(+구분선)을 안 그린다 — 명세상 합계 행이 없는 카드용
+   * (예: ETC-4-PAGE-07-0 Card 1). 기본 true(기존 동작 그대로). */
+  showTotal?: boolean;
+};
 
-/** 라벨+금액 행이 반복되고 합계가 나오는 금액 요약 카드. */
+/** 라벨+금액 행이 반복되고(기본) 합계가 나오는 금액 요약 카드. */
 function AmountCard(props: AmountCardProps) {
+  const { showTotal = true } = props;
   const rows = getRows(props);
   const total = getTotal(props);
 
@@ -26,15 +32,19 @@ function AmountCard(props: AmountCardProps) {
           </Text>
         </View>
       ))}
-      {props.type === 'incomeExpense' && (
-        <View style={styles.dividerWrapper}>
-          <Divider variant="dashed" />
-        </View>
+      {showTotal && (
+        <>
+          {props.type === 'incomeExpense' && (
+            <View style={styles.dividerWrapper}>
+              <Divider variant="dashed" />
+            </View>
+          )}
+          <View style={styles.row}>
+            <Text style={styles.label}>{total.label}</Text>
+            <Text style={styles.value}>{total.value}</Text>
+          </View>
+        </>
       )}
-      <View style={styles.row}>
-        <Text style={styles.label}>{total.label}</Text>
-        <Text style={styles.value}>{total.value}</Text>
-      </View>
     </CardBase>
   );
 }
@@ -43,18 +53,18 @@ function getRows(props: AmountCardProps) {
   switch (props.type) {
     case 'incomeExpense':
       return [
-        { label: '수입', value: `+${formatWon(props.income)}`, positive: true },
+        { label: '수입', value: `${formatWon(props.income)}원`, positive: true },
         {
           label: '지출',
-          value: `-${formatWon(props.expense)}`,
+          value: formatExpense(props.expense),
           positive: false,
         },
       ];
     case 'balance':
       return [
         {
-          label: '시작잔액',
-          value: formatWon(props.startBalance),
+          label: '시작 잔액',
+          value: `${formatWon(props.startBalance)}원`,
           positive: false,
         },
       ];
@@ -76,13 +86,13 @@ function getRows(props: AmountCardProps) {
 function getTotal(props: AmountCardProps) {
   switch (props.type) {
     case 'incomeExpense':
-      return { label: '합계', value: formatWon(props.income - props.expense) };
+      return { label: '합계', value: `${formatWon(props.income - props.expense)}원` };
     case 'balance':
-      return { label: '최종잔액', value: formatWon(props.endBalance) };
+      return { label: '최종 잔액', value: `${formatWon(props.endBalance)}원` };
     case 'income':
-      return { label: '수입', value: formatWon(props.income) };
+      return { label: '수입', value: `${formatWon(props.income)}원` };
     case 'expense':
-      return { label: '지출', value: formatWon(props.expense) };
+      return { label: '지출', value: `${formatWon(props.expense)}원` };
   }
 }
 

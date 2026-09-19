@@ -22,7 +22,7 @@
  */
 import { useCallback, useState } from 'react';
 import { SectionList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -136,7 +136,7 @@ function MemberPaymentHistoryScreen() {
 
   if (loadState === 'loading' || loadState === 'error') {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="primary">
         <AppBar
           type="sub"
           title={MEMBER_PAYMENT_HISTORY_TITLE}
@@ -155,7 +155,7 @@ function MemberPaymentHistoryScreen() {
             />
           )}
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
@@ -165,7 +165,7 @@ function MemberPaymentHistoryScreen() {
   }));
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar
         type="sub"
         title={MEMBER_PAYMENT_HISTORY_TITLE}
@@ -208,14 +208,11 @@ function MemberPaymentHistoryScreen() {
           />
         )}
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Badge from '../Badge/Badge';
 import { CALENDAR_APPROVAL_BADGE_LABEL } from '../../../constants/calendarScreenText';
-import { formatWon } from '../../../utils/currency';
+import { formatExpense, formatWon } from '../../../utils/currency';
 import {
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_NORMAL,
@@ -35,6 +35,8 @@ function TransactionListItem({
 }: TransactionListItemProps) {
   const [hovered, setHovered] = useState(false);
   const isIncome = amount > 0;
+  // 호출부가 지출을 -item.amount로 넘기므로 0원 지출은 -0이 된다 — `(-0).toLocaleString()`은
+  // "-0"이라 Math.abs로 부호를 걷어낸다(0원은 수입/지출 모두 부호 없이 `0원`).
 
   return (
     <Pressable
@@ -59,7 +61,7 @@ function TransactionListItem({
           <Image source={RECEIPT_ICON} style={styles.receiptIcon} />
         ) : null}
         <Text style={[styles.amount, isIncome && styles.amountIncome]}>
-          {formatWon(amount)}
+          {amount < 0 ? formatExpense(-amount) : `${formatWon(Math.abs(amount))}원`}
         </Text>
       </View>
     </Pressable>

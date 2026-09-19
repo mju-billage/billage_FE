@@ -3,6 +3,7 @@ import {
   createBottomTabNavigator,
   BottomTabBarProps,
 } from '@react-navigation/bottom-tabs';
+import { CommonActions } from '@react-navigation/native';
 import DashboardScreen from '../screens/Dashboard/DashboardScreen';
 import TransactionsScreen from '../screens/Transactions/TransactionsScreen';
 import FolderTabNavigator from '../screens/Folder/FolderTabNavigator';
@@ -88,7 +89,28 @@ function MainTabNavigator() {
     >
       <Tab.Screen name="Home" component={DashboardScreen} />
       <Tab.Screen name="Transactions" component={TransactionsScreen} />
-      <Tab.Screen name="Folder" component={FolderTabNavigator} />
+      <Tab.Screen
+        name="Folder"
+        component={FolderTabNavigator}
+        listeners={({ navigation }) => ({
+          // 폴더 탭은 자체 스택(FolderTabNavigator)을 가진 유일한 탭이다 —
+          // 서브폴더로 들어간 뒤 탭을 떠났다 돌아오거나 같은 탭을 재탭해도
+          // 화면 위치(폴더 깊이)만 루트로 되돌린다. unmountOnBlur는 안 쓴다
+          // — 화면 전체가 언마운트되면 폴더 목록을 매번 재요청하게 된다.
+          // 목록의 스크롤 위치·그리드/리스트 보기 방식은 FolderScreen 내부
+          // state라 이 초기화와 무관하게 유지된다(design-verification.md §5-11).
+          tabPress: () => {
+            navigation.dispatch(state =>
+              CommonActions.reset({
+                ...state,
+                routes: state.routes.map(route =>
+                  route.name === 'Folder' ? { ...route, state: undefined } : route,
+                ),
+              }),
+            );
+          },
+        })}
+      />
       <Tab.Screen name="Dues" component={DuesScreen} />
       <Tab.Screen name="More" component={MoreScreen} />
     </Tab.Navigator>

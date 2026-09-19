@@ -9,18 +9,21 @@ import {
 } from 'react-native';
 import {
   BACKGROUND_PRIMARY,
+  BASIC_0,
+  BORDER_NEUTRAL_NORMAL,
   FEEDBACK_NEGATIVE_BOLD,
   FILL_DISABLED,
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_DISABLED,
   FOREGROUND_INVERSE,
   FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
   NAVY_800,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
 
-type ButtonHierarchy = 'primary' | 'secondary' | 'tertiary';
+type ButtonHierarchy = 'primary' | 'secondary' | 'tertiary' | 'outlined';
 
 type ButtonProps = {
   label: string;
@@ -56,6 +59,8 @@ function Button({
     ? styles.secondary
     : hierarchy === 'tertiary'
     ? styles.tertiary
+    : hierarchy === 'outlined'
+    ? styles.outlined
     : styles.primary;
   const labelStyle = negative
     ? styles.negativeLabel
@@ -63,6 +68,8 @@ function Button({
     ? styles.secondaryLabel
     : hierarchy === 'tertiary'
     ? styles.tertiaryLabel
+    : hierarchy === 'outlined'
+    ? styles.outlinedLabel
     : styles.primaryLabel;
   const iconTint = disabled ? FOREGROUND_DISABLED : labelStyle.color;
 
@@ -120,6 +127,11 @@ const styles = StyleSheet.create({
   tertiary: {
     backgroundColor: FILL_NEUTRAL_NORMAL,
   },
+  outlined: {
+    backgroundColor: BASIC_0,
+    borderWidth: 1,
+    borderColor: BORDER_NEUTRAL_NORMAL,
+  },
   negative: {
     backgroundColor: FEEDBACK_NEGATIVE_BOLD,
   },
@@ -147,6 +159,9 @@ const styles = StyleSheet.create({
   },
   tertiaryLabel: {
     color: FOREGROUND_NEUTRAL_NORMAL,
+  },
+  outlinedLabel: {
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   negativeLabel: {
     color: FOREGROUND_INVERSE,

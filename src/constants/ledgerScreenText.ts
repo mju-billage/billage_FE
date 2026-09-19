@@ -23,7 +23,13 @@ export const LEDGER_MENU_RENAME = '장부 이름 변경';
 export const LEDGER_MENU_DELETE = '장부 삭제';
 
 export const LEDGER_RENAME_DIALOG_TITLE = '장부 이름 변경하기';
-export const LEDGER_RENAME_PLACEHOLDER = '최대 20자 이내로 입력해주세요.';
+/** 20자 확정(2026-09-18, design-verification.md §5-16) — 시안 목업 원문은
+ * "최대 10자 이내로 입력해주세요."였지만, 앱 내 이름/제목 필드 4/4가 20자(그중
+ * 3개 서버 도메인 문서 근거)이고 같은 명세서 설명표 No.2/No.3도 20을 두 번
+ * 명시해 설명표+서버 근거를 따랐다. 목업의 "10"은 시안↔설명표 불일치 #8로
+ * 별도 기록, 기획 확인 필요. */
+export const LEDGER_RENAME_DIALOG_DESCRIPTION = '최대 20자까지 입력할 수 있어요.';
+export const LEDGER_RENAME_PLACEHOLDER = '변경할 이름을 입력해주세요.';
 export const LEDGER_RENAME_CONFIRM_LABEL = '변경';
 
 export const LEDGER_BUDGET_DIALOG_TITLE = '예산 설정하기';
@@ -88,6 +94,9 @@ export const TRANSACTION_RECEIPT_ITEM_NAME_LABEL = '상품명';
 export const TRANSACTION_RECEIPT_QUANTITY_LABEL = '수량';
 export const TRANSACTION_RECEIPT_AMOUNT_LABEL = '금액';
 export const TRANSACTION_RECEIPT_TOTAL_LABEL = '합계';
+/** 상세 내역_납부관리_수입내역(마감된 회비에서 생성된 수입 내역, `entry.duesExists`) 전용. */
+export const TRANSACTION_PAYER_COUNT_SUFFIX = '명';
+export const TRANSACTION_DUES_DETAIL_CTA_LABEL = '회비 상세보기';
 export const TRANSACTION_DELETE_CONFIRM_TITLE = '내역을 삭제하시겠습니까?';
 export const TRANSACTION_DELETE_CONFIRM_DESCRIPTION =
   '삭제 이후에는 데이터 복구가 어렵습니다.';

@@ -4,6 +4,8 @@ export const FOLDER_SEARCH_PLACEHOLDER = '검색어를 입력해주세요.';
 export const FOLDER_EMPTY_TITLE = '아직 폴더 및 장부가 존재하지 않아요.';
 export const FOLDER_EMPTY_SUBTITLE =
   '새로운 장부를 생성하여 내역을 관리해보세요.';
+/** 목록 개수 단위. 시안 목업은 "6 개"(숫자와 단위 사이 공백 있음), 설명표는 "{N}개" — 불일치 #11, 목업을 따른다. */
+export const FOLDER_COUNT_SUFFIX = '개';
 export const FOLDER_SEARCH_EMPTY_TITLE = '해당 검색어에 대한 내역이 없어요.';
 export const FOLDER_SEARCH_EMPTY_SUBTITLE = '검색어를 다시 입력해주세요.';
 /** 로딩/에러 문구 — 디자인 시안에 해당 상태가 없어 최소 형태로 통일(api-integration-plan.md "표준 패턴" 참고). */
@@ -19,9 +21,10 @@ export const NEW_ITEM_SHEET_FOLDER_LABEL = '새 폴더 생성하기';
 
 export const FOLDER_MENU_SELECT_MOVE = '선택 이동';
 export const FOLDER_MENU_RENAME = '폴더 이름 변경';
-export const FOLDER_MENU_VIEW_TOGGLE = '그리드 · 리스트';
 export const FOLDER_MENU_UNLINK = '폴더 해제';
-export const FOLDER_MENU_BUDGET_LIST = '전체 예산 설정';
+/** 시안(폴더_메인화면.png Case A)이 "예산 설정"으로 고정 노출 — 예전엔
+ * "전체 예산 설정"이었다(2026-09-18 정정). */
+export const FOLDER_MENU_BUDGET_LIST = '예산 설정';
 export const FOLDER_MENU_BACKUP = '전체 백업';
 
 export const VIEW_TOGGLE_GRID_LABEL = '그리드';

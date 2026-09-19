@@ -24,6 +24,8 @@ const CLOSE_ICON = require('../../../assets/icons/action/Close.png');
 
 type TextFieldProps = {
   label?: string;
+  /** true면 라벨 우측에 빨간 별표(필수 표시)를 붙인다. */
+  required?: boolean;
   value: string;
   onChangeText: (text: string) => void;
   placeholder: string;
@@ -41,6 +43,7 @@ type TextFieldProps = {
   maxLength?: number;
   keyboardType?: KeyboardTypeOptions;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  autoFocus?: boolean;
 };
 
 /**
@@ -53,6 +56,7 @@ type TextFieldProps = {
 const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
   {
     label,
+    required = false,
     value,
     onChangeText,
     placeholder,
@@ -67,6 +71,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
     maxLength,
     keyboardType,
     autoCapitalize,
+    autoFocus = false,
   },
   ref,
 ) {
@@ -86,6 +91,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
       {label && (
         <Text style={[styles.label, disabled && styles.labelDisabled]}>
           {label}
+          {required && <Text style={styles.requiredMark}> *</Text>}
         </Text>
       )}
       <View style={[styles.inputRow, { borderBottomColor: underlineColor }]}>
@@ -102,6 +108,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           maxLength={maxLength}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
+          autoFocus={autoFocus}
           editable={!disabled}
         />
         {suffix && (
@@ -150,6 +157,9 @@ const styles = StyleSheet.create({
   },
   labelDisabled: {
     color: FOREGROUND_DISABLED,
+  },
+  requiredMark: {
+    color: FEEDBACK_NEGATIVE_BOLD,
   },
   inputRow: {
     flexDirection: 'row',

@@ -18,6 +18,9 @@ export type LedgerSummary = {
   /** budget이 null이면 이 값도 null. */
   remainingBudget: number | null;
   entryCount: number;
+  /** `getLedgersInFolder`(폴더 스코프 목록) 응답엔 없어 옵셔널 — `getAllLedgersInGroup`
+   * (모임 전체 목록)만 채운다(예산 설정 화면의 "최신 생성 장부순" 정렬에 씀). */
+  createdAt?: string;
 };
 
 export type LedgerDetail = LedgerSummary & {

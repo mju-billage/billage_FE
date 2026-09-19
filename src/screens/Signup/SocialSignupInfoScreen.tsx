@@ -37,7 +37,15 @@ type SocialSignupInfoRouteProp = RouteProp<
 
 const NAME_MAX_LENGTH = 8;
 
-/** 간편(소셜) 회원가입 정보 입력 화면: 소셜 프로필을 프리필해 이름과 이메일만 받는다. */
+/**
+ * 간편(소셜) 회원가입 정보 입력 화면: 소셜 프로필을 프리필해 이름과 이메일만 받는다.
+ *
+ * **2026-09-11 Swagger 대조**: `POST /auth/social/signup` 요청 스키마에 `email`
+ * 필드가 없다 — 이 화면이 입력받은 이메일은 지금 서버로 안 보낸다(표시/수정
+ * UI는 그대로 뒀다, 지울지는 기획 확인 필요). 대신 스키마엔 `termsAgreed`
+ * (필수)가 있는데 이 화면엔 약관 동의 UI가 없다 — `authService.socialSignup`
+ * 주석 참고, 실제 서버에 호출하면 `400`이 날 수 있다.
+ */
 function SocialSignupInfoScreen() {
   const navigation = useNavigation<SocialSignupInfoNavigationProp>();
   const { profile } = useRoute<SocialSignupInfoRouteProp>().params;
@@ -60,7 +68,6 @@ function SocialSignupInfoScreen() {
         provider: profile.provider,
         providerToken: profile.providerToken,
         name,
-        email,
       });
       navigation.navigate('SignupComplete');
     } catch (error) {

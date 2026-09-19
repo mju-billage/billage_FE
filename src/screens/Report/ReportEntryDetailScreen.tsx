@@ -18,7 +18,7 @@
  * 필드를 더 채울 것.
  */
 import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -60,7 +60,7 @@ function ReportEntryDetailScreen() {
   const { ledgerName, entry } = route.params;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar
         type="sub"
         title={REPORT_ENTRY_DETAIL_TITLE}
@@ -82,14 +82,11 @@ function ReportEntryDetailScreen() {
 
         <Text style={styles.notice}>{REPORT_ENTRY_DETAIL_SNAPSHOT_NOTICE}</Text>
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,

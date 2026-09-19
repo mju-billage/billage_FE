@@ -10,15 +10,22 @@
  * 자체는 `ETC-4-PAGE-02-0`(이미 만든 `GroupImagePickerScreen`)을 그대로
  * 재사용한다 — 새로 만들지 않는다.
  *
- * ⚠️ 갤러리/카메라가 전부 mock이라 실제 파일이 없다(`GroupProfileEditScreen.tsx`
- * 주석과 동일한 제약) — 촬영/앨범 선택은 로컬 미리보기조차 못 만들고(실제
- * 이미지 데이터가 없음) 저장 시에도 `profileImageFileId`를 보내지 않는다.
- * 단, "기본 프로필로 변경하기"는 서버에 `null`만 보내면 되고 실제 파일이
- * 필요 없어 — 이것만 진짜로 동작한다(3-state 규칙 중 "초기화"만 이번에
- * 실제로 붙는다).
+ * 2026-09-11부터 카메라/갤러리 둘 다 실제 촬영·선택이고, 고른 즉시
+ * `fileService.uploadFile(..., 'PROFILE_IMAGE')`로 업로드해 받은 fileId를
+ * `profileImageFileId`에 채운다(업로드 중엔 저장 버튼을 막는다). "기본
+ * 프로필로 변경하기"는 여전히 `null`만 보내면 되고 실제 파일이 필요 없다
+ * (3-state 규칙).
  */
 import { useCallback, useState } from 'react';
-import { BackHandler, Image, Pressable, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  BackHandler,
+  Image,
+  Linking,
+  Pressable,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -30,8 +37,10 @@ import TextField from '../../components/Input/Text Field/TextField';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Menu from '../../components/Navigation/Menu/Menu';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
-import MockCameraView from '../Transactions/MockCameraView';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import GroupImagePickerScreen from '../GroupManager/GroupImagePickerScreen';
+import { captureWithFeedback, type PickedImage } from '../../utils/imagePicker';
+import * as fileService from '../../services/fileService';
 import { getCurrentUser } from '../../types/session';
 import * as authService from '../../services/authService';
 import { ApiError } from '../../services/apiClient';
@@ -55,6 +64,16 @@ import {
   PROFILE_IMAGE_SHEET_RESET_LABEL,
   SNACKBAR_PROFILE_UPDATED,
 } from '../../constants/settingsScreenText';
+import {
+  CAMERA_PERMISSION_DIALOG_DESCRIPTION,
+  CAMERA_PERMISSION_DIALOG_TITLE,
+  GALLERY_PERMISSION_DIALOG_DESCRIPTION,
+  GALLERY_PERMISSION_DIALOG_TITLE,
+  PERMISSION_DIALOG_CANCEL_LABEL,
+  PERMISSION_SETTINGS_BUTTON_LABEL,
+  SNACKBAR_IMAGE_TOO_LARGE,
+  SNACKBAR_IMAGE_UPLOAD_FAILED,
+} from '../../constants/commonText';
 import { FOREGROUND_INVERSE, NAVY_800 } from '../../constants/colors';
 
 const CAMERA_ICON = require('../../assets/icons/content/Camera.png');
@@ -66,10 +85,13 @@ type ProfileEditNavigationProp = NativeStackNavigationProp<
   'ProfileEdit'
 >;
 
-type Stage = 'form' | 'camera' | 'imagePicker';
+type Stage = 'form' | 'imagePicker';
+
+const SNACKBAR_AUTO_HIDE_MS = 1600;
 /** 저장 시 보낼 이미지 상태 — 'none'=안 건드림(필드 생략), 'reset'=기본으로
- * 초기화(null 전송), 'picked'=mock으로 골랐지만 실제 파일이 없어 저장 안 함. */
-type ImageAction = 'none' | 'reset' | 'picked';
+ * 초기화(null 전송), 'uploaded'=새로 업로드해 fileId가 있음. */
+type ImageAction = 'none' | 'reset' | 'uploaded';
+type PermissionDialogKind = 'camera' | 'gallery' | null;
 
 /** "프로필 변경": 닉네임 + 대표 이미지 수정. */
 function ProfileEditScreen() {
@@ -81,13 +103,25 @@ function ProfileEditScreen() {
   const [stage, setStage] = useState<Stage>('form');
   const [imageMenuVisible, setImageMenuVisible] = useState(false);
   const [imageAction, setImageAction] = useState<ImageAction>('none');
+  const [previewUri, setPreviewUri] = useState<string | null>(null);
+  const [uploadedFileId, setUploadedFileId] = useState<number | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [leaveDialogVisible, setLeaveDialogVisible] = useState(false);
+  const [permissionDialogKind, setPermissionDialogKind] =
+    useState<PermissionDialogKind>(null);
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+
+  const showSnackbar = (message: string) => {
+    setSnackbarMessage(message);
+    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
+  };
 
   const trimmedName = name.trim();
-  const canSubmit = trimmedName.length > 0 && !isSubmitting;
+  const canSubmit = trimmedName.length > 0 && !isSubmitting && !isUploadingImage;
   const hasChanges = trimmedName !== (user?.name ?? '') || imageAction !== 'none';
   const hasCustomImage =
-    imageAction === 'picked' || (imageAction === 'none' && !!user?.profileImageUrl);
+    imageAction === 'uploaded' ||
+    (imageAction === 'none' && !!user?.profileImageUrl);
 
   const handleBack = () => {
     if (hasChanges) {
@@ -132,6 +166,8 @@ function ProfileEditScreen() {
       }
       if (imageAction === 'reset') {
         payload.profileImageFileId = null;
+      } else if (imageAction === 'uploaded' && uploadedFileId !== null) {
+        payload.profileImageFileId = uploadedFileId;
       }
       if (Object.keys(payload).length > 0) {
         await authService.updateMyProfile(payload);
@@ -155,27 +191,51 @@ function ProfileEditScreen() {
     }
   };
 
-  if (stage === 'camera') {
-    return (
-      <MockCameraView
-        onBack={() => setStage('form')}
-        onClose={() => setStage('form')}
-        onCapture={() => {
-          setImageAction('picked');
-          setStage('form');
-        }}
-      />
+  const handleImagePicked = async (image: PickedImage) => {
+    if (image.size !== undefined && image.size > fileService.MAX_UPLOAD_FILE_SIZE_BYTES) {
+      showSnackbar(SNACKBAR_IMAGE_TOO_LARGE);
+      return;
+    }
+    setPreviewUri(image.uri);
+    setIsUploadingImage(true);
+    try {
+      const uploaded = await fileService.uploadFile(
+        image.uri,
+        image.fileName,
+        image.type,
+        'PROFILE_IMAGE',
+      );
+      setUploadedFileId(Number(uploaded.id));
+      setImageAction('uploaded');
+    } catch {
+      setPreviewUri(null);
+      showSnackbar(SNACKBAR_IMAGE_UPLOAD_FAILED);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  // 시스템 카메라를 직접 부른다 — 예전엔 인앱 중간 화면(`CameraCaptureView`)을
+  // 거쳤는데, 시스템 카메라 앱을 쓰는 이상 그 중간 화면은 "카메라가 두 번
+  // 열리는" 것처럼만 보여 없앴다(2026-09-06).
+  const handleTakePhoto = async () => {
+    const image = await captureWithFeedback(showSnackbar, () =>
+      setPermissionDialogKind('camera'),
     );
-  }
+    if (image) {
+      await handleImagePicked(image);
+    }
+  };
 
   if (stage === 'imagePicker') {
     return (
       <GroupImagePickerScreen
         onBack={() => setStage('form')}
-        onOpenCamera={() => setStage('camera')}
-        onSelect={() => {
-          setImageAction('picked');
+        onMessage={showSnackbar}
+        onPermanentlyDenied={() => setPermissionDialogKind('gallery')}
+        onPicked={image => {
           setStage('form');
+          handleImagePicked(image);
         }}
       />
     );
@@ -189,15 +249,24 @@ function ProfileEditScreen() {
         <Pressable
           style={styles.avatarRow}
           onPress={() => setImageMenuVisible(true)}
+          disabled={isUploadingImage}
         >
           <Avatar
             type={hasCustomImage ? 'image' : 'icon'}
-            imageUri={imageAction === 'none' ? user?.profileImageUrl ?? '' : ''}
+            imageUri={
+              previewUri ?? (imageAction === 'none' ? user?.profileImageUrl ?? '' : '')
+            }
             size="lg"
           />
-          <View style={styles.cameraBadge}>
-            <Image source={CAMERA_ICON} style={styles.cameraBadgeIcon} />
-          </View>
+          {isUploadingImage ? (
+            <View style={styles.avatarUploadingOverlay}>
+              <ActivityIndicator color={FOREGROUND_INVERSE} />
+            </View>
+          ) : (
+            <View style={styles.cameraBadge}>
+              <Image source={CAMERA_ICON} style={styles.cameraBadgeIcon} />
+            </View>
+          )}
         </Pressable>
 
         <TextField
@@ -255,10 +324,12 @@ function ProfileEditScreen() {
           onSelect={key => {
             setImageMenuVisible(false);
             if (key === 'camera') {
-              setStage('camera');
+              handleTakePhoto();
             } else if (key === 'gallery') {
               setStage('imagePicker');
             } else if (key === 'reset') {
+              setPreviewUri(null);
+              setUploadedFileId(null);
               setImageAction('reset');
             }
           }}
@@ -278,6 +349,36 @@ function ProfileEditScreen() {
           navigation.goBack();
         }}
       />
+      <Dialog
+        visible={permissionDialogKind === 'camera'}
+        title={CAMERA_PERMISSION_DIALOG_TITLE}
+        description={CAMERA_PERMISSION_DIALOG_DESCRIPTION}
+        cancelLabel={PERMISSION_DIALOG_CANCEL_LABEL}
+        confirmLabel={PERMISSION_SETTINGS_BUTTON_LABEL}
+        onCancel={() => setPermissionDialogKind(null)}
+        onConfirm={() => {
+          setPermissionDialogKind(null);
+          Linking.openSettings();
+        }}
+      />
+      <Dialog
+        visible={permissionDialogKind === 'gallery'}
+        title={GALLERY_PERMISSION_DIALOG_TITLE}
+        description={GALLERY_PERMISSION_DIALOG_DESCRIPTION}
+        cancelLabel={PERMISSION_DIALOG_CANCEL_LABEL}
+        confirmLabel={PERMISSION_SETTINGS_BUTTON_LABEL}
+        onCancel={() => setPermissionDialogKind(null)}
+        onConfirm={() => {
+          setPermissionDialogKind(null);
+          Linking.openSettings();
+        }}
+      />
+
+      {snackbarMessage && (
+        <View style={styles.snackbarWrapper}>
+          <Snackbar visible title={snackbarMessage} />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -313,9 +414,26 @@ const styles = StyleSheet.create({
     height: 14,
     tintColor: FOREGROUND_INVERSE,
   },
+  avatarUploadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   footer: {
     paddingHorizontal: 24,
     paddingVertical: 16,
+  },
+  snackbarWrapper: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    bottom: 24,
   },
 });
 

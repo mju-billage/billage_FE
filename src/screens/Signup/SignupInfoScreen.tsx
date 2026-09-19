@@ -1,15 +1,14 @@
 /** @screen COM-3-PAGE-03-0 가입 정보 입력 */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/Navigation/App bar/BackButton';
 import TextField from '../../components/Input/Text Field/TextField';
 import Button from '../../components/Input/Button/Button';
 import { isValidEmail, isValidPassword } from '../../utils/validators';
-import { ApiError } from '../../services/apiClient';
-import * as authService from '../../services/authService';
 import { TYPOGRAPHY } from '../../constants/typography';
 import {
   SIGNUP_INFO_TITLE,
@@ -19,13 +18,11 @@ import {
   SIGNUP_EMAIL_LABEL,
   SIGNUP_EMAIL_PLACEHOLDER,
   SIGNUP_EMAIL_FORMAT_ERROR,
-  SIGNUP_EMAIL_ALREADY_EXISTS_ERROR,
   SIGNUP_PASSWORD_LABEL,
   SIGNUP_PASSWORD_PLACEHOLDER,
   SIGNUP_PASSWORD_HELPER,
   SIGNUP_PASSWORD_CONFIRM_LABEL,
   SIGNUP_PASSWORD_MISMATCH_ERROR,
-  SIGNUP_GENERIC_ERROR,
 } from '../../constants/signupInfoText';
 import { NEXT_BUTTON_LABEL } from '../../constants/commonText';
 
@@ -33,23 +30,33 @@ type SignupInfoNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'SignupInfo'
 >;
+type SignupInfoRouteProp = RouteProp<RootStackParamList, 'SignupInfo'>;
 
 const NAME_MAX_LENGTH = 8;
 
-/** 이메일 회원가입 정보 입력 화면: 이름, 이메일, 비밀번호를 받는다. */
+/**
+ * 이메일 회원가입 정보 입력 화면: 이름, 이메일, 비밀번호를 받는다.
+ *
+ * ⚠️ 2026-09-06 흐름 변경(Auth.txt 6~8번): 예전엔 이 화면에서 바로
+ * `POST /auth/signup`을 호출했는데, 명세가 "이메일 인증을 먼저 마쳐야 가입
+ * 가능"으로 확정되면서 순서가 뒤집혔다 — 실제 가입 호출은
+ * `EmailVerificationScreen`의 코드 검증 성공 직후로 옮겼다(2026-09-11 Swagger
+ * 대조 결과 `verificationToken` 같은 건 실제로 없다 — `authService.ts` 주석
+ * 참고). 이 화면은 이제 입력값만 모아 다음 화면으로 넘긴다(API 호출 없음).
+ * `EMAIL_ALREADY_EXISTS` 에러도 그래서 이 화면이 아니라
+ * `EmailVerificationScreen`에서 처리한다 — 사용자가 인증까지 다 마친
+ * 뒤에야 알게 되는 건 UX상 아쉽지만 명세가 그렇게 정의했다.
+ */
 function SignupInfoScreen() {
   const navigation = useNavigation<SignupInfoNavigationProp>();
+  const route = useRoute<SignupInfoRouteProp>();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [signupError, setSignupError] = useState<string | undefined>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const emailError =
-    email.length > 0 && !isValidEmail(email)
-      ? SIGNUP_EMAIL_FORMAT_ERROR
-      : signupError;
+    email.length > 0 && !isValidEmail(email) ? SIGNUP_EMAIL_FORMAT_ERROR : undefined;
   const confirmError =
     passwordConfirm.length > 0 && passwordConfirm !== password
       ? SIGNUP_PASSWORD_MISMATCH_ERROR
@@ -61,21 +68,13 @@ function SignupInfoScreen() {
     isValidPassword(password) &&
     passwordConfirm === password;
 
-  const handleNext = async () => {
-    setSignupError(undefined);
-    setIsSubmitting(true);
-    try {
-      await authService.signup({ email, password, name });
-      navigation.navigate('EmailVerification', { email });
-    } catch (error) {
-      if (error instanceof ApiError && error.code === 'EMAIL_ALREADY_EXISTS') {
-        setSignupError(SIGNUP_EMAIL_ALREADY_EXISTS_ERROR);
-      } else {
-        setSignupError(SIGNUP_GENERIC_ERROR);
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleNext = () => {
+    navigation.navigate('EmailVerification', {
+      email,
+      name,
+      password,
+      agreements: route.params.agreements,
+    });
   };
 
   return (
@@ -97,10 +96,7 @@ function SignupInfoScreen() {
         <TextField
           label={SIGNUP_EMAIL_LABEL}
           value={email}
-          onChangeText={text => {
-            setEmail(text);
-            setSignupError(undefined);
-          }}
+          onChangeText={setEmail}
           placeholder={SIGNUP_EMAIL_PLACEHOLDER}
           error={emailError}
           keyboardType="email-address"
@@ -130,7 +126,7 @@ function SignupInfoScreen() {
           label={NEXT_BUTTON_LABEL}
           onPress={handleNext}
           fullWidth
-          disabled={!canProceed || isSubmitting}
+          disabled={!canProceed}
         />
       </View>
     </View>

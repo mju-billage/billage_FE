@@ -8,6 +8,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/Navigation/App bar/BackButton';
 import SearchField from '../../components/Input/Search/SearchField';
 import TextButton from '../../components/Input/Button/TextButton';
+import Button from '../../components/Input/Button/Button';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import type { EntryApprovalStatus, EntrySummary, EntryType } from '../../types/entry';
 import * as entryService from '../../services/entryService';
@@ -16,10 +17,18 @@ import LedgerFilterSheet, {
   type LedgerFilterValue,
 } from './LedgerFilterSheet';
 import {
+  LEDGER_DETAIL_RETRY_LABEL,
   LEDGER_ENTRIES_LOADING_MORE,
   LEDGER_SEARCH_EMPTY,
   LEDGER_SEARCH_PLACEHOLDER,
 } from '../../constants/ledgerScreenText';
+import { ApiError } from '../../services/apiClient';
+import {
+  API_ERROR_DEFAULT_MESSAGE,
+  API_NETWORK_ERROR_MESSAGE,
+  getApiErrorMessage,
+  isNetworkError,
+} from '../../constants/apiErrorMessages';
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
@@ -58,6 +67,17 @@ function LedgerSearchScreen() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [searchError, setSearchError] = useState<string | undefined>();
+
+  const toErrorMessage = (error: unknown): string => {
+    if (isNetworkError(error)) {
+      return API_NETWORK_ERROR_MESSAGE;
+    }
+    if (error instanceof ApiError) {
+      return getApiErrorMessage(error.code);
+    }
+    return API_ERROR_DEFAULT_MESSAGE;
+  };
 
   const search = useCallback(
     async (reset: boolean) => {
@@ -76,10 +96,16 @@ function LedgerSearchScreen() {
         setResults(current => (reset ? result.items : [...current, ...result.items]));
         setPage(result.page);
         setHasMore(!result.last);
-      } catch {
+        if (reset) {
+          setSearchError(undefined);
+        }
+      } catch (error) {
+        // "결과 없음"과 "요청 실패"를 구분한다 — 전에는 둘 다 빈 목록으로만
+        // 보여서 사용자가 검색이 실패한 건지 그냥 결과가 없는 건지 알 수 없었다.
         if (reset) {
           setResults([]);
           setHasMore(false);
+          setSearchError(toErrorMessage(error));
         }
       } finally {
         setIsLoadingMore(false);
@@ -120,7 +146,17 @@ function LedgerSearchScreen() {
         />
       </View>
 
-      {results.length === 0 ? (
+      {searchError ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyTitle}>{searchError}</Text>
+          <Button
+            label={LEDGER_DETAIL_RETRY_LABEL}
+            onPress={() => search(true)}
+            hierarchy="secondary"
+            style={styles.retryButton}
+          />
+        </View>
+      ) : results.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyTitle}>{LEDGER_SEARCH_EMPTY}</Text>
         </View>
@@ -196,10 +232,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingTop: 80,
+    gap: 12,
   },
   emptyTitle: {
     ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
+  },
+  retryButton: {
+    marginTop: 4,
   },
 });
 

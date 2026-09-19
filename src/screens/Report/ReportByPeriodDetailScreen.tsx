@@ -1,4 +1,5 @@
 /** @screen ETC-3-PAGE-03-0 기간별 보고서 조회 */
+/** @screen ETC-3-PAGE-03-1 기간별 보고서 상세(수입/지출) — 03-0의 탭 상태, 별도 라우트 아님 */
 /**
  * `ReportByLedgerDetailScreen`과 자매 화면(같은 이유로 상세 재조회) — 다른
  * 점은 헤더 카드 자체가 "이 기간 전체" 요약이고 눌러서 통합 시간순
@@ -7,9 +8,9 @@
  * 눌렀을 때 그 장부 하나만 필터링된 `ReportLedgerEntriesScreen`(05-0,
  * `ReportByLedgerDetailScreen`과 공유)으로 간다.
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Image, Pressable, Share, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,10 +18,11 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import CardBase from '../../components/Data Display/Card/CardBase';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import type { ReportDetail } from '../../types/report';
 import * as reportService from '../../services/reportService';
 import { ApiError } from '../../services/apiClient';
-import { formatWon } from '../../utils/currency';
+import { formatExpense, formatWon } from '../../utils/currency';
 import { formatDateDot } from '../../utils/dueDate';
 import {
   API_ERROR_DEFAULT_MESSAGE,
@@ -31,16 +33,23 @@ import {
 import {
   REPORT_DETAIL_CREATED_AT_LABEL,
   REPORT_DETAIL_EMPTY,
+  REPORT_DETAIL_EXPENSE_LABEL,
+  REPORT_DETAIL_INCOME_LABEL,
   REPORT_DETAIL_LOADING,
   REPORT_MAIN_RETRY_LABEL,
   REPORT_SHARE_EXPENSE_LABEL,
   REPORT_SHARE_INCOME_LABEL,
 } from '../../constants/reportScreenText';
-import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import {
+  FEEDBACK_POSITIVE_BOLD,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const SHARE_ICON = require('../../assets/icons/action/Share.png');
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/Chevron Right.png');
+const SNACKBAR_AUTO_HIDE_MS = 1600;
 
 type LoadState = 'loading' | 'error' | 'ready';
 type ReportByPeriodDetailNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -54,6 +63,18 @@ function ReportByPeriodDetailScreen() {
   const [report, setReport] = useState<ReportDetail | null>(null);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+
+  // ETC-5-SNACKBAR-08-0: 생성 직후 이 화면으로 이동하며 받은 완료 메시지를
+  // 한 번만 띄운다(design-verification.md §5-11).
+  useEffect(() => {
+    if (route.params.snackbarMessage) {
+      setSnackbarMessage(route.params.snackbarMessage);
+      setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
+      navigation.setParams({ snackbarMessage: undefined });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params.snackbarMessage]);
 
   const toErrorMessage = (error: unknown): string => {
     if (isNetworkError(error)) {
@@ -96,7 +117,7 @@ function ReportByPeriodDetailScreen() {
 
   if (loadState === 'loading' || loadState === 'error' || !report) {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="primary">
         <AppBar type="sub" title="" onBackPress={() => navigation.goBack()} />
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>
@@ -111,12 +132,12 @@ function ReportByPeriodDetailScreen() {
             />
           )}
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar
         type="sub"
         title={report.title}
@@ -150,8 +171,14 @@ function ReportByPeriodDetailScreen() {
             <Text style={styles.periodText}>
               {formatDateDot(report.startDate)} - {formatDateDot(report.endDate)}
             </Text>
-            <Text style={styles.headerIncome}>+{formatWon(report.summary.totalIncome)}원</Text>
-            <Text style={styles.headerExpense}>-{formatWon(report.summary.totalExpense)}원</Text>
+            <View style={styles.amountRow}>
+              <Text style={styles.amountLabel}>{REPORT_DETAIL_INCOME_LABEL}</Text>
+              <Text style={styles.headerIncome}>{formatWon(report.summary.totalIncome)}원</Text>
+            </View>
+            <View style={styles.amountRow}>
+              <Text style={styles.amountLabel}>{REPORT_DETAIL_EXPENSE_LABEL}</Text>
+              <Text style={styles.headerExpense}>{formatExpense(report.summary.totalExpense)}</Text>
+            </View>
           </CardBase>
         </Pressable>
 
@@ -189,14 +216,17 @@ function ReportByPeriodDetailScreen() {
           />
         )}
       </View>
-    </SafeAreaView>
+
+      {snackbarMessage && (
+        <View style={styles.snackbarWrapper}>
+          <Snackbar visible title={snackbarMessage} onClose={() => setSnackbarMessage(null)} />
+        </View>
+      )}
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,
@@ -234,8 +264,17 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
+  amountRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  amountLabel: {
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+  },
   headerIncome: {
     ...TYPOGRAPHY.body2,
+    color: FEEDBACK_POSITIVE_BOLD,
   },
   headerExpense: {
     ...TYPOGRAPHY.body2,
@@ -266,6 +305,12 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
+  },
+  snackbarWrapper: {
+    position: 'absolute',
+    left: 24,
+    right: 24,
+    bottom: 24,
   },
 });
 

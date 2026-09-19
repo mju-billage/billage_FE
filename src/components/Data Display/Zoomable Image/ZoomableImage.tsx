@@ -6,9 +6,8 @@
  * (react-native-gesture-handler 등) 없이 RN 코어 `PanResponder`만 쓴다.
  */
 import { useRef, useState } from 'react';
-import { Animated, Dimensions, PanResponder, StyleSheet, View } from 'react-native';
+import { Animated, PanResponder, StyleSheet, useWindowDimensions, View } from 'react-native';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const MIN_SCALE = 1;
 const MAX_SCALE = 4;
 const DOUBLE_TAP_SCALE = 2.5;
@@ -30,6 +29,12 @@ type ZoomableImageProps = {
 };
 
 function ZoomableImage({ uri, headers }: ZoomableImageProps) {
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  // PanResponder는 최초 렌더에서 한 번만 만들어져 핸들러가 그때의 값을 붙잡으므로, 회전 후 크기를
+  // 읽으려면 매 렌더 갱신되는 ref를 통해 읽어야 한다.
+  const windowSizeRef = useRef({ width: windowWidth, height: windowHeight });
+  windowSizeRef.current = { width: windowWidth, height: windowHeight };
+
   const [scale, setScale] = useState(MIN_SCALE);
   const [translate, setTranslate] = useState({ x: 0, y: 0 });
 
@@ -100,8 +105,8 @@ function ZoomableImage({ uri, headers }: ZoomableImageProps) {
           gestureStartRef.current.moved = true;
         }
         if (scaleRef.current > MIN_SCALE) {
-          const maxOffsetX = (SCREEN_WIDTH * (scaleRef.current - 1)) / 2;
-          const maxOffsetY = (SCREEN_HEIGHT * (scaleRef.current - 1)) / 2;
+          const maxOffsetX = (windowSizeRef.current.width * (scaleRef.current - 1)) / 2;
+          const maxOffsetY = (windowSizeRef.current.height * (scaleRef.current - 1)) / 2;
           applyTranslate({
             x: clamp(panStartRef.current.x + gestureState.dx, -maxOffsetX, maxOffsetX),
             y: clamp(panStartRef.current.y + gestureState.dy, -maxOffsetY, maxOffsetY),

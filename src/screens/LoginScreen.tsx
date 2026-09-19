@@ -22,8 +22,10 @@ import { TYPOGRAPHY } from '../constants/typography';
 import { SocialProfile, SocialType } from '../types/social';
 import { ApiError } from '../services/apiClient';
 import * as authService from '../services/authService';
+import { SocialAuthParseError } from '../services/authService';
 import * as socialAuthService from '../services/socialAuthService';
 import * as groupService from '../services/groupService';
+import { getApiErrorMessage, isNetworkError } from '../constants/apiErrorMessages';
 import {
   LOGIN_EMAIL_PLACEHOLDER,
   LOGIN_PASSWORD_PLACEHOLDER,
@@ -32,7 +34,9 @@ import {
   LOGIN_GO_TO_SIGNUP_LABEL,
   LOGIN_INVALID_CREDENTIALS_ERROR,
   LOGIN_GENERIC_ERROR,
-  LOGIN_SOCIAL_ERROR,
+  LOGIN_SOCIAL_SDK_ERROR,
+  LOGIN_SOCIAL_NETWORK_ERROR,
+  LOGIN_SOCIAL_PARSE_ERROR,
   LOGIN_MOCK_BUTTON_LABEL,
 } from '../constants/loginScreenText';
 
@@ -163,32 +167,44 @@ function LoginScreen() {
     goToMain();
   };
 
+  /**
+   * 2026-09-12: "로그인에 실패했습니다"만 뜨던 통짜 에러를 단계별로 갈랐다 —
+   * SDK 실패 / 네트워크 실패 / 서버 거부(코드 포함) / 응답 파싱 실패. 각 단계는
+   * `authService.socialLogin`/`socialAuthService`에 심어둔 `console.warn`으로도
+   * Metro 콘솔에 남는다(`[SocialLogin]` 태그로 검색).
+   */
   const handleSocialLogin = async (provider: SocialType) => {
     setLoginError(undefined);
+    let profile: SocialProfile | null;
     try {
-      const profile = await getSocialProfile(provider);
-      if (!profile) {
-        return; // 사용자가 로그인을 취소함
-      }
+      profile = await getSocialProfile(provider);
+    } catch (error) {
+      console.warn('[SocialLogin][SDK] getSocialProfile 실패', provider, error);
+      setLoginError(LOGIN_SOCIAL_SDK_ERROR);
+      return;
+    }
+    if (!profile) {
+      return; // 사용자가 로그인을 취소함
+    }
 
-      try {
-        await authService.socialLogin({
-          provider: profile.provider,
-          providerToken: profile.providerToken,
-        });
-        goToMain();
-      } catch (error) {
-        if (
-          error instanceof ApiError &&
-          error.code === 'SOCIAL_MEMBER_NOT_FOUND'
-        ) {
-          navigation.navigate('SocialSignupInfo', { profile });
-        } else {
-          setLoginError(LOGIN_GENERIC_ERROR);
-        }
+    try {
+      await authService.socialLogin({
+        provider: profile.provider,
+        providerToken: profile.providerToken,
+      });
+      goToMain();
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 'SOCIAL_MEMBER_NOT_FOUND') {
+        navigation.navigate('SocialSignupInfo', { profile });
+      } else if (error instanceof SocialAuthParseError) {
+        setLoginError(LOGIN_SOCIAL_PARSE_ERROR);
+      } else if (error instanceof ApiError) {
+        setLoginError(getApiErrorMessage(error.code));
+      } else if (isNetworkError(error)) {
+        setLoginError(LOGIN_SOCIAL_NETWORK_ERROR);
+      } else {
+        setLoginError(LOGIN_GENERIC_ERROR);
       }
-    } catch {
-      setLoginError(LOGIN_SOCIAL_ERROR);
     }
   };
 

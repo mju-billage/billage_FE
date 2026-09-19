@@ -65,7 +65,14 @@ function TermsAgreementScreen() {
   };
 
   const handleNext = () => {
-    navigation.navigate('SignupInfo');
+    navigation.navigate('SignupInfo', {
+      agreements: {
+        termsOfService: agreements.service,
+        privacyPolicy: agreements.privacy,
+        ageOver14: agreements.age,
+        marketing: agreements.marketing,
+      },
+    });
   };
 
   return (

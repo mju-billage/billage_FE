@@ -1,4 +1,5 @@
 /** @screen ETC-4-PAGE-07-0 보고서_시간순 (전체 장부 통합) */
+/** @screen ETC-4-PAGE-07-1 보고서_시간순(수입/지출) — 07-0의 탭 상태, 별도 라우트 아님(ReportEntryList.tsx 탭) */
 /**
  * 기간별 보고서 상세(ETC-3-PAGE-03-0)의 헤더 카드(요약)를 눌러 들어오는
  * "이 기간 모든 장부의 내역을 한 리스트로" 화면. 시안 파일명은
@@ -18,15 +19,15 @@
  */
 import { useState } from 'react';
 import {
-  Dimensions,
   NativeScrollEvent,
   NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -40,8 +41,6 @@ import { REPORT_DETAIL_PERIOD_LABEL } from '../../constants/reportScreenText';
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-const CARD_WIDTH = Dimensions.get('window').width - 48;
-
 type ReportPeriodEntriesNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type ReportPeriodEntriesRouteProp = RouteProp<RootStackParamList, 'ReportPeriodEntries'>;
 
@@ -50,9 +49,15 @@ function ReportPeriodEntriesScreen() {
   const route = useRoute<ReportPeriodEntriesRouteProp>();
   const { reportTitle, startDate, endDate, summary, ledgers } = route.params;
   const [cardIndex, setCardIndex] = useState(0);
+  const { width: windowWidth } = useWindowDimensions();
 
+  // 캐러셀 스냅 결함 수정(2026-09-18): 카드 폭(화면폭-48)과 스크롤뷰의
+  // paddingLeft(24, 우측 없음)가 서로 안 맞아 2페이지부터 어긋났다 —
+  // LedgerDetailScreen과 같은 원인, 같은 수정. 슬라이드를 화면 폭 그대로 채우고
+  // 카드 여백은 슬라이드 안쪽 padding으로 옮겨 snapToInterval 없이
+  // pagingEnabled 기본 동작만으로 맞춘다.
   const handleScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const index = Math.round(e.nativeEvent.contentOffset.x / (CARD_WIDTH + 12));
+    const index = Math.round(e.nativeEvent.contentOffset.x / windowWidth);
     setCardIndex(index);
   };
 
@@ -61,7 +66,7 @@ function ReportPeriodEntriesScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar type="sub" title={reportTitle} onBackPress={() => navigation.goBack()} />
 
       <View style={styles.body}>
@@ -75,17 +80,19 @@ function ReportPeriodEntriesScreen() {
           showsHorizontalScrollIndicator={false}
           onMomentumScrollEnd={handleScrollEnd}
           style={styles.carousel}
-          snapToInterval={CARD_WIDTH + 12}
           decelerationRate="fast"
         >
-          <View style={styles.cardSlide}>
+          <View style={[styles.cardSlide, { width: windowWidth }]}>
+            {/* 명세(더보기_보고서생성_기간보고서조회.png) No.3: Card 1은 수입/지출
+                2행뿐, 합계 행이 없다 — 합계 행은 ETC-4-PAGE-05-0(장부 상세) 전용. */}
             <AmountCard
               type="incomeExpense"
               income={summary.totalIncome}
               expense={summary.totalExpense}
+              showTotal={false}
             />
           </View>
-          <View style={styles.cardSlide}>
+          <View style={[styles.cardSlide, { width: windowWidth }]}>
             <AmountCard
               type="balance"
               startBalance={summary.openingBalance ?? 0}
@@ -104,14 +111,11 @@ function ReportPeriodEntriesScreen() {
           }
         />
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,
@@ -125,11 +129,12 @@ const styles = StyleSheet.create({
     flexGrow: 0,
     marginTop: 12,
     marginHorizontal: -24,
-    paddingLeft: 24,
   },
+  // 슬라이드 하나 = 화면 폭 전체(JSX에서 width: windowWidth로 덮어씀) — 카드
+  // 여백은 스크롤뷰가 아니라 이 안쪽 padding으로 준다(캐러셀 스냅 결함 수정,
+  // 2026-09-18).
   cardSlide: {
-    width: CARD_WIDTH,
-    marginRight: 12,
+    paddingHorizontal: 24,
   },
   indicatorRow: {
     alignItems: 'center',

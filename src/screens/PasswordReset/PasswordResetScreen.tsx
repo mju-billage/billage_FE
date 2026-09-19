@@ -8,6 +8,12 @@ import BackButton from '../../components/Navigation/App bar/BackButton';
 import TextField from '../../components/Input/Text Field/TextField';
 import Button from '../../components/Input/Button/Button';
 import { isValidEmail } from '../../utils/validators';
+import * as authService from '../../services/authService';
+import {
+  API_ERROR_DEFAULT_MESSAGE,
+  API_NETWORK_ERROR_MESSAGE,
+  isNetworkError,
+} from '../../constants/apiErrorMessages';
 import { TYPOGRAPHY } from '../../constants/typography';
 import {
   PASSWORD_RESET_TITLE,
@@ -25,10 +31,23 @@ type PasswordResetNavigationProp = NativeStackNavigationProp<
 function PasswordResetScreen() {
   const navigation = useNavigation<PasswordResetNavigationProp>();
   const [email, setEmail] = useState('');
+  const [error, setError] = useState<string | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSend = () => {
-    // TODO: 임시 비밀번호 발급/발송 API 연동 필요
-    navigation.navigate('PasswordResetSent', { email });
+  const handleSend = async () => {
+    if (!isValidEmail(email) || isSubmitting) {
+      return;
+    }
+    setError(undefined);
+    setIsSubmitting(true);
+    try {
+      await authService.requestPasswordReset(email);
+      navigation.navigate('PasswordResetSent', { email });
+    } catch (err) {
+      setError(isNetworkError(err) ? API_NETWORK_ERROR_MESSAGE : API_ERROR_DEFAULT_MESSAGE);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -41,8 +60,12 @@ function PasswordResetScreen() {
 
       <TextField
         value={email}
-        onChangeText={setEmail}
+        onChangeText={text => {
+          setEmail(text);
+          setError(undefined);
+        }}
         placeholder={PASSWORD_RESET_EMAIL_PLACEHOLDER}
+        error={error}
         keyboardType="email-address"
         autoCapitalize="none"
       />
@@ -51,7 +74,7 @@ function PasswordResetScreen() {
         label={PASSWORD_RESET_SUBMIT_LABEL}
         onPress={handleSend}
         fullWidth
-        disabled={!isValidEmail(email)}
+        disabled={!isValidEmail(email) || isSubmitting}
       />
     </View>
   );

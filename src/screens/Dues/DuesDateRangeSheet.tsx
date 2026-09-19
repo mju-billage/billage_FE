@@ -31,7 +31,6 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Button from '../../components/Input/Button/Button';
-import TextButton from '../../components/Input/Button/TextButton';
 import Calendar from '../../components/Data Display/Calendar/Calendar';
 import { todayKey } from '../../utils/calendarGrid';
 import {
@@ -39,8 +38,9 @@ import {
   DATE_RANGE_SHEET_DATE_PLACEHOLDER,
   DATE_RANGE_SHEET_END_LABEL,
   DATE_RANGE_SHEET_START_LABEL,
+  DATE_RANGE_SHEET_TITLE,
 } from '../../constants/commonText';
-import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { FOREGROUND_NEUTRAL_SUBTLE, FOREGROUND_SECONDARY } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 function parseDateKey(date: string): { year: number; month: number } {
@@ -57,7 +57,6 @@ function toShortDate(dotDate: string): string {
 
 type DuesDateRangeSheetProps = {
   visible: boolean;
-  title: string;
   confirmLabel: string;
   cancelLabel?: string;
   startDate?: string;
@@ -68,7 +67,6 @@ type DuesDateRangeSheetProps = {
 
 function DuesDateRangeSheet({
   visible,
-  title,
   confirmLabel,
   cancelLabel = DATE_RANGE_SHEET_CANCEL_LABEL,
   startDate,
@@ -118,8 +116,11 @@ function DuesDateRangeSheet({
 
   return (
     <BottomSheet visible={visible} onClose={onClose}>
-      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.title}>{DATE_RANGE_SHEET_TITLE}</Text>
 
+      {/* 명세 No.4: 시작/종료 날짜 미리보기는 이 시트 자체의 previewRow 하나뿐이다
+          (2자리 연도 YY.MM.DD, 포인트 컬러) — `Calendar`의 내장 `DateField`
+          (4자리 연도, 기본색)는 다른 형식으로 중복 렌더되고 있었다, 꺼둔다. */}
       <Calendar
         year={calendar.year}
         month={calendar.month}
@@ -127,6 +128,7 @@ function DuesDateRangeSheet({
         selectedEndDate={draftEnd}
         onSelectDate={handleSelectDate}
         onChangeMonth={handleChangeMonth}
+        showDateFields={false}
       />
 
       <View style={styles.previewRow}>
@@ -145,7 +147,12 @@ function DuesDateRangeSheet({
       </View>
 
       <View style={styles.footer}>
-        <TextButton label={cancelLabel} hierarchy="secondary" onPress={onClose} />
+        <Button
+          label={cancelLabel}
+          hierarchy="tertiary"
+          onPress={onClose}
+          style={styles.cancelButton}
+        />
         <View style={styles.confirmButton}>
           <Button
             label={confirmLabel}
@@ -166,10 +173,11 @@ const styles = StyleSheet.create({
   },
   previewRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: 16,
   },
   previewEnd: {
-    marginLeft: 32,
+    alignItems: 'flex-end',
   },
   previewLabel: {
     ...TYPOGRAPHY.body3,
@@ -178,12 +186,16 @@ const styles = StyleSheet.create({
   previewValue: {
     ...TYPOGRAPHY.subtitle2,
     marginTop: 4,
+    color: FOREGROUND_SECONDARY,
   },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     marginTop: 20,
+  },
+  cancelButton: {
+    height: 52,
   },
   confirmButton: {
     flex: 1,

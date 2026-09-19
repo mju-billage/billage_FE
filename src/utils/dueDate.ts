@@ -34,6 +34,9 @@ export function getDDaySeverity(daysLeft: number): DDaySeverity {
 }
 
 /** 'YYYY-MM-DD' 또는 ISO datetime 문자열의 날짜 부분을 'YYYY.MM.DD'로 바꾼다. */
-export function formatDateDot(isoDateOrDateTime: string): string {
+export function formatDateDot(isoDateOrDateTime: string | null | undefined): string {
+  if (!isoDateOrDateTime) {
+    return '';
+  }
   return isoDateOrDateTime.slice(0, 10).replace(/-/g, '.');
 }

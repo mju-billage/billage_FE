@@ -1,7 +1,7 @@
 /** @screen FDR-2-PAGE-01-0 이동 대상 선택 */
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -88,10 +88,18 @@ function FolderSelectMoveScreen() {
         setLoadState('error');
         return;
       }
-      const [tree, ledgers] = await Promise.all([
+      // 2026-09-13: FolderScreen과 같은 회귀가 여기도 있었다 — 최상위(folderId
+      // null)에서 장부 조회를 빈 배열로 하드코딩해 최상위 장부를 이동 대상으로
+      // 고를 수 없었다. 모임 전체 장부를 받아 최상위분만 걸러 쓴다.
+      const [tree, allLedgers] = await Promise.all([
         folderService.getFolderTree(group.id),
-        folderId ? ledgerService.getLedgersInFolder(folderId) : Promise.resolve([]),
+        folderId
+          ? ledgerService.getLedgersInFolder(folderId)
+          : ledgerService.getAllLedgersInGroup(group.id),
       ]);
+      const ledgers = folderId
+        ? allLedgers
+        : allLedgers.filter(ledger => ledger.folderId === null);
       const childFolders = getChildFolders(tree, folderId);
       setItems(mergeFolderListItems(childFolders, ledgers));
       setLoadState('ready');
@@ -129,7 +137,7 @@ function FolderSelectMoveScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar title={SELECT_MOVE_TITLE} onBackPress={() => navigation.goBack()} />
 
       <View style={styles.body}>
@@ -183,14 +191,11 @@ function FolderSelectMoveScreen() {
           </>
         )}
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingTop: 16,

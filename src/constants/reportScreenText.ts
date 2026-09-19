@@ -50,13 +50,15 @@ export const REPORT_LEDGER_SELECT_CONFIRM_SUFFIX = '개 선택하기';
 // 기간별 생성 (ETC-4-PAGE-04-0)
 export const REPORT_BY_PERIOD_TITLE = '기간별 보고서 생성';
 export const REPORT_PERIOD_FIELD_LABEL = '기간';
-export const REPORT_PERIOD_PLACEHOLDER = 'YYYY.MM.DD - YYYY.MM.DD';
+export const REPORT_PERIOD_PLACEHOLDER = 'YY.MM.DD ~ YY.MM.DD';
 
 // 조회 플로우 공통 (ETC-3-PAGE-02-0 / ETC-3-PAGE-03-0 / ETC-4-PAGE-05-0 / ETC-4-PAGE-07-0)
 export const REPORT_DETAIL_CREATED_AT_LABEL = '생성 일시';
 export const REPORT_DETAIL_PERIOD_LABEL = '기간';
 export const REPORT_DETAIL_LOADING = '보고서를 불러오는 중이에요.';
 export const REPORT_DETAIL_EMPTY = '포함된 장부가 없어요.';
+export const REPORT_DETAIL_INCOME_LABEL = '수입';
+export const REPORT_DETAIL_EXPENSE_LABEL = '지출';
 export const REPORT_ENTRY_LIST_EMPTY = '내역이 없어요.';
 export const REPORT_ENTRY_LIST_COUNT_SUFFIX = '건';
 /** `Share.share()` 메시지 조립용 — 서버 웹뷰/PDF 응답이 없어(Report.txt 정책 메모)

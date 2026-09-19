@@ -1,4 +1,7 @@
 /** @screen DUE-1-PAGE-01-0 납부관리 메인 */
+/** @screen DUE-4-SNACKBAR-01-0 회비 생성 완료 (DuesCreateScreen 성공 시 route.params.snackbarMessage로 렌더) */
+/** @screen DUE-4-SNACKBAR-02-0 회비 마감 완료 (DuesDetailScreen 마감 성공 시 렌더) */
+/** @screen DUE-4-SNACKBAR-03-0 회비 삭제 완료 (DuesDetailScreen 삭제 성공 시 렌더) */
 /**
  * 6-A(DUE 화면 구현, 조회 전용): 목 데이터 없이 처음부터 실 API로 붙인다.
  * "+"(회비 생성, 6-B)와 "모임원 관리" 아이콘(7-A)은 이제 둘 다 연결돼 있다.

@@ -6,6 +6,38 @@
 
 ---
 
+## 실호출 절차 — Swagger도 실제와 다를 수 있다
+
+**명세 txt도 Swagger도 실제 응답과 다를 수 있다. 실호출이 유일한 근거다.**
+
+2026-09-11 Swagger 전수 대조 라운드에서 명세 txt의 "미구현"·"진행 중" 태그가 다수 낡아 있음을
+확인하고 Swagger를 새 기준으로 삼았는데, **바로 다음 라운드(2026-09-12)에 Swagger 자체도
+틀릴 수 있음이 드러났다** — `GET /archives/{id}`의 실제 응답은 Swagger 문서가 보여준 `summary{}`
+래핑 없이 평평한 구조였다(`{archiveId, groupId, title, startDate, endDate, totalIncome,
+totalExpense, balance, entryCount, ledgers, createdAt}`). 이걸 Swagger만 보고 타입을 맞춰
+`ArchiveDetailScreen`이 실기기에서 진입 즉시 크래시 났다(`docs/design-verification.md` §5-4
+"보관함 목록 진입 즉시 크래시" 참고).
+
+그래서 이 프로젝트에서 API 응답 스키마를 확정하는 우선순위는:
+
+1. **실호출(가장 신뢰도 높음)** — 읽기 전용(`GET`)이거나 되돌릴 수 있는 호출은 직접 불러
+   응답을 필드 하나까지 대조한다. `api-wiring.md`의 "실호출 확인" 열에 `O`(이번 라운드)
+   또는 `기존`(이전 라운드 확인)으로 표시된 것만 이 등급이다.
+2. **Swagger 스키마 대조(차선, 완전히 못 믿음)** — 파괴적이라 실호출이 불가능한 것만
+   이 등급으로 남긴다(`api-wiring.md`에 `Swagger` 또는 `-`로 표시). 화면을 그 타입에
+   맞춰 만들 순 있지만, 서버 응답 구조에 조금이라도 의문이 들면(중첩 래핑, 선택적 필드
+   등) 안전한 다른 호출로 우회 확인할 방법이 있는지부터 찾는다.
+3. **명세 txt(가장 신뢰도 낮음)** — 이번 두 라운드 모두 명세 txt의 상태 태그가 낡아
+   있었다는 게 반복 확인됐다. 화면 존재 여부·문구 판단엔 쓰되, API 응답 스키마의
+   최종 근거로는 쓰지 않는다.
+
+**파괴적이라 실호출을 못 하는 것**(`DELETE /auth/me` 등 계정·데이터를 실제로 지우는 호출)은
+Swagger 스키마만 믿고 코드를 맞춰둔 뒤, `docs/backend-requests.md`에 "컨트롤러/DTO 기준으로
+확인해달라"고 명시적으로 요청해 남겨둔다 — 실호출로 검증했다고 스스로도, 다음 세션에게도
+착각하게 두지 않는다.
+
+---
+
 ## 현황 (2026-09-03, 명세 전면 갱신 + 7-A 완료 시점)
 
 `API 공통 규칙.txt`만 미갱신, 나머지 15개 도메인 전면 갱신 + `Notification & Support`·`Statistics` 2개 신설. 대부분의 도메인이 서버 준비 완료 상태로 바뀌어, 이제 순서를 가르는 기준은 "코드 수정이 필요한가 / 화면부터 새로 만들어야 하는가 / 여전히 막혀 있는가" 세 갈래다. 상세 근거는 `docs/api-gaps.md`(해결됨/유효/판단 불가 3단 구조).
@@ -331,6 +363,7 @@ API가 없어(`docs/api-gaps.md` — 이메일 인증·비번재설정 전부 �
 |---|---|
 | 총무 | `billage.verify.dues.test@example.com` / 비밀번호 `Billage1!Verify` / `userId: 6` |
 | 일반(MEMBER) | `billage.verify.member.test@example.com` / 비밀번호 `Billage1!Member` / `userId: 7` — 2026-09-05 생성, `VerifyDues`에 `membershipId: 5`로 참여(`role: MEMBER`, `GET /groups/2/memberships` 확인) |
+| 두 번째 계정(2026-09-13) | `billage.verify.newcheck9999@example.com` / 비밀번호 `Password123!` / `userId: 9`, 이름 `새계정확인` — **`POST /auth/signup` 직접 호출로 생성, 이메일 인증(발송이 `MAIL_SEND_FAILED`로 막혀 있어 인증 자체가 불가)을 거치지 않은 상태.** 로그인은 인증 여부와 무관하게 정상 동작함을 확인(`scripts/api-call.js`로 검증). `groupId 6`("탈퇴테스트모임", `VerifyDues`가 단독 총무)에 `membershipId 11`로 참여(`role: MEMBER`) — `COM-2-PAGE-04-0`(탈퇴하기 > 권한 넘기기) 캡처용으로 이 조합을 만들었다. 계정 두 개가 필요한 다른 검증에도 재사용할 것. |
 
 **이 두 계정이 새 주 계정이다** — 다음 라운드부터 `billage.group.step{N}...` 대신 이 계정들과
 `VerifyDues` 모임을 재사용할 것. `Step1Group` 이름 규칙 자체는 유효하니, 앞으로 새 계정이

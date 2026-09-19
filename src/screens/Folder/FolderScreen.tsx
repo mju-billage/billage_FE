@@ -8,6 +8,10 @@
 /** @screen FDR-4-SNACKBAR-01-0 이동 완료 / 폴더 해제_완료 (여기는 폴더 해제_완료 절반. 이동 완료는
  * FolderMoveDestinationScreen.tsx) */
 /** @screen FDR-4-SNACKBAR-03-0 이름 변경_완료 (activeDialog='rename' 확인 시 SNACKBAR_FOLDER_RENAMED) */
+/** @screen FDR-2-MODAL-02-0 폴더 전체 백업 (activeDialog='backup') — `design-index.json`에 등록된
+ * 후보(`FDR\폴더\FDR-2-MODAL-02-0.png`)는 실제로는 "새 폴더 생성" 다이얼로그 내용이라 오배치이고,
+ * 진짜 시안은 같은 이름으로 `FDR\폴더\백업\` 하위에 따로 있다(2026-09-11 확인, §5-4 참고) */
+/** @screen FDR-3-SNACKBAR-02-0 폴더 백업 완료 (SNACKBAR_BACKUP_DONE_TITLE/DESCRIPTION) */
 /**
  * 3-B(API 연동, 쓰기) 메모 — 0-1 폴더 해제 판단(2026-09-05 철회): 최상위
  * 폴더를 해제하면 그 직속 장부가 `folderId: null`이 되는데, 당시엔 최상위
@@ -15,9 +19,10 @@
  * 있음" 조합의 해제를 UI에서 막았었다(`isUnlinkUnsafe`). `GET
  * .../folder-items`(폴더ID 생략=최상위 조회)가 실제로는 최상위 장부도
  * `LEDGER` 항목으로 그대로 내려준다는 걸 실호출로 확인해(`docs/api-gaps.md`
- * "확정됨" 6번) 그 전제가 깨졌다 — 차단을 없앴다. 백업(archive) 기능은 서버
- * 상태가 "시작 전"이라(`api-gaps.md` (B) 미준비) 이번에도 실제 API를 안
- * 붙이고 로컬 스낵바 스텁을 유지한다.
+ * "확정됨" 6번) 그 전제가 깨졌다 — 차단을 없앴다. 백업(archive) 기능은 실제
+ * API로 연동돼 있다(`archiveService.createArchive`) — 2026-09-11 Swagger
+ * 대조에서 잘못된 경로(`/groups/{groupId}/folders/archive`, 실제로는 없는
+ * 경로였다)를 쓰고 있던 게 드러나 `/groups/{groupId}/archives`로 고쳤다.
  */
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
@@ -37,7 +42,10 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import IconButton from '../../components/Input/Button/IconButton';
 import SearchField from '../../components/Input/Search/SearchField';
-import FolderItem from '../../components/Data Display/Folder/FolderItem';
+import FolderItem, {
+  FOLDER_GRID_COLUMNS,
+  FOLDER_GRID_COLUMN_GAP,
+} from '../../components/Data Display/Folder/FolderItem';
 import Button from '../../components/Input/Button/Button';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
@@ -72,10 +80,10 @@ import {
   FOLDER_MENU_RENAME,
   FOLDER_MENU_SELECT_MOVE,
   FOLDER_MENU_UNLINK,
-  FOLDER_MENU_VIEW_TOGGLE,
   FOLDER_NAME_MAX_LENGTH,
   FOLDER_RETRY_LABEL,
   FOLDER_SCREEN_TITLE,
+  FOLDER_COUNT_SUFFIX,
   FOLDER_SEARCH_EMPTY_SUBTITLE,
   FOLDER_SEARCH_EMPTY_TITLE,
   FOLDER_SEARCH_PLACEHOLDER,
@@ -101,9 +109,11 @@ import { BLUE_50, FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../c
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const MENU_ICON = require('../../assets/icons/action/MenuHorizontal.png');
+const STATISTICS_ICON = require('../../assets/icons/content/Graph.png');
+const GRID_ICON = require('../../assets/icons/system/Grid.png');
+const LIST_ICON = require('../../assets/icons/system/List.png');
 const PLUS_ICON = require('../../assets/icons/action/Plus.png');
 
-const GRID_COLUMNS = 3;
 const SNACKBAR_AUTO_HIDE_MS = 1600;
 
 type FolderScreenNavigationProp = CompositeNavigationProp<
@@ -118,7 +128,6 @@ type ActiveDialog =
   | 'unlink'
   | 'backup'
   | null;
-type MenuMode = 'main' | 'viewToggle';
 type LoadState = 'loading' | 'error' | 'ready';
 
 /** 폴더 메인/하위 폴더 공용 화면. params가 없으면 폴더 탭 최상위, 있으면 해당 폴더 내부다. */
@@ -135,7 +144,6 @@ function FolderScreen() {
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [moreMenuVisible, setMoreMenuVisible] = useState(false);
-  const [menuMode, setMenuMode] = useState<MenuMode>('main');
   const [newItemSheetVisible, setNewItemSheetVisible] = useState(false);
   const [activeDialog, setActiveDialog] = useState<ActiveDialog>(null);
   const [dialogInputValue, setDialogInputValue] = useState('');
@@ -172,12 +180,21 @@ function FolderScreen() {
         return;
       }
       // 폴더 트리는 모임 전체를 한 번에 내려주므로 화면 깊이와 무관하게 호출 1번.
-      // 장부는 현재 폴더 직속분만 별도 조회(최상위엔 그 조회 API 자체가 없다 —
-      // docs/api-gaps.md (C) "최상위 영역 장부 조회").
-      const [nextTree, ledgers] = await Promise.all([
+      // 장부는 현재 폴더 직속분만 별도 조회한다. 2026-09-13 발견: 최상위(folderId
+      // null)에서 이 값을 그냥 빈 배열로 하드코딩해뒀었다 — 예전엔 최상위 장부
+      // 조회 API 자체가 없어 그랬던 건데, `GET /groups/{groupId}/ledgers`가
+      // 신설된 뒤에도 여기를 안 고쳐서 최상위에 장부를 만들어도 폴더 화면에
+      // 안 보이는 회귀가 났다. 최상위에서는 모임 전체 장부를 받아 `folderId
+      // === null`인 것만 걸러 쓴다.
+      const [nextTree, allLedgers] = await Promise.all([
         folderService.getFolderTree(group.id),
-        folderId ? ledgerService.getLedgersInFolder(folderId) : Promise.resolve([]),
+        folderId
+          ? ledgerService.getLedgersInFolder(folderId)
+          : ledgerService.getAllLedgersInGroup(group.id),
       ]);
+      const ledgers = folderId
+        ? allLedgers
+        : allLedgers.filter(ledger => ledger.folderId === null);
       const childFolders = getChildFolders(nextTree, folderId);
       setItems(mergeFolderListItems(childFolders, ledgers));
       setLoadState('ready');
@@ -201,7 +218,6 @@ function FolderScreen() {
 
   const closeMoreMenu = () => {
     setMoreMenuVisible(false);
-    setMenuMode('main');
   };
 
   const closeDialog = () => {
@@ -223,24 +239,32 @@ function FolderScreen() {
     }
   };
 
-  const mainMenuItems: MenuItem[] = isRoot
+  // FDR-1-PAGE-01-0 시안 Case A(폴더 헤더 메뉴): 평면 5항목, 구분선 2개로
+  // 3그룹(선택 이동·예산 설정 / 그리드·리스트 / 전체 백업) — 2차 메뉴 없음.
+  // 하위 폴더(비root) 메뉴는 이번 라운드 대조 대상이 아니라 그룹 구분 없이
+  // 기존 순서 그대로 두고, "그리드·리스트" 진입점만 같은 방식으로 평면화했다.
+  const gridListItems: MenuItem[] = [
+    { key: 'grid', label: VIEW_TOGGLE_GRID_LABEL, icon: GRID_ICON },
+    { key: 'list', label: VIEW_TOGGLE_LIST_LABEL, icon: LIST_ICON },
+  ];
+
+  const menuSections: MenuItem[][] = isRoot
     ? [
-        { key: 'selectMove', label: FOLDER_MENU_SELECT_MOVE },
-        { key: 'viewToggle', label: FOLDER_MENU_VIEW_TOGGLE },
-        { key: 'budgetList', label: FOLDER_MENU_BUDGET_LIST },
-        { key: 'backup', label: FOLDER_MENU_BACKUP },
+        [
+          { key: 'selectMove', label: FOLDER_MENU_SELECT_MOVE },
+          { key: 'budgetList', label: FOLDER_MENU_BUDGET_LIST },
+        ],
+        gridListItems,
+        [{ key: 'backup', label: FOLDER_MENU_BACKUP }],
       ]
     : [
-        { key: 'selectMove', label: FOLDER_MENU_SELECT_MOVE },
-        { key: 'rename', label: FOLDER_MENU_RENAME },
-        { key: 'viewToggle', label: FOLDER_MENU_VIEW_TOGGLE },
-        { key: 'unlink', label: FOLDER_MENU_UNLINK },
+        [
+          { key: 'selectMove', label: FOLDER_MENU_SELECT_MOVE },
+          { key: 'rename', label: FOLDER_MENU_RENAME },
+          ...gridListItems,
+          { key: 'unlink', label: FOLDER_MENU_UNLINK },
+        ],
       ];
-
-  const viewToggleMenuItems: MenuItem[] = [
-    { key: 'grid', label: VIEW_TOGGLE_GRID_LABEL },
-    { key: 'list', label: VIEW_TOGGLE_LIST_LABEL },
-  ];
 
   const handleSelectMenu = (key: string) => {
     switch (key) {
@@ -252,9 +276,6 @@ function FolderScreen() {
         closeMoreMenu();
         setDialogInputValue(folderName ?? '');
         setActiveDialog('rename');
-        break;
-      case 'viewToggle':
-        setMenuMode('viewToggle');
         break;
       case 'grid':
         setViewMode('grid');
@@ -374,6 +395,11 @@ function FolderScreen() {
         title={isRoot ? FOLDER_SCREEN_TITLE : folderName ?? ''}
         onBackPress={() => navigation.goBack()}
         rightIcons={[
+          // 시안 No.1: 통계/분석 아이콘 + ⋮ 메뉴 두 개. 루트 폴더 메인
+          // 화면에만(하위 폴더 화면은 이번 라운드 대조 대상 아님).
+          ...(isRoot
+            ? [{ icon: STATISTICS_ICON, onPress: () => navigation.navigate('Statistics') }]
+            : []),
           { icon: MENU_ICON, onPress: () => setMoreMenuVisible(true) },
         ]}
       />
@@ -403,7 +429,7 @@ function FolderScreen() {
         {loadState === 'ready' && (
           <>
             <View style={styles.countRow}>
-              <Text style={styles.countText}>{filteredItems.length} 건</Text>
+              <Text style={styles.countText}>{filteredItems.length} {FOLDER_COUNT_SUFFIX}</Text>
               <IconButton
                 icon={PLUS_ICON}
                 onPress={() => setNewItemSheetVisible(true)}
@@ -428,7 +454,7 @@ function FolderScreen() {
                 key={viewMode}
                 data={filteredItems}
                 keyExtractor={item => item.id}
-                numColumns={viewMode === 'grid' ? GRID_COLUMNS : 1}
+                numColumns={viewMode === 'grid' ? FOLDER_GRID_COLUMNS : 1}
                 columnWrapperStyle={
                   viewMode === 'grid' ? styles.gridRow : undefined
                 }
@@ -464,7 +490,6 @@ function FolderScreen() {
       <NewItemSheet
         visible={newItemSheetVisible}
         onClose={() => setNewItemSheetVisible(false)}
-        showLedgerOption={!isRoot}
         onPressNewLedger={() => {
           setNewItemSheetVisible(false);
           navigation.navigate('LedgerCreate', { parentId: folderId });
@@ -479,7 +504,8 @@ function FolderScreen() {
       <FolderMoreMenu
         visible={moreMenuVisible}
         onClose={closeMoreMenu}
-        items={menuMode === 'main' ? mainMenuItems : viewToggleMenuItems}
+        sections={menuSections}
+        showIcon
         onSelect={handleSelectMenu}
       />
 
@@ -587,7 +613,8 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   gridRow: {
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
+    gap: FOLDER_GRID_COLUMN_GAP,
   },
   stateContainer: {
     flex: 1,

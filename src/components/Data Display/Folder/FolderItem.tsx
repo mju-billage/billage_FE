@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useMemo } from 'react';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import {
   BACKGROUND_PRIMARY,
   BASIC_0,
@@ -11,6 +12,26 @@ import {
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
 import Svg, { Path } from 'react-native-svg';
+
+// 증빙자료 앨범 그리드(`ReceiptGrid`)는 별도로 계산한다 — 폴더는 시안 실측 gap 16으로 바뀌었고
+// 앨범은 아직 실측 전이라(앨범 목업은 여백 약 20/간격 약 7~8로 보임) 값을 묶지 않는다.
+/** 그리드 뷰 한 줄의 열 수. FolderItem 그리드 폭 계산과 호출 화면의 numColumns가 같은 값이어야 한다. */
+export const FOLDER_GRID_COLUMNS = 3;
+/** 그리드 열 사이 간격(dp). 시안 실측값 (FDR-1-PAGE-01-0, 2026-09-19). */
+export const FOLDER_GRID_COLUMN_GAP = 16;
+/** 그리드를 쓰는 화면들(FolderScreen, ReportLedgerSelectScreen)의 body 좌우 패딩. */
+const GRID_SCREEN_HORIZONTAL_PADDING = 24;
+// 화면 너비에서 좌우 패딩 24*2를 빼는 이유: 그리드를 그리는 호출 화면이 모두 body에
+// paddingHorizontal: 24를 주기 때문이다. 이 값이 다른 화면에서 그리드를 쓰면 폭 계산이
+// 어긋나므로 그 화면의 패딩에 맞게 이 전제를 다시 확인해야 한다.
+function getGridItemWidth(windowWidth: number): number {
+  return (
+    (windowWidth -
+      GRID_SCREEN_HORIZONTAL_PADDING * 2 -
+      FOLDER_GRID_COLUMN_GAP * (FOLDER_GRID_COLUMNS - 1)) /
+    FOLDER_GRID_COLUMNS
+  );
+}
 
 type FolderItemKind = 'folder' | 'ledger';
 type FolderItemLayout = 'grid' | 'list';
@@ -71,11 +92,14 @@ function FolderItem({
   hasItems = true,
   onPress,
 }: FolderItemProps) {
+  const { width: windowWidth } = useWindowDimensions();
+  const gridItemWidth = useMemo(() => getGridItemWidth(windowWidth), [windowWidth]);
+
   return (
     <Pressable
       style={[
         styles.container,
-        layout === 'list' ? styles.listLayout : styles.gridLayout,
+        layout === 'list' ? styles.listLayout : [styles.gridLayout, { width: gridItemWidth }],
         selected && styles.selected,
       ]}
       onPress={onPress}
@@ -182,7 +206,6 @@ const styles = StyleSheet.create({
   },
   gridLayout: {
     alignItems: 'center',
-    width: 100,
   },
   listLayout: {
     flexDirection: 'row',

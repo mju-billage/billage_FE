@@ -2,24 +2,26 @@
 /**
  * 5단계(Dashboard API 연동): 목(`MOCK_DASHBOARD_SUMMARY`)이 가정한 화면 구성과
  * 서버 응답 모양이 크게 다르다.
- *  - 미니 캘린더(하루 단위 입출금)는 서버에 대응 데이터가 없다 — "모임 전체
- *    내역 목록"과 같은 뿌리의 공백(docs/api-gaps.md (A)): 날짜별로 집계하려면
- *    그 목록 API가 있어야 하는데 없다. 그래서 항상 빈 상태로 그린다(이번 달,
- *    금액 없음) — 실제로 CLAUDE.md에도 "대시보드 메인/캘린더는 와이어프레임
- *    자체가 예정"이라고 돼 있어 애초에 확정된 기능 스펙이 없다.
- *  - 회비(dues)는 건별 카드(D-day 등)가 아니라 **모임 전체 합계 하나**만 온다
- *    (activeDuesCount/totalTargetCount/paidCount/unpaidCount) — 지금 회비 도메인
- *    자체가 미구현이라 항상 0이고(Dashboard.txt 정책 메모), 나중에 생겨도
- *    이 API로는 건별 카드를 못 만든다(합계 한 줄이 한계). 그래서 카드 캐러셀을
- *    합계 텍스트 한 줄로 바꿨다 — 0이면 그 줄 자체를 안 보여준다("데이터 없음"과
- *    "실제 0"을 굳이 구분하지 않는다, 지금은 항상 후자라 구분할 실익이 없다).
- *  - 잔액/최근 내역/승인 대기는 기존 화면에 아예 슬롯이 없던 새 데이터라
- *    최소 형태로 섹션을 새로 얹었다(AmountCard/TransactionListItem 재사용,
- *    4-A에서 이미 검증된 컴포넌트라 새 디자인을 만들지 않았다).
- *  - 승인 대기 건수는 총무/일반 구분 없이 그대로 보여준다 — 명세가 "현재 구현은
- *    총무와 일반에게 동일한 데이터"라고 명시해 서버 자체가 역할 구분을 안 하고,
- *    디자인 시안도 없어(위 CLAUDE.md 메모) 막을 근거가 없다. 역할별로 감춰야
- *    하면 시안 확인 후 결정 — docs/api-gaps.md에 확인 필요 항목으로 올렸다.
+ *  - **2026-09-11 정정**: 미니 캘린더는 시안(DSH-1-PAGE-01-0, `대시보드_메인화면.png`)이
+ *    실제로 존재하고 "이번 달 1일부터 2주" 월 그리드를 요구한다(요일 헤더 없이 1~14일).
+ *    `dashboardService.getMonthlyCalendar()`(`CalendarScreen.tsx`와 같은 API,
+ *    `GET /groups/{groupId}/calendar?yearMonth=...`)로 이번 달분을 따로 불러
+ *    `income - expense` 합산해 채운다 — 대시보드 응답 자체의 `calendar` 필드(오늘
+ *    기준 지난 14일 롤링 윈도우)는 이 월 그리드와 안 맞아 쓰지 않는다.
+ *  - 회비(dues)는 `upcomingDues[]`(마감 임박 건별 D-day/납부 인원)를 그대로
+ *    `DuesProgressCard` 캐러셀로 보여준다(시안 UI 요소 3번). 목록이 비면 안내 문구로 대체.
+ *  - **2026-09-11 제거, 2026-09-12 사유 정정**: 잔액(AmountCard)/최근 내역
+ *    (TransactionListItem)/승인 대기 섹션은 예전에 "새 데이터니 최소 형태로 얹는다"며
+ *    추가했다가 다른 세션이 이유 설명 없이 주석으로 꺼둔 채(git blame `6de0cbf`)
+ *    방치돼 있었다 — eslint 미사용 경고 13건의 원인이었다. **제거 사유는 "시안에
+ *    없어서"가 아니다** — `GET /groups/{groupId}/dashboard`는 이 셋(`summary`/
+ *    `approval`/`recentEntries`)을 실제로 내려주고 있어 서버 쪽엔 기획 근거가 있었을
+ *    가능성이 높다. 이 화면(DSH-1-PAGE-01-0) 자체가 `billage-ia.md` 기준 W/F·Design
+ *    모두 아직 '예정'(미확정)이라 **지금 시안엔 이 데이터가 들어갈 대응 영역이 없어서
+ *    당장 그릴 근거가 없다는 뜻일 뿐** — 시안이 확정되면 재검토해야 한다
+ *    (`docs/design-verification.md` §5-4 참고). 복원은 이 블록이 마지막으로 살아
+ *    있던 커밋 `a7a5a18`(`git show a7a5a18:"src/screens/Dashboard/DashboardScreen.tsx"`)
+ *    에서 가능하다.
  *
  * `quickServices`는 서버에 대응 도메인이 없는 순수 클라이언트 데이터라 그대로
  * `MOCK_DASHBOARD_SUMMARY.quickServices`를 쓴다(docs/api-integration-plan.md
@@ -38,16 +40,20 @@ import FAB from '../../components/Input/Button/FAB';
 import IconButton from '../../components/Input/Button/IconButton';
 import Button from '../../components/Input/Button/Button';
 import MiniCalendarCard from '../../components/Data Display/Card/MiniCalendarCard';
-import AmountCard from '../../components/Data Display/Card/AmountCard';
-import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
+import DuesProgressCard from '../../components/Data Display/Card/DuesProgressCard';
 import QuickServiceCard from './QuickServiceCard';
 import { MOCK_DASHBOARD_SUMMARY } from '../../types/dashboard';
+import type { MiniCalendarData } from '../../types/dashboard';
 import { getActiveGroup } from '../../types/group';
 import { getCurrentUser } from '../../types/session';
 import * as dashboardService from '../../services/dashboardService';
-import type { DashboardOverview } from '../../services/dashboardService';
+import type {
+  CalendarDaySummary,
+  DashboardOverview,
+} from '../../services/dashboardService';
 import * as groupService from '../../services/groupService';
 import { ApiError } from '../../services/apiClient';
+import { formatDDayLabel } from '../../utils/dueDate';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
@@ -56,21 +62,15 @@ import {
   isNetworkError,
 } from '../../constants/apiErrorMessages';
 import {
+  DASHBOARD_DUES_CARD_DESCRIPTION,
+  DASHBOARD_DUES_CARD_REMAINING_SUFFIX,
   DASHBOARD_DUES_EMPTY,
-  DASHBOARD_DUES_SUMMARY_MIDDLE,
-  DASHBOARD_DUES_SUMMARY_PREFIX,
-  DASHBOARD_DUES_SUMMARY_SUFFIX,
-  DASHBOARD_LEDGER_COUNT_SUFFIX,
+  DASHBOARD_DUES_SECTION_TITLE,
   DASHBOARD_LOADING,
   DASHBOARD_NOTIFICATION_ACCESSIBILITY_LABEL,
-  DASHBOARD_PENDING_APPROVAL_PREFIX,
-  DASHBOARD_PENDING_APPROVAL_SUFFIX,
   DASHBOARD_QUICK_SERVICE_SUBTITLE_SUFFIX,
   DASHBOARD_QUICK_SERVICE_TITLE,
-  DASHBOARD_RECENT_ENTRIES_EMPTY,
-  DASHBOARD_RECENT_ENTRIES_TITLE,
   DASHBOARD_RETRY_LABEL,
-  DASHBOARD_SUMMARY_SECTION_TITLE,
 } from '../../constants/dashboardScreenText';
 import {
   BACKGROUND_PRIMARY,
@@ -89,14 +89,25 @@ type DashboardScreenNavigationProp = CompositeNavigationProp<
 
 type LoadState = 'loading' | 'error' | 'ready';
 
-/** 서버에 하루 단위 입출금 데이터가 없어(위 헤더 코멘트) 항상 이번 달 빈 캘린더만 보여준다. */
-function emptyMiniCalendarData() {
-  const now = new Date();
+/**
+ * `GET /groups/{groupId}/calendar?yearMonth=...`(월간 집계) 응답을 미니 캘린더가
+ * 쓰는 모양으로 바꾼다 — `CalendarScreen.tsx`의 `income - expense` 합산 방식과 동일.
+ * 대시보드 응답 자체의 `calendar` 필드(오늘 기준 지난 14일 롤링 윈도우)는 안 쓴다 —
+ * 시안(DSH-1-PAGE-01-0)이 요구하는 건 "이번 달 1일부터 2주"라 월 그리드 API가 맞다.
+ */
+function toMiniCalendarData(
+  year: number,
+  month: number,
+  days: CalendarDaySummary[],
+): MiniCalendarData {
   return {
-    year: now.getFullYear(),
-    month: now.getMonth() + 1,
-    monthLabel: `${now.getMonth() + 1}월`,
-    days: [],
+    year,
+    month,
+    monthLabel: `${month}월`,
+    days: days.map(day => ({
+      date: Number(day.date.split('-')[2]),
+      amount: day.income - day.expense,
+    })),
   };
 }
 
@@ -105,6 +116,7 @@ function DashboardScreen() {
   const navigation = useNavigation<DashboardScreenNavigationProp>();
 
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
+  const [miniCalendar, setMiniCalendar] = useState<MiniCalendarData | null>(null);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
 
@@ -135,8 +147,16 @@ function DashboardScreen() {
         setLoadState('error');
         return;
       }
-      const result = await dashboardService.getDashboard(group.id);
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = now.getMonth() + 1;
+      const yearMonth = `${year}-${String(month).padStart(2, '0')}`;
+      const [result, monthDays] = await Promise.all([
+        dashboardService.getDashboard(group.id),
+        dashboardService.getMonthlyCalendar(group.id, yearMonth),
+      ]);
       setOverview(result);
+      setMiniCalendar(toMiniCalendarData(year, month, monthDays));
       setLoadState('ready');
     } catch (error) {
       setLoadErrorMessage(toErrorMessage(error));
@@ -170,6 +190,10 @@ function DashboardScreen() {
     // TODO: 보고서 생성 / 증빙자료 앨범 화면 구현 후 연결
   };
 
+  const handlePressDues = (duesId: string) => {
+    navigation.navigate('DuesDetail', { duesId });
+  };
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <ScrollView
@@ -185,10 +209,9 @@ function DashboardScreen() {
           />
         </View>
 
-        <MiniCalendarCard
-          data={emptyMiniCalendarData()}
-          onPress={handlePressMiniCalendar}
-        />
+        {miniCalendar && (
+          <MiniCalendarCard data={miniCalendar} onPress={handlePressMiniCalendar} />
+        )}
 
         {loadState === 'loading' && (
           <View style={styles.stateContainer}>
@@ -203,28 +226,39 @@ function DashboardScreen() {
           </View>
         )}
 
-        {/* {loadState === 'ready' && overview && (
+        {loadState === 'ready' && overview && (
           <>
-            <Text style={styles.sectionTitle}>{DASHBOARD_SUMMARY_SECTION_TITLE}</Text>
-            <AmountCard
-              type="incomeExpense"
-              income={overview.totalIncome}
-              expense={overview.totalExpense}
-            />
-            <View style={styles.summaryMetaRow}>
-              <Text style={styles.summaryMetaText}>
-                {overview.ledgerCount}{DASHBOARD_LEDGER_COUNT_SUFFIX}
-              </Text>
-              {overview.pendingEntryCount > 0 && (
-                <Text style={styles.summaryMetaText}>
-                  {DASHBOARD_PENDING_APPROVAL_PREFIX}
-                  {overview.pendingEntryCount}
-                  {DASHBOARD_PENDING_APPROVAL_SUFFIX}
-                </Text>
-              )}
-            </View>
+            <Text style={styles.sectionTitle}>{DASHBOARD_DUES_SECTION_TITLE}</Text>
+            {overview.upcomingDues.length === 0 ? (
+              <Text style={styles.duesEmptyText}>{DASHBOARD_DUES_EMPTY}</Text>
+            ) : (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.duesCarousel}
+              >
+                {overview.upcomingDues.map(dues => (
+                  <DuesProgressCard
+                    key={dues.duesId}
+                    type="dashboard"
+                    onPress={() => handlePressDues(dues.duesId)}
+                    progress={{
+                      id: dues.duesId,
+                      groupName: dues.title,
+                      dDayLabel: formatDDayLabel(dues.daysLeft),
+                      description: DASHBOARD_DUES_CARD_DESCRIPTION,
+                      highlightDescription: `${dues.targetCount - dues.paidCount}${DASHBOARD_DUES_CARD_REMAINING_SUFFIX}`,
+                      paidMemberCount: dues.paidCount,
+                      totalMemberCount: dues.targetCount,
+                      progressRatio:
+                        dues.targetCount > 0 ? dues.paidCount / dues.targetCount : 0,
+                    }}
+                  />
+                ))}
+              </ScrollView>
+            )}
           </>
-        )} */}
+        )}
 
         <Text style={styles.quickServiceSubtitle}>
           {nickname} {DASHBOARD_QUICK_SERVICE_SUBTITLE_SUFFIX}
@@ -281,31 +315,13 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_DISABLED,
   },
-  summaryMetaRow: {
-    flexDirection: 'row',
-    gap: 16,
-    marginTop: 8,
-  },
-  summaryMetaText: {
-    ...TYPOGRAPHY.body3,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  duesSummaryText: {
-    ...TYPOGRAPHY.body2,
-    color: FOREGROUND_NEUTRAL_NORMAL,
-    marginTop: 16,
-  },
   duesEmptyText: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
     marginTop: 16,
   },
-  recentEmptyText: {
-    ...TYPOGRAPHY.body2,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  recentEntriesList: {
-    gap: 4,
+  duesCarousel: {
+    gap: 12,
   },
   quickServiceSubtitle: {
     ...TYPOGRAPHY.body2,

@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import ProgressBar from '../../Feedback/Progress Bar/ProgressBar';
 import Divider from '../Divider/Divider';
 import CardBase from './CardBase';
-import { formatWon } from '../../../utils/currency';
+import { formatExpense, formatWon } from '../../../utils/currency';
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
 
@@ -34,7 +34,7 @@ function BudgetCard(props: BudgetCardProps) {
   return (
     <CardBase>
       <Text style={styles.remainingTitle}>
-        남은 예산 {formatWon(remainingBudget)}
+        남은 예산 {formatWon(remainingBudget)}원
       </Text>
       <View style={styles.dividerWrapper}>
         <Divider />
@@ -42,14 +42,14 @@ function BudgetCard(props: BudgetCardProps) {
       <View style={styles.statRow}>
         <View style={styles.statColumn}>
           <Text style={styles.statLabel}>지출</Text>
-          <Text style={styles.statValue}>-{formatWon(expense)}</Text>
+          <Text style={styles.statValue}>{formatExpense(expense)}</Text>
         </View>
         <View style={styles.statDividerWrapper}>
           <Divider orientation="vertical" />
         </View>
         <View style={styles.statColumn}>
           <Text style={styles.statLabel}>예산</Text>
-          <Text style={styles.statValue}>{formatWon(budget)}</Text>
+          <Text style={styles.statValue}>{formatWon(budget)}원</Text>
         </View>
       </View>
       <ProgressBar progress={ratio} showLabel />

@@ -18,12 +18,21 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import SearchField from '../../components/Input/Search/SearchField';
+import Button from '../../components/Input/Button/Button';
 import ReceiptGrid from './ReceiptGrid';
 import { getActiveGroup } from '../../types/group';
 import type { Receipt } from '../../types/receipt';
 import * as receiptService from '../../services/receiptService';
+import { ApiError } from '../../services/apiClient';
+import {
+  API_ERROR_DEFAULT_MESSAGE,
+  API_NETWORK_ERROR_MESSAGE,
+  getApiErrorMessage,
+  isNetworkError,
+} from '../../constants/apiErrorMessages';
 import {
   RECEIPT_ALBUM_COUNT_SUFFIX,
+  RECEIPT_ALBUM_RETRY_LABEL,
   RECEIPT_ALBUM_TITLE,
   RECEIPT_SEARCH_EMPTY,
   RECEIPT_SEARCH_PLACEHOLDER,
@@ -41,13 +50,25 @@ function ReceiptSearchScreen() {
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  const [searchError, setSearchError] = useState<string | undefined>();
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const toErrorMessage = (error: unknown): string => {
+    if (isNetworkError(error)) {
+      return API_NETWORK_ERROR_MESSAGE;
+    }
+    if (error instanceof ApiError) {
+      return getApiErrorMessage(error.code);
+    }
+    return API_ERROR_DEFAULT_MESSAGE;
+  };
 
   const search = async (searchKeyword: string, pageToLoad: number) => {
     const trimmed = searchKeyword.trim();
     if (!trimmed) {
       setReceipts([]);
       setHasMore(false);
+      setSearchError(undefined);
       return;
     }
     const group = getActiveGroup();
@@ -66,8 +87,15 @@ function ReceiptSearchScreen() {
       }
       setPage(result.page);
       setHasMore(!result.last);
-    } catch {
-      // 검색 실패는 조용히 무시한다 — 빈 결과와 구분 없이 목록만 갱신 안 된다.
+      setSearchError(undefined);
+    } catch (error) {
+      // "결과 없음"과 "요청 실패"를 구분한다 — 전에는 둘 다 빈 목록으로만 보여서
+      // 사용자가 검색이 실패한 건지 그냥 결과가 없는 건지 알 수 없었다.
+      if (pageToLoad === 0) {
+        setReceipts([]);
+        setHasMore(false);
+        setSearchError(toErrorMessage(error));
+      }
     }
   };
 
@@ -83,6 +111,7 @@ function ReceiptSearchScreen() {
         clearTimeout(debounceRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [keyword]);
 
   const loadMore = () => {
@@ -113,18 +142,30 @@ function ReceiptSearchScreen() {
         />
 
         {keyword.trim().length > 0 && (
-          <>
-            <Text style={styles.countText}>
-              {receipts.length}
-              {RECEIPT_ALBUM_COUNT_SUFFIX}
-            </Text>
-            <ReceiptGrid
-              items={receipts}
-              emptyText={RECEIPT_SEARCH_EMPTY}
-              onEndReached={loadMore}
-              onPressItem={handlePressReceipt}
-            />
-          </>
+          searchError ? (
+            <View style={styles.errorState}>
+              <Text style={styles.errorText}>{searchError}</Text>
+              <Button
+                label={RECEIPT_ALBUM_RETRY_LABEL}
+                onPress={() => search(keyword, 0)}
+                hierarchy="secondary"
+                style={styles.retryButton}
+              />
+            </View>
+          ) : (
+            <>
+              <Text style={styles.countText}>
+                {receipts.length}
+                {RECEIPT_ALBUM_COUNT_SUFFIX}
+              </Text>
+              <ReceiptGrid
+                items={receipts}
+                emptyText={RECEIPT_SEARCH_EMPTY}
+                onEndReached={loadMore}
+                onPressItem={handlePressReceipt}
+              />
+            </>
+          )
         )}
       </View>
     </SafeAreaView>
@@ -144,6 +185,19 @@ const styles = StyleSheet.create({
   countText: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
+  },
+  errorState: {
+    flex: 1,
+    alignItems: 'center',
+    paddingTop: 80,
+    gap: 12,
+  },
+  errorText: {
+    ...TYPOGRAPHY.subtitle3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+  },
+  retryButton: {
+    marginTop: 4,
   },
 });
 

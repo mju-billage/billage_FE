@@ -11,16 +11,16 @@
  */
 import { useCallback, useState } from 'react';
 import {
-  Dimensions,
   FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import {
   useFocusEffect,
   useNavigation,
@@ -68,6 +68,7 @@ import {
   LEDGER_MENU_RENAME,
   LEDGER_NAME_MAX_LENGTH,
   LEDGER_RENAME_CONFIRM_LABEL,
+  LEDGER_RENAME_DIALOG_DESCRIPTION,
   LEDGER_RENAME_DIALOG_TITLE,
   LEDGER_RENAME_PLACEHOLDER,
   SNACKBAR_LEDGER_DELETED_SUFFIX,
@@ -80,7 +81,6 @@ import { TYPOGRAPHY } from '../../constants/typography';
 
 const SEARCH_ICON = require('../../assets/icons/system/Search.png');
 const MENU_ICON = require('../../assets/icons/action/MenuHorizontal.png');
-const CARD_WIDTH = Dimensions.get('window').width - 48;
 
 type LedgerDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -98,6 +98,7 @@ function LedgerDetailScreen() {
   const navigation = useNavigation<LedgerDetailNavigationProp>();
   const route = useRoute<LedgerDetailRouteProp>();
   const ledgerId = route.params.ledgerId;
+  const { width: windowWidth } = useWindowDimensions();
 
   const [ledger, setLedger] = useState<LedgerDetail | null>(null);
   const [entries, setEntries] = useState<EntrySummary[]>([]);
@@ -265,14 +266,20 @@ function LedgerDetailScreen() {
 
   const dialogConfig = getDialogConfig(activeDialog);
 
+  // 캐러셀 스냅 결함 수정(2026-09-18): 이전엔 카드 폭(CARD_WIDTH = 화면폭-48)과
+  // 스크롤뷰 자체의 paddingLeft(24, 우측엔 없음)가 서로 안 맞아 2페이지부터
+  // 어긋났다(snapToInterval이 이 좌측 인셋을 계산에 안 넣었음, 첫 페이지는
+  // 우연히 괜찮아 보였을 뿐). 각 슬라이드를 화면 폭 그대로(windowWidth) 채우고
+  // 카드 여백은 슬라이드 안쪽 padding으로 옮겨서, pagingEnabled 기본 동작(뷰포트
+  // 폭 단위 스냅)만으로 항상 정확히 맞게 했다 — snapToInterval도 더 이상 필요 없다.
   const handleScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const index = Math.round(e.nativeEvent.contentOffset.x / (CARD_WIDTH + 12));
+    const index = Math.round(e.nativeEvent.contentOffset.x / windowWidth);
     setCardIndex(index);
   };
 
   if (loadState === 'loading' || loadState === 'error') {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="primary">
         <AppBar title="" onBackPress={() => navigation.goBack()} />
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>
@@ -282,7 +289,7 @@ function LedgerDetailScreen() {
             <Button label={LEDGER_DETAIL_RETRY_LABEL} onPress={load} hierarchy="secondary" style={{ alignSelf: 'center' }} />
           )}
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
@@ -291,7 +298,10 @@ function LedgerDetailScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      snackbar={snackbar ? <Snackbar visible title={snackbar} /> : undefined}
+    >
       <AppBar
         title={ledger.name}
         onBackPress={() => navigation.goBack()}
@@ -310,17 +320,16 @@ function LedgerDetailScreen() {
         showsHorizontalScrollIndicator={false}
         onMomentumScrollEnd={handleScrollEnd}
         style={styles.carousel}
-        snapToInterval={CARD_WIDTH + 12}
         decelerationRate="fast"
       >
-        <View style={styles.cardSlide}>
+        <View style={[styles.cardSlide, { width: windowWidth }]}>
           <AmountCard
             type="incomeExpense"
             income={ledger.totalIncome}
             expense={ledger.totalExpense}
           />
         </View>
-        <View style={styles.cardSlide}>
+        <View style={[styles.cardSlide, { width: windowWidth }]}>
           {ledger.budget != null ? (
             <BudgetCard
               remainingBudget={ledger.remainingBudget ?? ledger.budget - ledger.totalExpense}
@@ -370,12 +379,6 @@ function LedgerDetailScreen() {
         />
       )}
 
-      {snackbar && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbar} />
-        </View>
-      )}
-
       <FolderMoreMenu
         visible={moreMenuVisible}
         onClose={() => setMoreMenuVisible(false)}
@@ -399,6 +402,7 @@ function LedgerDetailScreen() {
         }}
         textFieldPlaceholder={dialogConfig.placeholder}
         textFieldKeyboardType={activeDialog === 'budget' ? 'number-pad' : undefined}
+        autoFocusTextField={activeDialog === 'rename'}
         textFieldError={dialogError}
         confirmLabel={dialogConfig.confirmLabel}
         destructive={activeDialog === 'delete'}
@@ -406,7 +410,7 @@ function LedgerDetailScreen() {
         onCancel={closeDialog}
         onConfirm={handleConfirmDialog}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
@@ -425,7 +429,7 @@ function getDialogConfig(activeDialog: ActiveDialog) {
     case 'rename':
       return {
         title: LEDGER_RENAME_DIALOG_TITLE,
-        description: undefined,
+        description: LEDGER_RENAME_DIALOG_DESCRIPTION,
         showTextField: true,
         placeholder: LEDGER_RENAME_PLACEHOLDER,
         confirmLabel: LEDGER_RENAME_CONFIRM_LABEL,
@@ -458,17 +462,15 @@ function getDialogConfig(activeDialog: ActiveDialog) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   carousel: {
     flexGrow: 0,
     marginTop: 16,
-    paddingLeft: 24,
   },
+  // 슬라이드 하나 = 화면 폭 전체(JSX에서 width: windowWidth로 덮어씀) — 카드
+  // 여백은 스크롤뷰가 아니라 이 안쪽 padding으로 준다(캐러셀 스냅 결함 수정,
+  // 2026-09-18).
   cardSlide: {
-    width: CARD_WIDTH,
-    marginRight: 12,
+    paddingHorizontal: 24,
   },
   indicatorRow: {
     alignItems: 'center',
@@ -507,12 +509,6 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
     textAlign: 'center',
     paddingVertical: 16,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

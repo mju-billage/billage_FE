@@ -1,5 +1,6 @@
 /** @screen DUE-3-PAGE-06-0 회비 수정 */
 /** @screen DUE-4-MODAL-02-0 회비 수정_이탈 안내 (이 화면과 DuesMemberEditScreen이 공유) */
+/** @screen DUE-4-SNACKBAR-04-0 회비 수정 완료 (화면 자체에서 표시 후 1.6초 뒤 상세로 복귀) */
 /**
  * 7-B-1(회비 수정·삭제·마감): 제목/장부/기간만 다룬다 — 금액은 서버가 절대
  * 수정 불가로 막는 필드라(Dues.txt §4 "amount는 수정할 수 없습니다",
@@ -18,21 +19,25 @@
  * 표 셀을 복사해 오며 안 고친 것으로 보여 목업을 따랐다. 이탈 확인(입력값
  * 변경 시 "수정한 내용은 저장되지 않아요" 모달)은 그 "<" 버튼 자체에 붙인다.
  *
- * CLOSED 상태 회비는애초에 DuesDetailScreen의 ⋮ 메뉴에 "회비 수정" 항목을
- * 안 보여줘 이 화면에 진입할 방법이 없다 — 그래도 서버가 `DUES_ALREADY_CLOSED
- * (409)`로 다시 한번 막아준다(레이스 대비 최종 방어선).
+ * **2026-09-17 정정**: "CLOSED 상태는 진입 방법이 없다"고 적었던 건 틀렸다 —
+ * DUE-2-PAGE-03-0 시안 Case A(마감된 회비)를 다시 대조하니 "회비 수정" 메뉴가
+ * CLOSED에서도 그대로 노출된다(숨는 건 "모임원 선택"/"회비 마감"뿐). 그래서
+ * CLOSED 상태로도 이 화면에 정상 진입할 수 있고, 제목/장부/기간은 이 화면이
+ * 상태를 안 보고 항상 편집 가능하게 둔다(시안에 CLOSED 전용 잠금 규정이
+ * 없음 — design-verification.md §5-13). 금액만 항상 비활성(서버 강제).
+ * 제출 시엔 서버가 `DUES_ALREADY_CLOSED(409)`로 막는다 — 즉 CLOSED 회비는
+ * "값은 고칠 수 있어 보이지만 저장은 항상 실패"하는 상태다(현재 동작 그대로 둠).
  */
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
-import SelectionListItem from '../../components/Data Display/Lists/SelectionListItem';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import DuesDateRangeSheet from './DuesDateRangeSheet';
@@ -67,8 +72,14 @@ import {
   SNACKBAR_DUES_UPDATED,
 } from '../../constants/duesScreenText';
 import { DATE_SHEET_CONFIRM_LABEL } from '../../constants/transactionScreenText';
-import { FOREGROUND_DISABLED } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FOREGROUND_DISABLED,
+  FOREGROUND_PRIMARY,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+
+const CALENDAR_ICON = require('../../assets/icons/system/Calendar.png');
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
 
@@ -174,6 +185,20 @@ function DuesEditScreen() {
     }
   };
 
+  // 안드로이드 하드웨어 back도 같은 이탈 확인을 거치게 한다(ReportCreateByLedgerScreen 패턴).
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        if (hasChanges) {
+          setLeaveDialogVisible(true);
+          return true;
+        }
+        return false;
+      });
+      return () => subscription.remove();
+    }, [hasChanges]),
+  );
+
   const handlePressLedgerField = () => {
     if (ledgerOptions.length === 0) {
       loadLedgerOptions();
@@ -254,6 +279,7 @@ function DuesEditScreen() {
       <ScrollView contentContainerStyle={styles.body}>
         <TextField
           label={DUES_CREATE_TITLE_FIELD_LABEL}
+          required
           value={title}
           onChangeText={text => setTitle(text.slice(0, DUES_TITLE_MAX_LENGTH))}
           placeholder={DUES_CREATE_TITLE_PLACEHOLDER}
@@ -261,6 +287,7 @@ function DuesEditScreen() {
         />
         <TextField
           label={DUES_CREATE_AMOUNT_LABEL}
+          required
           value={amount.toLocaleString()}
           onChangeText={() => {}}
           placeholder=""
@@ -268,24 +295,24 @@ function DuesEditScreen() {
           disabled
           helperText={DUES_EDIT_AMOUNT_LOCKED_HINT}
         />
-        <SelectionListItem
-          type="picker"
-          title={DUES_CREATE_LEDGER_LABEL}
-          required
-          value={ledgerName || DUES_CREATE_LEDGER_PLACEHOLDER}
-          onPress={handlePressLedgerField}
-        />
-        <SelectionListItem
-          type="picker"
-          title={DUES_CREATE_PERIOD_LABEL}
-          required
-          value={
-            startDate && dueDate
-              ? `${startDate} - ${dueDate}`
-              : DUES_CREATE_PERIOD_PLACEHOLDER
-          }
-          onPress={() => setActiveSheet('period')}
-        />
+        <View style={styles.fieldGroup}>
+          <Text style={styles.fieldLabel}>{DUES_CREATE_LEDGER_LABEL}</Text>
+          <Pressable style={styles.ledgerBox} onPress={handlePressLedgerField}>
+            <Text style={ledgerName ? styles.ledgerValue : styles.ledgerPlaceholder}>
+              {ledgerName || DUES_CREATE_LEDGER_PLACEHOLDER}
+            </Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.fieldGroup}>
+          <Text style={styles.fieldLabel}>{DUES_CREATE_PERIOD_LABEL}</Text>
+          <Pressable style={styles.periodBox} onPress={() => setActiveSheet('period')}>
+            <Text style={startDate && dueDate ? styles.periodValue : styles.periodPlaceholder}>
+              {startDate && dueDate ? `${startDate} ~ ${dueDate}` : DUES_CREATE_PERIOD_PLACEHOLDER}
+            </Text>
+            <Image source={CALENDAR_ICON} style={styles.periodIcon} />
+          </Pressable>
+        </View>
       </ScrollView>
 
       <View style={styles.footer}>
@@ -307,7 +334,6 @@ function DuesEditScreen() {
       />
       <DuesDateRangeSheet
         visible={activeSheet === 'period'}
-        title={DUES_CREATE_PERIOD_LABEL}
         confirmLabel={DATE_SHEET_CONFIRM_LABEL}
         startDate={startDate || undefined}
         endDate={dueDate || undefined}
@@ -348,7 +374,52 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingTop: 16,
-    gap: 4,
+    gap: 20,
+  },
+  fieldGroup: {
+    gap: 8,
+  },
+  fieldLabel: {
+    ...TYPOGRAPHY.subtitle3,
+  },
+  ledgerBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: BORDER_NEUTRAL_NORMAL,
+    borderRadius: 8,
+    paddingVertical: 12,
+  },
+  ledgerPlaceholder: {
+    ...TYPOGRAPHY.body1,
+    color: FOREGROUND_DISABLED,
+  },
+  ledgerValue: {
+    ...TYPOGRAPHY.body1,
+    color: FOREGROUND_PRIMARY,
+  },
+  periodBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: BORDER_NEUTRAL_NORMAL,
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  periodPlaceholder: {
+    ...TYPOGRAPHY.body1,
+    color: FOREGROUND_DISABLED,
+  },
+  periodValue: {
+    ...TYPOGRAPHY.body1,
+    color: FOREGROUND_PRIMARY,
+  },
+  periodIcon: {
+    width: 20,
+    height: 20,
+    tintColor: FOREGROUND_DISABLED,
   },
   footer: {
     paddingHorizontal: 24,

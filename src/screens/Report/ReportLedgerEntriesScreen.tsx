@@ -1,4 +1,5 @@
 /** @screen ETC-4-PAGE-05-0 보고서_장부 상세 조회 */
+/** @screen ETC-4-PAGE-05-1 보고서_장부 상세(수입/지출) — 05-0의 탭 상태, 별도 라우트 아님(ReportEntryList.tsx 탭) */
 /**
  * 장부별 보고서 상세(ETC-3-PAGE-02-0)의 장부 카드, 기간별 보고서 상세
  * (ETC-3-PAGE-03-0)의 장부 리스트 행 — 양쪽 모두 이 화면으로 뎁스인한다
@@ -14,7 +15,7 @@
  * 사유는 `ReportEntryList.tsx` 파일 상단 주석 참고.
  */
 import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -36,7 +37,7 @@ function ReportLedgerEntriesScreen() {
   const { ledgerName, startDate, endDate, totalIncome, totalExpense, entries } = route.params;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar type="sub" title={ledgerName} onBackPress={() => navigation.goBack()} />
 
       <View style={styles.body}>
@@ -53,14 +54,11 @@ function ReportLedgerEntriesScreen() {
           }
         />
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,

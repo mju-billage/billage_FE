@@ -18,6 +18,7 @@ import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import TextArea from '../../components/Input/Text Field/TextArea';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
+import { BACKGROUND_PRIMARY } from '../../constants/colors';
 import {
   DUES_CREATE_LEAVE_CONFIRM_LABEL,
   DUES_REQUEST_LEAVE_DESCRIPTION,
@@ -74,6 +75,7 @@ function DuesRequestScreen() {
           onChangeText={setMessage}
           placeholder={DUES_REQUEST_PLACEHOLDER}
           rows={10}
+          autoFocus
         />
       </View>
 
@@ -103,8 +105,11 @@ function DuesRequestScreen() {
 }
 
 const styles = StyleSheet.create({
+  // DUE-3-PAGE-04-0(납부 요청) 시안이 옅은 블루 — design-verification.md §5-7 규칙,
+  // §2 표 갱신.
   container: {
     flex: 1,
+    backgroundColor: BACKGROUND_PRIMARY,
   },
   body: {
     flex: 1,

@@ -86,19 +86,42 @@ function GroupManagerScreen() {
     setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
-  const fetchInvitation = useCallback(async (groupId: string) => {
-    setIsIssuingInvite(true);
-    setInviteError(false);
-    try {
-      await groupMembershipService.createInvitation(groupId);
-      setGroup(getActiveGroup());
-    } catch {
-      // 발급 실패는 화면 자체를 막지 않는다 — 행을 다시 누르면 재시도한다.
-      setInviteError(true);
-    } finally {
-      setIsIssuingInvite(false);
-    }
-  }, []);
+  const fetchInvitation = useCallback(
+    async (groupId: string, viewerOwner: boolean) => {
+      setIsIssuingInvite(true);
+      setInviteError(false);
+      try {
+        // GET current로 먼저 "지금 있는 코드"를 읽는다 — 이게 성공하면 발급 API는
+        // 아예 안 부른다(재발급은 매번 새 코드를 만들어 이전 공유 코드를 무효화한다).
+        await groupMembershipService.getCurrentInvitation(groupId);
+        setGroup(getActiveGroup());
+      } catch (error) {
+        if (
+          error instanceof ApiError &&
+          error.code === 'INVITATION_NOT_FOUND' &&
+          viewerOwner
+        ) {
+          // 코드가 아예 없는 최초 상태 — 발급은 총무만 가능하다(정책 확정).
+          try {
+            await groupMembershipService.createInvitation(groupId);
+            setGroup(getActiveGroup());
+            return;
+          } catch {
+            setInviteError(true);
+            return;
+          }
+        }
+        if (error instanceof ApiError && error.code === 'INVITATION_NOT_FOUND') {
+          // 일반 관리자는 코드를 만들 수 없다 — "총무에게 요청" 문구만 보여준다.
+          return;
+        }
+        setInviteError(true);
+      } finally {
+        setIsIssuingInvite(false);
+      }
+    },
+    [],
+  );
 
   const load = useCallback(async () => {
     setLoadState('loading');
@@ -119,14 +142,15 @@ function GroupManagerScreen() {
       const result = await groupMembershipService.getMemberships(activeGroup.id);
       setMembers(result);
       setLoadState('ready');
-      // 초대코드는 자동 발급하지 않는다 — 발급 API가 멱등하지 않아(재호출마다 새 코드,
-      // docs/api-gaps.md 정책 결함 참고) 화면 진입만으로 호출하면 코드가 계속 늘어난다.
-      // 카드를 눌렀을 때만(handlePressInviteCode) 발급을 요청한다.
+      // 2026-09-06: `GET .../invitations/current`(조회 전용)가 확인돼 화면 진입
+      // 시 자동으로 부른다 — 이전엔 발급 API가 멱등하지 않아(재호출마다 새 코드)
+      // 자동 호출을 못 하고 카드를 눌렀을 때만 발급했었다.
+      fetchInvitation(activeGroup.id, activeGroup.myRole === 'OWNER');
     } catch (error) {
       setLoadErrorMessage(toErrorMessage(error));
       setLoadState('error');
     }
-  }, []);
+  }, [fetchInvitation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -162,8 +186,12 @@ function GroupManagerScreen() {
       showSnackbar(SNACKBAR_INVITE_CODE_COPIED);
       return;
     }
-    // 초대코드가 없는 상태(최초 발급 실패 등)에서 다시 누르면 재시도한다.
-    fetchInvitation(group.id);
+    if (!viewerIsOwner) {
+      // 일반 관리자는 발급 권한이 없다 — 다시 눌러봐야 안내 문구만 반복된다.
+      return;
+    }
+    // 조회/발급 실패 후 다시 누르면 재시도한다.
+    fetchInvitation(group.id, true);
   };
 
   return (
@@ -175,7 +203,7 @@ function GroupManagerScreen() {
       />
 
       <View style={styles.content}>
-        {group && viewerIsOwner && (
+        {group && (
           <CardBase onPress={handlePressInviteCode} style={styles.inviteCodeRow}>
             <Image source={COPY_ICON} style={styles.inviteCodeIcon} />
             <Text style={styles.inviteCodeText}>

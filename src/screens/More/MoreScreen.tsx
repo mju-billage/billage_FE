@@ -1,4 +1,5 @@
 /** @screen ETC-1-PAGE-01-0 더보기 메인 */
+/** @screen ETC-5-SNACKBAR-05-0 모임 전환 완료 (GroupSwitcherMenu.onSelectGroup, 시안 이미지 0장) */
 import { useCallback, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -37,7 +38,7 @@ import {
   SNACKBAR_GROUP_SWITCHED_PREFIX,
   SNACKBAR_GROUP_SWITCHED_SUFFIX,
 } from '../../constants/groupManagerScreenText';
-import { DASHBOARD_NOTIFICATION_ACCESSIBILITY_LABEL } from '../../constants/dashboardScreenText';
+import { SETTINGS_TITLE } from '../../constants/settingsScreenText';
 import { BLUE_50, FOREGROUND_DISABLED, FOREGROUND_SECONDARY } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
@@ -148,7 +149,7 @@ function MoreScreen() {
           <IconButton
             icon={SETTING_ICON}
             onPress={() => navigation.navigate('Settings')}
-            accessibilityLabel={DASHBOARD_NOTIFICATION_ACCESSIBILITY_LABEL}
+            accessibilityLabel={SETTINGS_TITLE}
           />
         </View>
 
@@ -166,7 +167,7 @@ function MoreScreen() {
               </Text>
             </Pressable>
           </View>
-          <AvatarList members={cachedGroups} />
+          <AvatarList members={cachedGroups} maxVisible={4} />
         </CardBase>
 
         <View style={styles.menuWrapper}>

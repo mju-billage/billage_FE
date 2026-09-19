@@ -1,7 +1,7 @@
 /** @screen FDR-3-PAGE-03-0 새 장부 생성 */
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
+import { BackHandler, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -11,6 +11,7 @@ import TextField from '../../components/Input/Text Field/TextField';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import * as ledgerService from '../../services/ledgerService';
+import { getActiveGroup } from '../../types/group';
 import { ApiError } from '../../services/apiClient';
 import {
   API_ERROR_DEFAULT_MESSAGE,
@@ -69,19 +70,46 @@ function LedgerCreateScreen() {
     }
   };
 
+  // 안드로이드 하드웨어 back도 같은 이탈 확인을 거치게 한다(ReportCreateByLedgerScreen 패턴).
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        if (hasInput) {
+          setLeaveConfirmVisible(true);
+          return true;
+        }
+        return false;
+      });
+      return () => subscription.remove();
+    }, [hasInput]),
+  );
+
   const handleSubmit = async () => {
     const trimmedName = name.trim();
-    // parentId는 null일 수 없다 — 최상위(폴더 탭 루트)엔 장부를 바로 만들 API가
-    // 없어(POST /folders/{folderId}/ledgers만 있음) NewItemSheet가 이 화면 진입
-    // 자체를 최상위에서 숨긴다.
-    if (!trimmedName || !parentId || isSubmitting) {
+    if (!trimmedName || isSubmitting) {
       return;
     }
     setNameError(undefined);
     setIsSubmitting(true);
     try {
       const parsedBudget = budget.trim() ? Number(budget.trim()) : null;
-      await ledgerService.createLedger(parentId, trimmedName, parsedBudget);
+      if (parentId) {
+        await ledgerService.createLedger(parentId, trimmedName, parsedBudget);
+      } else {
+        // 최상위(폴더 탭 루트)에서 진입한 경우 — 2026-09-13 신설된
+        // POST /groups/{groupId}/ledgers로 만든다(백엔드 노티 03번).
+        const group = getActiveGroup();
+        if (!group) {
+          setNameError(API_ERROR_DEFAULT_MESSAGE);
+          setIsSubmitting(false);
+          return;
+        }
+        await ledgerService.createLedgerInGroup(group.id, {
+          name: trimmedName,
+          budget: parsedBudget,
+          folderId: null,
+        });
+      }
       setSnackbarVisible(true);
       setTimeout(() => {
         navigation.goBack();

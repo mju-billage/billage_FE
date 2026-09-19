@@ -1,7 +1,8 @@
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
 import {
   BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_INVERSE,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../../constants/colors';
@@ -15,10 +16,18 @@ type ThumbnailProps = {
   imageHeaders?: Record<string, string>;
   size?: number;
   onRemove?: () => void;
+  /** 업로드 진행 중 — 이미지 위에 스피너를 덮고 제거 버튼을 숨긴다. */
+  uploading?: boolean;
 };
 
 /** 작은 정사각 이미지 썸네일. 우상단에 겹쳐진 제거 버튼을 옵션으로 보여준다. */
-function Thumbnail({ imageUri, imageHeaders, size = 56, onRemove }: ThumbnailProps) {
+function Thumbnail({
+  imageUri,
+  imageHeaders,
+  size = 56,
+  onRemove,
+  uploading = false,
+}: ThumbnailProps) {
   return (
     <View style={[styles.container, { width: size, height: size }]}>
       {imageUri ? (
@@ -34,7 +43,12 @@ function Thumbnail({ imageUri, imageHeaders, size = 56, onRemove }: ThumbnailPro
           />
         </View>
       )}
-      {onRemove && (
+      {uploading && (
+        <View style={styles.uploadingOverlay}>
+          <ActivityIndicator color={FOREGROUND_INVERSE} />
+        </View>
+      )}
+      {onRemove && !uploading && (
         <Pressable style={styles.removeButton} onPress={onRemove} hitSlop={8}>
           <Image source={CLOSE_ICON} style={styles.removeIcon} />
         </Pressable>
@@ -81,6 +95,17 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     tintColor: FOREGROUND_NEUTRAL_NORMAL,
+  },
+  uploadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
