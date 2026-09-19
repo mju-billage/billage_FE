@@ -2,6 +2,7 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Button from '../../components/Input/Button/Button';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import {
   SCAN_FAILED_RETRY_LABEL,
   SCAN_FAILED_SUBTITLE,
@@ -26,7 +27,11 @@ function ReceiptScanFailedView({ onRetry, onClose }: ReceiptScanFailedViewProps)
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
+    <ScreenContainer
+      background="secondary"
+      edges={[]}
+      style={[styles.container, { paddingTop: insets.top + 12 }]}
+    >
       <Pressable style={styles.closeButton} onPress={onClose} hitSlop={8}>
         <Image source={CLOSE_ICON} style={styles.closeIcon} />
       </Pressable>
@@ -44,7 +49,7 @@ function ReceiptScanFailedView({ onRetry, onClose }: ReceiptScanFailedViewProps)
           fullWidth
         />
       </View>
-    </View>
+    </ScreenContainer>
   );
 }
 

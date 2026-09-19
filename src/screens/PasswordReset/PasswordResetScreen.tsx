@@ -7,6 +7,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/Navigation/App bar/BackButton';
 import TextField from '../../components/Input/Text Field/TextField';
 import Button from '../../components/Input/Button/Button';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { isValidEmail } from '../../utils/validators';
 import * as authService from '../../services/authService';
 import {
@@ -51,7 +52,7 @@ function PasswordResetScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
       <View style={styles.backRow}>
         <BackButton onPress={() => navigation.goBack()} />
       </View>
@@ -76,7 +77,7 @@ function PasswordResetScreen() {
         fullWidth
         disabled={!isValidEmail(email) || isSubmitting}
       />
-    </View>
+    </ScreenContainer>
   );
 }
 

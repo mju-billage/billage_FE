@@ -374,6 +374,21 @@ POST /api/v1/auth/password/reset  (Authorization 헤더 없음)
 
 명세 문서에서도 이 판단을 요청하고 있습니다.
 
+**2026-09-19 실호출 확인(`scripts/api-call.js`, 개발 서버, 로그인 후 호출)** — 알림 설정·문의하기·공지사항 화면이 "일시적인 문제가 발생했어요"로 뜨는 원인은 **서버에 라우트가 없어서(미구현)** 입니다. 존재하지 않는 임의 경로(`/api/v1/zzz-not-a-route`)와 응답이 완전히 같습니다(같은 404·같은 바디).
+
+| 엔드포인트 | HTTP | code | message |
+|---|---:|---|---|
+| `GET /api/v1/notifications/settings` | 404 | `RESOURCE_NOT_FOUND` | 요청한 리소스를 찾을 수 없습니다. |
+| `PATCH /api/v1/notifications/settings` | 404 | `RESOURCE_NOT_FOUND` | 요청한 리소스를 찾을 수 없습니다. |
+| `GET /api/v1/faqs`(문의하기 화면) | 404 | `RESOURCE_NOT_FOUND` | 요청한 리소스를 찾을 수 없습니다. |
+| `GET /api/v1/notices`(공지사항 목록) | 404 | `RESOURCE_NOT_FOUND` | 요청한 리소스를 찾을 수 없습니다. |
+| `GET /api/v1/notices/1`(상세) | 404 | `RESOURCE_NOT_FOUND` | 요청한 리소스를 찾을 수 없습니다. |
+| `GET /api/v1/notifications`(알림 목록) | 404 | `RESOURCE_NOT_FOUND` | 요청한 리소스를 찾을 수 없습니다. |
+| `GET /api/v1/terms/SERVICE` | 404 | `RESOURCE_NOT_FOUND` | 요청한 리소스를 찾을 수 없습니다. |
+| (대조) `GET /api/v1/groups` | 200 | — | 정상 |
+
+프론트 문제는 아닙니다(200인데 화면이 에러인 경우가 아님). 다만 프론트는 `RESOURCE_NOT_FOUND`를 매핑하지 않아 fallback 문구가 그대로 뜹니다 — 서버 구현 전까지 사용자에게는 원인이 안 보입니다.
+
 ### 5-3. 개인 납부 내역 검색 — `GET .../members/{memberId}/payments`에 `keyword` 없음
 
 `DUE-5-PAGE-02-0`(개인 납부 내역_검색, 시안 6장) 화면 작업을 위해 확인했는데, 이 API는 `from`/`to`(발생일 기간)만 지원하고 `keyword`(장부명·항목명 검색) 파라미터가 없습니다. 시안은 이 화면이 "장부 상세 조회 화면과 완전히 동일하게 동작"한다고 적어 검색어 입력이 전제입니다.

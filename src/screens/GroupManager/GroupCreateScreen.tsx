@@ -8,6 +8,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/Navigation/App bar/BackButton';
 import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import * as groupService from '../../services/groupService';
 import { ApiError } from '../../services/apiClient';
 import {
@@ -81,7 +82,7 @@ function GroupCreateScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
       <View style={styles.headerRow}>
         <BackButton onPress={() => navigation.goBack()} />
       </View>
@@ -110,7 +111,7 @@ function GroupCreateScreen() {
           onPress={handleSubmit}
         />
       </View>
-    </View>
+    </ScreenContainer>
   );
 }
 

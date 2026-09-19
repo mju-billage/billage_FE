@@ -8,6 +8,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/Navigation/App bar/BackButton';
 import TextField from '../../components/Input/Text Field/TextField';
 import Button from '../../components/Input/Button/Button';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { isValidEmail } from '../../utils/validators';
 import { ApiError } from '../../services/apiClient';
 import * as authService from '../../services/authService';
@@ -82,7 +83,7 @@ function SocialSignupInfoScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
       <View style={styles.backRow}>
         <BackButton onPress={() => navigation.goBack()} />
       </View>
@@ -117,7 +118,7 @@ function SocialSignupInfoScreen() {
           disabled={!canProceed || isSubmitting}
         />
       </View>
-    </View>
+    </ScreenContainer>
   );
 }
 

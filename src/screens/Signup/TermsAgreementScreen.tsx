@@ -8,6 +8,7 @@ import BackButton from '../../components/Navigation/App bar/BackButton';
 import AgreementCheckboxRow from '../../components/Input/Control/AgreementCheckboxRow';
 import Divider from '../../components/Data Display/Divider/Divider';
 import Button from '../../components/Input/Button/Button';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { TYPOGRAPHY } from '../../constants/typography';
 import {
   TERMS_AGREEMENT_TITLE,
@@ -76,7 +77,7 @@ function TermsAgreementScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
       <View style={styles.backRow}>
         <BackButton onPress={() => navigation.goBack()} />
       </View>
@@ -129,7 +130,7 @@ function TermsAgreementScreen() {
           disabled={!canProceed}
         />
       </View>
-    </View>
+    </ScreenContainer>
   );
 }
 

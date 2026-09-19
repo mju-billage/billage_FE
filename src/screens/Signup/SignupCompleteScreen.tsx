@@ -6,6 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/Navigation/App bar/BackButton';
 import Button from '../../components/Input/Button/Button';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import JoinGroupSheet from '../GroupManager/JoinGroupSheet';
 import { FOREGROUND_NEUTRAL_NORMAL } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
@@ -40,7 +41,7 @@ function SignupCompleteScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
       <View style={styles.backRow}>
         <BackButton onPress={() => navigation.goBack()} />
       </View>
@@ -70,7 +71,7 @@ function SignupCompleteScreen() {
           navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
         }}
       />
-    </View>
+    </ScreenContainer>
   );
 }
 

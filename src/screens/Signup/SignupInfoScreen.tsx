@@ -1,6 +1,6 @@
 /** @screen COM-3-PAGE-03-0 가입 정보 입력 */
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,6 +8,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/Navigation/App bar/BackButton';
 import TextField from '../../components/Input/Text Field/TextField';
 import Button from '../../components/Input/Button/Button';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { isValidEmail, isValidPassword } from '../../utils/validators';
 import { TYPOGRAPHY } from '../../constants/typography';
 import {
@@ -78,48 +79,55 @@ function SignupInfoScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.backRow}>
-        <BackButton onPress={() => navigation.goBack()} />
-      </View>
-      <Text style={styles.title}>{SIGNUP_INFO_TITLE}</Text>
+    <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
+      {/* 키보드에 가린 필드도 스크롤로 볼 수 있게 한다. 하단 CTA(footer)는 스크롤 밖에 고정. */}
+      <ScrollView
+        style={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.backRow}>
+          <BackButton onPress={() => navigation.goBack()} />
+        </View>
+        <Text style={styles.title}>{SIGNUP_INFO_TITLE}</Text>
 
-      <View style={styles.form}>
-        <TextField
-          label={SIGNUP_NAME_LABEL}
-          value={name}
-          onChangeText={text => setName(text.slice(0, NAME_MAX_LENGTH))}
-          placeholder={SIGNUP_NAME_PLACEHOLDER}
-          helperText={SIGNUP_NAME_HELPER}
-          maxLength={NAME_MAX_LENGTH}
-        />
-        <TextField
-          label={SIGNUP_EMAIL_LABEL}
-          value={email}
-          onChangeText={setEmail}
-          placeholder={SIGNUP_EMAIL_PLACEHOLDER}
-          error={emailError}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        <TextField
-          label={SIGNUP_PASSWORD_LABEL}
-          value={password}
-          onChangeText={setPassword}
-          placeholder={SIGNUP_PASSWORD_PLACEHOLDER}
-          helperText={SIGNUP_PASSWORD_HELPER}
-          secureToggle
-        />
-        <TextField
-          label={SIGNUP_PASSWORD_CONFIRM_LABEL}
-          value={passwordConfirm}
-          onChangeText={setPasswordConfirm}
-          placeholder={SIGNUP_PASSWORD_PLACEHOLDER}
-          helperText={SIGNUP_PASSWORD_HELPER}
-          error={confirmError}
-          secureToggle
-        />
-      </View>
+        <View style={styles.form}>
+          <TextField
+            label={SIGNUP_NAME_LABEL}
+            value={name}
+            onChangeText={text => setName(text.slice(0, NAME_MAX_LENGTH))}
+            placeholder={SIGNUP_NAME_PLACEHOLDER}
+            helperText={SIGNUP_NAME_HELPER}
+            maxLength={NAME_MAX_LENGTH}
+          />
+          <TextField
+            label={SIGNUP_EMAIL_LABEL}
+            value={email}
+            onChangeText={setEmail}
+            placeholder={SIGNUP_EMAIL_PLACEHOLDER}
+            error={emailError}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <TextField
+            label={SIGNUP_PASSWORD_LABEL}
+            value={password}
+            onChangeText={setPassword}
+            placeholder={SIGNUP_PASSWORD_PLACEHOLDER}
+            helperText={SIGNUP_PASSWORD_HELPER}
+            secureToggle
+          />
+          <TextField
+            label={SIGNUP_PASSWORD_CONFIRM_LABEL}
+            value={passwordConfirm}
+            onChangeText={setPasswordConfirm}
+            placeholder={SIGNUP_PASSWORD_PLACEHOLDER}
+            helperText={SIGNUP_PASSWORD_HELPER}
+            error={confirmError}
+            secureToggle
+          />
+        </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         <Button
@@ -129,7 +137,7 @@ function SignupInfoScreen() {
           disabled={!canProceed}
         />
       </View>
-    </View>
+    </ScreenContainer>
   );
 }
 
@@ -138,6 +146,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 60,
     paddingHorizontal: 24,
+  },
+  scroll: {
+    flex: 1,
   },
   backRow: {
     marginBottom: 16,

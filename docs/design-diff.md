@@ -153,6 +153,34 @@
 #### `SearchField` clear(X) 버튼 미지원 — 컴포넌트에 기능 자체가 없음, 승인 대기 [2026-09-19 6-11]
 - **검색 필드 clear(X) 버튼 — 보고만, 미수정**: `SearchField`(`components/Input/Search/SearchField.tsx`)는 `value/onChangeText/placeholder/size/variant/onSubmit`만 받고 **clear 지원이 없다**(우측엔 돋보기 아이콘 고정). 반대로 `TextField`는 `onClear?`(값이 있고 비활성 아닐 때 `Close.png` X 아이콘)를 갖고 있고 4개 화면(GroupProfileEdit/JoinGroupSheet/ProfileEdit/TransactionTextInputSheet)과 `Dialog`가 쓴다. `SearchField`는 8곳이 사용 중이라 §5-17의 "컴포넌트에 있는데 화면이 안 쓰는" 패턴이 아니라 **컴포넌트에 기능 자체가 없는** 경우다. 지시대로 고치지 않음 — 추가 시 `onClear` prop을 넣고 값이 있을 때 X + 돋보기 병기(시안 Case C), 폴더 화면에서 `onClear={() => setSearchQuery('')}` 연결하는 안이고, 나머지 7개 사용처에는 prop을 안 넘기면 변화 없다.
 
+#### 폼 화면 스크롤 컨테이너 없음 — 입력 필드 2개 이상 6화면 [2026-09-19 9-2, 조사만·수정 안 함]
+
+`SignupInfoScreen`(COM-3-PAGE-03-0)은 키보드 회피는 되는데 스크롤이 없어 키보드에 가린 칸이 안 보였다 → `ScrollView`(`keyboardShouldPersistTaps="handled"`, 하단 CTA는 스크롤 밖 고정)로 감싸 수정(§3). 같은 증상 후보(입력 `TextField`/`TextInput`/`TextArea` JSX 2개 이상 + `ScrollView`/`FlatList`/`SectionList` 없음)를 전수 검색한 결과, **우선순위는 사용자가 정한다**:
+
+| 파일 | Screen ID | 입력 | `ScreenContainer` | 비고 |
+|---|---|---|---|---|
+| `src/screens/Signup/SocialSignupInfoScreen.tsx` | COM-3-PAGE-02-0 | TextField 2 | 사용(8-7, 키보드 회피 새로 켜짐) | 필드 적어 가림 위험 낮음 |
+| `src/screens/More/PasswordChangeScreen.tsx` | ETC-4-PAGE-17-0 | TextField 3 | 사용(8-6, 키보드 회피 새로 켜짐) | 3필드 — `SignupInfo`와 같은 증상 후보 |
+| `src/screens/LoginScreen.tsx` | COM-1-PAGE-01-0 | TextField 2 | 미사용 | 스낵바 슬롯 대기 |
+| `src/screens/Folder/LedgerCreateScreen.tsx` | FDR-3-PAGE-03-0 | TextField 2 | 미사용 | 스낵바 슬롯 대기 |
+| `src/screens/Member/MemberAddIndividualScreen.tsx` | DUE-4-PAGE-01-0, DUE-5-PAGE-01-0 | TextField+TextArea 3 | 미사용 | 스낵바 슬롯 대기 |
+| `src/screens/Member/MemberEditScreen.tsx` | DUE-4-PAGE-03-0 | TextField+TextArea 3 | 미사용 | 스낵바 슬롯 대기, 키보드 회피 자체가 없음 |
+
+(참고: 스크롤이 이미 있는 다중 입력 화면 — `DuesCreateScreen`, `DuesEditScreen`, `SignupInfoScreen`(이번 수정).) 이 목록은 JSX 태그 개수 기준의 정적 검색이라 `.map`으로 필드를 반복하는 화면은 1개로 센다.
+
+#### 그래픽 에셋 `receipt-graphic.png` 미사용 — 영수증 스캔 실패 화면 [2026-09-19 9-2, 연결 안 함]
+
+`ReceiptScanFailedView`(ADD-4-PAGE-01-1)는 이미지 자리에 회색 `previewBox`(placeholder View)를 그린다. 그래픽 에셋 4종은 `src/assets/images/`에 모두 있고, 사용처는 아래와 같다(연결 위치는 명세서를 보고 사용자가 정한다):
+
+| 에셋 | 사용 여부 | 사용처 |
+|---|---|---|
+| `receipt-graphic.png` | **미사용** | 코드 어디에도 참조 없음(`.ts`/`.tsx`/스토리 포함 `grep` 0건) |
+| `album-graphic.png` | 사용 | `src/types/dashboard.ts` 대시보드 "간편 서비스" 카드(`증빙자료 앨범`) — 실사용은 `DashboardScreen`/`QuickServiceCard` |
+| `report-graphic.png` | 사용 | `src/types/dashboard.ts` 간편 서비스 카드(`보고서 생성`) |
+| `statistics-graphic.png` | 사용 | `src/types/dashboard.ts` 간편 서비스 카드(`통계/분석`) |
+
+미사용 에셋은 `design-verification.md` §5-17에도 기록했다.
+
 ### 1-2. 기획 확인 필요
 
 #### <a id="add-2-sheet-07-0-일자-선택-캘린더"></a>ADD-2-SHEET-07-0 (일자 선택 캘린더) — 디자인 원본이 더미 데이터, 기획에 원본 재요청 [2026-08-29 배치 E]
@@ -447,6 +475,45 @@ spec-sheet-map.tsv`에 헤더확인으로 등록, `design-verification.md` §4-0
   | **93.33(6-11)** | 69.33 | **6** | **5자+…** | 10 |
   즉 한글 이름이 **7글자부터** 말줄임이 걸린다(이전 8글자부터). 산술 근사이고 실제 안드로이드 텍스트 측정(fontScale, 커닝)·Bold 파일 사용 여부는 확인 못 했다. 부제(`caption`, `numberOfLines` 없음)는 "1개의 항목" 등 짧아 한 줄이지만 줄바꿈 방지 처리가 없어 매우 큰 항목 수(자릿수↑)에선 2줄이 될 수 있다(설명표는 이름만 말줄임 규정).
 
+#### 폴더 상세 3화면 코드 현황 — 시안 실측 대조 대기 [2026-09-19 9-1, 조사만·수정 안 함]
+
+**ID 확인**: §2 기준 `FDR-2-PAGE-04-0` = 폴더 상세(`FolderScreen`의 폴더 진입 상태, `FDR-1-PAGE-01-0`과 같은 파일), `FDR-2-PAGE-05-0` = 장부 상세(`LedgerDetailScreen`), **`FDR-2-PAGE-01-0` = 이동 대상 선택(`FolderSelectMoveScreen`)** 이다 — "폴더 상세 = `FDR-2-PAGE-01-0`"이 아니다. 3화면 다 조사했다. 숫자는 dp, 문구는 원문, 상수명 병기.
+
+| 항목 | `FDR-2-PAGE-04-0` 폴더 상세(`FolderScreen`, `folderId` 있음) | `FDR-2-PAGE-01-0` 이동 대상 선택(`FolderSelectMoveScreen`) | `FDR-2-PAGE-05-0` 장부 상세(`LedgerDetailScreen`) |
+|---|---|---|---|
+| 배경 | `SafeAreaView` `styles.container` `BLUE_50`(#F0F5FE), edges top·bottom | `ScreenContainer background="secondary"`(흰색) | `ScreenContainer background="primary"`(#F0F5FE) |
+| AppBar `type` | `'sub'`(루트는 `'titleOnly'`) | 기본값 `'sub'` | 기본값 `'sub'` |
+| 제목 소스 | `route.params.folderName ?? ''`(루트는 `FOLDER_SCREEN_TITLE` = `폴더`) | `SELECT_MOVE_TITLE` = `선택 이동` | `ledger.name`(로딩/에러 중엔 `''`) |
+| 우측 액션(순서) | ① `MENU_ICON`(`MenuHorizontal.png`) → `FolderMoreMenu`. 루트만 앞에 `STATISTICS_ICON`(`Graph.png`) → `Statistics` 추가 | 없음 | ① `SEARCH_ICON` → `LedgerSearch` ② `MENU_ICON` → 메뉴(`LEDGER_MENU_BUDGET` `예산 설정` / `LEDGER_MENU_RENAME` `장부 이름 변경` / `LEDGER_MENU_DELETE` `장부 삭제`) |
+| ⋮ 메뉴(폴더 진입) | 평면 1그룹: `FOLDER_MENU_SELECT_MOVE` `선택 이동` · `FOLDER_MENU_RENAME` `폴더 이름 변경` · `VIEW_TOGGLE_GRID_LABEL` `그리드` · `VIEW_TOGGLE_LIST_LABEL` `리스트` · `FOLDER_MENU_UNLINK` `폴더 해제` | - | - |
+| 브레드크럼/경로 | **없음**(관련 컴포넌트·상수 없음, `grep` 0건) | 없음 | 없음 |
+| 개수 표기 | `{filteredItems.length} {FOLDER_COUNT_SUFFIX}` → `N 개`(단위 `개`, 숫자와 공백 1칸, 검색 필터 후 개수). `countText` = `TYPOGRAPHY.body2`(regular 14/20, ls 0.25), 색 `FOREGROUND_NEUTRAL_SUBTLE`(GREY_400 #9B9B9B). 위치: 검색창 아래 `countRow` 왼쪽, `marginBottom` 8 | 없음 | 없음 |
+| `+` 버튼 | `countRow` 오른쪽 끝(`justifyContent: space-between`). `IconButton` 36×36, 아이콘 24×24 `Plus.png`(`FOREGROUND_PRIMARY` NAVY_800). 누르면 `NewItemSheet` — `NEW_ITEM_SHEET_LEDGER_LABEL` `새 장부 생성하기`(→ `LedgerCreate`, `parentId: folderId`) / `NEW_ITEM_SHEET_FOLDER_LABEL` `새 폴더 생성하기`(→ 이름 입력 다이얼로그) | 없음 | 없음 |
+| 그리드/리스트 토글 | 기본 `'grid'`, `useState`라 **저장 안 함**(화면 인스턴스마다 grid로 시작, 하위 폴더는 `navigation.push`로 새 인스턴스). 전환은 ⋮ 메뉴 `그리드`/`리스트`(현재값 체크 표시 없음) | 없음(항상 `layout="list"`) | 없음 |
+| 빈 상태 | 제목 `FOLDER_EMPTY_TITLE` = `아직 폴더 및 장부가 존재하지 않아요.` / 부제 `FOLDER_EMPTY_SUBTITLE` = `새로운 장부를 생성하여 내역을 관리해보세요.` (검색 무결과: `FOLDER_SEARCH_EMPTY_TITLE` `해당 검색어에 대한 내역이 없어요.` / `FOLDER_SEARCH_EMPTY_SUBTITLE` `검색어를 다시 입력해주세요.`). `emptyState` `paddingTop` 80, 가운데 정렬, 제목 `subtitle3`(semibold 14/20), 부제 `body2` GREY_400 `marginTop` 6 | 제목 `SELECT_MOVE_EMPTY_TITLE` = `이동할 수 있는 항목이 없어요.` / 부제 `FOLDER_EMPTY_SUBTITLE`(위와 같음). 같은 `emptyState` 스타일 | 제목 `LEDGER_LIST_EMPTY_TITLE` = `아직 내역이 존재하지 않아요.` / 부제 `LEDGER_LIST_EMPTY_SUBTITLE` = `내역을 추가하여 모임 장부를 정리해보세요.`. 같은 `emptyState` 스타일 |
+| 정렬 | 폴더+장부를 섞어 **이름 오름차순**(`name.localeCompare(…, 'ko')`, `mergeFolderListItems`), 폴더/장부 구분 없음 | 같은 함수(이름 오름차순) | 클라이언트 정렬 없음 — 서버 반환 순서(`getEntries` `page` 0, `size` 20, `sort` 파라미터 안 보냄) |
+| 좌우 패딩 | `body` `paddingHorizontal` 24 | `body` 24 | 카드 슬라이드·목록 각각 `paddingHorizontal` 24 |
+| 상단 여백 | AppBar 아래 `body` `paddingTop` 16 → 검색창(`SearchField` `size` lg 높이 44, radius 24, `paddingHorizontal` 16) `marginBottom` 16 → 개수 줄 | AppBar 아래 `body` `paddingTop` 16 | AppBar 아래 캐러셀 `marginTop` 16 → 인디케이터 `marginTop` 12 / `marginBottom` 16 → 목록 |
+| 아이템 세로 간격 | 아이템 자체 `padding` 12, `borderRadius` 12. **행 사이 별도 gap 없음**(`FlatList` `numColumns`) → grid 아이템 높이 117(폴더: 12+51+8+16+2+16+12)/116(장부) ; list 아이템 높이 75(12+51+12) | list 75 | `TransactionListItem` `paddingVertical` 12, `paddingHorizontal` 12(`marginHorizontal` −12로 상쇄) → 높이 64(영수증 아이콘 있으면 66) |
+| 아이템 형태 | grid: 3열, 열 간격 `FOLDER_GRID_COLUMN_GAP` 16, 폭 (창폭−48−32)/3 = 360dp에서 93.33. 폴더 아이콘 65×51 / 장부 60×50, 이름 `marginTop` 8 `body3` bold(12/16), 부제 `caption`(8/16) `marginTop` 2 GREY_400. list: 아이콘 슬롯 폭 65, 아이콘–텍스트 gap 12 | list 전용(선택 시 배경 `BACKGROUND_PRIMARY`), 하단 `footer` `paddingVertical` 16, 버튼 `SELECT_MOVE_CONFIRM_LABEL` `선택하기`/`SELECT_MOVE_CONFIRM_SUFFIX` `개 선택하기` | 카드: `CardBase` `padding` 16, `borderRadius` 12 (`AmountCard` 행 `paddingVertical` 6, `BudgetCard` `paddingVertical` 24), 인디케이터 점 5/선택 8 |
+| AppBar 크기 | 좌우 `paddingHorizontal` 20, 상하 12, `sub`는 뒤로가기 버튼 34(아이콘 20.4) + gap 12 + 제목 `h2`(semibold 20/28, ls 0.15, 색 기본 검정) → 높이 58. `titleOnly`(루트) 높이 52. 우측 아이콘 24×24, 아이콘 gap 16 | 같은 `sub` | 같은 `sub` |
+| 길게 누르기 | 없음(`FolderItem`은 `Pressable` `onPress`만) | 없음 | 없음 |
+
+#### 모임 추가 버튼 위치 — 코드 현황 (실기기 7번, 명세 확인은 사용자) [2026-09-19 9-2]
+
+`AllGroupsScreen`(ETC-2-PAGE-01-0): AppBar `type="sub"`, 제목 `ALL_GROUPS_TITLE` = `전체 모임 관리`, **우측 아이콘 없음**. 추가 버튼은 `ScrollView` 맨 아래에 모임 카드들 다음 마지막 요소로 오는 `EntityCard type="newGroup"`이다 — `CardBase variant="bordered"` + `borderStyle: 'dashed'`(테두리 1), 36×36 원형 아바타(`FILL_NEUTRAL_NORMAL`)에 `Plus.png` 16×16(`FOREGROUND_NEUTRAL_NORMAL`), 라벨 `새로운 모임 추가하기`(`subtitle3`, 색 `FOREGROUND_NEUTRAL_NORMAL`), 카드 안 gap 12, 목록 `gap` 12 · `paddingHorizontal` 24 · `paddingTop` 8. 누르면 `AddGroupSheet`(`ADD_GROUP_SHEET_TITLE` `새로운 모임 추가` — `ADD_GROUP_CREATE_LABEL` `모임 생성하기` / `ADD_GROUP_JOIN_LABEL` `코드로 참여하기`).
+
+#### 장부 길게 누르기 무반응 — 코드 현황 (실기기 12번, 명세 확인은 사용자) [2026-09-19 9-2]
+
+**long press 핸들러가 없다.** `FolderItem`은 `Pressable` `onPress`만 받고(`onLongPress`/`delayLongPress` 없음), `FolderScreen`은 `handlePressItem`(폴더 → `push`, 장부 → `LedgerDetail`)만 넘긴다. `src/` 전체에서 `onLongPress`/`delayLongPress` `grep` 결과 0건이다.
+
+#### 스낵바 슬롯 실기기 캡처 측정 — `LedgerDetailScreen` [2026-09-19 9-2, 슬롯 신규 적용은 사용자 판단 대기]
+
+`shots/`의 가장 최근 2장(파일명 시각 기준 `194407`, `194404`; 그 앞 3장 `194350`/`194352`/`194359`은 이번엔 안 쟀다) — 1080×2340 @480dpi(3px = 1dp):
+
+- **`Screenshot_20260919_194407_BILLAGE.jpg`**(장부 이름 변경 후 스낵바): 스낵바 x 72~1007 → **좌 24.0dp / 우 24.0dp**, 높이 44.0dp. 스낵바 하단 ~ 이미지 하단 = 216px = **72.0dp**. 이미지 하단 48dp(144px)는 시스템 내비게이션 바(3버튼, 회색 불투명)라 **스낵바 하단 ~ 내비게이션 바 상단 = 72px = 24.0dp**. → 하단 72dp = 24dp + 내비바 인셋 48dp, 즉 **하단 인셋이 적용돼 있다**(24dp였다면 미적용).
+- **`Screenshot_20260919_194404_BILLAGE.jpg`**(이름 변경 다이얼로그 + 키보드): 다이얼로그 x 72~1007(좌우 24.0dp), 높이 213.0dp, 다이얼로그 하단 ~ 키보드 상단 간격 **0.0dp**(키보드 342.0dp) — 다이얼로그가 키보드 **위에 가려지지 않고 있으며 키보드 상단에 붙어 있다**(취소/변경 버튼 보임).
+
 ### 1-4. 서버 블로킹
 
 #### §0 회비 생성 `POST /groups/{groupId}/dues` 500 INTERNAL_ERROR — 서버 확인 필요 [2026-09-05 배치 G]
@@ -461,6 +528,14 @@ spec-sheet-map.tsv`에 헤더확인으로 등록, `design-verification.md` §4-0
   빈 상태 위주다. `DuesProgressCard`/`DuesStatusCard`의 OPEN·CLOSED 렌더링 자체는 이전
   세션(2026-09-04)에 실호출로 이미 검증된 값이라 코드상으로는 문제가 없다고 보지만, **이번
   라운드 기준으로는 라이브 캡처가 아니라는 점을 밝혀둔다**.
+
+#### 알림 설정 · 문의하기 · 공지사항 — "일시적인 문제가 발생했어요"의 실제 원인은 서버 미구현(404) [2026-09-19 9-2]
+
+`scripts/api-call.js`로 직접 호출(`docs/backend-requests.md` §5-2에 표 기록). 세 화면이 호출하는 `GET /api/v1/notifications/settings`(알림 설정), `GET /api/v1/faqs`(문의하기), `GET /api/v1/notices`(공지사항 목록) 전부 **HTTP 404 `RESOURCE_NOT_FOUND`**(`요청한 리소스를 찾을 수 없습니다.`)이고, 존재하지 않는 임의 경로(`/api/v1/zzz-not-a-route`)와 응답이 완전히 같다 → **라우트 없음(미구현)**. 500(서버 오류)도, 200인데 클라이언트 파싱 실패도 아니다. 프론트는 `RESOURCE_NOT_FOUND`를 매핑하지 않아 fallback 문구가 그대로 뜬다(`lessons.md` 1-3) — 매핑을 추가할지는 미결.
+
+#### 공지사항 목록 배경 파란색 — 가설 확인 결과: 문제 없음 [2026-09-19 9-2]
+
+`NoticeListScreen`(ETC-3-PAGE-09-0) 코드 `ScreenContainer background="primary"`, §2 명세 판정 블루(v5 90%) → **일치**. 목록이 에러라 항목을 못 누르므로 본 화면은 목록이고 파란 배경이 맞다. 상세(`NoticeDetailScreen`, ETC-4-PAGE-18-0)는 명세 흰색이라 8-6에서 `secondary`로 고쳤다.
 
 ## 2. 판단 대기 (⏳ 내 결정 필요)
 
@@ -637,6 +712,7 @@ DSH-1 재캡처로 "고쳐졌는지" 확인하는 절차 자체가 성립하지 
 - [해결] 2026-09-19 §5-19 분류 확정 — §2 전용 37개 / tsv 전용 7개 분류는 design-verification §5-19 (라운드 6-10)
 - [해결] 2026-09-19 빈 화면/검색 무결과 문구 — 코드가 이미 목업과 일치(설명표 차이는 불일치 #10) (라운드 6-11)
 - [해결] 2026-09-19 폴더 메뉴 리스트 아이콘 — 시안 Case A 확인, 코드 연결됨(§2 `시안 확인 완료`) (라운드 6-11)
+- [해결] 2026-09-19 `SignupInfoScreen`(COM-3-PAGE-03-0) 키보드 회피는 되는데 스크롤이 없어 가린 칸이 안 보임 — `ScrollView`(`keyboardShouldPersistTaps="handled"`)로 감싸고 하단 CTA는 스크롤 밖에 고정 (라운드 9-2)
 
 ## 4. 검증 방식 (파일럿 5개로 확정)
 

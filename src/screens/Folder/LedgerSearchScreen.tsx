@@ -10,6 +10,7 @@ import SearchField from '../../components/Input/Search/SearchField';
 import TextButton from '../../components/Input/Button/TextButton';
 import Button from '../../components/Input/Button/Button';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import type { EntryApprovalStatus, EntrySummary, EntryType } from '../../types/entry';
 import * as entryService from '../../services/entryService';
 import LedgerFilterSheet, {
@@ -126,7 +127,7 @@ function LedgerSearchScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
       <View style={styles.headerRow}>
         <BackButton onPress={() => navigation.goBack()} />
         <View style={styles.searchWrapper}>
@@ -195,7 +196,7 @@ function LedgerSearchScreen() {
         onClose={() => setFilterSheetVisible(false)}
         onApply={setFilter}
       />
-    </View>
+    </ScreenContainer>
   );
 }
 
