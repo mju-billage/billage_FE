@@ -11,10 +11,11 @@ import TextButton from '../../components/Input/Button/TextButton';
 import Button from '../../components/Input/Button/Button';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
-import type { EntryApprovalStatus, EntrySummary, EntryType } from '../../types/entry';
+import type { EntrySummary } from '../../types/entry';
 import * as entryService from '../../services/entryService';
 import LedgerFilterSheet, {
   DEFAULT_LEDGER_FILTER,
+  toEntryFilterQuery,
   type LedgerFilterValue,
 } from './LedgerFilterSheet';
 import {
@@ -40,20 +41,6 @@ type LedgerSearchNavigationProp = NativeStackNavigationProp<
   'LedgerSearch'
 >;
 type LedgerSearchRouteProp = RouteProp<RootStackParamList, 'LedgerSearch'>;
-
-function toApiType(type: LedgerFilterValue['type']): EntryType | undefined {
-  if (type === 'income') return 'INCOME';
-  if (type === 'expense') return 'EXPENSE';
-  return undefined;
-}
-
-function toApiStatus(
-  status: LedgerFilterValue['status'],
-): EntryApprovalStatus | undefined {
-  if (status === 'pending') return 'PENDING';
-  if (status === 'approved') return 'APPROVED';
-  return undefined;
-}
 
 /** 장부 상세에서 진입하는 내역 검색 화면: 제목/메모 검색(keyword) + 필터 시트. */
 function LedgerSearchScreen() {
@@ -89,9 +76,7 @@ function LedgerSearchScreen() {
       try {
         const result = await entryService.getEntries(ledgerId, {
           keyword: query.trim() || undefined,
-          type: toApiType(filter.type),
-          status: toApiStatus(filter.status),
-          sort: filter.sort === 'latest' ? 'occurredOn,desc' : 'occurredOn,asc',
+          ...toEntryFilterQuery(filter),
           page: nextPage,
         });
         setResults(current => (reset ? result.items : [...current, ...result.items]));

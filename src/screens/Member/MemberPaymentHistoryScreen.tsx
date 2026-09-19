@@ -35,7 +35,7 @@ import type { MemberPayment } from '../../types/member';
 import * as memberService from '../../services/memberService';
 import { ApiError } from '../../services/apiClient';
 import { formatWon } from '../../utils/currency';
-import { CALENDAR_WEEKDAY_LABELS } from '../../constants/calendarScreenText';
+import { formatDateHeader } from '../../utils/dateHeader';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
@@ -62,13 +62,6 @@ import { TYPOGRAPHY } from '../../constants/typography';
 type LoadState = 'loading' | 'error' | 'ready';
 type MemberPaymentHistoryRouteProp = RouteProp<RootStackParamList, 'MemberPaymentHistory'>;
 type MemberPaymentHistoryNavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-/** 'YYYY-MM-DD' -> 'M월 D일 요일'(TransactionsScreen과 동일 포맷). */
-function formatDateHeader(isoDate: string): string {
-  const [year, month, day] = isoDate.split('-').map(Number);
-  const jsDate = new Date(year, month - 1, day);
-  return `${month}월 ${day}일 ${CALENDAR_WEEKDAY_LABELS[jsDate.getDay()]}요일`;
-}
 
 /** `paidAt`(ISO datetime) 날짜 부분 기준으로 묶는다(TransactionsScreen의
  * `groupEntriesByDate`와 같은 방식). 서버가 최신순으로 내려주므로 그룹 내부는

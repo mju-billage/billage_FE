@@ -153,6 +153,16 @@
 #### `SearchField` clear(X) 버튼 미지원 — 컴포넌트에 기능 자체가 없음, 승인 대기 [2026-09-19 6-11]
 - **검색 필드 clear(X) 버튼 — 보고만, 미수정**: `SearchField`(`components/Input/Search/SearchField.tsx`)는 `value/onChangeText/placeholder/size/variant/onSubmit`만 받고 **clear 지원이 없다**(우측엔 돋보기 아이콘 고정). 반대로 `TextField`는 `onClear?`(값이 있고 비활성 아닐 때 `Close.png` X 아이콘)를 갖고 있고 4개 화면(GroupProfileEdit/JoinGroupSheet/ProfileEdit/TransactionTextInputSheet)과 `Dialog`가 쓴다. `SearchField`는 8곳이 사용 중이라 §5-17의 "컴포넌트에 있는데 화면이 안 쓰는" 패턴이 아니라 **컴포넌트에 기능 자체가 없는** 경우다. 지시대로 고치지 않음 — 추가 시 `onClear` prop을 넣고 값이 있을 때 X + 돋보기 병기(시안 Case C), 폴더 화면에서 `onClear={() => setSearchQuery('')}` 연결하는 안이고, 나머지 7개 사용처에는 prop을 안 넘기면 변화 없다.
 
+#### FDR-2-PAGE-05-0 (장부 상세) — 시안 대조 잔여, 판단 보류 [2026-09-20 10-3, 조사만]
+수정하지 않은 항목. 사용자 판단 대기.
+- **Scroll-away**: 설명표 No.2 "하단 리스트 스크롤 시 카드가 화면 위로 자연스럽게 사라짐". 앱은 **안 그렇다** — 카드 `ScrollView`(캐러셀)·인디케이터·필터/검색 줄·개수가 리스트 `SectionList`의 **형제**라 고정돼 있고 리스트만 스크롤한다. 카드를 `ListHeaderComponent`로 옮기는 구조 변경이 필요.
+- **⋮ 메뉴 라벨**: 설명표 `예산 설정`/`장부 이름 변경`/`삭제`. 앱은 `예산 설정`(`LEDGER_MENU_BUDGET`) / `장부 이름 변경`(`LEDGER_MENU_RENAME`) / `장부 삭제`(`LEDGER_MENU_DELETE`). Case A 목업 라벨은 사용자가 확인 예정.
+- **수입/지출 색**: 카드 수입 값 `FEEDBACK_POSITIVE_BOLD`(=`BLUE_500` `#4A7FE7`), 행 수입 금액 `FOREGROUND_SECONDARY`(=`BLUE_500` `#4A7FE7`). 지출은 색을 따로 안 줘서 기본 텍스트색, 표기 `-N원`(`formatExpense`, 0원은 부호 없음). 시안(수입 파랑 / 지출 검정 마이너스)과 같은 방향.
+- **승인 요청 건**: 앱에 개념 있음 — `EntrySummary.approvalStatus`(`PENDING`/`APPROVED`), 내역 메인 `승인요청` 탭(`status=PENDING`), 행 배지 `승인요청`(`CALENDAR_APPROVAL_BADGE_LABEL`). 다만 장부 상세는 `status`를 안 걸고 조회해서 서버가 승인 대기 건도 내려주면 **목록에 섞여 배지로 나온다**(설명표 No.6은 승인되면 장부로 들어온다고 함). 서버가 실제로 어떻게 내려주는지는 미확인.
+- **필터 시트에 `기간` 없음**: 시안 기본값 `기간(전체)/구분(전체)/정렬순서(최신순)`인데 `LedgerFilterSheet`는 `구분/승인 상태/정렬 순서`다. 서버 `GET /ledgers/{id}/entries`에 날짜 범위 파라미터가 없어서 뺐다(파일 주석) — 백엔드 요청 후보.
+- **`LedgerSearchScreen`(`FDR-3-PAGE-02-0`)은 그대로**: 행마다 날짜 라벨(`TYPOGRAPHY.caption` 8/16)을 아직 단다. 장부 상세와 같은 그룹 헤더로 맞출지는 별도 대조 사안.
+- **`fontSize: 8`**: `src/`에서 리터럴은 `constants/typography.ts`의 `caption` 토큰 하나뿐이다(§3-2 PDF 대조에서 일치). 장부 상세 행에서는 더 안 쓰지만 `caption` 토큰 자체는 `TransactionListItem` 라벨(장부명)·`Calendar`·`FolderItem`·`Tooltip`·`BottomNavigation`·`StatisticsScreen`이 쓴다.
+
 ### 1-2. 기획 확인 필요
 
 #### <a id="add-2-sheet-07-0-일자-선택-캘린더"></a>ADD-2-SHEET-07-0 (일자 선택 캘린더) — 디자인 원본이 더미 데이터, 기획에 원본 재요청 [2026-08-29 배치 E]
@@ -721,6 +731,10 @@ DSH-1 재캡처로 "고쳐졌는지" 확인하는 절차 자체가 성립하지 
 - [해결] 2026-09-20 폴더 상세 ⋮ 메뉴 라벨 — 목업이 `폴더 이름 변경` / `폴더 해제`로 `하기`가 없다. 앱(`FOLDER_MENU_RENAME`/`FOLDER_MENU_UNLINK`)과 일치 (10-1의 라벨 차이 지적 정정)
 - [해결] 2026-09-20 불일치 #13(개수 단위) 등급 하향 — 같은 시트 Case A 목업은 `2 개`, 메인 프레임 목업만 `2 건`. 시안 내부 오기로 확정, `개`로 구현 확정, 기획 확인 불필요 (`design-verification.md` §5-4 #13)
 - [해결] 2026-09-20 폴더 상세 `+` 버튼 위치 — 시안 `검색 필드 하단, 리스트 우측 상단` / 앱 `countRow` 우측 끝. 위치 관계 일치. **dp 실측은 다음 라운드**
+- [해결] 2026-09-20 장부 상세 앱바 검색 아이콘 제거 — 시안 앱바 우측은 ⋮ 하나. 검색 아이콘은 카드 아래 줄 우측으로 이동 (`LedgerDetailScreen`, 라운드 10-3, 실기기 확인 대기)
+- [해결] 2026-09-20 장부 상세 필터+검색 줄 신설 — 카드 아래·개수 위, 좌 필터(`Filter.png`) → `LedgerFilterSheet`, 우 검색(`Search.png`) → `LedgerSearch`. 필터 시트는 값(`value`/`onApply`)만 주고받는 독립 컴포넌트라 재사용, 필터 상태는 화면이 들고 서버 조회 조건(`toEntryFilterQuery`: `type`/`status`/`sort`)으로 반영해 목록만 다시 받음(카드·앱바는 유지). 검색 화면도 같은 변환 함수를 쓰도록 공용화 (10-3)
+- [해결] 2026-09-20 장부 상세 날짜 그룹 헤더 — 행마다 `YYYY-MM-DD`를 `caption`(8pt)으로 달던 것을 `M월 D일 요일` 그룹 헤더로. `ReportEntryList` 전체는 재사용 불가(구분 탭·클라이언트 정렬·스냅샷 타입)라 **헤더 포맷 함수만 `utils/dateHeader.ts`로 공용화**(같은 함수를 로컬로 들고 있던 `TransactionsScreen`·`TransactionSearchScreen`·`MemberPaymentHistoryScreen`·`ReportEntryList` 4곳도 교체; `CalendarScreen`은 인라인이라 그대로). `TransactionListItem`의 `label`은 선택 prop으로 (10-3)
+- [해결] 2026-09-20 장부 상세 개수 `24 건` — 이전엔 개수 표기 자체가 없었다. 서버 `totalElements`(필터 반영 전체 건수)를 `EntryListPage`에 추가해 `{N} 건`(`LEDGER_COUNT_SUFFIX`, 공백 한 칸, 0건이면 `0 건`). **폴더는 `개`, 장부는 `건`이 의도된 구분**임을 두 상수 주석에 남김 (10-3)
 
 ## 4. 검증 방식 (파일럿 5개로 확정)
 

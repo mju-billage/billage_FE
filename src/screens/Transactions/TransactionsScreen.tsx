@@ -65,7 +65,7 @@ import {
   FILTER_TYPE_INCOME,
   LEDGER_ENTRIES_LOADING_MORE,
 } from '../../constants/ledgerScreenText';
-import { CALENDAR_WEEKDAY_LABELS } from '../../constants/calendarScreenText';
+import { formatDateHeader } from '../../utils/dateHeader';
 import {
   TRANSACTIONS_COUNT_SUFFIX,
   TRANSACTIONS_EMPTY,
@@ -96,13 +96,6 @@ const TABS: TabItem<TransactionsTab>[] = [
   { label: TRANSACTIONS_TAB_ALL, value: 'all' },
   { label: TRANSACTIONS_TAB_PENDING, value: 'pending' },
 ];
-
-/** 'YYYY-MM-DD' -> 'M월 D일 요일'. */
-function formatDateHeader(isoDate: string): string {
-  const [year, month, day] = isoDate.split('-').map(Number);
-  const jsDate = new Date(year, month - 1, day);
-  return `${month}월 ${day}일 ${CALENDAR_WEEKDAY_LABELS[jsDate.getDay()]}요일`;
-}
 
 type FilterChipInfo = { key: string; label: string };
 

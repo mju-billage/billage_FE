@@ -23,7 +23,7 @@ import { useState } from 'react';
 import { SectionList, StyleSheet, Text, View } from 'react-native';
 import Tabs from '../../components/Navigation/Tabs/Tabs';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
-import { CALENDAR_WEEKDAY_LABELS } from '../../constants/calendarScreenText';
+import { formatDateHeader } from '../../utils/dateHeader';
 import {
   REPORT_ENTRY_LIST_COUNT_SUFFIX,
   REPORT_ENTRY_LIST_EMPTY,
@@ -49,13 +49,6 @@ const TABS: { label: string; value: Tab }[] = [
   { label: REPORT_LEDGER_ENTRIES_TAB_INCOME, value: 'income' },
   { label: REPORT_LEDGER_ENTRIES_TAB_EXPENSE, value: 'expense' },
 ];
-
-/** 'YYYY-MM-DD' -> 'M월 D일 요일'(TransactionsScreen과 동일 포맷). */
-function formatDateHeader(isoDate: string): string {
-  const [year, month, day] = isoDate.split('-').map(Number);
-  const jsDate = new Date(year, month - 1, day);
-  return `${month}월 ${day}일 ${CALENDAR_WEEKDAY_LABELS[jsDate.getDay()]}요일`;
-}
 
 function groupByDate(
   list: TaggedReportEntry[],

@@ -14,8 +14,9 @@ import { TYPOGRAPHY } from '../../../constants/typography';
 const RECEIPT_ICON = require('../../../assets/icons/content/Report.png');
 
 type TransactionListItemProps = {
-  /** 왼쪽 위 작은 라벨. 캘린더에서는 장부명, 장부 상세/검색에서는 날짜로 쓰인다. */
-  label: string;
+  /** 왼쪽 위 작은 라벨. 캘린더·내역 목록에서는 장부명, 장부 검색에서는 날짜로 쓰인다. 없으면 안 그린다
+   * (장부 상세는 날짜 그룹 헤더가 날짜를 대신해서 라벨이 없다). */
+  label?: string;
   itemName: string;
   amount: number;
   hasReceipt?: boolean;
@@ -49,7 +50,7 @@ function TransactionListItem({
       onHoverOut={() => setHovered(false)}
     >
       <View style={styles.leftColumn}>
-        <Text style={styles.groupName}>{label}</Text>
+        {label ? <Text style={styles.groupName}>{label}</Text> : null}
         <Text style={styles.itemName}>{itemName}</Text>
       </View>
       <View style={styles.rightColumn}>

@@ -159,6 +159,8 @@ export type EntryListPage = {
   items: EntrySummary[];
   page: number;
   totalPages: number;
+  /** 필터·검색 조건이 반영된 전체 건수(페이지와 무관). */
+  totalElements: number;
   last: boolean;
 };
 
@@ -194,6 +196,7 @@ export async function getEntries(
     items: response.content.map(toEntrySummary),
     page: response.page,
     totalPages: response.totalPages,
+    totalElements: response.totalElements,
     last: response.last,
   };
 }
