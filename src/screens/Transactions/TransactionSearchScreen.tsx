@@ -161,6 +161,7 @@ function TransactionSearchScreen() {
           value={query}
           onChangeText={setQuery}
           placeholder={TRANSACTION_SEARCH_PLACEHOLDER}
+          variant="outline"
         />
 
         {searchState === 'idle' ? null : searchState === 'loading' ? (

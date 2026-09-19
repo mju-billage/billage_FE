@@ -241,6 +241,7 @@ function DuesMemberEditScreen() {
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholder={DUES_MEMBER_SELECT_SEARCH_PLACEHOLDER}
+          variant="outline"
         />
 
         {members.length === 0 ? (

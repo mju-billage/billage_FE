@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import {
   BORDER_NEUTRAL_NORMAL,
-  FILL_NEUTRAL_NORMAL,
   FILL_NEUTRAL_SUBTLE,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_NORMAL,
@@ -31,7 +30,8 @@ type SearchFieldProps = {
   onClear?: () => void;
 };
 
-/** 좌측 입력 + 우측 돋보기 아이콘으로 구성된 검색 필드. outline 변형은 흰 바탕 + 테두리이고 포커스 시 테두리가 파란색으로 바뀐다. */
+/** 좌측 입력 + 우측 돋보기 아이콘으로 구성된 검색 필드(흰 바탕, 높이 48). 기본은 테두리 없음(파란 배경 화면용),
+ * outline 변형은 `#E5E7EB` 1px 테두리(흰 배경 화면용)이고 포커스 시 테두리가 파란색으로 바뀐다. */
 function SearchField({
   value,
   onChangeText,
@@ -79,18 +79,21 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: FILL_NEUTRAL_NORMAL,
+    // 시안 실측(2026-09-20, 명세서 9개 시트): 검색 필드 채움색은 9곳 전부 흰색이다 — 회색 채움은 없다.
+    // 테두리는 화면 배경이 흰색일 때만 `outline`으로 준다(파란 배경 화면은 테두리 없는 흰 pill).
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 24,
     paddingHorizontal: 16,
   },
   containerSm: {
     height: 36,
   },
+  // 시안 실측 높이 48dp.
   containerLg: {
-    height: 44,
+    height: 48,
   },
+  // 시안 테두리 `#E1E3E8` 1px — 팔레트에 그 값이 없어 가장 가까운 `BORDER_NEUTRAL_NORMAL`(`#E5E7EB`)을 쓴다.
   containerOutline: {
-    backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderWidth: 1,
     borderColor: BORDER_NEUTRAL_NORMAL,
   },

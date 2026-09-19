@@ -417,6 +417,7 @@ function FolderScreen() {
 
       <View style={styles.body}>
         <View style={styles.searchWrapper}>
+          {/* 파란 배경 화면이라 테두리 없는 흰 pill(기본 variant) — 시안 실측 */}
           <SearchField
             value={searchQuery}
             onChangeText={setSearchQuery}

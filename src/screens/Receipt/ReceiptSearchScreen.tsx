@@ -139,6 +139,7 @@ function ReceiptSearchScreen() {
           value={keyword}
           onChangeText={setKeyword}
           placeholder={RECEIPT_SEARCH_PLACEHOLDER}
+          variant="outline"
         />
 
         {keyword.trim().length > 0 && (

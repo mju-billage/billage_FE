@@ -394,6 +394,7 @@ function DuesCreateScreen() {
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder={DUES_MEMBER_SELECT_SEARCH_PLACEHOLDER}
+            variant="outline"
           />
 
           {memberLoadState === 'loading' && (
