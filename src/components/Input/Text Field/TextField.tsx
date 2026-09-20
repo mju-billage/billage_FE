@@ -117,6 +117,11 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           autoFocus={autoFocus}
           editable={!disabled}
         />
+        {onClear && value.length > 0 && !disabled && (
+          <Pressable onPress={onClear} hitSlop={8}>
+            <Image source={CLOSE_ICON} style={styles.clearIcon} />
+          </Pressable>
+        )}
         {suffix && (
           <Text style={[styles.suffix, disabled && styles.inputDisabled]}>
             {suffix}
@@ -129,11 +134,6 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
               source={isSecure ? EYE_CLOSED_ICON : EYE_ICON}
               style={styles.toggleIcon}
             />
-          </Pressable>
-        )}
-        {onClear && value.length > 0 && !disabled && (
-          <Pressable onPress={onClear} hitSlop={8}>
-            <Image source={CLOSE_ICON} style={styles.clearIcon} />
           </Pressable>
         )}
       </View>
@@ -196,6 +196,7 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
   clearIcon: {
+    marginRight: 4,
     width: 16,
     height: 16,
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,

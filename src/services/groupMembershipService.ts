@@ -16,6 +16,8 @@ type MembershipResponse = {
   name: string;
   role: GroupRole;
   joinedAt: string;
+  /** 아직 서버가 안 준다(2026-09-21 실호출). 오면 그대로 쓴다. */
+  profileImageUrl?: string | null;
 };
 
 type InvitationResponse = {
@@ -36,6 +38,7 @@ function toGroupMembership(
   groupId: string,
   response: MembershipResponse,
 ): GroupMembership {
+  const isMe = String(response.userId) === getCurrentUser()?.userId;
   return {
     membershipId: String(response.membershipId),
     groupId,
@@ -43,7 +46,9 @@ function toGroupMembership(
     name: response.name,
     role: response.role,
     joinedAt: response.joinedAt,
-    isMe: String(response.userId) === getCurrentUser()?.userId,
+    profileImageUrl:
+      response.profileImageUrl ?? (isMe ? getCurrentUser()?.profileImageUrl : null) ?? null,
+    isMe,
   };
 }
 

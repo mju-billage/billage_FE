@@ -273,6 +273,10 @@ GET /api/v1/ledgers/21/entries?zzz=1                          → 200, 3건 (모
 
 **보강(2026-09-20)**: 명세(Entry.txt §4)에는 from/to가 있으나 실서버가 무시한다. from=2030-01-01&to=2030-12-31로 호출해도 2026-09-12 내역이 그대로 반환됨. 미구현 파라미터도 400 없이 200으로 무시된다. 구현 여부 확인 요청.
 
+## 신규 — `GET /groups/{groupId}/memberships` 응답에 프로필 이미지 URL이 없습니다 (2026-09-21)
+
+더보기의 "모임 관리자" 카드에서 관리자 아바타에 프로필 이미지를 보여 주려 합니다. 그런데 응답 항목이 `membershipId, userId, name, email, role, joinedAt`뿐이라 (2026-09-21 실호출, groupId 6) 이미지 URL을 알 수 없습니다. 각 항목에 `profileImageUrl`(없으면 `null`)을 추가해 주세요 — `GET /auth/me`의 `profileImageUrl`과 같은 값이면 됩니다. 프론트는 필드가 오면 그대로 쓰도록 `GroupMembership.profileImageUrl`(선택)로 받아 두었고, 지금은 본인 항목만 로그인 세션의 프로필 이미지로 대신 채웁니다. (참고: 응답에 `email`이 이미 오지만 프론트 타입엔 아직 안 담는다 — `api-gaps.md` (A) 항목.)
+
 ## 신규 — 소셜 로그인 `provider`에 `NAVER`가 통과하지 않습니다 (2026-09-20)
 
 소셜 로그인 provider에 NAVER가 없다. KAKAO/GOOGLE만 통과하고 NAVER는 표기와 무관하게 400. 시안(COM-1-PAGE-01-0, 디자인 완료)에는 네이버 아이콘이 포함돼 있다. 서버 지원 여부와 일정 확인 요청.

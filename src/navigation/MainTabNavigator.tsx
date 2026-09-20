@@ -1,4 +1,4 @@
-import { ImageSourcePropType } from 'react-native';
+import { ImageSourcePropType, StyleSheet, View } from 'react-native';
 import {
   createBottomTabNavigator,
   BottomTabBarProps,
@@ -58,29 +58,42 @@ const TAB_LABEL_BY_ROUTE: Record<keyof MainTabParamList, string> = {
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const routeName = state.routes[state.index].name as keyof MainTabParamList;
 
+  // 탭바를 화면 위에 겹쳐 띄운다 — 화면이 탭바 뒤까지 이어져서 상단 라운딩 모서리 뒤로
+  // 각 화면 배경이 비친다(안 그러면 네비게이터 기본 회색 배경이 보인다). 그래서 탭 화면은
+  // 하단 여백을 `BOTTOM_NAVIGATION_HEIGHT`만큼 직접 잡아야 한다.
   return (
-    <BottomNavigation
-      activeKey={routeName}
-      items={state.routes.map(route => ({
-        key: route.name,
-        icon: TAB_ICON_BY_ROUTE[route.name as keyof MainTabParamList],
-        label: TAB_LABEL_BY_ROUTE[route.name as keyof MainTabParamList],
-      }))}
-      onChange={key => {
-        const event = navigation.emit({
-          type: 'tabPress',
-          target: state.routes.find(route => route.name === key)?.key,
-          canPreventDefault: true,
-        });
-        if (!event.defaultPrevented) {
-          navigation.navigate(key);
-        }
-      }}
-    />
+    <View style={styles.tabBarOverlay}>
+      <BottomNavigation
+        activeKey={routeName}
+        items={state.routes.map(route => ({
+          key: route.name,
+          icon: TAB_ICON_BY_ROUTE[route.name as keyof MainTabParamList],
+          label: TAB_LABEL_BY_ROUTE[route.name as keyof MainTabParamList],
+        }))}
+        onChange={key => {
+          const event = navigation.emit({
+            type: 'tabPress',
+            target: state.routes.find(route => route.name === key)?.key,
+            canPreventDefault: true,
+          });
+          if (!event.defaultPrevented) {
+            navigation.navigate(key);
+          }
+        }}
+      />
+    </View>
   );
 }
 
-/** 로그인 이후 진입하는 바텀탭 네비게이터: 홈만 실구현이고 나머지는 준비 중 안내 화면이다. */
+const styles = StyleSheet.create({
+  tabBarOverlay: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+});
+
 function MainTabNavigator() {
   return (
     <Tab.Navigator

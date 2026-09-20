@@ -44,7 +44,7 @@ import {
   SNACKBAR_IMAGE_TOO_LARGE,
   SNACKBAR_IMAGE_UPLOAD_FAILED,
 } from '../../constants/commonText';
-import { FOREGROUND_INVERSE, NAVY_800 } from '../../constants/colors';
+import { FOREGROUND_INVERSE, NAVY_800, OVERLAY_SCRIM } from '../../constants/colors';
 
 const CAMERA_ICON = require('../../assets/icons/content/Camera.png');
 const GALLERY_ICON = require('../../assets/icons/content/Image.png');
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 14,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: OVERLAY_SCRIM,
     alignItems: 'center',
     justifyContent: 'center',
   },

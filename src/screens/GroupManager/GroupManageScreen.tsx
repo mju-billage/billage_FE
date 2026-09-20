@@ -265,7 +265,7 @@ function GroupManageScreen() {
             )}
           </CardBase>
 
-          <CardBase onPress={() => navigation.navigate('GroupManager')}>
+          <CardBase onPress={() => navigation.navigate('MemberManage')}>
             <MenuRowContent
               icon={MEMBER_MANAGE_ICON}
               label={GROUP_MANAGE_MEMBER_MANAGE_LABEL}

@@ -60,9 +60,9 @@ function ArchiveLedgerEntriesScreen() {
           onPressEntry={entry =>
             navigation.navigate('ArchiveEntryDetail', {
               ledgerName,
-              // `ReportEntryList`는 `TaggedReportEntry`(4필드+ledgerName)로만 타입돼 있지만
-              // 실제로 넘어오는 객체는 위에서 스프레드한 `ArchivedEntry`(memo/receiptFiles
-              // 등 포함) 그대로다 — 참조가 같아 안전하게 캐스팅해서 전체 필드를 꺼낸다.
+              // `ReportEntryList`는 `TaggedReportEntry`(4필드+ledgerName+approvalStatus/
+              // receiptFiles 선택)로만 타입돼 있지만 실제로 넘어오는 객체는 위에서
+              // 스프레드한 `ArchivedEntry`(memo/createdByName 등 포함) 그대로다 — 참조가 같아 안전하게 캐스팅해서 전체 필드를 꺼낸다.
               entry: entry as unknown as ArchivedEntry & { ledgerName: string },
             })
           }

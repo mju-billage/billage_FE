@@ -1,23 +1,16 @@
 /** @screen ADD-2-SHEET-06-0 금액 입력 */
-import { useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useRef, useState } from 'react';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Button from '../../components/Input/Button/Button';
-import NumericKeypad from '../../components/Input/Keypad/NumericKeypad';
+import TextField from '../../components/Input/Text Field/TextField';
 import {
   AMOUNT_SHEET_TITLE,
   TEXT_INPUT_SHEET_CANCEL_LABEL,
   TEXT_INPUT_SHEET_SAVE_LABEL,
   TRANSACTION_REGISTER_AMOUNT_PLACEHOLDER,
 } from '../../constants/transactionScreenText';
-import {
-  BORDER_NEUTRAL_NORMAL,
-  FOREGROUND_DISABLED,
-  FOREGROUND_NEUTRAL_SUBTLE,
-} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
-
-const CLOSE_ICON = require('../../assets/icons/action/Close.png');
 
 /** Entry(최대 999,999,999)와 Dues(최대 999,999,999) 둘 다 같은 상한이라 공용 시트에
  * 하드코딩했다 — 다른 상한이 필요한 도메인이 생기면 그때 prop으로 뺀다. */
@@ -30,7 +23,7 @@ type TransactionAmountSheetProps = {
   onSave: (amount: number) => void;
 };
 
-/** 금액 입력 바텀시트. 시스템 키보드 대신 커스텀 숫자패드로 입력받는다. */
+/** 금액 입력 바텀시트. 안드로이드 기본 숫자 키보드로 입력받는다(키보드 위치는 `BottomSheet`가 처리). */
 function TransactionAmountSheet({
   visible,
   value,
@@ -38,12 +31,18 @@ function TransactionAmountSheet({
   onSave,
 }: TransactionAmountSheetProps) {
   const [digits, setDigits] = useState(value > 0 ? String(value) : '');
+  const inputRef = useRef<TextInput>(null);
 
-  const appendDigit = (digit: string) => {
-    setDigits(current => {
-      const next = current + digit;
-      return Number(next) > MAX_AMOUNT ? current : next;
-    });
+  const formatted = digits === '' ? '' : Number(digits).toLocaleString();
+
+  const handleChangeText = (text: string) => {
+    const nextDigits = text.replace(/[^0-9]/g, '').replace(/^0+(?=\d)/, '');
+    if (Number(nextDigits) > MAX_AMOUNT || nextDigits === digits) {
+      // 상한 초과·변화 없음이면 state가 그대로라 리렌더가 스킵돼 네이티브 입력창이 어긋난다 — 되돌린다.
+      inputRef.current?.setNativeProps({ text: formatted });
+      return;
+    }
+    setDigits(nextDigits);
   };
 
   const handleSave = () => {
@@ -55,20 +54,16 @@ function TransactionAmountSheet({
     <BottomSheet visible={visible} onClose={onClose}>
       <Text style={styles.title}>{AMOUNT_SHEET_TITLE}</Text>
 
-      <View style={styles.inputRow}>
-        {digits === '' ? (
-          <Text style={styles.placeholder}>
-            {TRANSACTION_REGISTER_AMOUNT_PLACEHOLDER}
-          </Text>
-        ) : (
-          <Text style={styles.value}>{Number(digits).toLocaleString()}원</Text>
-        )}
-        {digits.length > 0 && (
-          <Pressable onPress={() => setDigits('')} hitSlop={8}>
-            <Image source={CLOSE_ICON} style={styles.clearIcon} />
-          </Pressable>
-        )}
-      </View>
+      <TextField
+        ref={inputRef}
+        value={formatted}
+        onChangeText={handleChangeText}
+        placeholder={TRANSACTION_REGISTER_AMOUNT_PLACEHOLDER}
+        keyboardType="number-pad"
+        suffix="원"
+        autoFocus
+        onClear={() => setDigits('')}
+      />
 
       <View style={styles.footerRow}>
         <View style={styles.footerButton}>
@@ -88,15 +83,6 @@ function TransactionAmountSheet({
           />
         </View>
       </View>
-
-      <View style={styles.keypadWrapper}>
-        <NumericKeypad
-          onPressDigit={appendDigit}
-          onPressDecimal={() => {}}
-          onBackspace={() => setDigits(current => current.slice(0, -1))}
-          onConfirm={handleSave}
-        />
-      </View>
     </BottomSheet>
   );
 }
@@ -106,36 +92,13 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.subtitle1,
     marginBottom: 16,
   },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER_NEUTRAL_NORMAL,
-    paddingBottom: 8,
-  },
-  placeholder: {
-    ...TYPOGRAPHY.body1,
-    color: FOREGROUND_DISABLED,
-  },
-  value: {
-    ...TYPOGRAPHY.subtitle1,
-  },
-  clearIcon: {
-    width: 16,
-    height: 16,
-    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
-  },
   footerRow: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 16,
+    marginTop: 8,
   },
   footerButton: {
     flex: 1,
-  },
-  keypadWrapper: {
-    marginTop: 20,
   },
 });
 

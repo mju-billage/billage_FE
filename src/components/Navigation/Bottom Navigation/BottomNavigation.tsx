@@ -19,6 +19,10 @@ export type BottomNavigationItem = {
   label: string;
 };
 
+/** 탭바 높이(dp). 탭바가 화면 위에 겹쳐 떠 있어서(MainTabNavigator) 탭 화면들이 하단 여백/FAB 위치를 잡을 때 쓴다.
+ * paddingTop 12 + 항목(아이콘 22 + gap 4 + caption lineHeight 16) + paddingBottom 24 = 78. */
+export const BOTTOM_NAVIGATION_HEIGHT = 78;
+
 type BottomNavigationProps = {
   items: BottomNavigationItem[];
   activeKey: string;

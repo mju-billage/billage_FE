@@ -1,6 +1,6 @@
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Menu, { MenuItem } from '../../components/Navigation/Menu/Menu';
-import { FILL_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { FILL_NEUTRAL_SUBTLE, OVERLAY_MENU_BACKDROP } from '../../constants/colors';
 
 type FolderMoreMenuProps = {
   visible: boolean;
@@ -49,13 +49,13 @@ function FolderMoreMenu({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: OVERLAY_MENU_BACKDROP,
   },
   menuWrapper: {
     position: 'absolute',
     top: 56,
     right: 24,
-    width: 200,
+    padding: 8,
     backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 12,
     overflow: 'hidden',

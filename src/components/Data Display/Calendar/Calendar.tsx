@@ -273,6 +273,7 @@ const styles = StyleSheet.create({
   },
   dateCircleSelected: {
     backgroundColor: FOREGROUND_SECONDARY,
+    borderRadius: 9,
   },
   dateCircleRangeStart: {
     borderTopRightRadius: 0,

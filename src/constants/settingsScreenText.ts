@@ -31,7 +31,7 @@ export const MY_PROFILE_RETRY_LABEL = '다시 시도';
 
 // 프로필 변경 (ETC-4-PAGE-15-0)
 export const PROFILE_EDIT_TITLE = '프로필 변경';
-export const PROFILE_EDIT_NAME_LABEL = '닉네임';
+export const PROFILE_EDIT_NAME_LABEL = '이름';
 /** 시안 UI 요소 3번: "10자 제한 적용되며 10자 이상 입력시 입력 차단". */
 export const PROFILE_EDIT_NAME_MAX_LENGTH = 10;
 export const PROFILE_EDIT_SUBMIT_LABEL = '저장하기';

@@ -19,6 +19,9 @@ export type GroupMembership = {
   name: string;
   role: GroupRole;
   joinedAt: string;
+  /** 프로필 이미지 URL. 서버 memberships 응답엔 아직 없다(2026-09-21 실호출) — 서버가 내려주면 그 값,
+   * 없으면 본인(`isMe`)만 로그인 세션의 프로필 이미지로 채우고 나머지는 null. */
+  profileImageUrl: string | null;
   /** 서버 필드 아님 — userId가 `types/session.ts`의 현재 로그인 사용자와 같은지 클라이언트가 계산해서 채운다. */
   isMe: boolean;
 };

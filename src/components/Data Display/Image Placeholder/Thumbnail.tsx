@@ -5,6 +5,7 @@ import {
   FOREGROUND_INVERSE,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
+  OVERLAY_SCRIM,
 } from '../../../constants/colors';
 
 const CLOSE_ICON = require('../../../assets/icons/action/Close.png');
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 12,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: OVERLAY_SCRIM,
     alignItems: 'center',
     justifyContent: 'center',
   },

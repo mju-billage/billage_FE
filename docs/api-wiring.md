@@ -106,7 +106,7 @@
 | POST | /groups/join | `groupService.joinGroup` | JoinGroupSheet | 구현 | 기존 | |
 | DELETE | /groups/{groupId}/memberships/{membershipId} | `groupMembershipService.removeMembership` | MemberProfileSheet(모임 내보내기) | 구현 | 기존 | |
 | PATCH | /groups/{groupId}/memberships/{membershipId} | `groupMembershipService.updateMembershipRole` | MemberProfileSheet | 구현 | 기존 | |
-| GET | /groups/{groupId}/memberships | `groupMembershipService.getMemberships` | GroupManagerScreen | 구현 | O(2026-09-13) | `scripts/api-verify.js` 2단계 재검증 — `membershipId`/`userId`/`role` 확인 |
+| GET | /groups/{groupId}/memberships | `groupMembershipService.getMemberships` | GroupManagerScreen, MoreScreen(관리자 카드) | 구현 | O(2026-09-13) | `scripts/api-verify.js` 2단계 재검증 — `membershipId`/`userId`/`role` 확인. 응답에 프로필 이미지 URL 없음(2026-09-21) — backend-requests.md 신규 항목 |
 | GET | /groups/{groupId}/invitations/current | `groupMembershipService.getCurrentInvitation` | GroupManagerScreen | 구현 | O | `{invitationCode, invitationLink, expiresAt}` 확인. 2026-09-13 `scripts/api-verify.js` 2단계로 재검증(POST 발급 직후 같은 코드로 응답) |
 
 ## folder-controller (Folder, 6개)

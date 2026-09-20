@@ -107,6 +107,7 @@ import {
 } from '../../constants/folderScreenText';
 import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Navigation/BottomNavigation';
 
 const MENU_ICON = require('../../assets/icons/action/MenuHorizontal.png');
 const STATISTICS_ICON = require('../../assets/icons/content/Graph.png');
@@ -592,7 +593,7 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     paddingTop: 16,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   searchWrapper: {
     marginBottom: 16,
@@ -608,7 +609,7 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   listContent: {
-    paddingBottom: 24,
+    paddingBottom: BOTTOM_NAVIGATION_HEIGHT + 24,
   },
   gridRow: {
     justifyContent: 'flex-start',

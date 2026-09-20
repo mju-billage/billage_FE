@@ -1,7 +1,7 @@
 /** @screen ETC-4-PAGE-15-0 프로필 변경 */
 /** @screen ETC-4-SHEET-02-0 프로필 변경_사진 변경 (imageMenuVisible) */
 /**
- * "프로필 변경": 닉네임 + 대표 이미지를 수정한다. `GroupProfileEditScreen.tsx`와
+ * "프로필 변경": 이름 + 대표 이미지를 수정한다. `GroupProfileEditScreen.tsx`와
  * 구조가 거의 같지만 이미지 선택 진입 방식이 다르다 — 모임 쪽은 아바타를
  * 누르면 바로 `GroupImagePickerScreen`(그리드)으로 가지만, 이 화면은 시안
  * (글로벌설정_내프로필_프로필변경-1.png, 실제 Screen ID는 파일명과 달리
@@ -74,7 +74,7 @@ import {
   SNACKBAR_IMAGE_TOO_LARGE,
   SNACKBAR_IMAGE_UPLOAD_FAILED,
 } from '../../constants/commonText';
-import { FOREGROUND_INVERSE, NAVY_800 } from '../../constants/colors';
+import { FOREGROUND_INVERSE, NAVY_800, OVERLAY_SCRIM } from '../../constants/colors';
 
 const CAMERA_ICON = require('../../assets/icons/content/Camera.png');
 const GALLERY_ICON = require('../../assets/icons/content/Image.png');
@@ -93,7 +93,7 @@ const SNACKBAR_AUTO_HIDE_MS = 1600;
 type ImageAction = 'none' | 'reset' | 'uploaded';
 type PermissionDialogKind = 'camera' | 'gallery' | null;
 
-/** "프로필 변경": 닉네임 + 대표 이미지 수정. */
+/** "프로필 변경": 이름 + 대표 이미지 수정. */
 function ProfileEditScreen() {
   const navigation = useNavigation<ProfileEditNavigationProp>();
   const user = getCurrentUser();
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
     paddingTop: 24,
   },
   avatarRow: {
-    alignSelf: 'flex-start',
+    alignSelf: 'center',
     marginBottom: 32,
   },
   cameraBadge: {
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     borderRadius: 14,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: OVERLAY_SCRIM,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -74,11 +74,13 @@ import {
 } from '../../constants/dashboardScreenText';
 import {
   BACKGROUND_PRIMARY,
+  BASIC_0,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Navigation/BottomNavigation';
 
 const BELL_ICON = require('../../assets/icons/communication/Bell.png');
 
@@ -289,9 +291,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 16,
-    paddingBottom: 40,
+    paddingBottom: BOTTOM_NAVIGATION_HEIGHT+ 12,
   },
   headerRow: {
     flexDirection: 'row',
@@ -304,7 +306,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...TYPOGRAPHY.subtitle1,
-    marginBottom: 12,
+    marginTop: 12,
+    marginBottom: 0,
   },
   stateContainer: {
     alignItems: 'center',
@@ -324,6 +327,9 @@ const styles = StyleSheet.create({
   duesCarousel: {
     gap: 12,
   },
+  duesCard: {
+    backgroundColor: BASIC_0,
+  },
   quickServiceSubtitle: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_NORMAL,
@@ -331,7 +337,7 @@ const styles = StyleSheet.create({
   },
   quickServiceRow: {
     flexDirection: 'row',
-    gap: 4,
+    gap: 6,
   },
 });
 

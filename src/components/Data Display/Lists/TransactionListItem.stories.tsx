@@ -38,6 +38,14 @@ export const ReceiptIncome: Story = {
   },
 };
 
+export const DefaultIncome: Story = {
+  args: {
+    label: '1학기',
+    itemName: '3월 회비',
+    amount: 300000,
+  },
+};
+
 export const ReceiptExpense: Story = {
   args: {
     label: '1학기',

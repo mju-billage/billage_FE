@@ -63,6 +63,7 @@ import {
   TRANSACTION_ITEM_NAME_LABEL,
   TRANSACTION_LEDGER_LABEL,
   TRANSACTION_MANAGER_LABEL,
+  TRANSACTION_MEMO_EMPTY_PLACEHOLDER,
   TRANSACTION_MEMO_LABEL,
   TRANSACTION_MEMO_PLACEHOLDER,
   TRANSACTION_PAYER_COUNT_SUFFIX,
@@ -75,6 +76,7 @@ import {
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import Divider from '../../components/Data Display/Divider/Divider';
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const DELETE_ICON = require('../../assets/icons/action/Close.png');
@@ -255,8 +257,11 @@ function TransactionDetailScreen() {
         <Field label={TRANSACTION_LEDGER_LABEL} value={ledgerNameValue} />
         <Field
           label={TRANSACTION_MEMO_LABEL}
-          value={memoValue || TRANSACTION_MEMO_PLACEHOLDER}
+          value={memoValue || TRANSACTION_MEMO_EMPTY_PLACEHOLDER}
         />
+        <View style={{marginTop: 12}}>
+          <Divider />
+        </View>
 
         {entry.receiptFiles.length > 0 && (
           <View style={styles.section}>
@@ -368,8 +373,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: BORDER_NEUTRAL_NORMAL,
   },
   fieldLabel: {
     ...TYPOGRAPHY.body2,

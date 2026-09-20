@@ -34,7 +34,6 @@ import {
   GROUP_MANAGER_INVITE_CODE_PENDING,
   GROUP_MANAGER_INVITE_CODE_PREFIX,
   GROUP_MANAGER_LOADING,
-  GROUP_MANAGER_MEMBER_MANAGE_LABEL,
   GROUP_MANAGER_RETRY_LABEL,
   GROUP_MANAGER_TITLE,
   SNACKBAR_INVITE_CODE_COPIED,
@@ -43,7 +42,6 @@ import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_NORMAL } from '../../constants/
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const COPY_ICON = require('../../assets/icons/system/Copy.png');
-const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/Chevron Right.png');
 
 type GroupManagerNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -218,13 +216,6 @@ function GroupManagerScreen() {
           </CardBase>
         )}
 
-        {group && (
-          <CardBase onPress={() => navigation.navigate('MemberManage')} style={styles.memberManageRow}>
-            <Text style={styles.memberManageLabel}>{GROUP_MANAGER_MEMBER_MANAGE_LABEL}</Text>
-            <Image source={CHEVRON_RIGHT_ICON} style={styles.memberManageChevron} />
-          </CardBase>
-        )}
-
         {loadState === 'loading' && (
           <View style={styles.stateContainer}>
             <Text style={styles.stateText}>{GROUP_MANAGER_LOADING}</Text>
@@ -244,9 +235,10 @@ function GroupManagerScreen() {
         )}
 
         {loadState === 'ready' && (
-          <View style={styles.memberListWrapper}>
+          <CardBase style={styles.memberListCard}>
             <ToolsMenu
               showTitle={false}
+              flush
               sections={[
                 {
                   items: members.map(member => ({
@@ -262,7 +254,7 @@ function GroupManagerScreen() {
                 },
               ]}
             />
-          </View>
+          </CardBase>
         )}
       </View>
 
@@ -302,21 +294,11 @@ const styles = StyleSheet.create({
   inviteCodeText: {
     ...TYPOGRAPHY.subtitle3,
   },
-  memberManageRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  memberManageLabel: {
-    ...TYPOGRAPHY.subtitle3,
-  },
-  memberManageChevron: {
-    width: 16,
-    height: 16,
-    tintColor: FOREGROUND_DISABLED,
-  },
-  memberListWrapper: {
+  // 관리자 전체를 흰 카드 하나로 묶는다. 항목 자체 패딩(위아래 12·좌우 4)과 합쳐 카드 안쪽 여백이 16이 되도록 줄였다.
+  memberListCard: {
     marginTop: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
   },
   stateContainer: {
     flex: 1,

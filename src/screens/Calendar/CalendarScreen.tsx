@@ -43,7 +43,7 @@ import {
   CALENDAR_SCREEN_TITLE,
   CALENDAR_WEEKDAY_LABELS,
 } from '../../constants/calendarScreenText';
-import { FOREGROUND_DISABLED } from '../../constants/colors';
+import { BACKGROUND_PRIMARY, BACKGROUND_SECONDARY, FOREGROUND_DISABLED } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const CHEVRON_LEFT_ICON = require('../../assets/icons/nav/Chevron Left.png');
@@ -187,12 +187,12 @@ function CalendarScreen() {
       : null;
 
   return (
-    <ScreenContainer background="secondary">
+    <View style={{backgroundColor: BACKGROUND_SECONDARY, height: '100%'}}>
       <AppBar
         title={CALENDAR_SCREEN_TITLE}
         onBackPress={() => navigation.goBack()}
       />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <View style={styles.scrollContent}>
         <View style={styles.monthNavRow}>
           <View style={styles.monthNav}>
             <Pressable onPress={() => handleChangeMonth(-1)} hitSlop={8}>
@@ -239,13 +239,12 @@ function CalendarScreen() {
             showDateFields={false}
           />
         )}
-
+      </View>
+      <View style={styles.gap}></View>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         {selectedDateLabel && (
           <>
             <Text style={styles.selectedDateLabel}>{selectedDateLabel}</Text>
-            <View style={styles.dividerWrapper}>
-              <Divider />
-            </View>
 
             {dayLoadState === 'loading' && (
               <Text style={styles.stateText}>{DAILY_LOADING}</Text>
@@ -286,12 +285,13 @@ function CalendarScreen() {
           </>
         )}
       </ScrollView>
-    </ScreenContainer>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   scrollContent: {
+    backgroundColor: BACKGROUND_SECONDARY,
     paddingHorizontal: 24,
     paddingBottom: 40,
   },
@@ -313,6 +313,11 @@ const styles = StyleSheet.create({
   },
   monthLabel: {
     ...TYPOGRAPHY.h3,
+  },
+  gap: {
+    height: 16,
+    width: '100%',
+    backgroundColor: BACKGROUND_PRIMARY,
   },
   selectedDateLabel: {
     ...TYPOGRAPHY.subtitle3,

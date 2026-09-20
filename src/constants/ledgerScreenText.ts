@@ -99,6 +99,7 @@ export const TRANSACTION_MANAGER_LABEL = '담당자';
 export const TRANSACTION_LEDGER_LABEL = '장부';
 export const TRANSACTION_MEMO_LABEL = '메모';
 export const TRANSACTION_MEMO_PLACEHOLDER = '메모를 남길 수 있어요.';
+export const TRANSACTION_MEMO_EMPTY_PLACEHOLDER = '-';
 export const TRANSACTION_RECEIPT_LABEL = '증빙 자료';
 export const TRANSACTION_RECEIPT_DETAIL_LABEL = '증빙 자료 세부 내역';
 export const TRANSACTION_RECEIPT_ITEM_NAME_LABEL = '상품명';
