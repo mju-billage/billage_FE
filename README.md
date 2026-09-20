@@ -45,6 +45,17 @@ npm run ios
 
 코드를 저장하면 [Fast Refresh](https://reactnative.dev/docs/fast-refresh)로 실행 중인 앱에 즉시 반영됩니다. 반영이 안 되면 `Ctrl+M`(Windows/Linux) 또는 `Cmd+M`(macOS)으로 Dev Menu를 열고 Reload 하세요.
 
+### 0.4 APK 생성 (Android)
+
+`.env`(`.env.example` 참고)를 채운 뒤 프로젝트 루트에서:
+
+```sh
+cd android
+./gradlew assembleRelease      # Windows: gradlew.bat assembleRelease
+```
+
+결과물: `android/app/build/outputs/apk/release/app-release.apk`. 현재 `release` 빌드타입이 **debug 키스토어로 서명**(`android/app/build.gradle`)되므로 배포용이 아니라 테스트 설치용이다. 스토어 배포 전엔 별도 keystore와 signingConfig가 필요하다. 개발 중 설치는 `npm run android`(0.2)로 충분하다.
+
 ---
 
 ## 1. 네이밍 규칙

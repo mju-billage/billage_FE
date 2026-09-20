@@ -6,7 +6,7 @@
  */
 import { useNavigation } from '@react-navigation/native';
 import { StyleSheet, Text } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
@@ -34,7 +34,7 @@ function TermsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary" style={styles.container}>
       <AppBar type="sub" title={TERMS_LIST_TITLE} onBackPress={() => navigation.goBack()} />
       <CardBase
         style={styles.card}
@@ -54,7 +54,7 @@ function TermsScreen() {
       >
         <Text style={styles.cardLabel}>{TERMS_LIST_AUTO_RECORD_LABEL}</Text>
       </CardBase>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 

@@ -4,7 +4,7 @@
 /** @screen ETC-5-SNACKBAR-02-0 모임 내보내기 완료 (스낵바 렌더링은 여기, 메시지 조합은 MemberProfileSheet.tsx) */
 import { useCallback, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -34,7 +34,6 @@ import {
   GROUP_MANAGER_INVITE_CODE_PENDING,
   GROUP_MANAGER_INVITE_CODE_PREFIX,
   GROUP_MANAGER_LOADING,
-  GROUP_MANAGER_MEMBER_MANAGE_LABEL,
   GROUP_MANAGER_RETRY_LABEL,
   GROUP_MANAGER_TITLE,
   SNACKBAR_INVITE_CODE_COPIED,
@@ -43,7 +42,6 @@ import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_NORMAL } from '../../constants/
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const COPY_ICON = require('../../assets/icons/system/Copy.png');
-const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/Chevron Right.png');
 
 type GroupManagerNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -86,19 +84,42 @@ function GroupManagerScreen() {
     setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
-  const fetchInvitation = useCallback(async (groupId: string) => {
-    setIsIssuingInvite(true);
-    setInviteError(false);
-    try {
-      await groupMembershipService.createInvitation(groupId);
-      setGroup(getActiveGroup());
-    } catch {
-      // 발급 실패는 화면 자체를 막지 않는다 — 행을 다시 누르면 재시도한다.
-      setInviteError(true);
-    } finally {
-      setIsIssuingInvite(false);
-    }
-  }, []);
+  const fetchInvitation = useCallback(
+    async (groupId: string, viewerOwner: boolean) => {
+      setIsIssuingInvite(true);
+      setInviteError(false);
+      try {
+        // GET current로 먼저 "지금 있는 코드"를 읽는다 — 이게 성공하면 발급 API는
+        // 아예 안 부른다(재발급은 매번 새 코드를 만들어 이전 공유 코드를 무효화한다).
+        await groupMembershipService.getCurrentInvitation(groupId);
+        setGroup(getActiveGroup());
+      } catch (error) {
+        if (
+          error instanceof ApiError &&
+          error.code === 'INVITATION_NOT_FOUND' &&
+          viewerOwner
+        ) {
+          // 코드가 아예 없는 최초 상태 — 발급은 총무만 가능하다(정책 확정).
+          try {
+            await groupMembershipService.createInvitation(groupId);
+            setGroup(getActiveGroup());
+            return;
+          } catch {
+            setInviteError(true);
+            return;
+          }
+        }
+        if (error instanceof ApiError && error.code === 'INVITATION_NOT_FOUND') {
+          // 일반 관리자는 코드를 만들 수 없다 — "총무에게 요청" 문구만 보여준다.
+          return;
+        }
+        setInviteError(true);
+      } finally {
+        setIsIssuingInvite(false);
+      }
+    },
+    [],
+  );
 
   const load = useCallback(async () => {
     setLoadState('loading');
@@ -119,14 +140,15 @@ function GroupManagerScreen() {
       const result = await groupMembershipService.getMemberships(activeGroup.id);
       setMembers(result);
       setLoadState('ready');
-      // 초대코드는 자동 발급하지 않는다 — 발급 API가 멱등하지 않아(재호출마다 새 코드,
-      // docs/api-gaps.md 정책 결함 참고) 화면 진입만으로 호출하면 코드가 계속 늘어난다.
-      // 카드를 눌렀을 때만(handlePressInviteCode) 발급을 요청한다.
+      // 2026-09-06: `GET .../invitations/current`(조회 전용)가 확인돼 화면 진입
+      // 시 자동으로 부른다 — 이전엔 발급 API가 멱등하지 않아(재호출마다 새 코드)
+      // 자동 호출을 못 하고 카드를 눌렀을 때만 발급했었다.
+      fetchInvitation(activeGroup.id, activeGroup.myRole === 'OWNER');
     } catch (error) {
       setLoadErrorMessage(toErrorMessage(error));
       setLoadState('error');
     }
-  }, []);
+  }, [fetchInvitation]);
 
   useFocusEffect(
     useCallback(() => {
@@ -162,12 +184,21 @@ function GroupManagerScreen() {
       showSnackbar(SNACKBAR_INVITE_CODE_COPIED);
       return;
     }
-    // 초대코드가 없는 상태(최초 발급 실패 등)에서 다시 누르면 재시도한다.
-    fetchInvitation(group.id);
+    if (!viewerIsOwner) {
+      // 일반 관리자는 발급 권한이 없다 — 다시 눌러봐야 안내 문구만 반복된다.
+      return;
+    }
+    // 조회/발급 실패 후 다시 누르면 재시도한다.
+    fetchInvitation(group.id, true);
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+      }
+    >
       <AppBar
         type="sub"
         title={GROUP_MANAGER_TITLE}
@@ -175,20 +206,13 @@ function GroupManagerScreen() {
       />
 
       <View style={styles.content}>
-        {group && viewerIsOwner && (
+        {group && (
           <CardBase onPress={handlePressInviteCode} style={styles.inviteCodeRow}>
             <Image source={COPY_ICON} style={styles.inviteCodeIcon} />
             <Text style={styles.inviteCodeText}>
               {GROUP_MANAGER_INVITE_CODE_PREFIX}
               {inviteCodeText}
             </Text>
-          </CardBase>
-        )}
-
-        {group && (
-          <CardBase onPress={() => navigation.navigate('MemberManage')} style={styles.memberManageRow}>
-            <Text style={styles.memberManageLabel}>{GROUP_MANAGER_MEMBER_MANAGE_LABEL}</Text>
-            <Image source={CHEVRON_RIGHT_ICON} style={styles.memberManageChevron} />
           </CardBase>
         )}
 
@@ -211,9 +235,10 @@ function GroupManagerScreen() {
         )}
 
         {loadState === 'ready' && (
-          <View style={styles.memberListWrapper}>
+          <CardBase style={styles.memberListCard}>
             <ToolsMenu
               showTitle={false}
+              flush
               sections={[
                 {
                   items: members.map(member => ({
@@ -229,7 +254,7 @@ function GroupManagerScreen() {
                 },
               ]}
             />
-          </View>
+          </CardBase>
         )}
       </View>
 
@@ -245,20 +270,11 @@ function GroupManagerScreen() {
         // 남는데, 그 화면도 활성 모임이 없어 바로 에러 상태가 되니 의미가 없다).
         onLeftGroup={() => navigation.pop(2)}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     paddingHorizontal: 24,
     paddingTop: 8,
@@ -278,21 +294,11 @@ const styles = StyleSheet.create({
   inviteCodeText: {
     ...TYPOGRAPHY.subtitle3,
   },
-  memberManageRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  memberManageLabel: {
-    ...TYPOGRAPHY.subtitle3,
-  },
-  memberManageChevron: {
-    width: 16,
-    height: 16,
-    tintColor: FOREGROUND_DISABLED,
-  },
-  memberListWrapper: {
+  // 관리자 전체를 흰 카드 하나로 묶는다. 항목 자체 패딩(위아래 12·좌우 4)과 합쳐 카드 안쪽 여백이 16이 되도록 줄였다.
+  memberListCard: {
     marginTop: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
   },
   stateContainer: {
     flex: 1,
@@ -303,12 +309,6 @@ const styles = StyleSheet.create({
   stateText: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_DISABLED,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

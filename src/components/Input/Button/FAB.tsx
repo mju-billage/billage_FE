@@ -1,6 +1,7 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { FOREGROUND_INVERSE, NAVY_800 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
+import { BOTTOM_NAVIGATION_HEIGHT } from '../../Navigation/Bottom Navigation/BottomNavigation';
 
 type FloatingActionButtonProps = {
   onPress: () => void;
@@ -10,19 +11,16 @@ type FloatingActionButtonProps = {
 };
 
 const SIZE = 46;
+const DocumentAddIconImage = require('../../../assets/icons/content/DocumentAdd.png');
 
 /** 문서(가로줄 2개) + 우하단 plus 배지로 구성한 "내역 추가" 아이콘. */
 function DocumentAddIcon() {
   return (
     <View style={styles.icon}>
-      <View style={styles.doc}>
-        <View style={styles.docLine} />
-        <View style={[styles.docLine, styles.docLineShort]} />
-      </View>
-      <View style={styles.badge}>
-        <View style={styles.badgeBarH} />
-        <View style={styles.badgeBarV} />
-      </View>
+      <Image 
+        source={DocumentAddIconImage}
+        style={styles.documentadd}
+      />
     </View>
   );
 }
@@ -52,7 +50,8 @@ const styles = StyleSheet.create({
   button: {
     position: 'absolute',
     right: 24,
-    bottom: 12,
+    // 탭 화면에선 탭바가 화면 위에 겹쳐 있어 그 위로 12 띄운다.
+    bottom: BOTTOM_NAVIGATION_HEIGHT + 12,
     height: SIZE,
     backgroundColor: NAVY_800,
     flexDirection: 'row',
@@ -77,6 +76,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
+  },
+  documentadd: {
+    width: 24,
+    height: 24,
+    tintColor: FOREGROUND_INVERSE,
   },
   doc: {
     width: 15,

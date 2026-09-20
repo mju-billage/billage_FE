@@ -9,7 +9,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, SectionList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -36,18 +36,11 @@ import {
   TRANSACTIONS_RETRY_LABEL,
   TRANSACTIONS_TITLE,
 } from '../../constants/transactionScreenText';
-import { CALENDAR_WEEKDAY_LABELS } from '../../constants/calendarScreenText';
+import { formatDateHeader } from '../../utils/dateHeader';
 import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const SEARCH_DEBOUNCE_MS = 300;
-
-/** 'YYYY-MM-DD' -> 'M월 D일 요일'. */
-function formatDateHeader(isoDate: string): string {
-  const [year, month, day] = isoDate.split('-').map(Number);
-  const jsDate = new Date(year, month - 1, day);
-  return `${month}월 ${day}일 ${CALENDAR_WEEKDAY_LABELS[jsDate.getDay()]}요일`;
-}
 
 type TransactionSearchNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -156,7 +149,7 @@ function TransactionSearchScreen() {
   }));
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="secondary">
       <AppBar
         type="sub"
         title={TRANSACTIONS_TITLE}
@@ -168,6 +161,7 @@ function TransactionSearchScreen() {
           value={query}
           onChangeText={setQuery}
           placeholder={TRANSACTION_SEARCH_PLACEHOLDER}
+          variant="outline"
         />
 
         {searchState === 'idle' ? null : searchState === 'loading' ? (
@@ -225,14 +219,11 @@ function TransactionSearchScreen() {
           />
         )}
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingTop: 16,

@@ -1,6 +1,6 @@
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Menu, { MenuItem } from '../../components/Navigation/Menu/Menu';
-import { FILL_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { FILL_NEUTRAL_SUBTLE, OVERLAY_MENU_BACKDROP } from '../../constants/colors';
 
 type MemberMoreMenuProps = {
   visible: boolean;
@@ -32,7 +32,7 @@ function MemberMoreMenu({ visible, onClose, items, onSelect }: MemberMoreMenuPro
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: OVERLAY_MENU_BACKDROP,
   },
   menuWrapper: {
     position: 'absolute',

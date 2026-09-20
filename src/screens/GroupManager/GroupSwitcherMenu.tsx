@@ -2,7 +2,7 @@ import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Menu from '../../components/Navigation/Menu/Menu';
 import { getCachedGroups } from '../../types/group';
 import { GROUP_SWITCHER_ADD_ALL } from '../../constants/groupManagerScreenText';
-import { FILL_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { FILL_NEUTRAL_SUBTLE, OVERLAY_MENU_BACKDROP } from '../../constants/colors';
 
 const ALL_GROUPS_KEY = '__all_groups__';
 
@@ -55,7 +55,7 @@ function GroupSwitcherMenu({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: OVERLAY_MENU_BACKDROP,
   },
   menuWrapper: {
     position: 'absolute',

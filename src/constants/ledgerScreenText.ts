@@ -23,7 +23,13 @@ export const LEDGER_MENU_RENAME = '장부 이름 변경';
 export const LEDGER_MENU_DELETE = '장부 삭제';
 
 export const LEDGER_RENAME_DIALOG_TITLE = '장부 이름 변경하기';
-export const LEDGER_RENAME_PLACEHOLDER = '최대 20자 이내로 입력해주세요.';
+/** 20자 확정(2026-09-18, design-verification.md §5-16) — 시안 목업 원문은
+ * "최대 10자 이내로 입력해주세요."였지만, 앱 내 이름/제목 필드 4/4가 20자(그중
+ * 3개 서버 도메인 문서 근거)이고 같은 명세서 설명표 No.2/No.3도 20을 두 번
+ * 명시해 설명표+서버 근거를 따랐다. 목업의 "10"은 시안↔설명표 불일치 #8로
+ * 별도 기록, 기획 확인 필요. */
+export const LEDGER_RENAME_DIALOG_DESCRIPTION = '최대 20자까지 입력할 수 있어요.';
+export const LEDGER_RENAME_PLACEHOLDER = '변경할 이름을 입력해주세요.';
 export const LEDGER_RENAME_CONFIRM_LABEL = '변경';
 
 export const LEDGER_BUDGET_DIALOG_TITLE = '예산 설정하기';
@@ -38,6 +44,10 @@ export const SNACKBAR_LEDGER_RENAMED_PREFIX = "'";
 export const SNACKBAR_LEDGER_RENAMED_SUFFIX = "'으로 장부 이름이 변경되었어요.";
 export const SNACKBAR_LEDGER_DELETED_SUFFIX = ' 장부가 삭제되었어요.';
 
+/** 장부 상세 목록 개수 단위 — `24 건`(숫자와 단위 사이 공백 한 칸, 0건이면 `0 건`). 설명표
+ * FDR-2-PAGE-05-0 No.5. **폴더 목록은 `개`(`FOLDER_COUNT_SUFFIX`), 장부 내역 목록은 `건`이 의도된
+ * 구분이다 — "통일"하지 말 것.** */
+export const LEDGER_COUNT_SUFFIX = ' 건';
 export const LEDGER_LIST_EMPTY_TITLE = '아직 내역이 존재하지 않아요.';
 export const LEDGER_LIST_EMPTY_SUBTITLE =
   '내역을 추가하여 모임 장부를 정리해보세요.';
@@ -49,8 +59,15 @@ export const LEDGER_ENTRIES_LOADING_MORE = '불러오는 중...';
 
 /** keyword 파라미터는 제목·메모만 검색한다(Entry.txt) — "장부명"은 뺐다(이미 그
  * 장부 안에서 검색 중이라 의미가 없다). */
-export const LEDGER_SEARCH_PLACEHOLDER = '내역명을 입력해주세요.';
+/** 시안 목업 문구를 따른다(설명표는 '검색어를 입력해주세요.', 예전 구현은 '내역명을 입력해주세요.') —
+ * 불일치 #15. 장부 안 검색인데 '장부명'이 들어가는 이유는 기획 확인 필요. */
+export const LEDGER_SEARCH_PLACEHOLDER = '내역명, 장부명을 입력해주세요.';
+/** 내역 검색(`TransactionSearchScreen`)의 결과 없음 문구. 장부 안 검색(`FDR-3-PAGE-02-0`)은 마침표 없는
+ * `LEDGER_ENTRY_SEARCH_EMPTY`를 따로 쓴다 — 이 상수는 다른 화면이 같이 써서 바꾸지 않았다. */
 export const LEDGER_SEARCH_EMPTY = '해당되는 내역이 없어요.';
+/** 장부 안 검색 결과 없음. 시안(원본 스펙시트 Case B, 크롭 `FDR-3-PAGE-02-0-3.png`)과 설명표 3-1 모두
+ * 마침표 없음(2026-09-20 확대 확인). */
+export const LEDGER_ENTRY_SEARCH_EMPTY = '해당되는 내역이 없어요';
 
 export const FILTER_SHEET_TITLE = '필터 선택';
 export const FILTER_PERIOD_LABEL = '기간';
@@ -82,12 +99,16 @@ export const TRANSACTION_MANAGER_LABEL = '담당자';
 export const TRANSACTION_LEDGER_LABEL = '장부';
 export const TRANSACTION_MEMO_LABEL = '메모';
 export const TRANSACTION_MEMO_PLACEHOLDER = '메모를 남길 수 있어요.';
+export const TRANSACTION_MEMO_EMPTY_PLACEHOLDER = '-';
 export const TRANSACTION_RECEIPT_LABEL = '증빙 자료';
 export const TRANSACTION_RECEIPT_DETAIL_LABEL = '증빙 자료 세부 내역';
 export const TRANSACTION_RECEIPT_ITEM_NAME_LABEL = '상품명';
 export const TRANSACTION_RECEIPT_QUANTITY_LABEL = '수량';
 export const TRANSACTION_RECEIPT_AMOUNT_LABEL = '금액';
 export const TRANSACTION_RECEIPT_TOTAL_LABEL = '합계';
+/** 상세 내역_납부관리_수입내역(마감된 회비에서 생성된 수입 내역, `entry.duesExists`) 전용. */
+export const TRANSACTION_PAYER_COUNT_SUFFIX = '명';
+export const TRANSACTION_DUES_DETAIL_CTA_LABEL = '회비 상세보기';
 export const TRANSACTION_DELETE_CONFIRM_TITLE = '내역을 삭제하시겠습니까?';
 export const TRANSACTION_DELETE_CONFIRM_DESCRIPTION =
   '삭제 이후에는 데이터 복구가 어렵습니다.';

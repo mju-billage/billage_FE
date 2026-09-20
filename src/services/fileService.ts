@@ -1,5 +1,11 @@
 import { request } from './apiClient';
 
+/** File.txt "1. 파일 업로드" 정책 메모: "현재 구현값(제안안 그대로 적용, 설정으로
+ * 변경 가능)... 최대 10MB". 서버가 압축을 안 하므로(같은 정책 메모) 이 상한을
+ * 넘는 파일은 업로드 전에 클라이언트가 먼저 막아야 `FILE_SIZE_EXCEEDED(413)`
+ * 대신 이유를 알 수 있는 안내를 보여줄 수 있다. */
+export const MAX_UPLOAD_FILE_SIZE_BYTES = 10 * 1024 * 1024;
+
 export type FilePurpose = 'RECEIPT' | 'PROFILE_IMAGE' | 'GROUP_IMAGE';
 
 export type UploadedFile = {
@@ -26,12 +32,12 @@ type FileUploadResponse = {
  * 파일을 업로드한다(multipart/form-data, File.txt "1. 파일 업로드"). `fileUri`는
  * 기기의 실제 로컬 파일 경로/URI여야 한다.
  *
- * ⚠️ 이 함수를 실제로 호출하는 화면이 아직 없다 — 이 프로젝트엔 진짜 카메라·갤러리
- * 접근이 없다(`MockCameraView`/`ReceiptGalleryPickerScreen`이 전부 가짜 문자열
- * 토큰만 만든다, `photo-${Date.now()}`처럼). 그 토큰들은 실제 파일이 아니라서
- * 업로드할 수 없다 — 여기 올리면 서버가 깨진 파일을 받거나 그대로 실패한다.
- * 실제 이미지 피커/카메라 라이브러리가 붙을 때 바로 쓸 수 있게 인터페이스만
- * 먼저 맞춰둔다(docs/api-gaps.md 참고).
+ * 2026-09-11부터 카메라(`utils/imagePicker.ts`의 `captureWithFeedback`)/갤러리
+ * (`pickGalleryWithFeedback`)로 얻은 이미지를 촬영·선택 직후 이 함수로 곧바로
+ * 업로드한다 — 호출부: `TransactionRegisterScreen`(`RECEIPT`),
+ * `GroupProfileEditScreen`(`GROUP_IMAGE`), `ProfileEditScreen`(`PROFILE_IMAGE`).
+ * 실호출로 fileId/purpose/fileUrl 필드명이 명세와 일치함을 확인했다(개발 서버,
+ * 2026-09-11).
  */
 export async function uploadFile(
   fileUri: string,

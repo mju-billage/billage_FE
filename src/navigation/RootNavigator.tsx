@@ -59,6 +59,8 @@ import ReportPeriodEntriesScreen from '../screens/Report/ReportPeriodEntriesScre
 import ReportEntryDetailScreen from '../screens/Report/ReportEntryDetailScreen';
 import ArchiveListScreen from '../screens/Archive/ArchiveListScreen';
 import ArchiveDetailScreen from '../screens/Archive/ArchiveDetailScreen';
+import ArchiveLedgerEntriesScreen from '../screens/Archive/ArchiveLedgerEntriesScreen';
+import ArchiveEntryDetailScreen from '../screens/Archive/ArchiveEntryDetailScreen';
 import SettingsScreen from "../screens/More/SettingScreen"
 import MyProfileScreen from '../screens/More/MyProfileScreen';
 import ProfileEditScreen from '../screens/More/ProfileEditScreen';
@@ -75,19 +77,26 @@ import WithdrawReasonScreen from '../screens/More/WithdrawReasonScreen';
 import StatisticsScreen from '../screens/Statistics/StatisticsScreen';
 import type { TermType } from '../services/supportService';
 import type { ReportEntrySnapshot, ReportLedgerDetail, ReportSummary } from '../types/report';
+import type { ArchivedEntry } from '../types/archive';
 import { SocialProfile } from '../types/social';
 import * as authService from '../services/authService';
 import * as groupService from '../services/groupService';
 
 export type RootStackParamList = {
   Login: { snackbarMessage?: string } | undefined;
-  TermsAgreement: undefined;
+  // 일반 가입은 params 없이, 신규 소셜 가입자는 `socialProfile`을 들고 온다(약관동의 뒤 `SocialSignupInfo`로 이어짐).
+  TermsAgreement: { socialProfile?: SocialProfile } | undefined;
   TermsOfService: undefined;
   PrivacyPolicy: undefined;
   MarketingConsent: undefined;
-  SocialSignupInfo: { profile: SocialProfile };
-  SignupInfo: undefined;
-  EmailVerification: { email: string };
+  SocialSignupInfo: { profile: SocialProfile; agreements: authService.SignupAgreements };
+  SignupInfo: { agreements: authService.SignupAgreements };
+  EmailVerification: {
+    email: string;
+    name: string;
+    password: string;
+    agreements: authService.SignupAgreements;
+  };
   SignupComplete: undefined;
   PasswordReset: undefined;
   PasswordResetSent: { email: string };
@@ -104,7 +113,7 @@ export type RootStackParamList = {
   Statistics: undefined;
   LedgerCreate: { parentId: string | null };
   LedgerDetail: { ledgerId: string };
-  LedgerSearch: { ledgerId: string };
+  LedgerSearch: { ledgerId: string; ledgerName: string };
   TransactionDetail: { transactionId: string };
   TransactionReceiptDetail: { fileUrl: string };
   TransactionSearch: undefined;
@@ -138,8 +147,8 @@ export type RootStackParamList = {
   ReportCreateByLedger: { selectedLedgers?: { id: string; name: string }[] } | undefined;
   ReportLedgerSelect: { selectedLedgers: { id: string; name: string }[] };
   ReportCreateByPeriod: undefined;
-  ReportByLedgerDetail: { reportId: string };
-  ReportByPeriodDetail: { reportId: string };
+  ReportByLedgerDetail: { reportId: string; snackbarMessage?: string };
+  ReportByPeriodDetail: { reportId: string; snackbarMessage?: string };
   ReportLedgerEntries: {
     reportTitle: string;
     ledgerName: string;
@@ -162,6 +171,18 @@ export type RootStackParamList = {
   };
   Archive: undefined;
   ArchiveDetail: { archiveId: string };
+  ArchiveLedgerEntries: {
+    ledgerName: string;
+    startDate: string;
+    endDate: string;
+    totalIncome: number;
+    totalExpense: number;
+    entries: ArchivedEntry[];
+  };
+  ArchiveEntryDetail: {
+    ledgerName: string;
+    entry: ArchivedEntry;
+  };
   Settings: undefined;
   MyProfile: { snackbarMessage?: string } | undefined;
   ProfileEdit: undefined;
@@ -355,6 +376,11 @@ function RootNavigator() {
           />
           <Stack.Screen name="Archive" component={ArchiveListScreen} />
           <Stack.Screen name="ArchiveDetail" component={ArchiveDetailScreen} />
+          <Stack.Screen
+            name="ArchiveLedgerEntries"
+            component={ArchiveLedgerEntriesScreen}
+          />
+          <Stack.Screen name="ArchiveEntryDetail" component={ArchiveEntryDetailScreen} />
           <Stack.Screen
             name="Settings"
             component={SettingsScreen}

@@ -2,7 +2,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import Divider from '../Divider/Divider';
 import FolderTabShape from './FolderTabShape';
 import CardBase from './CardBase';
-import { formatWon } from '../../../utils/currency';
+import { formatExpense, formatWon } from '../../../utils/currency';
 import {
   FEEDBACK_POSITIVE_BOLD,
   FILL_NEUTRAL_SUBTLE,
@@ -50,11 +50,11 @@ function ReportCard({
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>수입</Text>
-        <Text style={styles.income}>+{formatWon(income)}</Text>
+        <Text style={styles.income}>{income > 0 ? '+' : ''}{formatWon(income)}</Text>
       </View>
       <View style={styles.row}>
         <Text style={styles.label}>지출</Text>
-        <Text style={styles.expense}>-{formatWon(expense)}</Text>
+        <Text style={styles.expense}>{formatExpense(expense)}</Text>
       </View>
     </CardBase>
   );

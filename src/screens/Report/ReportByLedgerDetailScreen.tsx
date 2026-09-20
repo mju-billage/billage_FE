@@ -1,4 +1,5 @@
 /** @screen ETC-3-PAGE-02-0 장부별 보고서 조회 */
+/** @screen ETC-3-PAGE-02-1 장부별 보고서 상세(수입/지출) — 02-0의 탭 상태, 별도 라우트 아님 */
 /**
  * 보고서 생성 메인(`ReportMainScreen`)의 장부별 탭 카드를 눌러 들어오는 상세
  * 화면. 목록에 없던 `ledgers[].entries`가 필요해 `GET /reports/{reportId}`로
@@ -9,9 +10,9 @@
  * 공유 버튼은 서버에 보고서 웹뷰/PDF 응답이 없어(Report.txt 정책 메모) OS
  * 공유 시트에 텍스트 요약만 실어 보낸다 — 새 API도 새 의존성도 필요 없다.
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Image, Pressable, Share, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -19,10 +20,11 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import CardBase from '../../components/Data Display/Card/CardBase';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import type { ReportDetail } from '../../types/report';
 import * as reportService from '../../services/reportService';
 import { ApiError } from '../../services/apiClient';
-import { formatWon } from '../../utils/currency';
+import { formatExpense, formatWon } from '../../utils/currency';
 import { formatDateDot } from '../../utils/dueDate';
 import {
   API_ERROR_DEFAULT_MESSAGE,
@@ -33,13 +35,14 @@ import {
 import {
   REPORT_DETAIL_CREATED_AT_LABEL,
   REPORT_DETAIL_EMPTY,
+  REPORT_DETAIL_EXPENSE_LABEL,
+  REPORT_DETAIL_INCOME_LABEL,
   REPORT_DETAIL_LOADING,
   REPORT_MAIN_RETRY_LABEL,
   REPORT_SHARE_EXPENSE_LABEL,
   REPORT_SHARE_INCOME_LABEL,
 } from '../../constants/reportScreenText';
 import {
-  FEEDBACK_NEGATIVE_BOLD,
   FEEDBACK_POSITIVE_BOLD,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
@@ -48,6 +51,7 @@ import { TYPOGRAPHY } from '../../constants/typography';
 
 const SHARE_ICON = require('../../assets/icons/action/Share.png');
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/Chevron Right.png');
+const SNACKBAR_AUTO_HIDE_MS = 1600;
 
 type LoadState = 'loading' | 'error' | 'ready';
 type ReportByLedgerDetailNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -61,6 +65,18 @@ function ReportByLedgerDetailScreen() {
   const [report, setReport] = useState<ReportDetail | null>(null);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+
+  // ETC-5-SNACKBAR-08-0: 생성 직후 이 화면으로 이동하며 받은 완료 메시지를
+  // 한 번만 띄운다(design-verification.md §5-11).
+  useEffect(() => {
+    if (route.params.snackbarMessage) {
+      setSnackbarMessage(route.params.snackbarMessage);
+      setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
+      navigation.setParams({ snackbarMessage: undefined });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params.snackbarMessage]);
 
   const toErrorMessage = (error: unknown): string => {
     if (isNetworkError(error)) {
@@ -103,7 +119,7 @@ function ReportByLedgerDetailScreen() {
 
   if (loadState === 'loading' || loadState === 'error' || !report) {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="primary">
         <AppBar type="sub" title="" onBackPress={() => navigation.goBack()} />
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>
@@ -118,12 +134,19 @@ function ReportByLedgerDetailScreen() {
             />
           )}
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarMessage ? (
+          <Snackbar visible title={snackbarMessage} onClose={() => setSnackbarMessage(null)} />
+        ) : undefined
+      }
+    >
       <AppBar
         type="sub"
         title={report.title}
@@ -170,12 +193,14 @@ function ReportByLedgerDetailScreen() {
                     <Text style={styles.ledgerName} numberOfLines={1}>
                       {item.ledgerName}
                     </Text>
-                    <Text style={styles.ledgerIncome}>
-                      +{formatWon(item.totalIncome)}원
-                    </Text>
-                    <Text style={styles.ledgerExpense}>
-                      -{formatWon(item.totalExpense)}원
-                    </Text>
+                    <View style={styles.amountRow}>
+                      <Text style={styles.amountLabel}>{REPORT_DETAIL_INCOME_LABEL}</Text>
+                      <Text style={styles.ledgerIncome}>{formatWon(item.totalIncome)}원</Text>
+                    </View>
+                    <View style={styles.amountRow}>
+                      <Text style={styles.amountLabel}>{REPORT_DETAIL_EXPENSE_LABEL}</Text>
+                      <Text style={styles.ledgerExpense}>{formatExpense(item.totalExpense)}</Text>
+                    </View>
                   </View>
                   <Image source={CHEVRON_RIGHT_ICON} style={styles.chevron} />
                 </CardBase>
@@ -184,14 +209,11 @@ function ReportByLedgerDetailScreen() {
           />
         )}
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,
@@ -211,6 +233,7 @@ const styles = StyleSheet.create({
   metaText: {
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
+    textAlign: 'right',
   },
   headerCard: {
     marginTop: 8,
@@ -238,7 +261,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   ledgerCardTextColumn: {
+    flex: 1,
     gap: 4,
+  },
+  amountRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  amountLabel: {
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   ledgerName: {
     ...TYPOGRAPHY.subtitle3,
@@ -249,7 +281,6 @@ const styles = StyleSheet.create({
   },
   ledgerExpense: {
     ...TYPOGRAPHY.body2,
-    color: FEEDBACK_NEGATIVE_BOLD,
   },
   chevron: {
     width: 20,

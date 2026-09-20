@@ -1,4 +1,6 @@
 /** @screen ETC-4-PAGE-03-0 장부별 보고서 생성 */
+/** @screen ETC-5-MODAL-01-0 보고서_이탈방지 (leaveDialogVisible) */
+/** @screen ETC-5-SNACKBAR-08-0 보고서_생성완료 (SNACKBAR_REPORT_CREATED, ReportMainScreen에서 렌더) */
 /**
  * "장부별 보고서 생성하기"에서 들어오는 생성 폼. 기간을 받지 않는다 —
  * 선택한 장부의 전체 기간을 서버가 알아서 담는다(Report.txt).
@@ -23,11 +25,11 @@
  */
 import { useCallback, useState } from 'react';
 import { BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
@@ -151,12 +153,26 @@ function ReportCreateByLedgerScreen() {
     setFormError(undefined);
     setIsSubmitting(true);
     try {
-      await reportService.createReportByLedger(group.id, {
+      const created = await reportService.createReportByLedger(group.id, {
         title: title.trim(),
         ledgerIds: ledgers.map(l => l.id),
         entryType,
       });
-      navigation.navigate('ReportMain', { snackbarMessage: SNACKBAR_REPORT_CREATED });
+      // ETC-4-PAGE-03-0 명세 No.5: 성공 시 생성 완료된 보고서 상세로 이동한다.
+      // navigate가 아니라 reset — 생성 폼과 그 위에 쌓였을 수 있는 장부 선택
+      // 화면을 스택에서 걷어내, 상세에서 뒤로가기를 누르면 폼이 아니라 보고서
+      // 목록(ReportMain)으로 가게 한다(design-verification.md §5-11).
+      navigation.reset({
+        index: 2,
+        routes: [
+          { name: 'Main', params: { screen: 'More' } },
+          { name: 'ReportMain' },
+          {
+            name: 'ReportByLedgerDetail',
+            params: { reportId: created.reportId, snackbarMessage: SNACKBAR_REPORT_CREATED },
+          },
+        ],
+      });
     } catch (error) {
       if (error instanceof ApiError) {
         const titleFieldError = error.fieldErrors.find(fe => fe.field === 'title');
@@ -174,12 +190,13 @@ function ReportCreateByLedgerScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="secondary">
       <AppBar type="sub" title={REPORT_BY_LEDGER_TITLE} onBackPress={handleBack} />
 
       <ScrollView contentContainerStyle={styles.body}>
         <TextField
           label={REPORT_TITLE_FIELD_LABEL}
+          required
           value={title}
           onChangeText={text => {
             setTitle(text.slice(0, REPORT_TITLE_MAX_LENGTH));
@@ -216,7 +233,7 @@ function ReportCreateByLedgerScreen() {
           <Button
             label={REPORT_LEDGER_SELECT_LABEL}
             icon={PLUS_ICON}
-            hierarchy="secondary"
+            hierarchy="outlined"
             fullWidth
             onPress={() => navigation.navigate('ReportLedgerSelect', { selectedLedgers: ledgers })}
           />
@@ -268,14 +285,11 @@ function ReportCreateByLedgerScreen() {
           navigation.goBack();
         }}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,

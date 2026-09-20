@@ -35,7 +35,9 @@ function AgreementCheckboxRow({
         </View>
         <Text style={[styles.label, emphasized && styles.labelEmphasized]}>
           {label}
-          {tag && <Text style={styles.tag}> ({tag})</Text>}
+          {tag && (
+            <Text style={tag === AGREEMENT_TAG_REQUIRED ? styles.tagRequired : undefined}> ({tag})</Text>
+          )}
         </Text>
       </Pressable>
       {onPressDetail && (
@@ -68,7 +70,8 @@ const styles = StyleSheet.create({
   labelEmphasized: {
     ...TYPOGRAPHY.subtitle1,
   },
-  tag: {
+  // 시안 실측(회원가입_약관동의.png 픽셀): `(필수)`만 파랑이고 `(선택)`은 본문과 같은 색이다.
+  tagRequired: {
     color: FOREGROUND_SECONDARY,
   },
   chevron: {

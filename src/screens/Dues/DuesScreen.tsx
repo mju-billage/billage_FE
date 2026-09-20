@@ -1,4 +1,7 @@
 /** @screen DUE-1-PAGE-01-0 납부관리 메인 */
+/** @screen DUE-4-SNACKBAR-01-0 회비 생성 완료 (DuesCreateScreen 성공 시 route.params.snackbarMessage로 렌더) */
+/** @screen DUE-4-SNACKBAR-02-0 회비 마감 완료 (DuesDetailScreen 마감 성공 시 렌더) */
+/** @screen DUE-4-SNACKBAR-03-0 회비 삭제 완료 (DuesDetailScreen 삭제 성공 시 렌더) */
 /**
  * 6-A(DUE 화면 구현, 조회 전용): 목 데이터 없이 처음부터 실 API로 붙인다.
  * "+"(회비 생성, 6-B)와 "모임원 관리" 아이콘(7-A)은 이제 둘 다 연결돼 있다.
@@ -18,7 +21,6 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -29,6 +31,7 @@ import Button from '../../components/Input/Button/Button';
 import Tabs from '../../components/Navigation/Tabs/Tabs';
 import DuesProgressCard from '../../components/Data Display/Card/DuesProgressCard';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { getActiveGroup } from '../../types/group';
 import type { DuesSummary } from '../../types/dues';
 import * as duesService from '../../services/duesService';
@@ -54,8 +57,9 @@ import {
   DUES_TAB_ALL,
   DUES_TAB_IN_PROGRESS,
 } from '../../constants/duesScreenText';
-import { BLUE_50, FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Navigation/BottomNavigation';
 
 const PLUS_ICON = require('../../assets/icons/action/Plus.png');
 const MEMBER_BOOK_ICON = require('../../assets/icons/user/Member Book.png');
@@ -184,7 +188,15 @@ function DuesScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      avoidKeyboard={false}
+      snackbar={
+        snackbarMessage ? (
+          <Snackbar visible title={snackbarMessage} />
+        ) : undefined
+      }
+    >
       <AppBar
         type="titleOnly"
         title={DUES_MAIN_TITLE}
@@ -263,24 +275,14 @@ function DuesScreen() {
           </>
         )}
       </View>
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: BLUE_50,
-  },
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 8,
   },
   countText: {
@@ -310,13 +312,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     gap: 12,
-    paddingBottom: 24,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
+    paddingBottom: BOTTOM_NAVIGATION_HEIGHT + 24,
   },
 });
 

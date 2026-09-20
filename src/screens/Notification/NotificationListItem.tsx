@@ -1,5 +1,6 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
-import type { NotificationItem } from '../../types/notification';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import type { NotificationItem } from '../../services/supportService';
+import { formatRelativeTime } from '../../utils/relativeTime';
 import {
   BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_NORMAL,
@@ -14,21 +15,24 @@ const BRACKET_PATTERN = /(\[[^\]]+\])/g;
 
 type NotificationListItemProps = {
   item: NotificationItem;
+  onPress: () => void;
 };
 
 /** 알림 목록의 항목 하나. 설명 중 [이름] 부분은 강조 표시한다. */
-function NotificationListItem({ item }: NotificationListItemProps) {
-  const lines = item.description.split('\n');
+function NotificationListItem({ item, onPress }: NotificationListItemProps) {
+  const lines = item.body.split('\n');
 
   return (
-    <View style={styles.container}>
+    <Pressable style={styles.container} onPress={onPress}>
       <View style={styles.iconBadge}>
         <Image source={GRID_ICON} style={styles.icon} />
       </View>
       <View style={styles.content}>
         <View style={styles.titleRow}>
-          <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.time}>{item.relativeTimeLabel}</Text>
+          <Text style={[styles.title, !item.readAt && styles.titleUnread]}>
+            {item.title}
+          </Text>
+          <Text style={styles.time}>{formatRelativeTime(item.createdAt)}</Text>
         </View>
         {lines.map((line, index) => (
           <Text key={index} style={styles.description}>
@@ -36,7 +40,7 @@ function NotificationListItem({ item }: NotificationListItemProps) {
           </Text>
         ))}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -83,6 +87,9 @@ const styles = StyleSheet.create({
   title: {
     ...TYPOGRAPHY.subtitle3,
     flexShrink: 1,
+  },
+  titleUnread: {
+    fontWeight: 'bold',
   },
   time: {
     ...TYPOGRAPHY.body3,

@@ -1,7 +1,7 @@
 /** @screen ETC-2-PAGE-07-0 폴더/장부 통계/분석 */
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -10,6 +10,7 @@ import Button from '../../components/Input/Button/Button';
 import CardBase from '../../components/Data Display/Card/CardBase';
 import ProgressBar from '../../components/Feedback/Progress Bar/ProgressBar';
 import FolderItem from '../../components/Data Display/Folder/FolderItem';
+import { formatExpense, formatWon } from '../../utils/currency';
 import type {
   StatisticsBudgetUsageItem,
   StatisticsExpenseShareItem,
@@ -68,10 +69,6 @@ type StatisticsScreenNavigationProp = NativeStackNavigationProp<
 type LoadState = 'loading' | 'error' | 'ready';
 
 const EXPENSE_SHARE_COLORS = [NAVY_800, YELLOW_500, BLUE_500, BLUE_300];
-
-function formatWon(amount: number): string {
-  return `${amount.toLocaleString()}원`;
-}
 
 function isEmptyOverview(overview: StatisticsOverview): boolean {
   return (
@@ -183,20 +180,21 @@ function StatisticsScreen() {
             <View style={styles.amountRow}>
               <Text style={styles.amountLabel}>{STATISTICS_ACTIVE_INCOME_LABEL}</Text>
               <Text style={[styles.amountValue, styles.incomeValue]}>
-                +{formatWon(mostActiveLedger.totalIncome)}
+                {mostActiveLedger.totalIncome > 0 ? '+' : ''}
+                {formatWon(mostActiveLedger.totalIncome)}원
               </Text>
             </View>
             <View style={styles.amountRow}>
               <Text style={styles.amountLabel}>{STATISTICS_ACTIVE_EXPENSE_LABEL}</Text>
               <Text style={[styles.amountValue, styles.expenseValue]}>
-                -{formatWon(mostActiveLedger.totalExpense)}
+                {formatExpense(mostActiveLedger.totalExpense)}
               </Text>
             </View>
             <View style={styles.amountRow}>
               <Text style={styles.amountLabel}>{STATISTICS_ACTIVE_BUDGET_LABEL}</Text>
               <Text style={styles.amountValue}>
                 {mostActiveLedger.budget != null
-                  ? formatWon(mostActiveLedger.budget)
+                  ? `${formatWon(mostActiveLedger.budget)}원`
                   : STATISTICS_ACTIVE_BUDGET_UNSET}
               </Text>
             </View>
@@ -267,7 +265,7 @@ function StatisticsScreen() {
                   <Text style={styles.expenseSharePercent}>{item.share}%</Text>
                 </View>
                 <Text style={styles.expenseShareAmount}>
-                  -{formatWon(item.totalExpense)}
+                  {formatExpense(item.totalExpense)}
                 </Text>
               </View>
             ))}
@@ -278,7 +276,7 @@ function StatisticsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+    <ScreenContainer background="secondary">
       <AppBar title={STATISTICS_TITLE} onBackPress={() => navigation.goBack()} />
 
       {loadState === 'loading' && (
@@ -302,7 +300,7 @@ function StatisticsScreen() {
       {loadState === 'ready' && (
         <View style={styles.scrollContent}>{renderBody()}</View>
       )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
@@ -321,9 +319,6 @@ function BudgetUsageRow({ item }: { item: StatisticsBudgetUsageItem }) {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
   scrollContent: {
     flex: 1,
     paddingHorizontal: 20,

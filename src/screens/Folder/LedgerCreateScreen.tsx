@@ -1,7 +1,7 @@
 /** @screen FDR-3-PAGE-03-0 새 장부 생성 */
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
+import { BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -10,7 +10,9 @@ import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import * as ledgerService from '../../services/ledgerService';
+import { getActiveGroup } from '../../types/group';
 import { ApiError } from '../../services/apiClient';
 import {
   API_ERROR_DEFAULT_MESSAGE,
@@ -69,19 +71,46 @@ function LedgerCreateScreen() {
     }
   };
 
+  // 안드로이드 하드웨어 back도 같은 이탈 확인을 거치게 한다(ReportCreateByLedgerScreen 패턴).
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        if (hasInput) {
+          setLeaveConfirmVisible(true);
+          return true;
+        }
+        return false;
+      });
+      return () => subscription.remove();
+    }, [hasInput]),
+  );
+
   const handleSubmit = async () => {
     const trimmedName = name.trim();
-    // parentId는 null일 수 없다 — 최상위(폴더 탭 루트)엔 장부를 바로 만들 API가
-    // 없어(POST /folders/{folderId}/ledgers만 있음) NewItemSheet가 이 화면 진입
-    // 자체를 최상위에서 숨긴다.
-    if (!trimmedName || !parentId || isSubmitting) {
+    if (!trimmedName || isSubmitting) {
       return;
     }
     setNameError(undefined);
     setIsSubmitting(true);
     try {
       const parsedBudget = budget.trim() ? Number(budget.trim()) : null;
-      await ledgerService.createLedger(parentId, trimmedName, parsedBudget);
+      if (parentId) {
+        await ledgerService.createLedger(parentId, trimmedName, parsedBudget);
+      } else {
+        // 최상위(폴더 탭 루트)에서 진입한 경우 — 2026-09-13 신설된
+        // POST /groups/{groupId}/ledgers로 만든다(백엔드 노티 03번).
+        const group = getActiveGroup();
+        if (!group) {
+          setNameError(API_ERROR_DEFAULT_MESSAGE);
+          setIsSubmitting(false);
+          return;
+        }
+        await ledgerService.createLedgerInGroup(group.id, {
+          name: trimmedName,
+          budget: parsedBudget,
+          folderId: null,
+        });
+      }
       setSnackbarVisible(true);
       setTimeout(() => {
         navigation.goBack();
@@ -101,42 +130,59 @@ function LedgerCreateScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerRow}>
-        <BackButton onPress={handleBack} />
-      </View>
+    <ScreenContainer
+      background="secondary"
+      edges={['bottom']}
+      style={styles.container}
+      snackbar={
+        snackbarVisible ? (
+          <Snackbar visible title={`'${name.trim()}'${SNACKBAR_LEDGER_CREATED_SUFFIX}`} />
+        ) : undefined
+      }
+      snackbarOffset={68}
+    >
+      {/* 키보드에 가린 필드도 스크롤로 볼 수 있게 한다. 하단 CTA(footer)는 스크롤 밖에 고정. */}
+      <ScrollView
+        style={styles.scroll}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.headerRow}>
+          <BackButton onPress={handleBack} />
+        </View>
 
-      <Text style={styles.title}>{LEDGER_CREATE_TITLE}</Text>
-      <Text style={styles.subtitle}>{LEDGER_CREATE_SUBTITLE}</Text>
+        <Text style={styles.title}>{LEDGER_CREATE_TITLE}</Text>
+        <Text style={styles.subtitle}>{LEDGER_CREATE_SUBTITLE}</Text>
 
-      <View style={styles.form}>
-        <TextField
-          label={LEDGER_NAME_LABEL}
-          value={name}
-          onChangeText={text => {
-            setName(text.slice(0, LEDGER_NAME_MAX_LENGTH));
-            setNameError(undefined);
-          }}
-          placeholder={LEDGER_NAME_PLACEHOLDER}
-          helperText={LEDGER_NAME_HELPER}
-          error={nameError}
-          maxLength={LEDGER_NAME_MAX_LENGTH}
-        />
-        <TextField
-          label={LEDGER_BUDGET_LABEL}
-          value={budget}
-          onChangeText={text => {
-            const digitsOnly = text.replace(/[^0-9]/g, '');
-            const clamped =
-              digitsOnly && Number(digitsOnly) > LEDGER_BUDGET_MAX
-                ? String(LEDGER_BUDGET_MAX)
-                : digitsOnly;
-            setBudget(clamped);
-          }}
-          placeholder={LEDGER_BUDGET_PLACEHOLDER}
-          keyboardType="number-pad"
-        />
-      </View>
+        <View style={styles.form}>
+          <TextField
+            label={LEDGER_NAME_LABEL}
+            value={name}
+            onChangeText={text => {
+              setName(text.slice(0, LEDGER_NAME_MAX_LENGTH));
+              setNameError(undefined);
+            }}
+            placeholder={LEDGER_NAME_PLACEHOLDER}
+            helperText={LEDGER_NAME_HELPER}
+            error={nameError}
+            maxLength={LEDGER_NAME_MAX_LENGTH}
+          />
+          <TextField
+            label={LEDGER_BUDGET_LABEL}
+            value={budget}
+            onChangeText={text => {
+              const digitsOnly = text.replace(/[^0-9]/g, '');
+              const clamped =
+                digitsOnly && Number(digitsOnly) > LEDGER_BUDGET_MAX
+                  ? String(LEDGER_BUDGET_MAX)
+                  : digitsOnly;
+              setBudget(clamped);
+            }}
+            placeholder={LEDGER_BUDGET_PLACEHOLDER}
+            keyboardType="number-pad"
+          />
+        </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         <Button
@@ -146,15 +192,6 @@ function LedgerCreateScreen() {
           onPress={handleSubmit}
         />
       </View>
-
-      {snackbarVisible && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar
-            visible
-            title={`'${name.trim()}'${SNACKBAR_LEDGER_CREATED_SUFFIX}`}
-          />
-        </View>
-      )}
 
       <Dialog
         visible={leaveConfirmVisible}
@@ -168,7 +205,7 @@ function LedgerCreateScreen() {
           navigation.goBack();
         }}
       />
-    </View>
+    </ScreenContainer>
   );
 }
 
@@ -177,6 +214,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 60,
     paddingHorizontal: 24,
+  },
+  scroll: {
+    flex: 1,
   },
   headerRow: {
     marginBottom: 8,
@@ -195,12 +235,6 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: 'auto',
     paddingVertical: 16,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 88,
   },
 });
 

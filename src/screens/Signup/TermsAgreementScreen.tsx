@@ -1,13 +1,15 @@
 /** @screen COM-2-PAGE-01-0 약관 동의 */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/Navigation/App bar/BackButton';
 import AgreementCheckboxRow from '../../components/Input/Control/AgreementCheckboxRow';
 import Divider from '../../components/Data Display/Divider/Divider';
 import Button from '../../components/Input/Button/Button';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { TYPOGRAPHY } from '../../constants/typography';
 import {
   TERMS_AGREEMENT_TITLE,
@@ -28,6 +30,8 @@ type TermsAgreementNavigationProp = NativeStackNavigationProp<
   'TermsAgreement'
 >;
 
+type TermsAgreementRouteProp = RouteProp<RootStackParamList, 'TermsAgreement'>;
+
 type Agreements = {
   service: boolean;
   privacy: boolean;
@@ -42,9 +46,11 @@ const INITIAL_AGREEMENTS: Agreements = {
   age: false,
 };
 
-/** 약관 동의 화면: 전체 동의 및 개별 약관 체크박스를 보여준다. */
+/** 약관 동의 화면: 전체 동의 및 개별 약관 체크박스를 보여준다. 일반 가입과 신규 소셜 가입이 함께 쓴다 —
+ * 소셜 가입은 `route.params.socialProfile`이 있고, 동의를 마치면 `SocialSignupInfo`로 이어진다. */
 function TermsAgreementScreen() {
   const navigation = useNavigation<TermsAgreementNavigationProp>();
+  const socialProfile = useRoute<TermsAgreementRouteProp>().params?.socialProfile;
   const [agreements, setAgreements] = useState<Agreements>(INITIAL_AGREEMENTS);
 
   const allChecked = Object.values(agreements).every(Boolean);
@@ -65,11 +71,21 @@ function TermsAgreementScreen() {
   };
 
   const handleNext = () => {
-    navigation.navigate('SignupInfo');
+    const signupAgreements = {
+      termsOfService: agreements.service,
+      privacyPolicy: agreements.privacy,
+      ageOver14: agreements.age,
+      marketing: agreements.marketing,
+    };
+    if (socialProfile) {
+      navigation.navigate('SocialSignupInfo', { profile: socialProfile, agreements: signupAgreements });
+      return;
+    }
+    navigation.navigate('SignupInfo', { agreements: signupAgreements });
   };
 
   return (
-    <View style={styles.container}>
+    <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
       <View style={styles.backRow}>
         <BackButton onPress={() => navigation.goBack()} />
       </View>
@@ -122,7 +138,7 @@ function TermsAgreementScreen() {
           disabled={!canProceed}
         />
       </View>
-    </View>
+    </ScreenContainer>
   );
 }
 

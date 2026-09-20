@@ -14,7 +14,14 @@ import { SocialProfile } from '../types/social';
 export async function loginWithKakao(): Promise<SocialProfile | null> {
   try {
     const token = await kakaoLogin();
+    console.warn('[SocialLogin][SDK][Kakao] token 수신', {
+      hasAccessToken: !!token.accessToken,
+    });
     const profile = await getKakaoProfile();
+    console.warn('[SocialLogin][SDK][Kakao] profile 수신', {
+      hasEmail: !!profile.email,
+      hasNickname: !!profile.nickname,
+    });
     return {
       provider: 'Kakao',
       providerToken: token.accessToken,
@@ -23,8 +30,10 @@ export async function loginWithKakao(): Promise<SocialProfile | null> {
     };
   } catch (error) {
     if (isKakaoCancelError(error)) {
+      console.warn('[SocialLogin][SDK][Kakao] 사용자 취소');
       return null;
     }
+    console.warn('[SocialLogin][SDK][Kakao] 실패', error);
     throw error;
   }
 }
@@ -32,6 +41,11 @@ export async function loginWithKakao(): Promise<SocialProfile | null> {
 /** 네이버 로그인을 진행하고 정규화된 프로필을 반환한다. 사용자가 취소하면 null을 반환한다. */
 export async function loginWithNaver(): Promise<SocialProfile | null> {
   const result = await NaverLogin.login();
+  console.warn('[SocialLogin][SDK][Naver] login 결과', {
+    isSuccess: result.isSuccess,
+    isCancel: result.failureResponse?.isCancel,
+    failureMessage: result.failureResponse?.message,
+  });
 
   if (!result.isSuccess || !result.successResponse) {
     if (result.failureResponse?.isCancel) {
@@ -44,6 +58,10 @@ export async function loginWithNaver(): Promise<SocialProfile | null> {
 
   const { accessToken } = result.successResponse;
   const profileResponse = await NaverLogin.getProfile(accessToken);
+  console.warn('[SocialLogin][SDK][Naver] profile 수신', {
+    hasEmail: !!profileResponse.response.email,
+    hasName: !!profileResponse.response.name,
+  });
   return {
     provider: 'Naver',
     providerToken: accessToken,
@@ -56,6 +74,11 @@ export async function loginWithNaver(): Promise<SocialProfile | null> {
 export async function loginWithGoogle(): Promise<SocialProfile | null> {
   await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
   const response = await GoogleSignin.signIn();
+  console.warn('[SocialLogin][SDK][Google] signIn 결과', {
+    cancelled: isCancelledResponse(response),
+    success: isSuccessResponse(response),
+    hasIdToken: isSuccessResponse(response) ? !!response.data.idToken : false,
+  });
 
   if (isCancelledResponse(response)) {
     return null;

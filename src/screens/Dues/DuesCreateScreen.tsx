@@ -31,20 +31,28 @@
  *    않고 기존 폼 로우 스타일(`SelectionListItem`)로 통일했다(장부/기간).
  */
 import { useCallback, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import {
+  BackHandler,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
-import SelectionListItem from '../../components/Data Display/Lists/SelectionListItem';
 import SearchField from '../../components/Input/Search/SearchField';
 import MemberListItem from '../../components/Data Display/Lists/MemberListItem';
 import CheckBox from '../../components/Input/Control/CheckBox';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import DuesDateRangeSheet from './DuesDateRangeSheet';
 import TransactionSingleSelectSheet from '../Transactions/TransactionSingleSelectSheet';
 import { getActiveGroup } from '../../types/group';
@@ -87,10 +95,17 @@ import {
   SNACKBAR_DUES_CREATED_SUFFIX,
 } from '../../constants/duesScreenText';
 import { DATE_SHEET_CONFIRM_LABEL } from '../../constants/transactionScreenText';
-import { FEEDBACK_NEGATIVE_BOLD, FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import {
+  BORDER_NEUTRAL_NORMAL,
+  FEEDBACK_NEGATIVE_BOLD,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_PRIMARY,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const CLOSE_ICON = require('../../assets/icons/action/Close.png');
+const CALENDAR_ICON = require('../../assets/icons/system/Calendar.png');
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
 
@@ -159,6 +174,26 @@ function DuesCreateScreen() {
       navigation.goBack();
     }
   };
+
+  // 안드로이드 하드웨어 back(ReportCreateByLedgerScreen 패턴). `members` 단계에선
+  // 화면 상단 back 버튼과 같이 `basic` 단계로 되돌아간다(입력값 유지, 이탈 아님).
+  // `basic` 단계에선 `handleClose`와 동일하게 입력값이 있을 때만 이탈 확인을 띄운다.
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        if (step === 'members') {
+          setStep('basic');
+          return true;
+        }
+        if (hasInput) {
+          setLeaveDialogVisible(true);
+          return true;
+        }
+        return false;
+      });
+      return () => subscription.remove();
+    }, [step, hasInput]),
+  );
 
   /**
    * 자릿수(최대 9자, `DUES_AMOUNT_MAX`=999,999,999가 9자리 최댓값이라 자릿수
@@ -301,11 +336,21 @@ function DuesCreateScreen() {
       });
       // DUE-4-SNACKBAR-01-0: 생성 화면이 아니라 납부관리 메인 목록에서
       // 스낵바를 보여준다(시안 확인) — DuesDetailScreen 삭제/마감과 같은 패턴.
-      navigation.navigate('Main', {
-        screen: 'Dues',
-        params: {
-          snackbarMessage: `${SNACKBAR_DUES_CREATED_PREFIX}${created.title}${SNACKBAR_DUES_CREATED_SUFFIX}`,
-        },
+      // navigate가 아니라 reset — 생성 폼(및 그 위에 쌓였을 수 있는 화면)을
+      // 스택에서 걷어내 뒤로가기로 폼에 못 돌아가게 한다(design-verification.md §5-11).
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Main',
+            params: {
+              screen: 'Dues',
+              params: {
+                snackbarMessage: `${SNACKBAR_DUES_CREATED_PREFIX}${created.title}${SNACKBAR_DUES_CREATED_SUFFIX}`,
+              },
+            },
+          },
+        ],
       });
     } catch (error) {
       if (error instanceof ApiError) {
@@ -324,9 +369,19 @@ function DuesCreateScreen() {
     }
   };
 
+  // DUE-2-PAGE-01-0/DUE-3-PAGE-01-0(새 회비 생성 및 모임원 선택) 둘 다 시안이
+  // 흰 배경 — design-verification.md §5-7 규칙, §2 표 갱신.
   if (step === 'members') {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer
+        background="secondary"
+        snackbar={
+          snackbarMessage ? (
+            <Snackbar visible title={snackbarMessage} />
+          ) : undefined
+        }
+        snackbarOffset={68}
+      >
         <AppBar
           type="sub"
           title={DUES_MEMBER_SELECT_TITLE}
@@ -339,6 +394,7 @@ function DuesCreateScreen() {
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholder={DUES_MEMBER_SELECT_SEARCH_PLACEHOLDER}
+            variant="outline"
           />
 
           {memberLoadState === 'loading' && (
@@ -410,18 +466,20 @@ function DuesCreateScreen() {
             navigation.goBack();
           }}
         />
-
-        {snackbarMessage && (
-          <View style={styles.snackbarWrapper}>
-            <Snackbar visible title={snackbarMessage} />
-          </View>
-        )}
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="secondary"
+      snackbar={
+        snackbarMessage ? (
+          <Snackbar visible title={snackbarMessage} />
+        ) : undefined
+      }
+      snackbarOffset={68}
+    >
       <AppBar
         type="titleOnly"
         title={DUES_CREATE_TITLE}
@@ -431,6 +489,7 @@ function DuesCreateScreen() {
       <ScrollView contentContainerStyle={styles.body}>
         <TextField
           label={DUES_CREATE_TITLE_FIELD_LABEL}
+          required
           value={title}
           onChangeText={text => setTitle(text.slice(0, DUES_TITLE_MAX_LENGTH))}
           placeholder={DUES_CREATE_TITLE_PLACEHOLDER}
@@ -439,31 +498,32 @@ function DuesCreateScreen() {
         <TextField
           ref={amountInputRef}
           label={DUES_CREATE_AMOUNT_LABEL}
+          required
           value={amount > 0 ? amount.toLocaleString() : ''}
           onChangeText={handleAmountChange}
           placeholder={DUES_CREATE_AMOUNT_PLACEHOLDER}
           keyboardType="number-pad"
           suffix="원"
         />
-        <SelectionListItem
-          type="picker"
-          title={DUES_CREATE_LEDGER_LABEL}
-          required
-          value={ledgerName || DUES_CREATE_LEDGER_PLACEHOLDER}
-          onPress={handlePressLedgerField}
-        />
-        <SelectionListItem
-          type="picker"
-          title={DUES_CREATE_PERIOD_LABEL}
-          required
-          value={
-            startDate && dueDate
-              ? `${startDate} - ${dueDate}`
-              : DUES_CREATE_PERIOD_PLACEHOLDER
-          }
-          onPress={() => setActiveSheet('period')}
-        />
-        {periodError && <Text style={styles.periodError}>{periodError}</Text>}
+        <View style={styles.fieldGroup}>
+          <Text style={styles.fieldLabel}>{DUES_CREATE_LEDGER_LABEL}</Text>
+          <Pressable style={styles.ledgerBox} onPress={handlePressLedgerField}>
+            <Text style={ledgerName ? styles.ledgerValue : styles.ledgerPlaceholder}>
+              {ledgerName || DUES_CREATE_LEDGER_PLACEHOLDER}
+            </Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.fieldGroup}>
+          <Text style={styles.fieldLabel}>{DUES_CREATE_PERIOD_LABEL}</Text>
+          <Pressable style={styles.periodBox} onPress={() => setActiveSheet('period')}>
+            <Text style={startDate && dueDate ? styles.periodValue : styles.periodPlaceholder}>
+              {startDate && dueDate ? `${startDate} ~ ${dueDate}` : DUES_CREATE_PERIOD_PLACEHOLDER}
+            </Text>
+            <Image source={CALENDAR_ICON} style={styles.periodIcon} />
+          </Pressable>
+          {periodError && <Text style={styles.periodError}>{periodError}</Text>}
+        </View>
       </ScrollView>
 
       <View style={styles.footer}>
@@ -485,7 +545,6 @@ function DuesCreateScreen() {
       />
       <DuesDateRangeSheet
         visible={activeSheet === 'period'}
-        title={DUES_CREATE_PERIOD_LABEL}
         confirmLabel={DATE_SHEET_CONFIRM_LABEL}
         startDate={startDate || undefined}
         endDate={dueDate || undefined}
@@ -509,31 +568,65 @@ function DuesCreateScreen() {
           navigation.goBack();
         }}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,
     paddingTop: 16,
-    gap: 4,
+    gap: 20,
+  },
+  fieldGroup: {
+    gap: 8,
+  },
+  fieldLabel: {
+    ...TYPOGRAPHY.subtitle3,
+  },
+  ledgerBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: BORDER_NEUTRAL_NORMAL,
+    borderRadius: 8,
+    paddingVertical: 12,
+  },
+  ledgerPlaceholder: {
+    ...TYPOGRAPHY.body1,
+    color: FOREGROUND_DISABLED,
+  },
+  ledgerValue: {
+    ...TYPOGRAPHY.body1,
+    color: FOREGROUND_PRIMARY,
+  },
+  periodBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: BORDER_NEUTRAL_NORMAL,
+    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  periodPlaceholder: {
+    ...TYPOGRAPHY.body1,
+    color: FOREGROUND_DISABLED,
+  },
+  periodValue: {
+    ...TYPOGRAPHY.body1,
+    color: FOREGROUND_PRIMARY,
+  },
+  periodIcon: {
+    width: 20,
+    height: 20,
+    tintColor: FOREGROUND_DISABLED,
   },
   periodError: {
     ...TYPOGRAPHY.body3,
     color: FEEDBACK_NEGATIVE_BOLD,
-    marginTop: -12,
-    marginBottom: 12,
   },
   footer: {
     paddingHorizontal: 24,
@@ -572,12 +665,6 @@ const styles = StyleSheet.create({
   selectAllCount: {
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

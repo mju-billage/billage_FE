@@ -2,14 +2,14 @@
 /** @screen FDR-3-SHEET-01-0 장부 예산 입력 (아래 BottomSheet+TextField, FDR-3-SHEET-02-0과 동일 구현) */
 /** @screen FDR-3-SHEET-02-0 예산 설정 (같은 BottomSheet — IA상 두 ID가 같은 시트를 가리키는 것으로 판단) */
 /**
- * "모임 전체 장부 목록" API가 없어(docs/api-gaps.md (A), 3-A에서 실측 확인)
- * `ledgerService.getAllLedgersInGroup()`가 폴더 트리 조회 1콜 + 폴더 개수만큼 장부
- * 목록 조회를 병렬로 묶는다 — 이 화면이 유일하게 그 N+1 비용을 그대로 치른다.
- * 최상위(폴더 없음) 장부는 조회 API 자체가 없어 이 목록에서 빠진다.
+ * 2026-09-13 백엔드 노티 04번으로 신설된 `GET /groups/{groupId}/ledgers`(평평한 전체
+ * 목록, 최상위 포함)를 `ledgerService.getAllLedgersInGroup()`가 쓴다 — 예전엔 이
+ * API가 없어 폴더 트리 조회 1콜 + 폴더 개수만큼 병렬 호출(N+1)로 대체했고, 그 방식은
+ * 최상위(폴더 없음) 장부를 아예 못 봤다. 실호출로 최상위 장부가 이 목록에 포함됨을
+ * 확인했다.
  */
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -18,7 +18,8 @@ import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
-import FolderItem from '../../components/Data Display/Folder/FolderItem';
+import SelectionListItem from '../../components/Data Display/Lists/SelectionListItem';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import type { LedgerSummary } from '../../types/ledger';
 import { getActiveGroup } from '../../types/group';
 import * as ledgerService from '../../services/ledgerService';
@@ -39,11 +40,13 @@ import {
   BUDGET_LIST_TITLE,
   BUDGET_SAVE_LABEL,
   BUDGET_SHEET_PLACEHOLDER,
-  LEDGER_ITEM_BUDGET_UNSET,
   SNACKBAR_BUDGET_SAVED,
 } from '../../constants/folderScreenText';
 import { LEDGER_BUDGET_MAX } from '../../constants/ledgerScreenText';
-import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import {
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
@@ -65,10 +68,10 @@ type FolderBudgetListNavigationProp = NativeStackNavigationProp<
 >;
 type LoadState = 'loading' | 'error' | 'ready';
 
-function getBudgetSubtitle(ledger: LedgerSummary): string {
-  return ledger.budget != null
-    ? `예산 ${ledger.budget.toLocaleString()}원`
-    : LEDGER_ITEM_BUDGET_UNSET;
+// 시안(폴더_메뉴_예산설정.png No.2): 예산 미설정 장부는 "0원"으로 노출(별도
+// 안내 문구 아님) — design-verification.md §5-16 참고.
+function getBudgetValue(ledger: LedgerSummary): string {
+  return `${(ledger.budget ?? 0).toLocaleString()}원`;
 }
 
 /** 폴더 탭 최상위 ⋮ 메뉴의 "전체 예산 설정": 모임 전체 장부를 나열한다(읽기 전용). */
@@ -110,7 +113,12 @@ function FolderBudgetListScreen() {
         return;
       }
       const result = await ledgerService.getAllLedgersInGroup(group.id);
-      setLedgers(result);
+      // 시안 No.2 [상태]: "최신 생성된 장부순으로 리스트업" — 서버 응답 순서를
+      // 신뢰하지 않고 createdAt 내림차순으로 직접 정렬한다.
+      const sorted = [...result].sort((a, b) =>
+        (b.createdAt ?? '').localeCompare(a.createdAt ?? ''),
+      );
+      setLedgers(sorted);
       setLoadState('ready');
     } catch (error) {
       setLoadErrorMessage(toErrorMessage(error));
@@ -153,8 +161,16 @@ function FolderBudgetListScreen() {
     }
   };
 
+  // 시안(폴더_메뉴_예산설정.png)이 옅은 블루 — design-verification.md §5-7/§5-16.
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarVisible ? (
+          <Snackbar visible title={SNACKBAR_BUDGET_SAVED} />
+        ) : undefined
+      }
+    >
       <AppBar title={BUDGET_LIST_TITLE} onBackPress={() => navigation.goBack()} />
 
       {loadState === 'loading' && (
@@ -182,22 +198,15 @@ function FolderBudgetListScreen() {
             keyExtractor={item => item.id}
             contentContainerStyle={styles.listContent}
             renderItem={({ item }) => (
-              <FolderItem
-                kind="ledger"
-                name={item.name}
-                subtitle={getBudgetSubtitle(item)}
-                layout="list"
+              <SelectionListItem
+                type="picker"
+                title={item.name}
+                value={getBudgetValue(item)}
                 onPress={() => handlePressLedger(item)}
               />
             )}
           />
         ))}
-
-      {snackbarVisible && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={SNACKBAR_BUDGET_SAVED} />
-        </View>
-      )}
 
       <BottomSheet
         visible={editingLedger !== null}
@@ -221,14 +230,11 @@ function FolderBudgetListScreen() {
           fullWidth
         />
       </BottomSheet>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   listContent: {
     paddingHorizontal: 24,
     paddingBottom: 24,
@@ -260,12 +266,6 @@ const styles = StyleSheet.create({
   sheetTitle: {
     ...TYPOGRAPHY.subtitle1,
     marginBottom: 16,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

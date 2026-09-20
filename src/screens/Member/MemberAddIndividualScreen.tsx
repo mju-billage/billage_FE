@@ -2,8 +2,8 @@
 /** @screen DUE-5-PAGE-01-0 태그 입력 (개별 추가 화면 내부 스텝으로 구현) */
 /** @screen DUE-5-SNACKBAR-03-0 모임원 개별 추가 완료 */
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -142,7 +142,7 @@ function MemberAddIndividualScreen() {
 
   if (step === 'tags') {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="secondary">
         <AppBar
           type="sub"
           title={MEMBER_TAG_INPUT_TITLE}
@@ -167,18 +167,26 @@ function MemberAddIndividualScreen() {
             }}
           />
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="secondary"
+      snackbar={snackbarVisible ? <Snackbar visible title={SNACKBAR_MEMBER_ADDED} /> : undefined}
+      snackbarOffset={68}
+    >
       <AppBar
         type="sub"
         title={MEMBER_ADD_INDIVIDUAL_TITLE}
         onBackPress={() => navigation.goBack()}
       />
-      <View style={styles.content}>
+      <ScrollView
+        style={styles.content}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <TextField
           label={MEMBER_NAME_LABEL}
           value={name}
@@ -220,7 +228,7 @@ function MemberAddIndividualScreen() {
           />
         </View>
         {formError && <Text style={styles.formError}>{formError}</Text>}
-      </View>
+      </ScrollView>
       <View style={styles.footer}>
         <Button
           label={MEMBER_ADD_SUBMIT_LABEL}
@@ -229,20 +237,11 @@ function MemberAddIndividualScreen() {
           onPress={handleSubmit}
         />
       </View>
-
-      {snackbarVisible && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={SNACKBAR_MEMBER_ADDED} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     flex: 1,
     paddingHorizontal: 24,
@@ -268,12 +267,6 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 24,
     paddingVertical: 16,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 88,
   },
 });
 

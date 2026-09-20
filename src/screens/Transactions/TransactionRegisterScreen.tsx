@@ -16,18 +16,29 @@
  * User 기준)여야 한다 — 납부 명단(`Member`)은 담당자가 될 수 없다(Entry.txt §4). 그래서
  * 선택 목록도 `groupMembershipService.getMemberships()`에서 가져온다.
  *
- * 실 API로 가는 두 모드에서 여전히 뺀 것들:
+ * 실 API로 가는 두 모드에서 여전히 뺀 것:
  *  - "장부" 변경(editReal만): `PATCH /entries/{id}`에 ledgerId가 없어 등록 후엔
  *    장부를 옮길 수 없다 — 표시만 하고 못 누르게 막았다.
- *  - 증빙 실제 업로드: 카메라/스캔/갤러리가 전부 가짜 문자열 토큰만 만들어서
- *    (`utils/mockOcr.ts`, `MockCameraView` 등) 실제 파일이 없다. 기존 증빙(서버에서
- *    불러온 진짜 fileId)을 빼는 것만 실제로 반영되고, 새로 "첨부"한 것은 폼
- *    안에서만 보이다가 제출해도 서버로 안 간다 — docs/api-gaps.md 참고.
+ *
+ * 2026-09-11부터 증빙 실제 업로드가 붙었다 — 카메라/갤러리로 고른 사진을
+ * 촬영·선택 직후 `fileService.uploadFile(..., 'RECEIPT')`로 바로 업로드하고,
+ * 받은 fileId를 등록/수정 요청의 `receiptFileIds`에 담는다(`receiptItems`,
+ * 업로드 중인 항목은 fileId가 없어 자동으로 제외된다). 영수증 스캔(`scan`)은
+ * 여전히 `utils/mockOcr.ts` mock이라 실제 파일이 없다 — OCR 서버가
+ * "시작 전"이라(`docs/api-wiring.md`) 이번에도 연결하지 않는다.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import {
+  BackHandler,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -45,7 +56,7 @@ import TransactionAttachMenuSheet from './TransactionAttachMenuSheet';
 import type { AttachMenuKey } from './TransactionAttachMenuSheet';
 import TransactionSingleSelectSheet from './TransactionSingleSelectSheet';
 import TransactionTextInputSheet from './TransactionTextInputSheet';
-import MockCameraView from './MockCameraView';
+import { captureWithFeedback, type PickedImage } from '../../utils/imagePicker';
 import ReceiptScanningView from './ReceiptScanningView';
 import ReceiptScanFailedView from './ReceiptScanFailedView';
 import ReceiptGalleryPickerScreen from './ReceiptGalleryPickerScreen';
@@ -54,6 +65,7 @@ import { getActiveGroup } from '../../types/group';
 import * as ledgerService from '../../services/ledgerService';
 import * as entryService from '../../services/entryService';
 import * as groupMembershipService from '../../services/groupMembershipService';
+import * as fileService from '../../services/fileService';
 import { ApiError } from '../../services/apiClient';
 import { buildAuthenticatedImageSource } from '../../utils/authenticatedImage';
 import {
@@ -114,13 +126,22 @@ import {
 } from '../../constants/transactionScreenText';
 import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import {
+  CAMERA_PERMISSION_DIALOG_DESCRIPTION,
+  CAMERA_PERMISSION_DIALOG_TITLE,
+  GALLERY_PERMISSION_DIALOG_DESCRIPTION,
+  GALLERY_PERMISSION_DIALOG_TITLE,
+  PERMISSION_DIALOG_CANCEL_LABEL,
+  PERMISSION_SETTINGS_BUTTON_LABEL,
+  SNACKBAR_IMAGE_TOO_LARGE,
+  SNACKBAR_IMAGE_UPLOAD_FAILED,
+} from '../../constants/commonText';
 
 type TransactionKind = 'income' | 'expense';
 type RegisterMode = 'createReal' | 'editReal';
 
 type RegisterStage =
   | { kind: 'form' }
-  | { kind: 'camera'; mode: 'photo' | 'scan' }
   | { kind: 'scanning' }
   | { kind: 'scanFailed' }
   | { kind: 'gallery' };
@@ -135,10 +156,30 @@ type ActiveSheet =
   | 'memo'
   | 'attachMenu';
 
-type ActiveDialog = 'none' | 'leave' | 'scanRescan' | 'scanApply';
+type ActiveDialog =
+  | 'none'
+  | 'leave'
+  | 'scanRescan'
+  | 'scanApply'
+  | 'cameraPermission'
+  | 'galleryPermission';
 type ScreenLoadState = 'loading' | 'error' | 'ready';
 
 type LedgerOption = { id: string; name: string };
+
+/** 증빙 한 장. 새로 촬영/선택한 항목은 `uploading:true`로 시작해 업로드가
+ * 끝나면 `fileId`가 채워진다 — `fileId`가 없는 항목(업로드 중/스캔 mock)은
+ * 제출 시 자동으로 빠진다. `fromScan`은 영수증 스캔이 만든 항목 표시다 — "이미
+ * 스캔한 적 있는가"(재스캔 덮어쓰기 확인)는 이 항목이 목록에 남아 있는지로 판단해서,
+ * 썸네일을 지우면 그 판정도 함께 사라진다. */
+type ReceiptItem = {
+  key: string;
+  previewUri: string;
+  previewHeaders?: Record<string, string>;
+  fileId?: number;
+  uploading: boolean;
+  fromScan?: boolean;
+};
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
 
@@ -190,8 +231,7 @@ function TransactionRegisterScreen() {
   const [ledgerId, setLedgerId] = useState('');
   const [ledgerName, setLedgerName] = useState('');
   const [memo, setMemo] = useState('');
-  const [receiptImages, setReceiptImages] = useState<string[]>([]);
-  const [realReceiptUrls, setRealReceiptUrls] = useState<Record<string, string>>({});
+  const [receiptItems, setReceiptItems] = useState<ReceiptItem[]>([]);
 
   const [ledgerOptions, setLedgerOptions] = useState<LedgerOption[]>([]);
   const [screenLoadState, setScreenLoadState] = useState<ScreenLoadState>('loading');
@@ -211,7 +251,6 @@ function TransactionRegisterScreen() {
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>('none');
   const [activeDialog, setActiveDialog] = useState<ActiveDialog>('none');
   const [pendingScanResult, setPendingScanResult] = useState<MockScanResult | null>(null);
-  const [hasScannedOnce, setHasScannedOnce] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
@@ -250,9 +289,17 @@ function TransactionRegisterScreen() {
         setLedgerId(detail.ledgerId);
         setLedgerName(detail.ledgerName);
         const realIds = detail.receiptFiles.map(f => f.id);
-        setReceiptImages(realIds);
-        setRealReceiptUrls(
-          Object.fromEntries(detail.receiptFiles.map(f => [f.id, f.url])),
+        setReceiptItems(
+          detail.receiptFiles.map(f => {
+            const source = buildAuthenticatedImageSource(f.url);
+            return {
+              key: f.id,
+              previewUri: source.uri,
+              previewHeaders: source.headers,
+              fileId: Number(f.id),
+              uploading: false,
+            };
+          }),
         );
         setInitialSnapshot({
           title: detail.title,
@@ -276,7 +323,13 @@ function TransactionRegisterScreen() {
   }, []);
 
   const canChangeLedger = mode !== 'editReal';
-  const canSubmit = itemName.trim().length > 0 && ledgerId.length > 0 && amount > 0;
+  const isUploadingReceipt = receiptItems.some(item => item.uploading);
+  const hasScanReceipt = receiptItems.some(item => item.fromScan);
+  const canSubmit =
+    itemName.trim().length > 0 &&
+    ledgerId.length > 0 &&
+    amount > 0 &&
+    !isUploadingReceipt;
 
   const handleSelectManager = (key: string) => {
     setManagerUserId(key);
@@ -297,6 +350,25 @@ function TransactionRegisterScreen() {
     navigation.goBack();
   };
 
+  // 안드로이드 하드웨어 back(ReportCreateByLedgerScreen 패턴). `form` 단계에선
+  // 화면 상단 back 버튼과 똑같이 이탈 확인 모달을 띄운다 — 이 화면의 `handleBack`은
+  // 입력 여부와 무관하게 항상 모달을 띄우므로 하드웨어 back도 그대로 맞춘다.
+  // `gallery`/`scanning`/`scanFailed` 단계에선 화면을 나가는 대신 폼 단계로
+  // 돌아간다(각 하위 화면의 onBack/onClose와 동일한 동작).
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        if (stage.kind === 'form') {
+          handleBack();
+        } else {
+          setStage({ kind: 'form' });
+        }
+        return true;
+      });
+      return () => subscription.remove();
+    }, [stage]),
+  );
+
   const handleSubmit = async () => {
     if (!canSubmit || isSubmitting) {
       return;
@@ -304,6 +376,9 @@ function TransactionRegisterScreen() {
 
     setIsSubmitting(true);
     try {
+      const uploadedReceiptFileIds = receiptItems
+        .filter((item): item is ReceiptItem & { fileId: number } => item.fileId !== undefined)
+        .map(item => item.fileId);
       if (mode === 'createReal') {
         const created = await entryService.createEntry(ledgerId, {
           type: transactionKind === 'income' ? 'INCOME' : 'EXPENSE',
@@ -312,6 +387,7 @@ function TransactionRegisterScreen() {
           occurredOn: toIsoDate(date),
           memo: memo.trim() || undefined,
           managerUserId,
+          receiptFileIds: uploadedReceiptFileIds,
         });
         showSnackbar(
           created.approvalStatus === 'PENDING'
@@ -339,13 +415,11 @@ function TransactionRegisterScreen() {
           if (managerUserId && managerUserId !== initialSnapshot.managerUserId) {
             updates.managerUserId = managerUserId;
           }
-          // 실제 서버 파일(숫자 id)만 골라 비교한다 — 카메라/스캔/갤러리로 새로
-          // 붙인 항목은 가짜 토큰이라 여기 안 들어간다(진짜 업로드가 아직 없음).
-          const keptRealIds = receiptImages
-            .filter(id => /^\d+$/.test(id))
-            .map(Number);
-          if (!sameNumberSet(keptRealIds, initialSnapshot.receiptFileIds)) {
-            updates.receiptFileIds = keptRealIds;
+          // 업로드가 끝나 fileId가 생긴 항목만 비교한다 — 업로드 중이거나
+          // 스캔 mock 항목(fileId 없음)은 제외된다(제출 자체가 업로드 중엔
+          // 막혀 있어 도달하지 않는다).
+          if (!sameNumberSet(uploadedReceiptFileIds, initialSnapshot.receiptFileIds)) {
+            updates.receiptFileIds = uploadedReceiptFileIds;
           }
         }
         await entryService.updateEntry(transactionId!, updates);
@@ -365,20 +439,83 @@ function TransactionRegisterScreen() {
     setLedgerName(option?.name ?? '');
   };
 
-  const removeReceiptImage = (id: string) => {
-    setReceiptImages(current => current.filter(image => image !== id));
+  const removeReceiptItem = (key: string) => {
+    setReceiptItems(current => current.filter(item => item.key !== key));
+  };
+
+  /**
+   * 실제 촬영본/선택본(2026-09-06 카메라, 2026-09-11 갤러리)이 생기면 로컬
+   * 파일 uri로 썸네일을 먼저 보여주고(`uploading: true`), 곧바로
+   * `fileService.uploadFile(..., 'RECEIPT')`로 업로드한다. 여러 장이면
+   * **순차 업로드**다 — 한 번에 최대 10장뿐이라 병렬로 열 필요가 없고,
+   * 실패했을 때 어느 장부터 실패했는지 순서대로 보여줄 수 있어 실패 처리가
+   * 단순해진다.
+   */
+  const uploadReceiptImage = async (key: string, image: PickedImage) => {
+    try {
+      const uploaded = await fileService.uploadFile(
+        image.uri,
+        image.fileName,
+        image.type,
+        'RECEIPT',
+      );
+      setReceiptItems(current =>
+        current.map(item =>
+          item.key === key ? { ...item, uploading: false, fileId: Number(uploaded.id) } : item,
+        ),
+      );
+    } catch {
+      setReceiptItems(current => current.filter(item => item.key !== key));
+      showSnackbar(SNACKBAR_IMAGE_UPLOAD_FAILED);
+    }
+  };
+
+  const addPickedImages = async (images: PickedImage[]) => {
+    for (const image of images) {
+      if (image.size !== undefined && image.size > fileService.MAX_UPLOAD_FILE_SIZE_BYTES) {
+        showSnackbar(SNACKBAR_IMAGE_TOO_LARGE);
+        continue;
+      }
+      const key = `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      setReceiptItems(current => [
+        ...current,
+        { key, previewUri: image.uri, uploading: true },
+      ]);
+      await uploadReceiptImage(key, image);
+    }
+  };
+
+  /**
+   * 시스템 카메라를 직접 부른다 — 예전엔 이 앞에 프리뷰 없는 인앱 카메라 화면
+   * (`CameraCaptureView`)을 거쳤는데, 시스템 카메라 앱을 쓰는 이상 그 중간
+   * 화면은 "카메라가 두 번 열리는" 것처럼만 보여 없앴다(2026-09-06). 취소하면
+   * 아무 화면 전환 없이 지금 화면(폼 또는 스캔 재시도 전 화면)에 그대로 남는다.
+   */
+  const handleTakePhoto = async (mode: 'photo' | 'scan') => {
+    const image = await captureWithFeedback(showSnackbar, () =>
+      setActiveDialog('cameraPermission'),
+    );
+    if (!image) {
+      return;
+    }
+    if (mode === 'photo') {
+      showSnackbar(SNACKBAR_RECEIPT_ADDED);
+      addPickedImages([image]);
+    } else {
+      setStage({ kind: 'scanning' });
+    }
   };
 
   const handleSelectAttachMenu = (key: AttachMenuKey) => {
     setActiveSheet('none');
     if (key === 'scan') {
-      if (hasScannedOnce) {
+      if (hasScanReceipt) {
         setActiveDialog('scanRescan');
       } else {
-        setStage({ kind: 'camera', mode: 'scan' });
+        handleTakePhoto('scan');
       }
     } else if (key === 'photo') {
-      setStage({ kind: 'camera', mode: 'photo' });
+      handleTakePhoto('photo');
     } else {
       setStage({ kind: 'gallery' });
     }
@@ -386,22 +523,7 @@ function TransactionRegisterScreen() {
 
   const handleConfirmRescan = () => {
     setActiveDialog('none');
-    setStage({ kind: 'camera', mode: 'scan' });
-  };
-
-  const handleCapture = () => {
-    if (stage.kind !== 'camera') {
-      return;
-    }
-    if (stage.mode === 'photo') {
-      if (receiptImages.length < TRANSACTION_REGISTER_RECEIPT_MAX) {
-        setReceiptImages(current => [...current, `photo-${Date.now()}`]);
-      }
-      setStage({ kind: 'form' });
-      showSnackbar(SNACKBAR_RECEIPT_ADDED);
-    } else {
-      setStage({ kind: 'scanning' });
-    }
+    handleTakePhoto('scan');
   };
 
   const handleScanComplete = (result: MockScanResult | null) => {
@@ -410,10 +532,12 @@ function TransactionRegisterScreen() {
       return;
     }
 
-    if (receiptImages.length < TRANSACTION_REGISTER_RECEIPT_MAX) {
-      setReceiptImages(current => [...current, `scan-${Date.now()}`]);
+    if (receiptItems.length < TRANSACTION_REGISTER_RECEIPT_MAX) {
+      setReceiptItems(current => [
+        ...current,
+        { key: `scan-${Date.now()}`, previewUri: '', uploading: false, fromScan: true },
+      ]);
     }
-    setHasScannedOnce(true);
 
     const amountConflict = amount !== 0 && amount !== result.amount;
     const dateConflict = date !== todayKey() && date !== result.date;
@@ -447,16 +571,6 @@ function TransactionRegisterScreen() {
     showSnackbar(SNACKBAR_RECEIPT_ADDED);
   };
 
-  if (stage.kind === 'camera') {
-    return (
-      <MockCameraView
-        onBack={() => setStage({ kind: 'form' })}
-        onClose={() => setStage({ kind: 'form' })}
-        onCapture={handleCapture}
-      />
-    );
-  }
-
   if (stage.kind === 'scanning') {
     return <ReceiptScanningView onComplete={handleScanComplete} />;
   }
@@ -464,7 +578,7 @@ function TransactionRegisterScreen() {
   if (stage.kind === 'scanFailed') {
     return (
       <ReceiptScanFailedView
-        onRetry={() => setStage({ kind: 'camera', mode: 'scan' })}
+        onRetry={() => handleTakePhoto('scan')}
         onClose={() => setStage({ kind: 'form' })}
       />
     );
@@ -473,21 +587,22 @@ function TransactionRegisterScreen() {
   if (stage.kind === 'gallery') {
     return (
       <ReceiptGalleryPickerScreen
-        remainingSlots={TRANSACTION_REGISTER_RECEIPT_MAX - receiptImages.length}
-        onConfirm={photoIds => {
-          setReceiptImages(current => [...current, ...photoIds]);
+        remainingSlots={TRANSACTION_REGISTER_RECEIPT_MAX - receiptItems.length}
+        onPicked={images => {
           setStage({ kind: 'form' });
           showSnackbar(SNACKBAR_RECEIPT_ADDED);
+          addPickedImages(images);
         }}
         onBack={() => setStage({ kind: 'form' })}
-        onOpenCamera={() => setStage({ kind: 'camera', mode: 'photo' })}
+        onMessage={showSnackbar}
+        onPermanentlyDenied={() => setActiveDialog('galleryPermission')}
       />
     );
   }
 
   if (screenLoadState === 'loading' || screenLoadState === 'error') {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="secondary">
         <AppBar type="sub" title={TRANSACTION_REGISTER_TITLE} onBackPress={() => navigation.goBack()} />
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>
@@ -497,12 +612,16 @@ function TransactionRegisterScreen() {
             <Button label={TRANSACTION_REGISTER_RETRY_LABEL} onPress={loadReal} hierarchy="secondary" style={{ alignSelf: 'center' }} />
           )}
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="secondary"
+      snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
+      snackbarOffset={68}
+    >
       <AppBar
         type="sub"
         title={TRANSACTION_REGISTER_TITLE}
@@ -579,25 +698,22 @@ function TransactionRegisterScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>
             {TRANSACTION_REGISTER_RECEIPT_LABEL}
-            {` ${receiptImages.length}/${TRANSACTION_REGISTER_RECEIPT_MAX}`}
+            {` ${receiptItems.length}/${TRANSACTION_REGISTER_RECEIPT_MAX}`}
           </Text>
           <View style={styles.thumbnailRow}>
             <AttachmentAddButton
               onPress={() => setActiveSheet('attachMenu')}
-              disabled={receiptImages.length >= TRANSACTION_REGISTER_RECEIPT_MAX}
+              disabled={receiptItems.length >= TRANSACTION_REGISTER_RECEIPT_MAX}
             />
-            {receiptImages.map(image => {
-              const realUrl = realReceiptUrls[image];
-              const source = realUrl ? buildAuthenticatedImageSource(realUrl) : undefined;
-              return (
-                <Thumbnail
-                  key={image}
-                  imageUri={source?.uri}
-                  imageHeaders={source?.headers}
-                  onRemove={() => removeReceiptImage(image)}
-                />
-              );
-            })}
+            {receiptItems.map(item => (
+              <Thumbnail
+                key={item.key}
+                imageUri={item.previewUri || undefined}
+                imageHeaders={item.previewHeaders}
+                uploading={item.uploading}
+                onRemove={() => removeReceiptItem(item.key)}
+              />
+            ))}
           </View>
         </View>
       </ScrollView>
@@ -698,20 +814,35 @@ function TransactionRegisterScreen() {
         onCancel={handleDiscardScanResult}
         onConfirm={handleApplyScanResult}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+      <Dialog
+        visible={activeDialog === 'cameraPermission'}
+        title={CAMERA_PERMISSION_DIALOG_TITLE}
+        description={CAMERA_PERMISSION_DIALOG_DESCRIPTION}
+        cancelLabel={PERMISSION_DIALOG_CANCEL_LABEL}
+        confirmLabel={PERMISSION_SETTINGS_BUTTON_LABEL}
+        onCancel={() => setActiveDialog('none')}
+        onConfirm={() => {
+          setActiveDialog('none');
+          Linking.openSettings();
+        }}
+      />
+      <Dialog
+        visible={activeDialog === 'galleryPermission'}
+        title={GALLERY_PERMISSION_DIALOG_TITLE}
+        description={GALLERY_PERMISSION_DIALOG_DESCRIPTION}
+        cancelLabel={PERMISSION_DIALOG_CANCEL_LABEL}
+        confirmLabel={PERMISSION_SETTINGS_BUTTON_LABEL}
+        onCancel={() => setActiveDialog('none')}
+        onConfirm={() => {
+          setActiveDialog('none');
+          Linking.openSettings();
+        }}
+      />
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     paddingTop: 8,
     paddingHorizontal: 24,
@@ -760,12 +891,6 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 24,
     paddingBottom: 16,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 88,
   },
 });
 

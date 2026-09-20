@@ -9,18 +9,20 @@
  * 그대로 잇는 쪽을 표준으로 삼았다(docs/api-integration-plan.md "표준 패턴" 참고,
  * Dues·Report도 이 패턴을 따르면 된다).
  */
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
-  Dimensions,
-  FlatList,
+  Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Pressable,
   ScrollView,
+  SectionList,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import {
   useFocusEffect,
   useNavigation,
@@ -38,9 +40,15 @@ import Button from '../../components/Input/Button/Button';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import FolderMoreMenu from './FolderMoreMenu';
+import LedgerFilterSheet, {
+  DEFAULT_LEDGER_FILTER,
+  toEntryFilterQuery,
+  type LedgerFilterValue,
+} from './LedgerFilterSheet';
 import type { MenuItem } from '../../components/Navigation/Menu/Menu';
 import type { LedgerDetail } from '../../types/ledger';
-import type { EntrySummary } from '../../types/entry';
+import { groupEntriesByDate, type EntrySummary } from '../../types/entry';
+import { formatDateHeader } from '../../utils/dateHeader';
 import * as ledgerService from '../../services/ledgerService';
 import * as entryService from '../../services/entryService';
 import { ApiError } from '../../services/apiClient';
@@ -60,6 +68,7 @@ import {
   LEDGER_DELETE_DIALOG_TITLE,
   LEDGER_DETAIL_LOADING,
   LEDGER_DETAIL_RETRY_LABEL,
+  LEDGER_COUNT_SUFFIX,
   LEDGER_ENTRIES_LOADING_MORE,
   LEDGER_LIST_EMPTY_SUBTITLE,
   LEDGER_LIST_EMPTY_TITLE,
@@ -68,6 +77,7 @@ import {
   LEDGER_MENU_RENAME,
   LEDGER_NAME_MAX_LENGTH,
   LEDGER_RENAME_CONFIRM_LABEL,
+  LEDGER_RENAME_DIALOG_DESCRIPTION,
   LEDGER_RENAME_DIALOG_TITLE,
   LEDGER_RENAME_PLACEHOLDER,
   SNACKBAR_LEDGER_DELETED_SUFFIX,
@@ -79,8 +89,8 @@ import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const SEARCH_ICON = require('../../assets/icons/system/Search.png');
+const FILTER_ICON = require('../../assets/icons/system/Filter.png');
 const MENU_ICON = require('../../assets/icons/action/MenuHorizontal.png');
-const CARD_WIDTH = Dimensions.get('window').width - 48;
 
 type LedgerDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -98,9 +108,11 @@ function LedgerDetailScreen() {
   const navigation = useNavigation<LedgerDetailNavigationProp>();
   const route = useRoute<LedgerDetailRouteProp>();
   const ledgerId = route.params.ledgerId;
+  const { width: windowWidth } = useWindowDimensions();
 
   const [ledger, setLedger] = useState<LedgerDetail | null>(null);
   const [entries, setEntries] = useState<EntrySummary[]>([]);
+  const [entryTotal, setEntryTotal] = useState(0);
   const [entryPage, setEntryPage] = useState(0);
   const [hasMoreEntries, setHasMoreEntries] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -113,6 +125,11 @@ function LedgerDetailScreen() {
   const [dialogError, setDialogError] = useState<string | undefined>();
   const [isSubmittingDialog, setIsSubmittingDialog] = useState(false);
   const [snackbar, setSnackbar] = useState<string | null>(null);
+  // 필터 값은 서버 조회 조건이다(`toEntryFilterQuery`). 화면이 포커스될 때마다 도는 `load()`가
+  // 필터가 바뀔 때는 다시 돌면 안 돼서(전체 로딩 화면으로 돌아감) 최신 값을 ref로도 들고 있는다.
+  const [filter, setFilter] = useState<LedgerFilterValue>(DEFAULT_LEDGER_FILTER);
+  const filterRef = useRef<LedgerFilterValue>(DEFAULT_LEDGER_FILTER);
+  const [filterSheetVisible, setFilterSheetVisible] = useState(false);
 
   const toErrorMessage = (error: unknown): string => {
     if (isNetworkError(error)) {
@@ -137,10 +154,11 @@ function LedgerDetailScreen() {
     try {
       const [detail, firstPage] = await Promise.all([
         ledgerService.getLedgerDetail(ledgerId),
-        entryService.getEntries(ledgerId, { page: 0 }),
+        entryService.getEntries(ledgerId, { ...toEntryFilterQuery(filterRef.current), page: 0 }),
       ]);
       setLedger(detail);
       setEntries(firstPage.items);
+      setEntryTotal(firstPage.totalElements);
       setEntryPage(firstPage.page);
       setHasMoreEntries(!firstPage.last);
       setLoadState('ready');
@@ -157,6 +175,7 @@ function LedgerDetailScreen() {
     setIsLoadingMore(true);
     try {
       const nextPage = await entryService.getEntries(ledgerId, {
+        ...toEntryFilterQuery(filter),
         page: entryPage + 1,
       });
       setEntries(current => [...current, ...nextPage.items]);
@@ -167,7 +186,7 @@ function LedgerDetailScreen() {
     } finally {
       setIsLoadingMore(false);
     }
-  }, [ledgerId, entryPage, isLoadingMore, hasMoreEntries]);
+  }, [ledgerId, entryPage, isLoadingMore, hasMoreEntries, filter]);
 
   useFocusEffect(
     useCallback(() => {
@@ -178,6 +197,28 @@ function LedgerDetailScreen() {
   const showSnackbar = (message: string) => {
     setSnackbar(message);
     setTimeout(() => setSnackbar(null), SNACKBAR_AUTO_HIDE_MS);
+  };
+
+  /** 필터 적용: 카드·앱바는 그대로 두고 내역 목록만 새 조건으로 첫 페이지부터 다시 받는다. */
+  const handleApplyFilter = async (next: LedgerFilterValue) => {
+    const previous = filterRef.current;
+    filterRef.current = next;
+    setFilter(next);
+    try {
+      const firstPage = await entryService.getEntries(ledgerId, {
+        ...toEntryFilterQuery(next),
+        page: 0,
+      });
+      setEntries(firstPage.items);
+      setEntryTotal(firstPage.totalElements);
+      setEntryPage(firstPage.page);
+      setHasMoreEntries(!firstPage.last);
+    } catch (error) {
+      // 조회에 실패하면 목록은 그대로이므로 필터 값도 이전으로 되돌린다.
+      filterRef.current = previous;
+      setFilter(previous);
+      showSnackbar(toErrorMessage(error));
+    }
   };
 
   const closeDialog = () => {
@@ -265,14 +306,27 @@ function LedgerDetailScreen() {
 
   const dialogConfig = getDialogConfig(activeDialog);
 
+  // 시안: 날짜 그룹 헤더(`4월 16일 목요일`) 아래에 그날 내역 행들. 서버가 발생일 순으로 내려주므로
+  // 받은 순서 그대로 같은 날짜끼리 묶는다.
+  const sections = groupEntriesByDate(entries).map(group => ({
+    title: formatDateHeader(group.date),
+    data: group.items,
+  }));
+
+  // 캐러셀 스냅 결함 수정(2026-09-18): 이전엔 카드 폭(CARD_WIDTH = 화면폭-48)과
+  // 스크롤뷰 자체의 paddingLeft(24, 우측엔 없음)가 서로 안 맞아 2페이지부터
+  // 어긋났다(snapToInterval이 이 좌측 인셋을 계산에 안 넣었음, 첫 페이지는
+  // 우연히 괜찮아 보였을 뿐). 각 슬라이드를 화면 폭 그대로(windowWidth) 채우고
+  // 카드 여백은 슬라이드 안쪽 padding으로 옮겨서, pagingEnabled 기본 동작(뷰포트
+  // 폭 단위 스냅)만으로 항상 정확히 맞게 했다 — snapToInterval도 더 이상 필요 없다.
   const handleScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const index = Math.round(e.nativeEvent.contentOffset.x / (CARD_WIDTH + 12));
+    const index = Math.round(e.nativeEvent.contentOffset.x / windowWidth);
     setCardIndex(index);
   };
 
   if (loadState === 'loading' || loadState === 'error') {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="primary">
         <AppBar title="" onBackPress={() => navigation.goBack()} />
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>
@@ -282,7 +336,7 @@ function LedgerDetailScreen() {
             <Button label={LEDGER_DETAIL_RETRY_LABEL} onPress={load} hierarchy="secondary" style={{ alignSelf: 'center' }} />
           )}
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
@@ -291,90 +345,116 @@ function LedgerDetailScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      snackbar={snackbar ? <Snackbar visible title={snackbar} /> : undefined}
+    >
       <AppBar
         title={ledger.name}
         onBackPress={() => navigation.goBack()}
-        rightIcons={[
-          {
-            icon: SEARCH_ICON,
-            onPress: () => navigation.navigate('LedgerSearch', { ledgerId }),
-          },
-          { icon: MENU_ICON, onPress: () => setMoreMenuVisible(true) },
-        ]}
+        rightIcons={[{ icon: MENU_ICON, onPress: () => setMoreMenuVisible(true) }]}
       />
 
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={handleScrollEnd}
-        style={styles.carousel}
-        snapToInterval={CARD_WIDTH + 12}
-        decelerationRate="fast"
-      >
-        <View style={styles.cardSlide}>
-          <AmountCard
-            type="incomeExpense"
-            income={ledger.totalIncome}
-            expense={ledger.totalExpense}
+      {/* 시안 [상태] Scroll-away: 카드·인디케이터·필터/검색 줄·개수가 리스트 헤더라 리스트를 올리면 같이
+          화면 위로 사라진다. 앱바는 리스트 밖이라 최상단에 고정. */}
+      <SectionList
+        sections={sections}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.listContent}
+        stickySectionHeadersEnabled={false}
+        onEndReachedThreshold={0.4}
+        onEndReached={loadMoreEntries}
+        ListHeaderComponent={
+          <>
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={handleScrollEnd}
+              style={styles.carousel}
+              decelerationRate="fast"
+            >
+              <View style={[styles.cardSlide, { width: windowWidth }]}>
+                <AmountCard
+                  type="incomeExpense"
+                  income={ledger.totalIncome}
+                  expense={ledger.totalExpense}
+                />
+              </View>
+              <View style={[styles.cardSlide, { width: windowWidth }]}>
+                {ledger.budget != null ? (
+                  <BudgetCard
+                    remainingBudget={ledger.remainingBudget ?? ledger.budget - ledger.totalExpense}
+                    expense={ledger.totalExpense}
+                    budget={ledger.budget}
+                  />
+                ) : (
+                  <BudgetCard state="empty" />
+                )}
+              </View>
+            </ScrollView>
+            <View style={styles.indicatorRow}>
+              <CarouselIndicator count={2} selectedIndex={cardIndex} />
+            </View>
+
+            <View style={styles.toolRow}>
+              <Pressable
+                onPress={() => setFilterSheetVisible(true)}
+                hitSlop={8}
+                accessibilityLabel="필터"
+              >
+                <Image source={FILTER_ICON} style={styles.toolIcon} />
+              </Pressable>
+              <Pressable
+                onPress={() => navigation.navigate('LedgerSearch', { ledgerId, ledgerName: ledger.name })}
+                hitSlop={8}
+                accessibilityLabel="검색"
+              >
+                <Image source={SEARCH_ICON} style={styles.toolIcon} />
+              </Pressable>
+            </View>
+
+            <Text style={styles.countText}>
+              {entryTotal}
+              {LEDGER_COUNT_SUFFIX}
+            </Text>
+          </>
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>{LEDGER_LIST_EMPTY_TITLE}</Text>
+            <Text style={styles.emptySubtitle}>{LEDGER_LIST_EMPTY_SUBTITLE}</Text>
+          </View>
+        }
+        ListFooterComponent={
+          isLoadingMore ? (
+            <Text style={styles.loadingMoreText}>{LEDGER_ENTRIES_LOADING_MORE}</Text>
+          ) : null
+        }
+        renderSectionHeader={({ section }) => (
+          <Text style={styles.sectionHeader}>{section.title}</Text>
+        )}
+        renderItem={({ item }) => (
+          <TransactionListItem
+            itemName={item.title}
+            amount={item.type === 'INCOME' ? item.amount : -item.amount}
+            hasReceipt={item.receiptCount > 0}
+            isPendingApproval={item.approvalStatus === 'PENDING'}
+            onPress={() =>
+              navigation.navigate('TransactionDetail', {
+                transactionId: item.id,
+              })
+            }
           />
-        </View>
-        <View style={styles.cardSlide}>
-          {ledger.budget != null ? (
-            <BudgetCard
-              remainingBudget={ledger.remainingBudget ?? ledger.budget - ledger.totalExpense}
-              expense={ledger.totalExpense}
-              budget={ledger.budget}
-            />
-          ) : (
-            <BudgetCard state="empty" />
-          )}
-        </View>
-      </ScrollView>
-      <View style={styles.indicatorRow}>
-        <CarouselIndicator count={2} selectedIndex={cardIndex} />
-      </View>
+        )}
+      />
 
-      {entries.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyTitle}>{LEDGER_LIST_EMPTY_TITLE}</Text>
-          <Text style={styles.emptySubtitle}>{LEDGER_LIST_EMPTY_SUBTITLE}</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={entries}
-          keyExtractor={item => item.id}
-          contentContainerStyle={styles.listContent}
-          onEndReachedThreshold={0.4}
-          onEndReached={loadMoreEntries}
-          ListFooterComponent={
-            isLoadingMore ? (
-              <Text style={styles.loadingMoreText}>{LEDGER_ENTRIES_LOADING_MORE}</Text>
-            ) : null
-          }
-          renderItem={({ item }) => (
-            <TransactionListItem
-              label={item.occurredOn}
-              itemName={item.title}
-              amount={item.type === 'INCOME' ? item.amount : -item.amount}
-              hasReceipt={item.receiptCount > 0}
-              isPendingApproval={item.approvalStatus === 'PENDING'}
-              onPress={() =>
-                navigation.navigate('TransactionDetail', {
-                  transactionId: item.id,
-                })
-              }
-            />
-          )}
-        />
-      )}
-
-      {snackbar && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbar} />
-        </View>
-      )}
+      <LedgerFilterSheet
+        visible={filterSheetVisible}
+        value={filter}
+        onClose={() => setFilterSheetVisible(false)}
+        onApply={handleApplyFilter}
+      />
 
       <FolderMoreMenu
         visible={moreMenuVisible}
@@ -399,6 +479,7 @@ function LedgerDetailScreen() {
         }}
         textFieldPlaceholder={dialogConfig.placeholder}
         textFieldKeyboardType={activeDialog === 'budget' ? 'number-pad' : undefined}
+        autoFocusTextField={activeDialog === 'rename'}
         textFieldError={dialogError}
         confirmLabel={dialogConfig.confirmLabel}
         destructive={activeDialog === 'delete'}
@@ -406,7 +487,7 @@ function LedgerDetailScreen() {
         onCancel={closeDialog}
         onConfirm={handleConfirmDialog}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
@@ -425,7 +506,7 @@ function getDialogConfig(activeDialog: ActiveDialog) {
     case 'rename':
       return {
         title: LEDGER_RENAME_DIALOG_TITLE,
-        description: undefined,
+        description: LEDGER_RENAME_DIALOG_DESCRIPTION,
         showTextField: true,
         placeholder: LEDGER_RENAME_PLACEHOLDER,
         confirmLabel: LEDGER_RENAME_CONFIRM_LABEL,
@@ -458,26 +539,51 @@ function getDialogConfig(activeDialog: ActiveDialog) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  // 리스트 콘텐츠의 좌우 패딩 24 안에 있으므로 캐러셀만 화면 폭 전체로 되돌린다(슬라이드가
+  // 화면 폭이라 페이지 스냅이 그대로 맞는다).
   carousel: {
     flexGrow: 0,
     marginTop: 16,
-    paddingLeft: 24,
+    marginHorizontal: -24,
   },
+  // 슬라이드 하나 = 화면 폭 전체(JSX에서 width: windowWidth로 덮어씀) — 카드
+  // 여백은 스크롤뷰가 아니라 이 안쪽 padding으로 준다(캐러셀 스냅 결함 수정,
+  // 2026-09-18).
   cardSlide: {
-    width: CARD_WIDTH,
-    marginRight: 12,
+    paddingHorizontal: 24,
   },
   indicatorRow: {
     alignItems: 'center',
     marginTop: 12,
     marginBottom: 16,
   },
+  // 시안: 카드 아래 한 줄 — 좌측 필터, 우측 검색.
+  toolRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  toolIcon: {
+    width: 24,
+    height: 24,
+  },
+  countText: {
+    ...TYPOGRAPHY.body2,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+    marginBottom: 8,
+  },
   listContent: {
     paddingHorizontal: 24,
     paddingBottom: 24,
+  },
+  // 12px+Bold 조합은 정식 스타일에 없어 body3+bold를 예외로 채택(내역 메인과 같은 헤더).
+  sectionHeader: {
+    ...TYPOGRAPHY.body3,
+    fontWeight: 'bold',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+    marginTop: 12,
+    marginBottom: 6,
   },
   stateContainer: {
     flex: 1,
@@ -490,7 +596,6 @@ const styles = StyleSheet.create({
     color: FOREGROUND_DISABLED,
   },
   emptyState: {
-    flex: 1,
     alignItems: 'center',
     paddingTop: 80,
   },
@@ -507,12 +612,6 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
     textAlign: 'center',
     paddingVertical: 16,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

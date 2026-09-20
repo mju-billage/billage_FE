@@ -16,7 +16,12 @@ type ReceiptScanningViewProps = {
   onComplete: (result: MockScanResult | null) => void;
 };
 
-/** 스캔한 영수증을 OCR로 인식하는 동안 보여주는 mock 애니메이션 화면. */
+/**
+ * 스캔한 영수증을 OCR로 인식하는 동안 보여주는 애니메이션 화면. `generateMockScanResult()`
+ * (`utils/mockOcr.ts`)를 쓴다 — **서버 미구현(`POST /files/{fileId}/ocr` 없음)으로 인한
+ * 임시 mock**, 지우거나 에러 상태로 바꾸지 말 것(스캔 화면 자체가 동작 불가가 된다).
+ * 서버가 생기면 실제 업로드된 `fileId`로 OCR을 호출하는 `ocrService`로 교체할 것.
+ */
 function ReceiptScanningView({ onComplete }: ReceiptScanningViewProps) {
   const sweep = useRef(new Animated.Value(0)).current;
 

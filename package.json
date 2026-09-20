@@ -12,7 +12,8 @@
     "build-storybook": "storybook build",
     "shot": "node scripts/capture-shot.js",
     "design-index": "node scripts/build-design-index.js",
-    "pair": "node scripts/make-pair.js"
+    "pair": "node scripts/make-pair.js",
+    "screen-audit": "node scripts/screen-audit.js"
   },
   "dependencies": {
     "@react-native-google-signin/google-signin": "^16.1.2",
@@ -25,10 +26,14 @@
     "react": "19.2.3",
     "react-native": "0.86.0",
     "react-native-config": "^1.6.1",
+    "react-native-image-picker": "^8.2.1",
+    "react-native-keyboard-controller": "^1.22.5",
     "react-native-keychain": "^10.0.0",
+    "react-native-reanimated": "^4.6.0",
     "react-native-safe-area-context": "^5.8.0",
     "react-native-screens": "^4.26.0",
-    "react-native-svg": "^15.15.5"
+    "react-native-svg": "^15.15.5",
+    "react-native-worklets": "^0.12.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

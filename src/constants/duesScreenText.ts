@@ -39,7 +39,8 @@ export const DUES_CREATE_AMOUNT_PLACEHOLDER = '금액을 입력해주세요.';
 export const DUES_AMOUNT_MAX = 999_999_999;
 
 export const DUES_CREATE_LEDGER_LABEL = '장부';
-export const DUES_CREATE_LEDGER_PLACEHOLDER = '장부를 선택해주세요.';
+/** 시안(납부관리_메인_새회비생성.png No.4) 문구 — 박스 안 "+ 선택하기" 고정 노출. */
+export const DUES_CREATE_LEDGER_PLACEHOLDER = '+ 선택하기';
 
 /**
  * 화면명세서(DUE-2-PAGE-01-0)가 요구하는 "기간"(시작~마감 범위) 그대로 복원했다
@@ -49,7 +50,11 @@ export const DUES_CREATE_LEDGER_PLACEHOLDER = '장부를 선택해주세요.';
  * 같은 유형의 기간 선택 캘린더)를 새로 만들어 붙였다.
  */
 export const DUES_CREATE_PERIOD_LABEL = '기간';
-export const DUES_CREATE_PERIOD_PLACEHOLDER = '기간을 선택해주세요.';
+/** 시안(납부관리_메인_새회비생성.png No.5) placeholder 형식 문구 그대로 — 실제
+ * 채워진 값은 4자리 연도("2026.04.22 ~ 2026.04.25")지만, placeholder 자체는
+ * 시트에 박힌 "YY.MM.DD ~ YY.MM.DD" 표기를 그대로 쓴다(보고서 쪽 2자리 표기와
+ * 다른 시트라 공용 포맷 함수로 묶지 않는다 — design-verification.md §5-13). */
+export const DUES_CREATE_PERIOD_PLACEHOLDER = 'YY.MM.DD ~ YY.MM.DD';
 
 export const DUES_CREATE_NEXT_LABEL = '다음으로';
 

@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, Text } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../Layout/ScreenContainer';
 import AppBar from '../../Navigation/App bar/AppBar';
 import { FOREGROUND_NEUTRAL_NORMAL } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
@@ -17,19 +17,16 @@ function LegalDocumentView({
   onPressBack,
 }: LegalDocumentViewProps) {
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar type="sub" title={title} onBackPress={onPressBack} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.body}>{bodyText}</Text>
       </ScrollView>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   scrollContent: {
     paddingHorizontal: 24,
     paddingBottom: 40,

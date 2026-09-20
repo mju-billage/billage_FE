@@ -1,6 +1,6 @@
 /** @screen COM-1-PAGE-01-0 로그인 */
 import { useCallback, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
@@ -9,6 +9,7 @@ import TextField from '../components/Input/Text Field/TextField';
 import Button from '../components/Input/Button/Button';
 import TextButton from '../components/Input/Button/TextButton';
 import Snackbar from '../components/Feedback/Snackbar/Snackbar';
+import ScreenContainer from '../components/Layout/ScreenContainer';
 import {
   BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_SUBTLE,
@@ -22,8 +23,10 @@ import { TYPOGRAPHY } from '../constants/typography';
 import { SocialProfile, SocialType } from '../types/social';
 import { ApiError } from '../services/apiClient';
 import * as authService from '../services/authService';
+import { SocialAuthParseError } from '../services/authService';
 import * as socialAuthService from '../services/socialAuthService';
 import * as groupService from '../services/groupService';
+import { getApiErrorMessage, isNetworkError } from '../constants/apiErrorMessages';
 import {
   LOGIN_EMAIL_PLACEHOLDER,
   LOGIN_PASSWORD_PLACEHOLDER,
@@ -32,7 +35,9 @@ import {
   LOGIN_GO_TO_SIGNUP_LABEL,
   LOGIN_INVALID_CREDENTIALS_ERROR,
   LOGIN_GENERIC_ERROR,
-  LOGIN_SOCIAL_ERROR,
+  LOGIN_SOCIAL_SDK_ERROR,
+  LOGIN_SOCIAL_NETWORK_ERROR,
+  LOGIN_SOCIAL_PARSE_ERROR,
   LOGIN_MOCK_BUTTON_LABEL,
 } from '../constants/loginScreenText';
 
@@ -41,6 +46,9 @@ type LoginNavigationProp = NativeStackNavigationProp<
   'Login'
 >;
 type LoginRouteProp = RouteProp<RootStackParamList, 'Login'>;
+
+const LOGO_SYMBOL = require('../assets/images/Billage_simbol_big.png');
+const LOGO_WORDMARK = require('../assets/images/Billage_logo.png');
 
 const SOCIAL_CIRCLE_SIZE = 48;
 
@@ -163,32 +171,46 @@ function LoginScreen() {
     goToMain();
   };
 
+  /**
+   * 2026-09-12: "로그인에 실패했습니다"만 뜨던 통짜 에러를 단계별로 갈랐다 —
+   * SDK 실패 / 네트워크 실패 / 서버 거부(코드 포함) / 응답 파싱 실패. 각 단계는
+   * `authService.socialLogin`/`socialAuthService`에 심어둔 `console.warn`으로도
+   * Metro 콘솔에 남는다(`[SocialLogin]` 태그로 검색).
+   */
   const handleSocialLogin = async (provider: SocialType) => {
     setLoginError(undefined);
+    let profile: SocialProfile | null;
     try {
-      const profile = await getSocialProfile(provider);
-      if (!profile) {
-        return; // 사용자가 로그인을 취소함
-      }
+      profile = await getSocialProfile(provider);
+    } catch (error) {
+      console.warn('[SocialLogin][SDK] getSocialProfile 실패', provider, error);
+      setLoginError(LOGIN_SOCIAL_SDK_ERROR);
+      return;
+    }
+    if (!profile) {
+      return; // 사용자가 로그인을 취소함
+    }
 
-      try {
-        await authService.socialLogin({
-          provider: profile.provider,
-          providerToken: profile.providerToken,
-        });
-        goToMain();
-      } catch (error) {
-        if (
-          error instanceof ApiError &&
-          error.code === 'SOCIAL_MEMBER_NOT_FOUND'
-        ) {
-          navigation.navigate('SocialSignupInfo', { profile });
-        } else {
-          setLoginError(LOGIN_GENERIC_ERROR);
-        }
+    try {
+      await authService.socialLogin({
+        provider: profile.provider,
+        providerToken: profile.providerToken,
+      });
+      goToMain();
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 'SOCIAL_MEMBER_NOT_FOUND') {
+        // 신규 소셜 가입자: 소셜 인증 → 약관동의(COM-2-PAGE-01-0) → 간편 가입 정보 입력(COM-3-PAGE-02-0)
+        // (시안 `COM-3-PAGE-02-0` 페이지 경로·뒤로가기 = 약관동의). 약관 없이 가입하면 서버가 400을 준다.
+        navigation.navigate('TermsAgreement', { socialProfile: profile });
+      } else if (error instanceof SocialAuthParseError) {
+        setLoginError(LOGIN_SOCIAL_PARSE_ERROR);
+      } else if (error instanceof ApiError) {
+        setLoginError(getApiErrorMessage(error.code));
+      } else if (isNetworkError(error)) {
+        setLoginError(LOGIN_SOCIAL_NETWORK_ERROR);
+      } else {
+        setLoginError(LOGIN_GENERIC_ERROR);
       }
-    } catch {
-      setLoginError(LOGIN_SOCIAL_ERROR);
     }
   };
 
@@ -213,103 +235,130 @@ function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Image
-        source={require('../assets/images/Billage_logo.png')}
-        style={styles.logo}
-        resizeMode="contain"
-      />
+    <ScreenContainer
+      background="secondary"
+      edges={['bottom']}
+      style={styles.container}
+      snackbar={
+        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+      }
+    >
+      {/* 키보드에 가린 필드도 스크롤로 볼 수 있게 한다(keyboardShouldPersistTaps: 키보드가 떠 있어도 첫 탭이 먹게). */}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* 시안 실측(로그인_메인화면.png, 1px=1dp): 심볼 29×28 + 간격 9 + 워드마크 92×27, 전체 가운데 정렬. */}
+        <View style={styles.logoRow}>
+          <Image source={LOGO_SYMBOL} style={styles.logoSymbol} resizeMode="contain" />
+          <Image source={LOGO_WORDMARK} style={styles.logoWordmark} resizeMode="contain" />
+        </View>
 
-      <View style={styles.form}>
-        <TextField
-          value={email}
-          onChangeText={text => {
-            setEmail(text);
-            setLoginError(undefined);
-          }}
-          placeholder={LOGIN_EMAIL_PLACEHOLDER}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-        <View id="hv" style={{ height: 8}} />
-        <TextField
-          value={password}
-          onChangeText={text => {
-            setPassword(text);
-            setLoginError(undefined);
-          }}
-          placeholder={LOGIN_PASSWORD_PLACEHOLDER}
-          secureTextEntry
-          error={loginError}
-        />
-      </View>
-      <View id="hv" style={{ height: 16}} />
-      <Button
-        label={LOGIN_SUBMIT_LABEL}
-        onPress={handleLogin}
-        disabled={isSubmitting}
-        fullWidth
-      />
-      <View id="hv" style={{ height: 16}} />
-      <View style={styles.linkRow}>
-        <TextButton
-          label={LOGIN_FIND_PASSWORD_LABEL}
-          onPress={handleFindPassword}
-          hierarchy="tertiary"
-        />
-        <TextButton
-          label={LOGIN_GO_TO_SIGNUP_LABEL}
-          onPress={handleGoToSignup}
-          hierarchy="tertiary"
-        />
-      </View>
-
-      <View style={styles.socialRow}>
-        <SocialLoginBadge
-          type="Kakao"
-          onPress={() => handleSocialLogin('Kakao')}
-        />
-        <SocialLoginBadge
-          type="Naver"
-          onPress={() => handleSocialLogin('Naver')}
-        />
-        <SocialLoginBadge
-          type="Google"
-          onPress={() => handleSocialLogin('Google')}
-        />
-      </View>
-
-      {__DEV__ && (
-        <View style={styles.mockLoginRow}>
-          <Button
-            label={LOGIN_MOCK_BUTTON_LABEL}
-            onPress={handleMockLogin}
-            disabled={isSubmitting}
-            hierarchy="secondary"
-            fullWidth
+        <View style={styles.form}>
+          <TextField
+            value={email}
+            onChangeText={text => {
+              setEmail(text);
+              setLoginError(undefined);
+            }}
+            placeholder={LOGIN_EMAIL_PLACEHOLDER}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <View id="hv" style={{ height: 8}} />
+          <TextField
+            value={password}
+            onChangeText={text => {
+              setPassword(text);
+              setLoginError(undefined);
+            }}
+            placeholder={LOGIN_PASSWORD_PLACEHOLDER}
+            secureToggle
+            error={loginError}
           />
         </View>
-      )}
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
+        <View id="hv" style={{ height: 16}} />
+        <Button
+          label={LOGIN_SUBMIT_LABEL}
+          onPress={handleLogin}
+          disabled={isSubmitting || !email.trim() || !password.trim()}
+          fullWidth
+        />
+        <View id="hv" style={{ height: 16}} />
+        <View style={styles.linkRow}>
+          <TextButton
+            label={LOGIN_FIND_PASSWORD_LABEL}
+            onPress={handleFindPassword}
+            hierarchy="tertiary"
+            underline
+          />
+          <TextButton
+            label={LOGIN_GO_TO_SIGNUP_LABEL}
+            onPress={handleGoToSignup}
+            hierarchy="tertiary"
+            underline
+          />
         </View>
-      )}
-    </View>
+
+        <View style={styles.socialRow}>
+          <SocialLoginBadge
+            type="Kakao"
+            onPress={() => handleSocialLogin('Kakao')}
+          />
+          <SocialLoginBadge
+            type="Naver"
+            onPress={() => handleSocialLogin('Naver')}
+          />
+          <SocialLoginBadge
+            type="Google"
+            onPress={() => handleSocialLogin('Google')}
+          />
+        </View>
+
+        {__DEV__ && (
+          <View style={styles.mockLoginRow}>
+            <Button
+              label={LOGIN_MOCK_BUTTON_LABEL}
+              onPress={handleMockLogin}
+              disabled={isSubmitting}
+              hierarchy="secondary"
+              fullWidth
+            />
+          </View>
+        )}
+      </ScrollView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     paddingTop: 80,
     paddingHorizontal: 24,
   },
-  logo: {
-    width: 140,
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    alignItems: 'center',
+  },
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 9,
     marginBottom: 48,
+  },
+  logoSymbol: {
+    width: 29,
+    height: 28,
+  },
+  logoWordmark: {
+    width: 92,
+    height: 27,
   },
   form: {
     width: '100%',
@@ -329,12 +378,6 @@ const styles = StyleSheet.create({
   mockLoginRow: {
     width: '100%',
     marginTop: 24,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

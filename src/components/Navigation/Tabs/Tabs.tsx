@@ -18,6 +18,9 @@ type TabsProps<T extends string> = {
   onChange: (value: T) => void;
   /** 아이콘 노출 여부. 기본 true — item에 icon이 없으면 어차피 표시되지 않는다. */
   showIcon?: boolean;
+  /** true면 각 탭이 가로 여백 없이 전체 폭을 균등 분할하고 밑줄도 탭 폭 전체를 채운다. 기본 false
+   * (탭 좌우 패딩 16만큼 밑줄이 안쪽으로 들어온다). */
+  fullWidth?: boolean;
 };
 
 /** 콘텐츠 섹션을 전환하는 밑줄 스타일 탭 바. 아이콘을 함께 표시할 수 있다. */
@@ -26,6 +29,7 @@ function Tabs<T extends string>({
   value,
   onChange,
   showIcon = true,
+  fullWidth = false,
 }: TabsProps<T>) {
   return (
     <View style={styles.row}>
@@ -34,7 +38,11 @@ function Tabs<T extends string>({
         return (
           <Pressable
             key={item.value}
-            style={({ pressed }) => [styles.tab, pressed && styles.tabPressed]}
+            style={({ pressed }) => [
+              styles.tab,
+              fullWidth && styles.tabFullWidth,
+              pressed && styles.tabPressed,
+            ]}
             onPress={() => onChange(item.value)}
           >
             <View style={styles.tabContent}>
@@ -67,6 +75,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 8,
   },
+  tabFullWidth: {
+    paddingHorizontal: 0,
+    borderRadius: 0,
+  },
   tabPressed: {
     backgroundColor: FILL_NEUTRAL_NORMAL,
   },
@@ -85,6 +97,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...TYPOGRAPHY.body2,
+    paddingVertical: 4,
     color: FOREGROUND_DISABLED,
   },
   labelSelected: {

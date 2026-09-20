@@ -12,7 +12,7 @@
  */
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -163,7 +163,7 @@ function NotificationSettingsScreen() {
   const visibleRows = TOGGLE_ROWS.filter(row => viewerIsOwner || !row.ownerOnly);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="secondary">
       <AppBar
         type="sub"
         title={NOTIFICATION_SETTINGS_TITLE}
@@ -207,14 +207,11 @@ function NotificationSettingsScreen() {
           ))}
         </ScrollView>
       )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     paddingHorizontal: 24,
     paddingTop: 16,

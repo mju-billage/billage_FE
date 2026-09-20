@@ -43,7 +43,11 @@ export const SNACKBAR_GROUP_CREATED_SUFFIX = " 모임이 생성되었어요.";
 export const JOIN_GROUP_SHEET_TITLE = '코드로 참여하기';
 export const JOIN_GROUP_PLACEHOLDER = '초대 코드를 입력해주세요.';
 export const JOIN_GROUP_SUBMIT_LABEL = '참여하기';
-export const JOIN_GROUP_INVALID_CODE_ERROR = '유효하지 않은 초대 코드예요.';
+/** 시안(전체모임관리_모임추가_코드로참여하기.png) No.4 [액션] 문구 그대로 — "유효하지
+ * 않은 코드이거나 이미 가입된 모임일 경우" 실패 사유를 구분 안 하고 하나로 보여준다.
+ * 2026-09-13: 만료된 코드(`INVITATION_EXPIRED`)도 같은 취급 — 시안이 실패 사유를
+ * 굳이 나누지 않는 설계라 그대로 따랐다. */
+export const JOIN_GROUP_INVALID_CODE_ERROR = '코드가 일치하지 않아요. 다시 입력해주세요.';
 export const SNACKBAR_GROUP_JOINED_SUFFIX = " 모임에 참여했어요.";
 
 // 모임 관리 (ETC-2-PAGE-02-0) — "모임 관리자"(GroupMembership 권한 관리)와는
@@ -71,6 +75,10 @@ export const GROUP_PROFILE_EDIT_SUBMIT_LABEL = '저장하기';
 // 시안엔 체크박스·선택 개수·확인 버튼이 없다(단일 선택, 탭하면 바로 반영) —
 // 다중 선택인 ADD 도메인의 동명 ID(증빙자료 앨범 선택)와는 다른 화면이다.
 export const GROUP_IMAGE_PICKER_TITLE = '최근 항목';
+
+// 모임 프로필 이미지 선택 방식 바텀시트 — `ProfileEditScreen`의 이미지 메뉴와 동일 로직.
+export const GROUP_PROFILE_IMAGE_SHEET_CAMERA_LABEL = '사진 촬영하기';
+export const GROUP_PROFILE_IMAGE_SHEET_GALLERY_LABEL = '사진 선택하기';
 
 // 모임 삭제하기 (ETC-3-MODAL-02-0)
 export const GROUP_DELETE_CONFIRM_TITLE = '모임을 삭제할까요?';
@@ -100,11 +108,11 @@ export const GROUP_MANAGER_TITLE = '모임 관리자';
 export const GROUP_MANAGER_MEMBER_MANAGE_LABEL = '모임원 관리';
 export const GROUP_MANAGER_INVITE_CODE_PREFIX = '초대코드 : ';
 export const SNACKBAR_INVITE_CODE_COPIED = '초대 코드가 복사되었어요.';
-/** 카드를 눌러 발급을 요청한 직후(사용자 액션 기반, 자동 발급 아님). */
+/** 조회/발급 중(화면 진입 시 자동, GET .../invitations/current). */
 export const GROUP_MANAGER_INVITE_CODE_ISSUING = '발급 중...';
-/** 아직 발급받지 않은 초기 상태 — 카드를 누르면 그때 발급을 요청한다. */
-export const GROUP_MANAGER_INVITE_CODE_PENDING = '탭하여 초대코드 발급받기';
-/** 발급 요청이 실패했을 때 — 행을 다시 누르면 재시도한다. */
+/** 코드가 없고 내가 총무가 아닐 때(INVITATION_NOT_FOUND, 발급은 총무만 가능 — GroupMembership.txt 7번 정책). */
+export const GROUP_MANAGER_INVITE_CODE_PENDING = '총무에게 발급을 요청해주세요';
+/** 조회/발급 요청이 실패했을 때 — 행을 다시 누르면 재시도한다. */
 export const GROUP_MANAGER_INVITE_CODE_ERROR = '발급 실패 · 눌러서 재시도';
 /** 로딩/에러 문구 — 디자인 시안에 해당 상태가 없어 최소 형태로 통일. */
 export const GROUP_MANAGER_LOADING = '모임원 목록을 불러오는 중이에요.';

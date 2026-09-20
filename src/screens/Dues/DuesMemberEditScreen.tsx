@@ -1,5 +1,6 @@
 /** @screen DUE-3-PAGE-02-0 회비 수정_모임원 선택 */
 /** @screen DUE-4-MODAL-02-0 회비 수정_이탈 안내 (DuesEditScreen과 공유) */
+/** @screen DUE-4-SNACKBAR-04-0 회비 수정 완료 (화면 자체에서 표시 후 1.6초 뒤 상세로 복귀, DuesEditScreen과 공유) */
 /**
  * 7-B-1(회비 수정·삭제·마감): ⋮ 메뉴에서 바로 들어오는 독립 화면이다 —
  * `DuesEditScreen`(제목/장부/기간)과는 별개로 이 화면 혼자 `targetMemberIds`
@@ -15,9 +16,9 @@
  * 보여주거나 경고하지 않는다, 명세에도 그런 경고 UI가 없다.
  */
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -135,6 +136,20 @@ function DuesMemberEditScreen() {
     }
   };
 
+  // 안드로이드 하드웨어 back도 같은 이탈 확인을 거치게 한다(ReportCreateByLedgerScreen 패턴).
+  useFocusEffect(
+    useCallback(() => {
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        if (hasChanges) {
+          setLeaveDialogVisible(true);
+          return true;
+        }
+        return false;
+      });
+      return () => subscription.remove();
+    }, [hasChanges]),
+  );
+
   const filteredMembers = searchQuery.trim()
     ? members.filter(member =>
         member.name.toLowerCase().includes(searchQuery.trim().toLowerCase()),
@@ -189,7 +204,7 @@ function DuesMemberEditScreen() {
 
   if (loadState === 'loading' || loadState === 'error') {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="secondary">
         <AppBar
           type="sub"
           title={DUES_MEMBER_SELECT_TITLE}
@@ -208,12 +223,17 @@ function DuesMemberEditScreen() {
             />
           )}
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="secondary"
+      snackbar={
+        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+      }
+    >
       <AppBar type="sub" title={DUES_MEMBER_SELECT_TITLE} onBackPress={handleBack} />
 
       <View style={styles.body}>
@@ -221,6 +241,7 @@ function DuesMemberEditScreen() {
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholder={DUES_MEMBER_SELECT_SEARCH_PLACEHOLDER}
+          variant="outline"
         />
 
         {members.length === 0 ? (
@@ -270,20 +291,11 @@ function DuesMemberEditScreen() {
           navigation.goBack();
         }}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,
@@ -325,12 +337,6 @@ const styles = StyleSheet.create({
   footer: {
     paddingBottom: 16,
     paddingTop: 8,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

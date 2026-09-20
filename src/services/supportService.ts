@@ -121,6 +121,79 @@ export async function getFaqs(): Promise<Faq[]> {
   }));
 }
 
+export type NotificationCategory =
+  | 'GROUP_ACTIVITY'
+  | 'APPROVAL'
+  | 'DUES'
+  | 'NOTICE'
+  | 'MARKETING';
+export type NotificationTargetType = 'ENTRY' | 'DUES' | 'GROUP' | 'NOTICE';
+
+export type NotificationItem = {
+  id: string;
+  category: NotificationCategory;
+  title: string;
+  body: string;
+  groupId: string;
+  targetType: NotificationTargetType;
+  targetId: string;
+  readAt: string | null;
+  createdAt: string;
+};
+
+type NotificationResponse = {
+  notificationId: number;
+  category: NotificationCategory;
+  title: string;
+  body: string;
+  groupId: number;
+  targetType: NotificationTargetType;
+  targetId: number;
+  readAt: string | null;
+  createdAt: string;
+};
+
+type NotificationListResponse = {
+  content: NotificationResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+function toNotificationItem(response: NotificationResponse): NotificationItem {
+  return {
+    id: String(response.notificationId),
+    category: response.category,
+    title: response.title,
+    body: response.body,
+    groupId: String(response.groupId),
+    targetType: response.targetType,
+    targetId: String(response.targetId),
+    readAt: response.readAt,
+    createdAt: response.createdAt,
+  };
+}
+
+/**
+ * 알림 목록을 최신순으로 조회한다(Notification.txt 1번). 수신 거부한 카테고리는
+ * 서버가 생성 시점에 걸러내므로 클라이언트에서 다시 필터링하지 않는다.
+ */
+export async function getNotifications(): Promise<NotificationItem[]> {
+  const response = await request<NotificationListResponse>(
+    '/api/v1/notifications',
+    { method: 'GET' },
+  );
+  return response.content.map(toNotificationItem);
+}
+
+/** 알림 하나를 읽음 처리한다(Notification.txt 2번). */
+export async function markNotificationRead(notificationId: string): Promise<void> {
+  await request<void>(`/api/v1/notifications/${notificationId}/read`, {
+    method: 'PATCH',
+  });
+}
+
 export type SubmitInquiryRequest = {
   email: string;
   title: string;

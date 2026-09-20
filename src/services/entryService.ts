@@ -61,6 +61,11 @@ type EntryDetailResponse = {
   approvedBy: { userId: number; name: string } | null;
   approvedAt: string | null;
   receiptFiles: ReceiptFileResponse[];
+  duesId: number | null;
+  duesTitle: string | null;
+  duesExists: boolean;
+  payerCount: number;
+  payers: { memberId: number; name: string; amount: number }[];
 };
 
 type EntryCreateResponse = {
@@ -128,6 +133,15 @@ function toEntryDetail(response: EntryDetailResponse): EntryDetail {
       : null,
     approvedAt: response.approvedAt,
     receiptFiles: response.receiptFiles.map(toReceiptFile),
+    duesId: response.duesId != null ? String(response.duesId) : null,
+    duesTitle: response.duesTitle,
+    duesExists: response.duesExists,
+    payerCount: response.payerCount,
+    payers: response.payers.map(payer => ({
+      memberId: String(payer.memberId),
+      name: payer.name,
+      amount: payer.amount,
+    })),
   };
 }
 
@@ -145,6 +159,8 @@ export type EntryListPage = {
   items: EntrySummary[];
   page: number;
   totalPages: number;
+  /** 필터·검색 조건이 반영된 전체 건수(페이지와 무관). */
+  totalElements: number;
   last: boolean;
 };
 
@@ -180,6 +196,7 @@ export async function getEntries(
     items: response.content.map(toEntrySummary),
     page: response.page,
     totalPages: response.totalPages,
+    totalElements: response.totalElements,
     last: response.last,
   };
 }
@@ -273,6 +290,8 @@ export type CreateEntryInput = {
   memo?: string;
   /** 담당자(`GroupMembership.userId`). 안 보내면 서버가 등록자 본인으로 채운다. */
   managerUserId?: string;
+  /** 이미 업로드된(`fileService.uploadFile(..., 'RECEIPT')`) 파일의 fileId, 최대 10장. */
+  receiptFileIds?: number[];
 };
 
 export type CreatedEntry = {
@@ -285,9 +304,6 @@ export type CreatedEntry = {
  * 등록자가 총무(OWNER)면 즉시 APPROVED, 일반 관리자(MEMBER)면 PENDING으로
  * 생성된다(Entry.txt 정책 메모, "기획 글로벌 정책"). 화면은 반환된
  * `approvalStatus`로 안내 문구만 갈라 보여주면 된다 — 직접 정할 수 없다.
- *
- * `receiptFileIds`를 안 받는다 — 이 라운드엔 실제 카메라·갤러리 접근이 없어
- * (docs/api-gaps.md 참고) 실제로 업로드된 파일이 없다. 생기면 이 함수에 추가한다.
  */
 export async function createEntry(
   ledgerId: string,
@@ -304,6 +320,9 @@ export async function createEntry(
   }
   if (input.managerUserId) {
     body.managerUserId = Number(input.managerUserId);
+  }
+  if (input.receiptFileIds && input.receiptFileIds.length > 0) {
+    body.receiptFileIds = input.receiptFileIds;
   }
 
   const response = await request<EntryCreateResponse>(

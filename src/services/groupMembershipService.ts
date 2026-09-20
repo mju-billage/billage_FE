@@ -16,6 +16,8 @@ type MembershipResponse = {
   name: string;
   role: GroupRole;
   joinedAt: string;
+  /** 아직 서버가 안 준다(2026-09-21 실호출). 오면 그대로 쓴다. */
+  profileImageUrl?: string | null;
 };
 
 type InvitationResponse = {
@@ -36,6 +38,7 @@ function toGroupMembership(
   groupId: string,
   response: MembershipResponse,
 ): GroupMembership {
+  const isMe = String(response.userId) === getCurrentUser()?.userId;
   return {
     membershipId: String(response.membershipId),
     groupId,
@@ -43,7 +46,9 @@ function toGroupMembership(
     name: response.name,
     role: response.role,
     joinedAt: response.joinedAt,
-    isMe: String(response.userId) === getCurrentUser()?.userId,
+    profileImageUrl:
+      response.profileImageUrl ?? (isMe ? getCurrentUser()?.profileImageUrl : null) ?? null,
+    isMe,
   };
 }
 
@@ -88,6 +93,23 @@ export async function createInvitation(groupId: string): Promise<string> {
   const response = await request<InvitationResponse>(
     `/api/v1/groups/${groupId}/invitations`,
     { method: 'POST' },
+  );
+  setGroupInviteCode(groupId, response.invitationCode);
+  return response.invitationCode;
+}
+
+/**
+ * 2026-09-06 신규 연동. 명세 GroupMembership.txt 7번(`구현 완료`) — "지금 코드를
+ * 읽는" 조회 전용 엔드포인트다. 이게 없던 동안은 화면 진입마다 `createInvitation`
+ * (발급, 매번 새 코드)을 부를 수 없어(재발급마다 이전 코드가 무효화됨) 사용자가
+ * 카드를 직접 눌러야만 최초 1회 발급하는 우회를 썼다 — 이제 진입 시 이 함수로
+ * 먼저 조회하고, `INVITATION_NOT_FOUND`(코드가 아예 없음)일 때만
+ * `createInvitation`으로 최초 발급하면 된다.
+ */
+export async function getCurrentInvitation(groupId: string): Promise<string> {
+  const response = await request<InvitationResponse>(
+    `/api/v1/groups/${groupId}/invitations/current`,
+    { method: 'GET' },
   );
   setGroupInviteCode(groupId, response.invitationCode);
   return response.invitationCode;

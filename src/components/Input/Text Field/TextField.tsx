@@ -24,6 +24,8 @@ const CLOSE_ICON = require('../../../assets/icons/action/Close.png');
 
 type TextFieldProps = {
   label?: string;
+  /** true면 라벨 우측에 파란 별표(필수 표시)를 붙인다 — 시안 실측 `#3772E4`(6개 시트 전부 파랑), 토큰은 `FOREGROUND_SECONDARY`. */
+  required?: boolean;
   value: string;
   onChangeText: (text: string) => void;
   placeholder: string;
@@ -41,6 +43,9 @@ type TextFieldProps = {
   maxLength?: number;
   keyboardType?: KeyboardTypeOptions;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  autoFocus?: boolean;
+  /** 포커스가 필드를 벗어났을 때 호출된다(입력 중이 아닌 시점에 검증 에러를 띄우려는 화면용). */
+  onBlur?: () => void;
 };
 
 /**
@@ -53,6 +58,7 @@ type TextFieldProps = {
 const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
   {
     label,
+    required = false,
     value,
     onChangeText,
     placeholder,
@@ -67,6 +73,8 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
     maxLength,
     keyboardType,
     autoCapitalize,
+    autoFocus = false,
+    onBlur,
   },
   ref,
 ) {
@@ -86,6 +94,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
       {label && (
         <Text style={[styles.label, disabled && styles.labelDisabled]}>
           {label}
+          {required && <Text style={styles.requiredMark}> *</Text>}
         </Text>
       )}
       <View style={[styles.inputRow, { borderBottomColor: underlineColor }]}>
@@ -97,13 +106,22 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           placeholder={placeholder}
           placeholderTextColor={FOREGROUND_DISABLED}
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onBlur={() => {
+            setIsFocused(false);
+            onBlur?.();
+          }}
           secureTextEntry={isSecure}
           maxLength={maxLength}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
+          autoFocus={autoFocus}
           editable={!disabled}
         />
+        {onClear && value.length > 0 && !disabled && (
+          <Pressable onPress={onClear} hitSlop={8}>
+            <Image source={CLOSE_ICON} style={styles.clearIcon} />
+          </Pressable>
+        )}
         {suffix && (
           <Text style={[styles.suffix, disabled && styles.inputDisabled]}>
             {suffix}
@@ -111,15 +129,11 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
         )}
         {secureToggle && !disabled && (
           <Pressable onPress={() => setIsSecure(!isSecure)}>
+            {/* 시안(로그인·가입 정보 입력·비밀번호 변경 시트 공통): 마스킹 중 = 사선 눈, 노출 중 = 열린 눈(사선 사라짐). */}
             <Image
-              source={isSecure ? EYE_ICON : EYE_CLOSED_ICON}
+              source={isSecure ? EYE_CLOSED_ICON : EYE_ICON}
               style={styles.toggleIcon}
             />
-          </Pressable>
-        )}
-        {onClear && value.length > 0 && !disabled && (
-          <Pressable onPress={onClear} hitSlop={8}>
-            <Image source={CLOSE_ICON} style={styles.clearIcon} />
           </Pressable>
         )}
       </View>
@@ -151,6 +165,9 @@ const styles = StyleSheet.create({
   labelDisabled: {
     color: FOREGROUND_DISABLED,
   },
+  requiredMark: {
+    color: FOREGROUND_SECONDARY,
+  },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -179,6 +196,7 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
   clearIcon: {
+    marginRight: 4,
     width: 16,
     height: 16,
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,

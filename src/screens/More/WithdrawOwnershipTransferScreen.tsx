@@ -17,7 +17,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   useFocusEffect,
   useNavigation,
@@ -26,9 +25,11 @@ import {
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Avatar from '../../components/Data Display/Avatar/Avatar';
 import Button from '../../components/Input/Button/Button';
+import CardBase from '../../components/Data Display/Card/CardBase';
 import * as groupMembershipService from '../../services/groupMembershipService';
 import type { GroupMembership } from '../../types/groupMembership';
 import { ApiError } from '../../services/apiClient';
@@ -128,7 +129,7 @@ function WithdrawOwnershipTransferScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar
         type="sub"
         title={WITHDRAW_TRANSFER_TITLE}
@@ -167,28 +168,30 @@ function WithdrawOwnershipTransferScreen() {
             {groups.map(group => (
               <View key={group.groupId} style={styles.groupSection}>
                 <Text style={styles.groupName}>{group.name}</Text>
-                {(candidatesByGroup[group.groupId] ?? []).map(candidate => {
-                  const selected =
-                    selections[group.groupId] === candidate.userId;
-                  return (
-                    <Pressable
-                      key={candidate.membershipId}
-                      style={styles.memberRow}
-                      onPress={() =>
-                        setSelections(prev => ({
-                          ...prev,
-                          [group.groupId]: candidate.userId,
-                        }))
-                      }
-                    >
-                      <Avatar type="icon" size="sm" />
-                      <Text style={styles.memberName}>{candidate.name}</Text>
-                      {selected && (
-                        <Image source={CHECK_ICON} style={styles.checkIcon} />
-                      )}
-                    </Pressable>
-                  );
-                })}
+                <CardBase>
+                  {(candidatesByGroup[group.groupId] ?? []).map(candidate => {
+                    const selected =
+                      selections[group.groupId] === candidate.userId;
+                    return (
+                      <Pressable
+                        key={candidate.membershipId}
+                        style={styles.memberRow}
+                        onPress={() =>
+                          setSelections(prev => ({
+                            ...prev,
+                            [group.groupId]: candidate.userId,
+                          }))
+                        }
+                      >
+                        <Avatar type="icon" size="sm" style="neutral" />
+                        <Text style={styles.memberName}>{candidate.name}</Text>
+                        {selected && (
+                          <Image source={CHECK_ICON} style={styles.checkIcon} />
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </CardBase>
               </View>
             ))}
           </ScrollView>
@@ -203,14 +206,11 @@ function WithdrawOwnershipTransferScreen() {
           </View>
         </>
       )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     paddingHorizontal: 24,
     paddingTop: 16,

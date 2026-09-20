@@ -17,15 +17,18 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import SearchField from '../../components/Input/Search/SearchField';
-import FolderItem from '../../components/Data Display/Folder/FolderItem';
+import FolderItem, {
+  FOLDER_GRID_COLUMNS,
+  FOLDER_GRID_COLUMN_GAP,
+} from '../../components/Data Display/Folder/FolderItem';
 import { getActiveGroup } from '../../types/group';
 import * as folderService from '../../services/folderService';
 import type { FolderItemEntry } from '../../services/folderService';
@@ -53,7 +56,6 @@ import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const SEARCH_DEBOUNCE_MS = 300;
-const GRID_COLUMNS = 3;
 
 type LoadState = 'loading' | 'error' | 'ready';
 type ReportLedgerSelectNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -167,13 +169,13 @@ function ReportLedgerSelectScreen() {
   };
 
   const handleConfirm = () => {
-    navigation.navigate('ReportCreateByLedger', {
+    navigation.popTo('ReportCreateByLedger', {
       selectedLedgers: Array.from(selected, ([id, name]) => ({ id, name })),
     });
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="secondary">
       <AppBar type="sub" title={REPORT_LEDGER_SELECT_TITLE} onBackPress={handleBack} />
 
       <View style={styles.body}>
@@ -181,6 +183,7 @@ function ReportLedgerSelectScreen() {
           value={keyword}
           onChangeText={setKeyword}
           placeholder={REPORT_LEDGER_SELECT_SEARCH_PLACEHOLDER}
+          variant="outline"
         />
 
         {loadState === 'loading' && (
@@ -216,7 +219,7 @@ function ReportLedgerSelectScreen() {
               <FlatList
                 data={items}
                 keyExtractor={item => `${item.itemType}-${item.id}`}
-                numColumns={GRID_COLUMNS}
+                numColumns={FOLDER_GRID_COLUMNS}
                 columnWrapperStyle={styles.gridRow}
                 contentContainerStyle={styles.listContent}
                 renderItem={({ item }) => (
@@ -244,14 +247,11 @@ function ReportLedgerSelectScreen() {
           </>
         )}
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   },
   gridRow: {
     justifyContent: 'flex-start',
-    gap: 8,
+    gap: FOLDER_GRID_COLUMN_GAP,
   },
   footer: {
     paddingVertical: 16,

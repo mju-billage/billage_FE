@@ -1,5 +1,9 @@
 /** @screen DUE-2-PAGE-03-0 회비 상세 */
 /** @screen DUE-2-PAGE-03-1 회비 상세_마감된 회비 / 회비 상세_예정된 회비 (state로 분기) */
+/** @screen DUE-3-MODAL-01-0 회비 삭제 (확인 Dialog) */
+/** @screen DUE-3-MODAL-02-0 회비 마감 (확인 Dialog, OPEN 상태에서만 노출) */
+/** @screen DUE-3-SNACKBAR-01-0 입금 확인 ("납부 완료하기" 성공 시) */
+/** @screen DUE-3-SNACKBAR-02-0 입금 취소 ("납부 취소하기" 성공 시) */
 /**
  * 6-A(DUE 화면 구현, 조회 전용): "회비 상세_마감된 회비"와 "회비 상세_예정된
  * 회비" 명세가 같은 Screen ID(`DUE-2-PAGE-03-1`)를 쓴다 — 확인 결과 오기가
@@ -57,7 +61,6 @@
  */
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -72,6 +75,7 @@ import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import FolderMoreMenu from '../Folder/FolderMoreMenu';
 import type { MenuItem } from '../../components/Navigation/Menu/Menu';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import type { DuesDetail, DuesMember, PaymentStatus } from '../../types/dues';
 import { getActiveGroup } from '../../types/group';
 import * as duesService from '../../services/duesService';
@@ -118,7 +122,10 @@ import {
   SNACKBAR_DUES_PAYMENT_CANCELLED_SUFFIX,
   SNACKBAR_DUES_PAYMENT_CONFIRMED_SUFFIX,
 } from '../../constants/duesScreenText';
-import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import {
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const MENU_ICON = require('../../assets/icons/action/Menu Vertical.png');
@@ -258,11 +265,12 @@ function DuesDetailScreen() {
 
   const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
 
+  // DUE-2-PAGE-03-0 시안 Case A(CLOSED): 메뉴는 "회비 수정 / 회비 삭제"만 남는다
+  // — "회비 수정"은 CLOSED에서도 노출된다("모임원 선택"/"회비 마감"만 숨는다).
+  // design-verification.md §5-13 참고.
   const menuItems: MenuItem[] = detail
     ? [
-        ...(detail.status !== 'CLOSED'
-          ? [{ key: 'edit', label: DUES_MENU_EDIT_LABEL }]
-          : []),
+        { key: 'edit', label: DUES_MENU_EDIT_LABEL },
         ...(detail.status !== 'CLOSED'
           ? [{ key: 'members', label: DUES_MENU_MEMBERS_LABEL }]
           : []),
@@ -293,11 +301,21 @@ function DuesDetailScreen() {
     setIsDeleting(true);
     try {
       await duesService.deleteDues(detail.id);
-      navigation.navigate('Main', {
-        screen: 'Dues',
-        params: {
-          snackbarMessage: `${SNACKBAR_DUES_DELETED_PREFIX}${detail.title}${SNACKBAR_DUES_DELETED_SUFFIX}`,
-        },
+      // navigate가 아니라 reset — 삭제된 상세 화면을 스택에서 걷어내 뒤로가기로
+      // 되돌아갈 수 없게 한다(design-verification.md §5-11).
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Main',
+            params: {
+              screen: 'Dues',
+              params: {
+                snackbarMessage: `${SNACKBAR_DUES_DELETED_PREFIX}${detail.title}${SNACKBAR_DUES_DELETED_SUFFIX}`,
+              },
+            },
+          },
+        ],
       });
     } catch (error) {
       setDeleteDialogVisible(false);
@@ -314,11 +332,21 @@ function DuesDetailScreen() {
     setIsClosing(true);
     try {
       await duesService.closeDues(detail.id);
-      navigation.navigate('Main', {
-        screen: 'Dues',
-        params: {
-          snackbarMessage: `${SNACKBAR_DUES_CLOSED_PREFIX}${detail.title}${SNACKBAR_DUES_CLOSED_SUFFIX}`,
-        },
+      // navigate가 아니라 reset — 마감 폼/상세를 스택에서 걷어내 뒤로가기로
+      // 되돌아갈 수 없게 한다(design-verification.md §5-11).
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Main',
+            params: {
+              screen: 'Dues',
+              params: {
+                snackbarMessage: `${SNACKBAR_DUES_CLOSED_PREFIX}${detail.title}${SNACKBAR_DUES_CLOSED_SUFFIX}`,
+              },
+            },
+          },
+        ],
       });
     } catch (error) {
       setCloseDialogVisible(false);
@@ -330,7 +358,7 @@ function DuesDetailScreen() {
 
   if (loadState === 'loading' || loadState === 'error') {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="primary">
         <AppBar title="" onBackPress={() => navigation.goBack()} />
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>
@@ -345,7 +373,7 @@ function DuesDetailScreen() {
             />
           )}
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
@@ -366,8 +394,18 @@ function DuesDetailScreen() {
     !isClosed && !isScheduled ? getDDaySeverity(daysLeft) : 'neutral';
   const memberCount = tab === 'paid' ? detail.paidCount : detail.unpaidCount;
 
+  // DUE-2-PAGE-03-0(+03-1 진행중/예정/마감 상태 전부 같은 파일) 시안이 옅은
+  // 블루 — design-verification.md §5-7/§5-13.
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarMessage ? (
+          <Snackbar visible title={snackbarMessage} />
+        ) : undefined
+      }
+      snackbarOffset={canChangeStatus ? 68 : 0}
+    >
       <AppBar
         title={detail.title}
         onBackPress={() => navigation.goBack()}
@@ -501,20 +539,11 @@ function DuesDetailScreen() {
         onCancel={() => setCloseDialogVisible(false)}
         onConfirm={handleConfirmClose}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     paddingHorizontal: 24,
     paddingTop: 16,
@@ -562,12 +591,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 16,
     paddingTop: 8,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

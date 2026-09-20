@@ -12,6 +12,7 @@ import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Button from '../../components/Input/Button/Button';
 import TextButton from '../../components/Input/Button/TextButton';
 import FilterPill from '../../components/Input/Filter/FilterPill';
+import type { EntryListParams } from '../../services/entryService';
 import {
   FILTER_APPLY_LABEL,
   FILTER_RESET_LABEL,
@@ -47,6 +48,20 @@ export const DEFAULT_LEDGER_FILTER: LedgerFilterValue = {
   sort: 'latest',
 };
 
+/** 필터 값을 `GET /ledgers/{ledgerId}/entries` 쿼리로 바꾼다 — 필터는 서버가 거르므로
+ * 이 값을 `entryService.getEntries()`에 그대로 얹으면 된다(장부 상세·내역 검색 공용).
+ * 최신순은 서버 기본 정렬(`occurredOn,desc` + `id,desc`)을 그대로 쓰려고 `sort`를 안 넘긴다. */
+export function toEntryFilterQuery(
+  value: LedgerFilterValue,
+): Pick<EntryListParams, 'type' | 'status' | 'sort'> {
+  return {
+    type: value.type === 'income' ? 'INCOME' : value.type === 'expense' ? 'EXPENSE' : undefined,
+    status:
+      value.status === 'pending' ? 'PENDING' : value.status === 'approved' ? 'APPROVED' : undefined,
+    sort: value.sort === 'oldest' ? 'occurredOn,asc' : undefined,
+  };
+}
+
 type LedgerFilterSheetProps = {
   visible: boolean;
   value: LedgerFilterValue;
@@ -54,7 +69,9 @@ type LedgerFilterSheetProps = {
   onApply: (value: LedgerFilterValue) => void;
 };
 
-/** 내역 검색 화면에서 사용하는 필터 바텀시트: 구분/승인 상태/정렬. */
+/** 장부 상세·내역 검색 화면이 함께 쓰는 필터 바텀시트: 구분/승인 상태/정렬. 필터 값은
+ * 호출한 화면이 들고(`value`/`onApply`), 목록 반영은 그 화면이 `toEntryFilterQuery()`로
+ * 서버에 다시 조회하는 방식이다. */
 function LedgerFilterSheet({
   visible,
   value,

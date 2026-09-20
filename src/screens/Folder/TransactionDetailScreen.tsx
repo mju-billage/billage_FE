@@ -11,10 +11,21 @@
  * 새 화면(DTB-2-PAGE-03-0, 미구현)을 만들지 않고 이 화면에 버튼 하나로 얹었다 —
  * 장부 상세 목록에서 승인 대기 내역도 이미 탭해서 들어올 수 있어 여기가 유일하게
  * 실제로 도달 가능한 지점이다.
+ *
+ * **상세 내역_납부관리_수입내역 변형(2026-09-11 추가, 시안:
+ * `내역_상세내역조회_납부관리수입내역.png`, Screen ID 칸이 빈 데이터 기반 변형)**:
+ * 마감된 회비에서 생성된 수입 내역(`entry.duesExists`)이면 납부자 명수·명단과
+ * "회비 상세보기" CTA가 추가로 뜬다(`GET /entries/{id}`의 `payerCount`/`payers[]`/
+ * `duesId`, Entry.txt §8). 시안 앱바엔 휴지통 아이콘만 있고 연필(수정) 아이콘이
+ * 없어 이 변형에선 수정 진입점을 숨긴다 — 삭제 자체는 일반 삭제와 동일 동작이고
+ * "해당 회비 상세는 삭제되지 않는다"는 시안 문구는 삭제를 막으라는 게 아니라
+ * 이 내역을 지워도 회비 기록 자체는 안 지워진다는 데이터 무결성 설명이다.
+ * `duesExists === false`(회비가 나중에 삭제된 경우)의 화면 표현은 시안에 없어
+ * §5-4에 기획 확인 항목으로 남겼다 — 지금은 일반 내역과 동일하게 보여준다.
  */
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -48,11 +59,14 @@ import {
   TRANSACTION_DETAIL_LOADING,
   TRANSACTION_DETAIL_RETRY_LABEL,
   TRANSACTION_DETAIL_TITLE,
+  TRANSACTION_DUES_DETAIL_CTA_LABEL,
   TRANSACTION_ITEM_NAME_LABEL,
   TRANSACTION_LEDGER_LABEL,
   TRANSACTION_MANAGER_LABEL,
+  TRANSACTION_MEMO_EMPTY_PLACEHOLDER,
   TRANSACTION_MEMO_LABEL,
   TRANSACTION_MEMO_PLACEHOLDER,
+  TRANSACTION_PAYER_COUNT_SUFFIX,
   TRANSACTION_RECEIPT_LABEL,
 } from '../../constants/ledgerScreenText';
 import {
@@ -62,6 +76,7 @@ import {
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import Divider from '../../components/Data Display/Divider/Divider';
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const DELETE_ICON = require('../../assets/icons/action/Close.png');
@@ -160,7 +175,7 @@ function TransactionDetailScreen() {
 
   if (loadState === 'loading' || loadState === 'error') {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="secondary">
         <AppBar title={TRANSACTION_DETAIL_TITLE} onBackPress={() => navigation.goBack()} />
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>
@@ -170,7 +185,7 @@ function TransactionDetailScreen() {
             <Button label={TRANSACTION_DETAIL_RETRY_LABEL} onPress={load} hierarchy="secondary" style={{ alignSelf: 'center' }} />
           )}
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
@@ -187,21 +202,33 @@ function TransactionDetailScreen() {
   const managerValue = entry.manager.name;
   const canEditDelete = viewerIsOwner;
   const isPending = entry.approvalStatus === 'PENDING';
+  const isDuesLinked = entry.duesExists;
+  const canEdit = canEditDelete && !isDuesLinked;
+  const duesId = entry.duesId;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="secondary"
+      snackbar={
+        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+      }
+    >
       <AppBar
         title={TRANSACTION_DETAIL_TITLE}
         onBackPress={() => navigation.goBack()}
         rightIcons={
           canEditDelete
             ? [
-                {
-                  icon: EDIT_ICON,
-                  onPress: () =>
-                    navigation.navigate('TransactionRegister', { transactionId }),
-                  accessibilityLabel: 'edit',
-                },
+                ...(canEdit
+                  ? [
+                      {
+                        icon: EDIT_ICON,
+                        onPress: () =>
+                          navigation.navigate('TransactionRegister', { transactionId }),
+                        accessibilityLabel: 'edit',
+                      },
+                    ]
+                  : []),
                 {
                   icon: DELETE_ICON,
                   onPress: () => setDeleteDialogVisible(true),
@@ -230,8 +257,11 @@ function TransactionDetailScreen() {
         <Field label={TRANSACTION_LEDGER_LABEL} value={ledgerNameValue} />
         <Field
           label={TRANSACTION_MEMO_LABEL}
-          value={memoValue || TRANSACTION_MEMO_PLACEHOLDER}
+          value={memoValue || TRANSACTION_MEMO_EMPTY_PLACEHOLDER}
         />
+        <View style={{marginTop: 12}}>
+          <Divider />
+        </View>
 
         {entry.receiptFiles.length > 0 && (
           <View style={styles.section}>
@@ -254,6 +284,21 @@ function TransactionDetailScreen() {
           </View>
         )}
 
+        {isDuesLinked && (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>
+              {entry.payerCount}
+              {TRANSACTION_PAYER_COUNT_SUFFIX}
+            </Text>
+            {entry.payers.map(payer => (
+              <View key={payer.memberId} style={styles.payerRow}>
+                <Text style={styles.payerName}>{payer.name}</Text>
+                <Text style={styles.payerAmount}>{payer.amount.toLocaleString()}원</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
         {isPending && viewerIsOwner && (
           <View style={styles.approveButtonWrapper}>
             <Button
@@ -266,6 +311,16 @@ function TransactionDetailScreen() {
         )}
       </ScrollView>
 
+      {isDuesLinked && duesId && (
+        <View style={styles.footer}>
+          <Button
+            label={TRANSACTION_DUES_DETAIL_CTA_LABEL}
+            onPress={() => navigation.navigate('DuesDetail', { duesId })}
+            fullWidth
+          />
+        </View>
+      )}
+
       <Dialog
         visible={deleteDialogVisible}
         title={TRANSACTION_DELETE_CONFIRM_TITLE}
@@ -276,13 +331,7 @@ function TransactionDetailScreen() {
         onCancel={() => setDeleteDialogVisible(false)}
         onConfirm={handleConfirmDelete}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
@@ -296,9 +345,6 @@ function Field({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     paddingTop: 16,
     paddingHorizontal: 24,
@@ -327,8 +373,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: BORDER_NEUTRAL_NORMAL,
   },
   fieldLabel: {
     ...TYPOGRAPHY.body2,
@@ -354,11 +398,20 @@ const styles = StyleSheet.create({
   approveButtonWrapper: {
     marginTop: 24,
   },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
+  payerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+  },
+  payerName: {
+    ...TYPOGRAPHY.body1,
+  },
+  payerAmount: {
+    ...TYPOGRAPHY.body1,
+  },
+  footer: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
   },
 });
 

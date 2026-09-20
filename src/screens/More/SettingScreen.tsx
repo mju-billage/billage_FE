@@ -19,7 +19,7 @@
  */
 import { useCallback, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -102,7 +102,7 @@ function SettingsScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar
         type="sub"
         title={SETTINGS_TITLE}
@@ -148,52 +148,52 @@ function SettingsScreen() {
             </Pressable>
           </CardBase>
 
-          <ToolsMenu
-            sections={[
-              {
-                title: SETTINGS_SUPPORT_SECTION_TITLE,
-                items: [
-                  {
-                    key: 'notice',
-                    icon: NOTICE_ICON,
-                    label: SETTINGS_NOTICE_LABEL,
-                    onPress: () => navigation.navigate('NoticeList'),
-                  },
-                  {
-                    key: 'inquiry',
-                    icon: INQUIRY_ICON,
-                    label: SETTINGS_INQUIRY_LABEL,
-                    onPress: () => navigation.navigate('Inquiry'),
-                  },
-                  {
-                    key: 'terms',
-                    icon: TERMS_ICON,
-                    label: SETTINGS_TERMS_LABEL,
-                    onPress: () => navigation.navigate('Terms'),
-                  },
-                  {
-                    key: 'version',
-                    icon: VERSION_ICON,
-                    label: SETTINGS_APP_VERSION_LABEL,
-                    tag: `v${APP_VERSION}`,
-                    onPress: () => {},
-                  },
-                ],
-              },
-            ]}
-          />
+          <CardBase style={styles.supportCard}>
+            <ToolsMenu
+              flush
+              sections={[
+                {
+                  title: SETTINGS_SUPPORT_SECTION_TITLE,
+                  items: [
+                    {
+                      key: 'notice',
+                      icon: NOTICE_ICON,
+                      label: SETTINGS_NOTICE_LABEL,
+                      onPress: () => navigation.navigate('NoticeList'),
+                    },
+                    {
+                      key: 'inquiry',
+                      icon: INQUIRY_ICON,
+                      label: SETTINGS_INQUIRY_LABEL,
+                      onPress: () => navigation.navigate('Inquiry'),
+                    },
+                    {
+                      key: 'terms',
+                      icon: TERMS_ICON,
+                      label: SETTINGS_TERMS_LABEL,
+                      onPress: () => navigation.navigate('Terms'),
+                    },
+                    {
+                      key: 'version',
+                      icon: VERSION_ICON,
+                      label: SETTINGS_APP_VERSION_LABEL,
+                      tag: `v${APP_VERSION}`,
+                      onPress: () => {},
+                    },
+                  ],
+                },
+              ]}
+            />
+          </CardBase>
         </View>
       )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 8,
     gap: 12,
   },
@@ -204,6 +204,12 @@ const styles = StyleSheet.create({
   },
   profileName: {
     ...TYPOGRAPHY.subtitle2,
+  },
+  // "고객 지원 및 정보" 제목+항목 4개를 흰 카드 하나로 묶는다. 위 16(제목), 아래는 항목 자체 패딩 12가 있어 4만.
+  supportCard: {
+    paddingTop: 16,
+    paddingBottom: 4,
+    paddingHorizontal: 12,
   },
   menuRow: {
     flexDirection: 'row',

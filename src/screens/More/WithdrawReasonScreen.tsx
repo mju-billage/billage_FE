@@ -6,21 +6,22 @@
  * `ownershipTransfers`(없으면 빈 배열, [Case B])를 그대로 같이 보낸다 — 권한
  * 이전과 계정 삭제가 한 트랜잭션이라서다(Auth.txt 11번 정책 메모).
  *
- * ⚠️ CTA 버튼 문구가 시안 안에서 서로 다르다 — UI 요소 표(No.4)는 "선택 완료"라고
- * 적어 두었지만 목업 이미지 두 곳(메인 프레임 2장)엔 "탈퇴하기"로 그려져 있다.
- * 이 화면 CTA는 실제 탈퇴를 실행하지 않고 다음(최종 확인 모달)으로 넘어가기만
- * 하므로 액션 성격상 표의 "선택 완료"를 따랐다 — 실제로는 "탈퇴하기"가 맞을 수도
- * 있어 보고 대상.
+ * CTA 버튼 문구는 "탈퇴하기"로 확정했다(2026-09-11) — UI 요소 표(No.4)와 Case A
+ * 프레임은 "선택 완료"라 적었지만, 같은 화면의 메인 프레임 2장(COM-2-PAGE-05-0)과
+ * 다음 화면(COM-3-MODAL-01-0)의 배경 프레임까지 총 3곳이 "탈퇴하기"로 그려져
+ * 있어 시각적 다수를 따랐다(`WITHDRAW_REASON_SUBMIT_LABEL` 주석 참고). 이 CTA는
+ * 실제 탈퇴를 실행하지 않고 다음(최종 확인 모달)으로 넘어가기만 한다.
  */
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { CommonActions, useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
+import CardBase from '../../components/Data Display/Card/CardBase';
 import CheckBox from '../../components/Input/Control/CheckBox';
 import TextField from '../../components/Input/Text Field/TextField';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
@@ -127,7 +128,7 @@ function WithdrawReasonScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar
         type="sub"
         title={WITHDRAW_REASON_TITLE}
@@ -138,27 +139,29 @@ function WithdrawReasonScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.heading}>{WITHDRAW_REASON_HEADING}</Text>
 
-        {REASON_OPTIONS.map(option => (
-          <View key={option.code}>
-            <View style={styles.reasonRow}>
-              <Text style={styles.reasonLabel}>{option.label}</Text>
-              <CheckBox
-                checked={selectedReasons.includes(option.code)}
-                onToggle={() => toggleReason(option.code)}
-              />
-            </View>
-            {option.code === 'ETC' && etcSelected && (
-              <View style={styles.etcFieldWrapper}>
-                <TextField
-                  value={reasonDetail}
-                  onChangeText={setReasonDetail}
-                  placeholder={WITHDRAW_REASON_ETC_PLACEHOLDER}
-                  maxLength={WITHDRAW_REASON_ETC_MAX_LENGTH}
+        <CardBase>
+          {REASON_OPTIONS.map(option => (
+            <View key={option.code}>
+              <View style={styles.reasonRow}>
+                <Text style={styles.reasonLabel}>{option.label}</Text>
+                <CheckBox
+                  checked={selectedReasons.includes(option.code)}
+                  onToggle={() => toggleReason(option.code)}
                 />
               </View>
-            )}
-          </View>
-        ))}
+              {option.code === 'ETC' && etcSelected && (
+                <View style={styles.etcFieldWrapper}>
+                  <TextField
+                    value={reasonDetail}
+                    onChangeText={setReasonDetail}
+                    placeholder={WITHDRAW_REASON_ETC_PLACEHOLDER}
+                    maxLength={WITHDRAW_REASON_ETC_MAX_LENGTH}
+                  />
+                </View>
+              )}
+            </View>
+          ))}
+        </CardBase>
 
         {errorMessage.length > 0 && (
           <Text style={styles.errorText}>{errorMessage}</Text>
@@ -185,14 +188,11 @@ function WithdrawReasonScreen() {
         onCancel={() => setConfirmDialogVisible(false)}
         onConfirm={handleWithdraw}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     paddingHorizontal: 24,
     paddingTop: 16,

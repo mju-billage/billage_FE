@@ -1,7 +1,7 @@
 /** @screen ETC-3-PAGE-09-0 공지사항 */
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -61,7 +61,7 @@ function NoticeListScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar type="sub" title={NOTICE_LIST_TITLE} onBackPress={() => navigation.goBack()} />
 
       {loadState === 'loading' && (
@@ -103,14 +103,11 @@ function NoticeListScreen() {
           )}
         />
       )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   listContent: {
     paddingHorizontal: 24,
     paddingTop: 8,

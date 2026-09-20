@@ -8,21 +8,20 @@
  * 많은 모임은 그리드 전체가 원본 수십 장을 내려받는 셈이라 느려질 수 있다 —
  * 알려진 제약으로 남겨둔다(design-verification.md §5-4).
  */
-import { Dimensions, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useMemo } from 'react';
+import { FlatList, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Thumbnail from '../../components/Data Display/Image Placeholder/Thumbnail';
 import type { Receipt } from '../../types/receipt';
 import { buildAuthenticatedImageSource } from '../../utils/authenticatedImage';
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
+// 폴더 그리드(`FolderItem`의 FOLDER_GRID_*)는 시안 실측 gap 16으로 변경됨, 앨범은 미실측 —
+// 그래서 이 파일의 gap 8/패딩 24는 폴더와 묶지 않고 그대로 둔다. 앨범 시안(`더보기_증빙자료앨범.png`)
+// 목업은 좌우 여백 약 20dp/타일 간격 약 7~8dp로 보이나 축소 이미지라 실측 필요.
 const GRID_COLUMNS = 3;
 const GRID_GAP = 8;
 const HORIZONTAL_PADDING = 24;
-const TILE_SIZE =
-  (Dimensions.get('window').width -
-    HORIZONTAL_PADDING * 2 -
-    GRID_GAP * (GRID_COLUMNS - 1)) /
-  GRID_COLUMNS;
 
 type ReceiptGridProps = {
   items: Receipt[];
@@ -32,6 +31,14 @@ type ReceiptGridProps = {
 };
 
 function ReceiptGrid({ items, emptyText, onEndReached, onPressItem }: ReceiptGridProps) {
+  const { width: windowWidth } = useWindowDimensions();
+  const tileSize = useMemo(
+    () =>
+      (windowWidth - HORIZONTAL_PADDING * 2 - GRID_GAP * (GRID_COLUMNS - 1)) /
+      GRID_COLUMNS,
+    [windowWidth],
+  );
+
   if (items.length === 0) {
     return (
       <View style={styles.emptyState}>
@@ -53,7 +60,7 @@ function ReceiptGrid({ items, emptyText, onEndReached, onPressItem }: ReceiptGri
         const source = buildAuthenticatedImageSource(item.fileUrl);
         return (
           <Pressable onPress={() => onPressItem(item)}>
-            <Thumbnail imageUri={source.uri} imageHeaders={source.headers} size={TILE_SIZE} />
+            <Thumbnail imageUri={source.uri} imageHeaders={source.headers} size={tileSize} />
           </Pressable>
         );
       }}

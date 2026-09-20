@@ -22,9 +22,9 @@
  * `LedgerCreate`에 갔다가 돌아오는 포커스 복귀 시점엔 갱신된다 — 별도 이벤트
  * 연결 없이 포커스 재진입만으로 새 장부가 목록에 반영된다.
  */
-import { useCallback, useState } from 'react';
-import { ActivityIndicator, SectionList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, StyleSheet, Text, View } from 'react-native';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
@@ -40,6 +40,7 @@ import AmountCard from '../../components/Data Display/Card/AmountCard';
 import Chip from '../../components/Data Display/Chips/Chip';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import FloatingActionButton from '../../components/Input/Button/FAB';
+import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Navigation/BottomNavigation';
 import TransactionFilterSheet from './TransactionFilterSheet';
 import type { EntryGroupSummary, EntrySummary } from '../../types/entry';
 import {
@@ -65,7 +66,7 @@ import {
   FILTER_TYPE_INCOME,
   LEDGER_ENTRIES_LOADING_MORE,
 } from '../../constants/ledgerScreenText';
-import { CALENDAR_WEEKDAY_LABELS } from '../../constants/calendarScreenText';
+import { formatDateHeader } from '../../utils/dateHeader';
 import {
   TRANSACTIONS_COUNT_SUFFIX,
   TRANSACTIONS_EMPTY,
@@ -75,7 +76,12 @@ import {
   TRANSACTIONS_TAB_PENDING,
   TRANSACTIONS_TITLE,
 } from '../../constants/transactionScreenText';
-import { BLUE_50, FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import {
+  BACKGROUND_PRIMARY,
+  BACKGROUND_SECONDARY,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const FILTER_ICON = require('../../assets/icons/system/Filter.png');
@@ -96,13 +102,6 @@ const TABS: TabItem<TransactionsTab>[] = [
   { label: TRANSACTIONS_TAB_ALL, value: 'all' },
   { label: TRANSACTIONS_TAB_PENDING, value: 'pending' },
 ];
-
-/** 'YYYY-MM-DD' -> 'M월 D일 요일'. */
-function formatDateHeader(isoDate: string): string {
-  const [year, month, day] = isoDate.split('-').map(Number);
-  const jsDate = new Date(year, month - 1, day);
-  return `${month}월 ${day}일 ${CALENDAR_WEEKDAY_LABELS[jsDate.getDay()]}요일`;
-}
 
 type FilterChipInfo = { key: string; label: string };
 
@@ -141,6 +140,9 @@ function TransactionsScreen() {
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
+  const [cardBlockHeight, setCardBlockHeight] = useState(0);
+  const [controlsHeight, setControlsHeight] = useState(0);
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   const toErrorMessage = (error: unknown): string => {
     if (isNetworkError(error)) {
@@ -266,6 +268,30 @@ function TransactionsScreen() {
 
   const filterChips = getFilterChips(filter, ledgerOptions);
 
+  // 접히는 헤더: 카드 블록(파란 영역) 높이만큼 스크롤되는 동안 헤더가 같이 올라가고, 그 뒤엔
+  // Tabs~건수 블록이 AppBar 아래에 붙은 채 목록만 스크롤된다.
+  const showList = loadState === 'ready' && entries.length > 0;
+  const listTopInset = cardBlockHeight + controlsHeight;
+  const headerTranslateY = scrollY.interpolate({
+    inputRange: [0, Math.max(cardBlockHeight, 1)],
+    outputRange: [0, -cardBlockHeight],
+    extrapolate: 'clamp',
+  });
+  const handleScroll = useMemo(
+    () =>
+      Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+        useNativeDriver: true,
+      }),
+    [scrollY],
+  );
+
+  // 목록이 사라지는 상태(로딩·에러·빈 목록)에선 스크롤 위치가 0으로 돌아가므로 헤더도 펼친다.
+  useEffect(() => {
+    if (!showList) {
+      scrollY.setValue(0);
+    }
+  }, [showList, scrollY]);
+
   const handlePressTransaction = (entry: EntrySummary) => {
     navigation.navigate('TransactionDetail', { transactionId: entry.id });
   };
@@ -283,108 +309,129 @@ function TransactionsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary" edges={['top']}>
       <AppBar type="titleOnly" title={TRANSACTIONS_TITLE} />
 
       <View style={styles.body}>
-        <AmountCard
-          type="incomeExpense"
-          income={summary.totalIncome}
-          expense={summary.totalExpense}
-        />
+        <View style={styles.listArea}>
+          {loadState === 'loading' && (
+            <View style={[styles.stateContainer, { paddingTop: listTopInset + 40 }]}>
+              <Text style={styles.stateText}>{TRANSACTIONS_LOADING}</Text>
+            </View>
+          )}
 
-        <View style={styles.tabRow}>
-          <Tabs items={TABS} value={tab} onChange={setTab} showIcon={false} />
-        </View>
-
-        <View style={styles.actionRow}>
-          <View style={styles.iconRow}>
-            <IconButton
-              icon={FILTER_ICON}
-              onPress={() => setFilterSheetVisible(true)}
-            />
-            <IconButton
-              icon={SEARCH_ICON}
-              onPress={() => navigation.navigate('TransactionSearch')}
-            />
-          </View>
-        </View>
-
-        {filterChips.length > 0 && (
-          <View style={styles.chipRow}>
-            {filterChips.map(chip => (
-              <Chip
-                key={chip.key}
-                label={chip.label}
-                onRemove={() => removeFilterChip(chip.key)}
+          {loadState === 'error' && (
+            <View style={[styles.stateContainer, { paddingTop: listTopInset + 40 }]}>
+              <Text style={styles.stateText}>{loadErrorMessage}</Text>
+              <Button
+                label={TRANSACTIONS_RETRY_LABEL}
+                onPress={load}
+                hierarchy="secondary"
+                style={{ alignSelf: 'center' }}
               />
-            ))}
-          </View>
-        )}
+            </View>
+          )}
 
-        {loadState === 'loading' && (
-          <View style={styles.stateContainer}>
-            <Text style={styles.stateText}>{TRANSACTIONS_LOADING}</Text>
-          </View>
-        )}
+          {loadState === 'ready' && entries.length === 0 && (
+            <View style={[styles.emptyState, { paddingTop: listTopInset + 80 }]}>
+              <Text style={styles.emptyText}>{TRANSACTIONS_EMPTY}</Text>
+            </View>
+          )}
 
-        {loadState === 'error' && (
-          <View style={styles.stateContainer}>
-            <Text style={styles.stateText}>{loadErrorMessage}</Text>
-            <Button
-              label={TRANSACTIONS_RETRY_LABEL}
-              onPress={load}
-              hierarchy="secondary"
-              style={{ alignSelf: 'center' }}
+          {showList && (
+            <Animated.SectionList
+              sections={sections}
+              keyExtractor={item => item.id}
+              contentContainerStyle={styles.listContent}
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
+              onEndReachedThreshold={0.4}
+              onEndReached={loadMoreEntries}
+              // 접히는 헤더가 목록 위에 겹쳐 있어, 그 높이만큼 위를 비워 둔다.
+              ListHeaderComponent={<View style={{ height: listTopInset }} />}
+              ListFooterComponent={
+                isLoadingMore ? (
+                  <View style={styles.loadingMoreRow}>
+                    <ActivityIndicator size="small" />
+                    <Text style={styles.loadingMoreText}>
+                      {LEDGER_ENTRIES_LOADING_MORE}
+                    </Text>
+                  </View>
+                ) : null
+              }
+              renderSectionHeader={({ section }) => (
+                <Text style={styles.sectionHeader}>{section.title}</Text>
+              )}
+              renderItem={({ item }) => (
+                <TransactionListItem
+                  label={item.ledgerName}
+                  itemName={item.title}
+                  amount={item.type === 'INCOME' ? item.amount : -item.amount}
+                  hasReceipt={item.receiptCount > 0}
+                  isPendingApproval={item.approvalStatus === 'PENDING'}
+                  onPress={() => handlePressTransaction(item)}
+                />
+              )}
+            />
+          )}
+        </View>
+
+        {/* 스크롤하면 수입/지출/합계 카드는 위로 사라지고 Tabs·필터 줄·칩·건수는 AppBar 아래에 붙어 남는다. */}
+        <Animated.View
+          style={[styles.collapsingHeader, { transform: [{ translateY: headerTranslateY }] }]}
+        >
+          <View
+            style={styles.summarySection}
+            onLayout={event => setCardBlockHeight(event.nativeEvent.layout.height)}
+          >
+            <AmountCard
+              type="incomeExpense"
+              income={summary.totalIncome}
+              expense={summary.totalExpense}
             />
           </View>
-        )}
 
-        {loadState === 'ready' && (
-          <>
-            <Text style={styles.countText}>
-              {entries.length}
-              {TRANSACTIONS_COUNT_SUFFIX}
-            </Text>
+          <View
+            style={styles.controls}
+            onLayout={event => setControlsHeight(event.nativeEvent.layout.height)}
+          >
+            <View style={styles.tabsBleed}>
+              <Tabs items={TABS} value={tab} onChange={setTab} showIcon={false} fullWidth />
+            </View>
 
-            {entries.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>{TRANSACTIONS_EMPTY}</Text>
+            <View style={styles.actionRow}>
+              <View style={styles.iconRow}>
+                <IconButton
+                  icon={FILTER_ICON}
+                  onPress={() => setFilterSheetVisible(true)}
+                />
+                <IconButton
+                  icon={SEARCH_ICON}
+                  onPress={() => navigation.navigate('TransactionSearch')}
+                />
               </View>
-            ) : (
-              <SectionList
-                sections={sections}
-                keyExtractor={item => item.id}
-                contentContainerStyle={styles.listContent}
-                onEndReachedThreshold={0.4}
-                onEndReached={loadMoreEntries}
-                ListFooterComponent={
-                  isLoadingMore ? (
-                    <View style={styles.loadingMoreRow}>
-                      <ActivityIndicator size="small" />
-                      <Text style={styles.loadingMoreText}>
-                        {LEDGER_ENTRIES_LOADING_MORE}
-                      </Text>
-                    </View>
-                  ) : null
-                }
-                renderSectionHeader={({ section }) => (
-                  <Text style={styles.sectionHeader}>{section.title}</Text>
-                )}
-                renderItem={({ item }) => (
-                  <TransactionListItem
-                    label={item.ledgerName}
-                    itemName={item.title}
-                    amount={item.type === 'INCOME' ? item.amount : -item.amount}
-                    hasReceipt={item.receiptCount > 0}
-                    isPendingApproval={item.approvalStatus === 'PENDING'}
-                    onPress={() => handlePressTransaction(item)}
+            </View>
+
+            {filterChips.length > 0 && (
+              <View style={styles.chipRow}>
+                {filterChips.map(chip => (
+                  <Chip
+                    key={chip.key}
+                    label={chip.label}
+                    onRemove={() => removeFilterChip(chip.key)}
                   />
-                )}
-              />
+                ))}
+              </View>
             )}
-          </>
-        )}
+
+            {loadState === 'ready' && (
+              <Text style={styles.countText}>
+                {entries.length}
+                {TRANSACTIONS_COUNT_SUFFIX}
+              </Text>
+            )}
+          </View>
+        </Animated.View>
       </View>
 
       <FloatingActionButton
@@ -401,22 +448,44 @@ function TransactionsScreen() {
           navigation.navigate('LedgerCreate', { parentId: null })
         }
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: BLUE_50,
-  },
+  // overflow hidden: 위로 밀려 올라간 카드가 AppBar를 덮지 않게 자른다.
   body: {
     flex: 1,
-    paddingTop: 12,
-    paddingHorizontal: 24,
+    overflow: 'hidden',
   },
-  tabRow: {
-    marginTop: 16,
+  // 목록은 body 전체를 채우는 흰 영역이고, 카드·Tabs 헤더가 그 위에 겹친다(좌우 패딩은 안쪽만).
+  listArea: {
+    flex: 1,
+    paddingHorizontal: 24,
+    backgroundColor: BACKGROUND_SECONDARY,
+  },
+  collapsingHeader: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1,
+  },
+  // 파란 카드 블록. 위 12·아래 16(카드와 흰 영역 사이 간격)까지 포함해 접힌다.
+  summarySection: {
+    paddingTop: 12,
+    paddingBottom: 16,
+    paddingHorizontal: 20,
+    backgroundColor: BACKGROUND_PRIMARY,
+  },
+  // Tabs 이하 흰 영역. 목록이 이 뒤로 스크롤되므로 배경이 불투명해야 한다.
+  controls: {
+    paddingHorizontal: 24,
+    backgroundColor: BACKGROUND_SECONDARY,
+  },
+  // controls의 좌우 패딩 24를 상쇄해 탭을 화면 가로 전체로 편다.
+  tabsBleed: {
+    marginHorizontal: -24,
   },
   actionRow: {
     flexDirection: 'row',
@@ -425,6 +494,7 @@ const styles = StyleSheet.create({
   },
   iconRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     gap: 4,
   },
   chipRow: {
@@ -438,8 +508,9 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
     marginBottom: 8,
   },
+  // 탭바가 화면 위에 겹쳐 있어 그 높이 + 기존 96(FAB 가림 방지)만큼 비운다.
   listContent: {
-    paddingBottom: 96,
+    paddingBottom: BOTTOM_NAVIGATION_HEIGHT + 96,
   },
   // 12px+Bold 조합은 정식 스타일에 없어 body3+bold를 예외로 채택.
   sectionHeader: {

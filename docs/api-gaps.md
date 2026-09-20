@@ -45,22 +45,23 @@
 
 | 항목 | 무엇으로 풀렸는가 | 코드 반영 상태 |
 |---|---|---|
-| 모임 전체 내역 목록 API 없음 (구 (A) 최우선) | `GET /groups/{groupId}/entries`(잔액 요약 포함) 구현 완료(2026-09-01 확인) | **코드 반영 완료(2026-09-05)** — `entryService.ts`(`getGroupEntries`), `TransactionsScreen.tsx`/`TransactionSearchScreen.tsx`/`TransactionFilterSheet.tsx`/`TransactionLedgerMultiSelectSheet.tsx` |
-| 모임 전체 장부 목록 API 없음, N+1 우회 중 (구 (A)) | `GET /groups/{groupId}/ledgers` 구현 완료(2026-09-01 확인) | **이미 반영됨** — 6-B에서 `ledgerService.getAllLedgersInGroup()`이 이 API로 이미 전환돼 있었다(우연히 선반영) |
 | 모임원(관리자) 강제 내보내기 API 없음 (구 (A)) | `DELETE /groups/{groupId}/memberships/{membershipId}` 구현 완료(2026-08-30 명세 보강 — 원래도 구현돼 있었으나 문서 누락) | 미반영 — 화면(`ETC-4-MODAL-03-0`) 자체가 없음, 신규 개발 시 반영 |
 | 초대코드 발급 비멱등 + 조회 API 없음 (정책 결함) | ① 발급 멱등화(2026-09-01) ② `GET .../invitations/current` 신설(2026-09-01) — 둘 중 하나만 있으면 됐는데 **둘 다** 생김. **2026-09-05 실호출로 검증 완료**(`docs/api-integration-plan.md` "초대코드 신설 엔드포인트 실호출 검증" 절): 발급 이력 없는 상태에서 `GET .../current` 호출 시 총무는 자동 발급+즉시 반환(404 아님), 이후 `GET`·`POST` 재호출 전부 같은 코드 반환 — 멱등성·조회 둘 다 명세대로 동작 확인 | **미반영** — 프론트는 여전히 "화면 진입 시 발급 시도"(2단계 우회 로직) 그대로. 조회 API로 교체 필요(1순위) |
 | `GroupMembership` 응답에 `email` 없음 (필드 공백) | `GET .../memberships` 응답에 `email` 추가(2026-08-30) | 미반영 — `MemberProfileSheet` 등이 여전히 이름+역할만 표시 |
 | `GET /folders/{folderId}/ledgers`에 `createdAt` 없음 (필드 공백) | 2026-09-01 추가 | 미반영 — 카드 서브타이틀이 예산 상태로 대체된 채 그대로 |
 | `PATCH .../memberships/{id}` 성공 응답 형태 없음 (필드 공백) | 1번(목록)과 동일 형태로 확정(2026-09-01) | 미반영 — 캐시 갱신 로직 재점검 필요 |
-| Entry 등록/수정에 "담당자" 필드 없음 (필드 공백) | `managerUserId` 등록(PR #27)·수정(2026-09-01 확인) 둘 다 구현 완료, 상세 조회에 `manager` 객체도 포함 | **코드 반영 완료(2026-09-05)** — `entryService.ts`(등록·수정 요청, 상세 응답), `TransactionRegisterScreen.tsx`(입력·수정 폼, 담당자 후보를 `GroupMembership`에서 조회), `TransactionDetailScreen.tsx`(실 Entry 상세 표시) |
-| `receiptFileIds`(내역 등록) 명세 자기모순 | Entry.txt 상단 배너·Validation 절 문구가 이번 갱신에서 **"활성화되었습니다"로 통일**됨(구 "미적용" 문구 삭제 확인) | 조치 불필요 — 기존에 활성화 쪽으로 가정하고 짠 코드가 맞았음 |
 | 에러 응답 섹션 없음 — `POST /groups/join` | 에러 응답 섹션 추가(`INVALID_INVITATION_CODE`·`INVITATION_EXPIRED`·`ALREADY_GROUP_MEMBER`) | 미반영 — 여전히 화면이 자체 문구로 뭉뚱그림, 코드별 문구로 세분화 가능 |
-| 에러 응답 섹션 없음 — `GET .../memberships` | 에러 응답 섹션 추가(`ACCESS_DENIED`·`GROUP_NOT_FOUND`) | 조치 불필요(이미 공통 매핑으로 정상 커버) |
-| 에러 응답 섹션 없음 — `POST .../invitations` | 에러 응답 섹션 추가 | 조치 불필요 |
-| 에러 응답 섹션 없음 — `POST .../leave` | 에러 응답 섹션 추가(`LAST_OWNER_REQUIRED` 포함) | 조치 불필요 |
-| "회비 요청하기"(미납부자 알림) API 없음 (Dues 도메인 공백) | Dues.txt가 "서버 기능이 아니다 — 클립보드+OS 공유 시트, 클라이언트 전용"으로 확정 | 조치 불필요 — 화면에 버튼 자체를 안 그린 기존 판단이 맞았음. 7-B에서 버튼을 그릴 땐 서버 호출 없이 클라이언트 공유 기능으로 구현 |
 | `PATCH /ledgers/{id}`의 `folderId: null` 허용 여부 불명 (필드 공백) | "`null`은 변경 없음 — 최상위 이동 아님"으로 명확화(2026-09-01). 최상위 이동은 `POST /groups/{groupId}/folder-items/move`(`targetFolderId: null`) 사용 | **2026-09-05 판단 번복**: 당시엔 이 조합을 UI에서 막아뒀지만(`MOVE_DESTINATION_LEDGER_TO_ROOT_BLOCKED`), `FolderMoveDestinationScreen`을 `/folder-items/move`로 전환하면서 그 차단을 없앴다 — 새 API가 장부의 최상위 이동을 명시적으로 지원하고(Folder.txt §7), 실호출로 장부를 최상위로 옮긴 뒤 `GET .../folder-items`(폴더ID 생략)에 `LEDGER` 항목으로 그대로 나타남까지 확인했다. 옛 단건 PATCH API 얘기라 지금은 무관해졌다 |
-| 파일 허용 확장자·용량·개수 "추후 확정" (C) | "현재 구현값(jpeg/png/webp, 10MB) 그대로 확정 제안" + 내역당 10장 상한 **서버 검증으로도 확정**(2026-09-01) | 조치 불필요 — 기존 클라이언트 제한(10장)이 서버와 일치함이 확인됨 |
+
+- [해결] 모임 전체 내역 목록 API 없음 (구 (A) 최우선) (2026-09-01)
+- [해결] 모임 전체 장부 목록 API 없음, N+1 우회 중 (구 (A)) (2026-09-01)
+- [해결] Entry 등록/수정에 "담당자" 필드 없음 (필드 공백) (2026-09-01)
+- [해결] `receiptFileIds`(내역 등록) 명세 자기모순 (2026-09-03)
+- [해결] 에러 응답 섹션 없음 — `GET .../memberships` (2026-09-03)
+- [해결] 에러 응답 섹션 없음 — `POST .../invitations` (2026-09-03)
+- [해결] 에러 응답 섹션 없음 — `POST .../leave` (2026-09-03)
+- [해결] "회비 요청하기"(미납부자 알림) API 없음 (Dues 도메인 공백) (2026-09-03)
+- [해결] 파일 허용 확장자·용량·개수 "추후 확정" (C) (2026-09-01)
 
 ---
 

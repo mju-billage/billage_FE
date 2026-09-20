@@ -17,6 +17,8 @@ type TextAreaProps = {
   error?: string;
   rows?: number;
   maxLength?: number;
+  /** true면 화면 진입 시 이 영역에 자동 포커스 + 시스템 키보드를 띄운다. */
+  autoFocus?: boolean;
 };
 
 /** 여러 줄 입력이 가능한 박스형 텍스트 영역. */
@@ -28,6 +30,7 @@ function TextArea({
   error,
   rows = 4,
   maxLength,
+  autoFocus,
 }: TextAreaProps) {
   const [isFocused, setIsFocused] = useState(false);
   const borderColor = error
@@ -49,6 +52,7 @@ function TextArea({
         maxLength={maxLength}
         multiline
         textAlignVertical="top"
+        autoFocus={autoFocus}
       />
       {(error || helperText) && (
         <Text style={error ? styles.errorText : styles.helperText}>

@@ -10,20 +10,21 @@
  * `TransactionListItem`(label=장부명)을 그대로 재사용할 수 있는 이유다.
  *
  * ⚠️ 시안 UI 요소 6번은 이 리스트 행에 "영수증 첨부 아이콘"이 있다고
- * 적었지만(`TransactionListItem`은 `hasReceipt` prop으로 이미 지원함) 여기선
- * 안 넣었다 — `GET /reports/{reportId}` 응답의 `entries`(스냅샷)에
- * `receiptCount`/`receipts` 자체가 없다(2026-09-05 실호출 확인). 자리만
+ * 적었다. 보관함 스냅샷(`ArchivedEntry`)은 `approvalStatus`/`receiptFiles[]`가
+ * 있어 `TransactionListItem`의 승인요청 배지·영수증 아이콘을 그린다(2026-09-21).
+ * 보고서 스냅샷(`GET /reports/{reportId}`의 `entries`)엔 그 필드 자체가 없어
+ * (2026-09-05 실호출 확인) 보고서 두 화면은 여전히 배지·아이콘이 안 뜬다. 자리만
  * 비워 두지 않은 이유: 데이터 없이 빈 아이콘 슬롯을 넣으면 나중에 실제
- * 데이터가 와서 정렬(아이콘 유무에 따른 좌우 정렬)이 바뀔 때 지금 만든
- * 레이아웃과 어긋난다. `docs/backend-requests.md` 1순위 요청이 받아들여져
- * 스냅샷에 `receiptCount`가 추가되면 아래 `renderItem`에
- * `hasReceipt={item.receiptCount > 0}`을 그때 추가할 것.
+ * 데이터가 와서 정렬이 바뀔 때 지금 만든 레이아웃과 어긋난다.
+ * `docs/backend-requests.md` 2순위 요청이 받아들여져 스냅샷에 `receiptCount`가
+ * 추가되면 아래 `renderItem`의 `hasReceipt`에 그 값도 반영할 것.
+ * 배지·영수증이 없는 행은 `TransactionListItem`이 납부관리 아이콘(기본)을 그린다.
  */
 import { useState } from 'react';
 import { SectionList, StyleSheet, Text, View } from 'react-native';
 import Tabs from '../../components/Navigation/Tabs/Tabs';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
-import { CALENDAR_WEEKDAY_LABELS } from '../../constants/calendarScreenText';
+import { formatDateHeader } from '../../utils/dateHeader';
 import {
   REPORT_ENTRY_LIST_COUNT_SUFFIX,
   REPORT_ENTRY_LIST_EMPTY,
@@ -40,6 +41,10 @@ export type TaggedReportEntry = {
   title: string;
   amount: number;
   occurredOn: string;
+  /** 보관함 스냅샷(`ArchivedEntry`)에만 있다 — 보고서 스냅샷엔 없어 그 화면들은 배지가 안 뜬다. */
+  approvalStatus?: 'PENDING' | 'APPROVED';
+  /** 보관함 스냅샷에만 있다(위와 같은 이유). 하나라도 있으면 영수증 아이콘을 그린다. */
+  receiptFiles?: { fileId: string }[];
 };
 
 type Tab = 'all' | 'income' | 'expense';
@@ -49,13 +54,6 @@ const TABS: { label: string; value: Tab }[] = [
   { label: REPORT_LEDGER_ENTRIES_TAB_INCOME, value: 'income' },
   { label: REPORT_LEDGER_ENTRIES_TAB_EXPENSE, value: 'expense' },
 ];
-
-/** 'YYYY-MM-DD' -> 'M월 D일 요일'(TransactionsScreen과 동일 포맷). */
-function formatDateHeader(isoDate: string): string {
-  const [year, month, day] = isoDate.split('-').map(Number);
-  const jsDate = new Date(year, month - 1, day);
-  return `${month}월 ${day}일 ${CALENDAR_WEEKDAY_LABELS[jsDate.getDay()]}요일`;
-}
 
 function groupByDate(
   list: TaggedReportEntry[],
@@ -121,13 +119,15 @@ function ReportEntryList({ entries, onPressEntry }: ReportEntryListProps) {
             <Text style={styles.sectionHeader}>{section.title}</Text>
           )}
           renderItem={({ item }) => (
-            // TODO: receiptCount가 스냅샷에 추가되면 hasReceipt={item.receiptCount > 0}
-            // 넣을 것 — 지금은 스냅샷에 그 필드가 없어 뺐다(파일 상단 주석,
-            // docs/backend-requests.md 1순위 참고).
+            // 보고서 스냅샷은 approvalStatus/receiptFiles가 없어 배지·영수증이 안 뜬다.
+            // TODO: 스냅샷에 receiptCount가 추가되면 그 값도 hasReceipt에 반영할 것
+            // (파일 상단 주석, docs/backend-requests.md 2순위 참고).
             <TransactionListItem
               label={item.ledgerName}
               itemName={item.title}
               amount={item.type === 'INCOME' ? item.amount : -item.amount}
+              hasReceipt={(item.receiptFiles?.length ?? 0) > 0}
+              isPendingApproval={item.approvalStatus === 'PENDING'}
               onPress={() => onPressEntry(item)}
             />
           )}

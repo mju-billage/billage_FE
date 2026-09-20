@@ -2,7 +2,6 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Chip from '../Chips/Chip';
 import CardBase from './CardBase';
 import {
-  FEEDBACK_NEGATIVE_BOLD,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
@@ -97,8 +96,9 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
+  // 필수 별표는 시안 실측 파랑 — `TextField`·`SelectionListItem`과 같은 `FOREGROUND_SECONDARY`.
   required: {
-    color: FEEDBACK_NEGATIVE_BOLD,
+    color: FOREGROUND_SECONDARY,
   },
   fieldValue: {
     ...TYPOGRAPHY.subtitle3,

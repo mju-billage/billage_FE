@@ -13,7 +13,7 @@
  */
 import { useCallback, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -212,7 +212,12 @@ function GroupManageScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+      }
+    >
       <AppBar
         type="sub"
         title={GROUP_MANAGE_TITLE}
@@ -260,7 +265,7 @@ function GroupManageScreen() {
             )}
           </CardBase>
 
-          <CardBase onPress={() => navigation.navigate('GroupManager')}>
+          <CardBase onPress={() => navigation.navigate('MemberManage')}>
             <MenuRowContent
               icon={MEMBER_MANAGE_ICON}
               label={GROUP_MANAGE_MEMBER_MANAGE_LABEL}
@@ -321,13 +326,7 @@ function GroupManageScreen() {
         onCancel={() => setConfirmKind('none')}
         onConfirm={handleDelete}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar visible title={snackbarMessage} />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
@@ -360,9 +359,6 @@ function MenuRowContent({
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     paddingHorizontal: 24,
     paddingTop: 8,
@@ -419,12 +415,6 @@ const styles = StyleSheet.create({
   stateText: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_DISABLED,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

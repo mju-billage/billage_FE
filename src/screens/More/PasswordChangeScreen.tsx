@@ -5,8 +5,8 @@
  * 정상이다(서버가 열리면 코드 수정 없이 붙는다).
  */
 import { useCallback, useState } from 'react';
-import { BackHandler, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { BackHandler, ScrollView, StyleSheet, View } from 'react-native';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -20,6 +20,7 @@ import { isValidPassword } from '../../utils/validators';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
+  getApiErrorMessage,
   isNetworkError,
 } from '../../constants/apiErrorMessages';
 import {
@@ -114,6 +115,8 @@ function PasswordChangeScreen() {
         setCurrentPasswordError(API_NETWORK_ERROR_MESSAGE);
       } else if (error instanceof ApiError && error.code === 'INVALID_CREDENTIALS') {
         setCurrentPasswordError(PASSWORD_CHANGE_CURRENT_MISMATCH_ERROR);
+      } else if (error instanceof ApiError) {
+        setCurrentPasswordError(getApiErrorMessage(error.code));
       } else {
         setCurrentPasswordError(API_ERROR_DEFAULT_MESSAGE);
       }
@@ -123,10 +126,14 @@ function PasswordChangeScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="secondary">
       <AppBar type="sub" title={PASSWORD_CHANGE_TITLE} onBackPress={handleBack} />
 
-      <View style={styles.body}>
+      <ScrollView
+        style={styles.body}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <TextField
           label={PASSWORD_CHANGE_CURRENT_LABEL}
           value={currentPassword}
@@ -167,7 +174,7 @@ function PasswordChangeScreen() {
           secureToggle
           error={confirmError}
         />
-      </View>
+      </ScrollView>
 
       <View style={styles.footer}>
         <Button
@@ -191,14 +198,11 @@ function PasswordChangeScreen() {
           navigation.goBack();
         }}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,

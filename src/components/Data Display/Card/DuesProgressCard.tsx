@@ -8,6 +8,7 @@ import {
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
+  BASIC_0,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
 
@@ -95,7 +96,7 @@ function DashboardCard({
   return (
     <View style={[styles.card, ended && styles.cardEnded]}>
       <View style={styles.badgeRowStart}>
-        <DateBadge label={progress.dDayLabel} state={state} activeStatus="positive" />
+        <DateBadge label={progress.dDayLabel} state={state} activeStatus="destructive" />
         <Text style={[styles.groupName, ended && styles.textEnded]}>
           {progress.groupName}
         </Text>
@@ -175,6 +176,8 @@ function PaymentManagementCard({
 
 const styles = StyleSheet.create({
   card: {
+    backgroundColor: BASIC_0,
+    borderRadius: 8,
     width: CARD_WIDTH,
     padding: 16,
   },

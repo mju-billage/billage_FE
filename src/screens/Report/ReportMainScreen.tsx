@@ -14,16 +14,19 @@
  * 카드 탭(2026-09-05, 7-G): `reportType`에 따라 `ReportByLedgerDetail`
  * (ETC-3-PAGE-02-0)/`ReportByPeriodDetail`(ETC-3-PAGE-03-0)로 분기한다.
  *
- * 생성 화면에서 성공하면 이 화면으로 `navigate(..., {snackbarMessage})`
- * 돌아온다(`MemberManageScreen`/`DuesScreen`과 같은 패턴) — 실제로 시안
- * (더보기_보고서생성하기_장부별.png Case C)도 상세 화면이 아니라 이 목록
- * 화면에 스낵바가 뜨는 걸로 캡처돼 있다(표 설명은 "상세 조회로 이동"이라고
- * 적었지만, 그 화면 자체가 아직 없어 실제로 갈 곳이 없다 — 시안 캡처를
- * 따랐다).
+ * **2026-09-13 정정**: 예전엔 생성 성공 시 이 화면으로 `navigate(...,
+ * {snackbarMessage})` 돌아오게 했었다 — 시안 캡처(더보기_보고서생성하기_장부별.png
+ * Case C)가 상세가 아니라 이 목록에 스낵바가 뜨는 걸로 보였고, 그때는
+ * `ReportByLedgerDetail`/`ReportByPeriodDetail` 화면 자체가 아직 없어 명세 표의
+ * "상세 조회로 이동"(ETC-4-PAGE-03-0 No.5)을 따를 수 없었기 때문이다. 이제 그
+ * 두 화면이 존재하므로 명세대로 상세로 직접 이동하도록 바꿨다(스낵바도 상세
+ * 화면에서 뜬다) — 뒤로가기가 폼이 아니라 이 목록으로 오게 하는 스택 정리도
+ * 함께 적용했다(design-verification.md §5-11 참고, `ReportCreateByLedgerScreen`/
+ * `ReportCreateByPeriodScreen`).
  */
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -165,7 +168,18 @@ function ReportMainScreen() {
   }, [route.params?.snackbarMessage]);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer
+      background="primary"
+      snackbar={
+        snackbarMessage ? (
+          <Snackbar
+            visible
+            title={snackbarMessage}
+            onClose={() => setSnackbarMessage(null)}
+          />
+        ) : undefined
+      }
+    >
       <AppBar
         type="sub"
         title={REPORT_MAIN_TITLE}
@@ -259,24 +273,11 @@ function ReportMainScreen() {
           navigation.navigate('ReportCreateByPeriod');
         }}
       />
-
-      {snackbarMessage && (
-        <View style={styles.snackbarWrapper}>
-          <Snackbar
-            visible
-            title={snackbarMessage}
-            onClose={() => setSnackbarMessage(null)}
-          />
-        </View>
-      )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,
@@ -331,12 +332,6 @@ const styles = StyleSheet.create({
   loadingMoreText: {
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  snackbarWrapper: {
-    position: 'absolute',
-    left: 24,
-    right: 24,
-    bottom: 24,
   },
 });
 

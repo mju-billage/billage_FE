@@ -42,14 +42,27 @@ type ToolsMenuProps = {
   sections: ToolsMenuSection[];
   showTitle?: boolean;
   selectedKey?: string;
+  /** true면 마지막 섹션 아래 여백(20)을 뺀다 — 카드 안에 넣어 쓸 때 카드 하단 패딩과 겹쳐 두꺼워지지 않게. */
+  flush?: boolean;
 };
 
 /** 아이콘/아바타 + 타이틀(+보조 태그) 목록으로 구성된 도구·설정 메뉴. 섹션 타이틀로 그룹을 나눌 수 있다. */
-function ToolsMenu({ sections, showTitle = true, selectedKey }: ToolsMenuProps) {
+function ToolsMenu({
+  sections,
+  showTitle = true,
+  selectedKey,
+  flush = false,
+}: ToolsMenuProps) {
   return (
     <View>
       {sections.map((section, sectionIndex) => (
-        <View key={sectionIndex} style={styles.section}>
+        <View
+          key={sectionIndex}
+          style={[
+            styles.section,
+            flush && sectionIndex === sections.length - 1 && styles.sectionFlush,
+          ]}
+        >
           {sectionIndex > 0 && (
             <View style={styles.dividerWrapper}>
               <Divider />
@@ -98,12 +111,17 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 20,
   },
+  sectionFlush: {
+    marginBottom: 0,
+  },
   // 12px+Bold 조합은 정식 스타일에 없어 body3+bold를 예외로 채택.
   sectionTitle: {
     ...TYPOGRAPHY.body3,
     fontWeight: 'bold',
     color: FOREGROUND_DISABLED,
     marginBottom: 8,
+    // 항목(paddingHorizontal 4)의 아이콘과 제목 시작 위치를 맞춘다.
+    paddingHorizontal: 4,
   },
   item: {
     flexDirection: 'row',

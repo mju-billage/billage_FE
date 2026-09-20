@@ -7,6 +7,7 @@ import { TYPOGRAPHY } from '../../../constants/typography';
 import {
   FEEDBACK_NEGATIVE_BOLD,
   FILL_NEUTRAL_NORMAL,
+  FILL_SECONDARY_SUBTLE,
   FOREGROUND_DISABLED,
   FOREGROUND_INVERSE,
   FOREGROUND_NEUTRAL_NORMAL,
@@ -142,6 +143,19 @@ function Calendar({
 
             return (
               <View key={cellIndex} style={styles.dayCell}>
+                {/* 명세 No.3 [액션]: "시작일/종료일/사이 구간이 시각적으로 구분되어야 함" —
+                    사이 구간은 옅은 배경 띠로 이어 붙이고, 전체 구간의 양 끝(시작일/종료일)
+                    쪽만 둥글게 처리한다(안쪽 경계는 각지게 둬야 셀 사이가 이어져 보인다). */}
+                {(isInRange || isRangeStart || isRangeEnd) && (
+                  <View
+                    style={[
+                      styles.rangeBand,
+                      isInRange && styles.rangeBandFull,
+                      isRangeStart && styles.rangeBandStart,
+                      isRangeEnd && styles.rangeBandEnd,
+                    ]}
+                  />
+                )}
                 {interactive ? (
                   <Pressable
                     style={styles.dayCellTouchable}
@@ -217,6 +231,31 @@ const styles = StyleSheet.create({
     width: 36,
     alignItems: 'center',
     gap: 2,
+    position: 'relative',
+  },
+  rangeBand: {
+    position: 'absolute',
+    top: 0,
+    height: 32,
+  },
+  rangeBandFull: {
+    left: 0,
+    right: 0,
+    backgroundColor: FILL_SECONDARY_SUBTLE,
+  },
+  rangeBandStart: {
+    left: '50%',
+    right: 0,
+    backgroundColor: FILL_SECONDARY_SUBTLE,
+    borderTopLeftRadius: 9,
+    borderBottomLeftRadius: 9,
+  },
+  rangeBandEnd: {
+    left: 0,
+    right: '50%',
+    backgroundColor: FILL_SECONDARY_SUBTLE,
+    borderTopRightRadius: 9,
+    borderBottomRightRadius: 9,
   },
   dayCellTouchable: {
     width: '100%',
@@ -234,6 +273,7 @@ const styles = StyleSheet.create({
   },
   dateCircleSelected: {
     backgroundColor: FOREGROUND_SECONDARY,
+    borderRadius: 9,
   },
   dateCircleRangeStart: {
     borderTopRightRadius: 0,

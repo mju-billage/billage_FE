@@ -6,6 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import BackButton from '../../components/Navigation/App bar/BackButton';
 import Button from '../../components/Input/Button/Button';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import JoinGroupSheet from '../GroupManager/JoinGroupSheet';
 import { FOREGROUND_NEUTRAL_NORMAL } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
@@ -27,6 +28,11 @@ function SignupCompleteScreen() {
   const [joinSheetVisible, setJoinSheetVisible] = useState(false);
 
   const handleCreateGroup = () => {
+    // navigate 그대로 둔다 — 생성을 취소하고 뒤로가기를 누르면 이 선택 화면
+    // (모임 생성하기/코드로 참여하기)으로 돌아오는 게 맞는 동작이다. "가입 완료
+    // 화면이 뒤로가기로 남아 있으면 안 된다"는 건 생성이 *성공*했을 때 얘기이고,
+    // 그건 GroupCreateScreen의 성공 처리가 스택 전체를 reset하는 것으로 이미
+    // 해결된다(design-verification.md §5-11) — 이 화면 자체를 건드릴 필요 없음.
     navigation.navigate('GroupCreate');
   };
 
@@ -35,7 +41,7 @@ function SignupCompleteScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
       <View style={styles.backRow}>
         <BackButton onPress={() => navigation.goBack()} />
       </View>
@@ -65,7 +71,7 @@ function SignupCompleteScreen() {
           navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
         }}
       />
-    </View>
+    </ScreenContainer>
   );
 }
 

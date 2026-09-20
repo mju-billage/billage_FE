@@ -14,12 +14,13 @@
  */
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
+import CardBase from '../../components/Data Display/Card/CardBase';
 import * as groupService from '../../services/groupService';
 import * as groupMembershipService from '../../services/groupMembershipService';
 import { ApiError } from '../../services/apiClient';
@@ -123,7 +124,7 @@ function WithdrawGuideScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar
         type="sub"
         title={WITHDRAW_GUIDE_TITLE}
@@ -153,12 +154,14 @@ function WithdrawGuideScreen() {
         <>
           <ScrollView contentContainerStyle={styles.content}>
             <Text style={styles.heading}>{WITHDRAW_GUIDE_HEADING}</Text>
-            {WITHDRAW_GUIDE_BULLETS.map(bullet => (
-              <View key={bullet} style={styles.bulletRow}>
-                <Text style={styles.bulletDot}>{'•'}</Text>
-                <Text style={styles.bulletText}>{bullet}</Text>
-              </View>
-            ))}
+            <CardBase>
+              {WITHDRAW_GUIDE_BULLETS.map(bullet => (
+                <View key={bullet} style={styles.bulletRow}>
+                  <Text style={styles.bulletDot}>{'•'}</Text>
+                  <Text style={styles.bulletText}>{bullet}</Text>
+                </View>
+              ))}
+            </CardBase>
           </ScrollView>
 
           <View style={styles.footer}>
@@ -170,14 +173,11 @@ function WithdrawGuideScreen() {
           </View>
         </>
       )}
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   content: {
     paddingHorizontal: 24,
     paddingTop: 16,

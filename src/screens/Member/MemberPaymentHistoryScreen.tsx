@@ -22,7 +22,7 @@
  */
 import { useCallback, useState } from 'react';
 import { SectionList, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -35,7 +35,7 @@ import type { MemberPayment } from '../../types/member';
 import * as memberService from '../../services/memberService';
 import { ApiError } from '../../services/apiClient';
 import { formatWon } from '../../utils/currency';
-import { CALENDAR_WEEKDAY_LABELS } from '../../constants/calendarScreenText';
+import { formatDateHeader } from '../../utils/dateHeader';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
@@ -62,13 +62,6 @@ import { TYPOGRAPHY } from '../../constants/typography';
 type LoadState = 'loading' | 'error' | 'ready';
 type MemberPaymentHistoryRouteProp = RouteProp<RootStackParamList, 'MemberPaymentHistory'>;
 type MemberPaymentHistoryNavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-/** 'YYYY-MM-DD' -> 'M월 D일 요일'(TransactionsScreen과 동일 포맷). */
-function formatDateHeader(isoDate: string): string {
-  const [year, month, day] = isoDate.split('-').map(Number);
-  const jsDate = new Date(year, month - 1, day);
-  return `${month}월 ${day}일 ${CALENDAR_WEEKDAY_LABELS[jsDate.getDay()]}요일`;
-}
 
 /** `paidAt`(ISO datetime) 날짜 부분 기준으로 묶는다(TransactionsScreen의
  * `groupEntriesByDate`와 같은 방식). 서버가 최신순으로 내려주므로 그룹 내부는
@@ -136,7 +129,7 @@ function MemberPaymentHistoryScreen() {
 
   if (loadState === 'loading' || loadState === 'error') {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <ScreenContainer background="primary">
         <AppBar
           type="sub"
           title={MEMBER_PAYMENT_HISTORY_TITLE}
@@ -155,7 +148,7 @@ function MemberPaymentHistoryScreen() {
             />
           )}
         </View>
-      </SafeAreaView>
+      </ScreenContainer>
     );
   }
 
@@ -165,7 +158,7 @@ function MemberPaymentHistoryScreen() {
   }));
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <ScreenContainer background="primary">
       <AppBar
         type="sub"
         title={MEMBER_PAYMENT_HISTORY_TITLE}
@@ -208,14 +201,11 @@ function MemberPaymentHistoryScreen() {
           />
         )}
       </View>
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
   body: {
     flex: 1,
     paddingHorizontal: 24,

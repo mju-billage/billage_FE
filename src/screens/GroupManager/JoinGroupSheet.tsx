@@ -6,7 +6,12 @@ import TextField from '../../components/Input/Text Field/TextField';
 import Button from '../../components/Input/Button/Button';
 import type { GroupSummary } from '../../types/group';
 import * as groupService from '../../services/groupService';
-import { API_NETWORK_ERROR_MESSAGE, isNetworkError } from '../../constants/apiErrorMessages';
+import { ApiError } from '../../services/apiClient';
+import {
+  API_NETWORK_ERROR_MESSAGE,
+  getApiErrorMessage,
+  isNetworkError,
+} from '../../constants/apiErrorMessages';
 import {
   JOIN_GROUP_INVALID_CODE_ERROR,
   JOIN_GROUP_PLACEHOLDER,
@@ -44,13 +49,17 @@ function JoinGroupSheet({ visible, onClose, onJoined }: JoinGroupSheetProps) {
       setCode('');
       onJoined(group);
     } catch (fetchError) {
-      // 명세(GroupMembership §3)에 잘못된 초대 코드의 에러 코드가 정의돼 있지 않아
-      // 네트워크 실패가 아닌 모든 실패를 "유효하지 않은 초대 코드"로 보여준다.
-      setError(
-        isNetworkError(fetchError)
-          ? API_NETWORK_ERROR_MESSAGE
-          : JOIN_GROUP_INVALID_CODE_ERROR,
-      );
+      // GroupMembership.txt 3번: INVALID_INVITATION_CODE/INVITATION_EXPIRED/
+      // ALREADY_GROUP_MEMBER 세 코드 모두 시안이 "코드가 일치하지 않아요"
+      // 하나로 묶어서 보여준다(apiErrorMessages.ts GROUP_MEMBERSHIP_ERROR_MESSAGES
+      // 참고) — 그 외 코드(네트워크 실패 제외)는 공용 매핑을 그대로 쓴다.
+      if (isNetworkError(fetchError)) {
+        setError(API_NETWORK_ERROR_MESSAGE);
+      } else if (fetchError instanceof ApiError) {
+        setError(getApiErrorMessage(fetchError.code));
+      } else {
+        setError(JOIN_GROUP_INVALID_CODE_ERROR);
+      }
     } finally {
       setIsSubmitting(false);
     }

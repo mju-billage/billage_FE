@@ -31,7 +31,7 @@ export const MY_PROFILE_RETRY_LABEL = '다시 시도';
 
 // 프로필 변경 (ETC-4-PAGE-15-0)
 export const PROFILE_EDIT_TITLE = '프로필 변경';
-export const PROFILE_EDIT_NAME_LABEL = '닉네임';
+export const PROFILE_EDIT_NAME_LABEL = '이름';
 /** 시안 UI 요소 3번: "10자 제한 적용되며 10자 이상 입력시 입력 차단". */
 export const PROFILE_EDIT_NAME_MAX_LENGTH = 10;
 export const PROFILE_EDIT_SUBMIT_LABEL = '저장하기';
@@ -141,7 +141,11 @@ export const WITHDRAW_REASON_NO_LONGER_NEEDED_LABEL = '이용할 필요가 없�
 export const WITHDRAW_REASON_ETC_LABEL = '직접 입력할게요';
 export const WITHDRAW_REASON_ETC_PLACEHOLDER = '탈퇴 사유를 입력해주세요';
 export const WITHDRAW_REASON_ETC_MAX_LENGTH = 30;
-export const WITHDRAW_REASON_SUBMIT_LABEL = '선택 완료';
+/** 시안 판독 결과(2026-09-11): 표 Description(No.4)과 사유선택 화면 Case A
+ * 프레임은 "선택 완료"라 적었지만, 같은 화면의 메인 프레임 2장(COM-2-PAGE-05-0)과
+ * 다음 화면(COM-3-MODAL-01-0)의 배경 프레임까지 총 3곳이 "탈퇴하기"로 그려져
+ * 있다 — 시각적 다수를 따라 "탈퇴하기"로 확정. */
+export const WITHDRAW_REASON_SUBMIT_LABEL = '탈퇴하기';
 export const WITHDRAW_CONFIRM_TITLE = '정말 탈퇴하시겠어요?';
 export const WITHDRAW_CONFIRM_DESCRIPTION = '탈퇴 시 모든 정보와 이용 내역이 삭제돼요.';
 export const WITHDRAW_CONFIRM_CANCEL_LABEL = '취소';
