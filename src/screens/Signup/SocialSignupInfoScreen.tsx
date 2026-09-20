@@ -58,9 +58,6 @@ function SocialSignupInfoScreen() {
   // 시안 No.3: 8자 초과 입력 시 입력 라인이 레드로 바뀌고 하단에 에러 문구가 나온다(입력을 막지 않는다).
   // No.5: CTA는 이름이 1~8자일 때만 활성이다(이메일은 조건이 아니다).
   const isNameTooLong = name.length > SOCIAL_SIGNUP_NAME_MAX_LENGTH;
-  // 에러는 이름 필드를 한 번 벗어난(blur) 뒤부터 보이고, 뜬 뒤엔 실시간으로 갱신된다 — 일반 가입 정보 입력과 같은 규칙
-  // (시안 미명시, blur 기준으로 구현 (2026-09-20)). CTA 비활성은 에러 표시와 무관하게 바로 적용된다.
-  const [isNameTouched, setIsNameTouched] = useState(false);
   const canProceed = name.trim().length > 0 && !isNameTooLong;
 
   const handleNext = async () => {
@@ -107,8 +104,7 @@ function SocialSignupInfoScreen() {
             value={name}
             onChangeText={setName}
             placeholder={SIGNUP_NAME_PLACEHOLDER}
-            error={isNameTouched && isNameTooLong ? SOCIAL_SIGNUP_NAME_TOO_LONG_ERROR : undefined}
-            onBlur={() => setIsNameTouched(true)}
+            error={isNameTooLong ? SOCIAL_SIGNUP_NAME_TOO_LONG_ERROR : undefined}
           />
           <TextField
             label={SIGNUP_EMAIL_LABEL}

@@ -1989,7 +1989,16 @@ tsv 원본 행 중복(같은 ID가 여러 행): `COM-1-SNACKBAR-02-0`(5행) 등 
 
 **에러 빨강 — 팔레트 유지, 불일치 #23**: `FEEDBACK_NEGATIVE_BOLD`(`#FB6E67`) 유지, 새 상수 없음. **색 정의 확인 결과(2026-09-20)**: `FONT/Typography Style.pdf`(와 `Primitive Typography.pdf`)에는 **색 정의가 없다**(서체 Pyeojin Gothic·크기·행간·자간·굵기뿐 — 텍스트 추출로 확인). 색은 `Color_Definition.pdf`와 `color.pdf`에 있다: `Color_Definition.pdf` Red = 50 `#FFEDEC` · 100 `#FDC7C4` · 200 `#FDACA8` · 300 `#FC8680` · **400 `#FB6E67`** · **500 `#FA4A41`** · 600 `#E4433B`…, `color.pdf` Feedback = `negative-subtle` = `$red/50`, **`negative-bold` = `$red/400`**. 즉 앱의 `FEEDBACK_NEGATIVE_BOLD = #FB6E67`은 디자인 시스템 정의와 일치하고, 시트의 `#FA564D`는 팔레트 어디에도 없는 값이다(가장 가까운 것은 red/500 `#FA4A41`, 채널 차이 G·B 12).
 
-**에러 타이밍(blur 기준, 시안 미명시)**: `SignupInfoScreen`의 이름(10자 초과)·이메일 형식·비밀번호 조건·비밀번호 확인 불일치 에러가 **입력 중이 아니라 필드를 벗어난(blur) 뒤부터** 나온다. 한 번 뜬 뒤에는 입력 중에도 실시간으로 갱신돼 조건을 채우면 바로 사라진다. 비밀번호 확인은 **비밀번호와 확인이 둘 다 입력된 뒤에만** 비교한다. `TextField`에 `onBlur` prop을 추가했다(다른 화면은 안 쓰므로 영향 없음). CTA 비활성은 에러 표시 타이밍과 무관하게 즉시 적용. 같은 패턴을 찾은 결과: 실시간으로 파생 에러를 띄우는 폼은 `SocialSignupInfoScreen`(이름 8자 초과) 하나 더 있어 같은 규칙으로 맞췄다 — 나머지 폼은 에러가 제출 결과·서버 응답에서만 나오고 입력 중 파생 에러를 띄우지 않아 해당 없음. **주의**: 시트 Case A 프레임은 키보드가 올라온 채 이름 에러가 이미 보이는 모습이라(포커스가 이름에 남아 있는 것으로 보임) blur 기준과 어긋날 수 있다 — 이름만 즉시 표시로 바꾸려면 `touched.name` 조건을 빼면 된다.
+**에러 타이밍 — 11-8에서 정정(이름 글자수 초과만 즉시)**: 11-7에서 전부 blur 기준으로 통일했으나 이름 글자수 초과는 즉시 표시로 되돌렸다. 나머지는 blur 뒤부터 표시하고 한 번 뜬 뒤엔 실시간 갱신. `TextField.onBlur` prop은 유지. CTA 비활성은 타이밍과 무관하게 즉시.
+
+| 검증 | 타이밍 | 이유 |
+|---|---|---|
+| **이름 글자수 초과**(일반 10자 · 소셜 8자) | **즉시** | 시트 Case A 목업이 키보드가 올라온 채 에러를 표시한다. 넘긴 순간 알아야 한다 |
+| 이메일 형식 | blur | 입력 중엔 항상 "형식 오류"다 |
+| 비밀번호 조건 | blur | 위와 같음 |
+| 비밀번호 확인 불일치 | blur + 비밀번호·확인 양쪽 입력 후 | 위와 같음 |
+
+나머지 폼은 에러가 제출 결과·서버 응답에서만 나오고 입력 중 파생 에러를 띄우지 않아 해당 없음.
 
 **크롭 기준 판정 재확인 우선순위(목록만, 재확인은 안 함)**
 
@@ -2009,6 +2018,80 @@ tsv 원본 행 중복(같은 ID가 여러 행): `COM-1-SNACKBAR-02-0`(5행) 등 
 | **완료**(시트로 재대조) | `COM-1-PAGE-01-0` · `COM-2-PAGE-01-0` · `COM-3-PAGE-02-0` · `FDR-3-PAGE-02-0` · `COM-3-PAGE-03-0` | 11-1~11-6, 10-5 — 시트 기준으로 수정·기록 완료 |
 
 분류 기준: 크롭에서 **문구·수치·상태를 읽어 구현·판정**한 것 = 높음, **배경색**처럼 개정 사이에 바뀌기 어려운 것 = 낮음. 순서는 사용자가 정한다. 이 표는 위 목록(11-6 크롭 기준 판정 목록)을 나눈 것이고 누락이 있을 수 있다.
+
+### 5-26. 색 팔레트 대조 — `colors.ts` vs `Color_Definition.pdf` (2026-09-20, 11-8, 조사만·수정 없음)
+
+기준: `docs/palette.tsv` = `Color_Definition.pdf` 1페이지 Primitive Color 52색(`group | step | hex`). **이 PDF에는 시맨틱 매핑 페이지가 없다**(Primitive만) — 시맨틱(`FOREGROUND_*` 등)은 `color.pdf` 쪽이다. 비교는 대소문자 무시.
+
+**A. 일치 — `colors.ts` 헥스 상수 24개 중 21개**
+
+| 상수 | hex | 팔레트(group/step) |
+|---|---|---|
+| `NAVY_800` | `#070A23` | Navy/800 |
+| `NAVY_500` | `#111957` | Navy/500 |
+| `NAVY_200` | `#A0A3BC` | Navy/200 |
+| `BLUE_500` | `#4A7FE7` | Blue/500 |
+| `BLUE_400` | `#6CA1EE` | Blue/400 |
+| `BLUE_300` | `#9BC1F5` | Blue/300 |
+| `BLUE_100` | `#DCE8FB` | Blue/100 |
+| `BLUE_50` | `#F0F5FE` | Blue/50 |
+| `GREY_800` | `#374151` | Grey/700 **및** Grey/800 (아래 참고) |
+| `GREY_700` | `#374151` | Grey/700 **및** Grey/800 (아래 참고) |
+| `GREY_600` | `#4B5563` | Grey/600 |
+| `GREY_400` | `#9B9B9B` | Grey/400 |
+| `GREY_300` | `#C1C5CD` | Grey/300 |
+| `GREY_200` | `#E5E7EB` | Grey/200 |
+| `GREY_100` | `#F3F4F6` | Grey/100 |
+| `BASIC_0` | `#FFFFFF` | Basic/0 |
+| `BASIC_100` | `#000000` | Basic/100 |
+| `YELLOW_500` | `#FFBF2A` | Yellow/500 |
+| `YELLOW_50` | `#fFF9EA` | Yellow/50 (값은 일치, **표기만 `#fFF9EA`로 대소문자가 섞여 있음** — 오타로 보이나 동작 무관) |
+| `RED_400` | `#FB6E67` | Red/400 |
+| `RED_50` | `#FFEDEC` | Red/50 |
+
+**B. 팔레트 밖 — 3개**(전부 `color.pdf 범위 밖 (브랜드/화면 전용 액센트)` 주석 구역, 소셜 로그인 버튼 브랜드 색)
+
+| 상수 | hex | 가장 가까운 팔레트 색 | 채널 차이 |
+|---|---|---|---|
+| `SOCIAL_NAVER_GREEN` | `#03C75A` | Navy/500 `#111957`(초록 계열 없음, 사실상 무관) | R14 · G174 · B3 |
+| `SOCIAL_KAKAO_YELLOW` | `#FEE500` | Yellow/500 `#FFBF2A` | R1 · G38 · B42 |
+| `SOCIAL_KAKAO_TEXT` | `#3C1E1E` | Red/900 `#691F1B` | R45 · G1 · B3 |
+
+(`OVERLAY_SCRIM` = `rgba(0, 0, 0, 0.4)`는 알파 값이라 팔레트 대조 대상 아님.)
+
+**C. 중복 — 1쌍**: `GREY_800`과 `GREY_700`이 둘 다 `#374151`. **PDF 자체가 Grey/700·Grey/800을 둘 다 `#374151`로 적고 있다**(`palette.tsv` 11·12행)라 오기로 보이고, `colors.ts`는 PDF를 그대로 따른 것(주석에 명시). `GREY_800`은 `FILL_INVERSE`(→ `ReceiptDetailScreen`·`TransactionReceiptDetailScreen` 배경)와 `ReceiptScanningView`(배경)에서, `GREY_700`은 `Snackbar` 배경에서 쓴다 — 즉 지금 **어두운 면 3곳이 전부 같은 `#374151`**이고 어느 쪽이 실제 의도값인지는 디자이너 확인 전까지 알 수 없다. 참고로 Grey/700이 다른 값이라면 `Snackbar`와 `FILL_INVERSE` 계열이 갈릴 수 있다.
+
+**D. 팔레트에는 있지만 `colors.ts`에 상수가 없는 스텝(31개, 사용 시 새 상수 필요)**: Grey/50·500·900, Navy/50·100·300·400·600·700·900, Blue/200·600·700·800·900, Yellow/100·200·300·400·600·700·800·900, Red/100·200·300·500·600·700·800·900. (이번 조사로 필요해진 것은 없음. 예: 11-7의 시트 빨강 `#FA564D`는 Red/500 `#FA4A41`이 가장 가깝지만 새 상수를 만들지 않기로 했다 — 불일치 #23.)
+
+**E. `colors.ts`를 거치지 않은 하드코딩 — 17곳**(hex 3~8자리·`rgb(a)()` 전수, `src/` 전체)
+
+코드(비주석) 11곳:
+| 파일:라인 | 값 | 팔레트 대조 |
+|---|---|---|
+| `components/Navigation/Bottom Navigation/BottomNavigation.tsx:63` | `#000000` (`shadowColor`) | Basic/100과 같음(`BASIC_100` 상수 있음) |
+| `screens/Folder/FolderMoreMenu.tsx:52` | `rgba(0, 0, 0, 0.2)` | 알파 값, 팔레트 밖 |
+| `screens/GroupManager/GroupSwitcherMenu.tsx:58` | `rgba(0, 0, 0, 0.2)` | 위와 같음 |
+| `screens/Member/MemberMoreMenu.tsx:35` | `rgba(0, 0, 0, 0.2)` | 위와 같음 |
+| `components/Data Display/Image Placeholder/Thumbnail.tsx:106` | `rgba(0, 0, 0, 0.4)` | **`OVERLAY_SCRIM`과 값이 같음**(상수 미사용) |
+| `screens/GroupManager/GroupProfileEditScreen.tsx:333` | `rgba(0, 0, 0, 0.4)` | 위와 같음 |
+| `screens/More/ProfileEditScreen.tsx:420` | `rgba(0, 0, 0, 0.4)` | 위와 같음 |
+| `components/Feedback/Snackbar/Snackbar.tsx:95` | `rgba(255, 255, 255, 0.15)` | 알파 값(스낵바 액션 눌림), 팔레트 밖 |
+| `components/Data Display/Card/MiniCalendarCard.stories.tsx:11` | `#E4E9F2` | 팔레트 밖, 가장 가까운 것 Navy/50 `#E7E8EE`(R3 · G1 · B4) — **Storybook 배경** |
+| `components/Data Display/Card/ReportCard.stories.tsx:10` · `Receipt/Receipt.stories.tsx:10` | `#E4E9F2` | 위와 같음(스토리 전용, 앱 화면 아님) |
+
+주석 속 hex 6곳(동작 무관): `TextField.tsx:27`(`#3772E4` — 시트 별 색 실측), `SearchField.tsx:34·98`(`#E5E7EB`)·`:98`(`#E1E3E8`), `DuesProgressCard.tsx:49`(`#F3F4F6`)·`:52`(`#E5E7EB`). 참고: 주석의 `#3772E4`는 팔레트 밖이며 채널 합 기준 가장 가까운 것은 Blue/600 `#3562DB`(R2 · G16 · B9)이고 현재 쓰는 Blue/500 `#4A7FE7`은 R19 · G13 · B3(합 35 vs 27) — 11-7에서 승인받은 `FOREGROUND_SECONDARY`(Blue/500)는 그대로 둔다(보고용).
+
+**F. 요약**: 앱 색 상수는 팔레트와 **전부 일치**(팔레트 밖은 소셜 브랜드 3개뿐). 문제는 (1) PDF의 Grey/700=800 중복, (2) `YELLOW_50` 대소문자 표기, (3) 반투명 검정 `rgba(0,0,0,0.4)`가 `OVERLAY_SCRIM`을 안 쓰는 3곳, (4) `rgba(0,0,0,0.2)`(메뉴 백드롭 3곳)·`rgba(255,255,255,0.15)` 상수 없음. 전부 **목록만, 고치지 않았다**.
+
+### 5-27. 타이포그래피 표 추출 — `FONT/Typography Style.pdf` (2026-09-20, 11-8, 추출만·대조 안 함)
+
+- 텍스트 레이어에는 스타일 이름과 열 이름만 있고 **값은 벡터 도형(글리프 경로)이라 텍스트로 안 읽힌다**(`pdftotext`로는 스타일명만 나옴). PyMuPDF로 렌더링해 **눈으로 읽었다**(15행 × 4열, 값이 또렷하고 토큰 이름과 px 값이 서로 검증됨).
+- 결과: [docs/typography.tsv](typography.tsv) — `style | font_size_token/px | line_height_token/px | letter_spacing_token/value | font_weight_token/variable`.
+- `Primitive Typography.pdf`(텍스트 레이어 있음)의 토큰 값과 교차 확인: Font Size 250=10 · 300=12 · 350=14 · 400=16 · 450=18 · 500=20 · 600=24, Line Height 400=16 · 450=18 · 500=20 · 600=24 · 700=28 · 800=32, letter spacing none=0 · xs=0.1 · sm=0.15 · md=0.2 · lg=0.25 · xl=0.4 · 2xl=0.5 · 3xl=1.25 · 4xl=1.5 → 모두 스타일 표의 값과 일치.
+- **주의**: `Font Weight`의 숫자(Light 100 · Regular 200 · Medium 300 · SemiBold 400 · Bold 500)는 **Figma 변수 값이지 CSS 굵기(400/500/600/700)가 아니다.** 실제 렌더 굵기 매핑은 PDF에 없다. 또 표기가 `SemiBold`(H2~Subtitle)와 `Semibold`(Button·Badge)로 섞여 있다(같은 토큰으로 보임).
+- 스타일 표의 서체는 Pyeojin Gothic 하나.
+- 이 값과 `typography.ts` 대조는 **하지 않았다**(지시). 기존 `docs/typography-audit.md`(코드 대조 문서)와 별개다.
+
 
 ## 6. 권장 순서
 

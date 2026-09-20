@@ -55,10 +55,11 @@ function SignupInfoScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
-  // 검증 에러는 필드를 한 번 벗어난(blur) 뒤부터 보여준다 — 아직 입력 중인데 에러를 띄우지 않으려는 것.
+  // 형식·조건 에러(이메일·비밀번호·확인)는 필드를 한 번 벗어난(blur) 뒤부터 보여준다 — 입력 중엔 항상 "형식 오류"라서.
+  // **이름 글자수 초과만 즉시** 표시한다(Case A 목업이 키보드가 올라온 채 에러를 보여주고, 넘긴 순간 알아야 하므로).
   // 시안 미명시, blur 기준으로 구현 (2026-09-20). 한 번 뜬 뒤에는 입력 중에도 실시간으로 갱신돼
-  // 조건을 채우면 바로 사라진다(`touched`가 계속 true). 이름·이메일·비밀번호·확인 네 필드 모두 같은 규칙.
-  const [touched, setTouched] = useState({ name: false, email: false, password: false, confirm: false });
+  // 조건을 채우면 바로 사라진다(`touched`가 계속 true).
+  const [touched, setTouched] = useState({ email: false, password: false, confirm: false });
   const touch = (field: keyof typeof touched) => setTouched(prev => ({ ...prev, [field]: true }));
 
   const emailError =
@@ -115,8 +116,7 @@ function SignupInfoScreen() {
             onChangeText={setName}
             placeholder={SIGNUP_NAME_PLACEHOLDER}
             helperText={SIGNUP_NAME_HELPER}
-            error={touched.name && isNameTooLong ? SIGNUP_NAME_TOO_LONG_ERROR : undefined}
-            onBlur={() => touch('name')}
+            error={isNameTooLong ? SIGNUP_NAME_TOO_LONG_ERROR : undefined}
           />
           <TextField
             label={SIGNUP_EMAIL_LABEL}
