@@ -24,7 +24,7 @@ const CLOSE_ICON = require('../../../assets/icons/action/Close.png');
 
 type TextFieldProps = {
   label?: string;
-  /** true면 라벨 우측에 빨간 별표(필수 표시)를 붙인다. */
+  /** true면 라벨 우측에 파란 별표(필수 표시)를 붙인다 — 시안 실측 `#3772E4`(6개 시트 전부 파랑), 토큰은 `FOREGROUND_SECONDARY`. */
   required?: boolean;
   value: string;
   onChangeText: (text: string) => void;
@@ -44,6 +44,8 @@ type TextFieldProps = {
   keyboardType?: KeyboardTypeOptions;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   autoFocus?: boolean;
+  /** 포커스가 필드를 벗어났을 때 호출된다(입력 중이 아닌 시점에 검증 에러를 띄우려는 화면용). */
+  onBlur?: () => void;
 };
 
 /**
@@ -72,6 +74,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
     keyboardType,
     autoCapitalize,
     autoFocus = false,
+    onBlur,
   },
   ref,
 ) {
@@ -103,7 +106,10 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           placeholder={placeholder}
           placeholderTextColor={FOREGROUND_DISABLED}
           onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onBlur={() => {
+            setIsFocused(false);
+            onBlur?.();
+          }}
           secureTextEntry={isSecure}
           maxLength={maxLength}
           keyboardType={keyboardType}
@@ -160,7 +166,7 @@ const styles = StyleSheet.create({
     color: FOREGROUND_DISABLED,
   },
   requiredMark: {
-    color: FEEDBACK_NEGATIVE_BOLD,
+    color: FOREGROUND_SECONDARY,
   },
   inputRow: {
     flexDirection: 'row',

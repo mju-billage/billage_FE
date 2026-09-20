@@ -55,15 +55,23 @@ function SignupInfoScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  // 검증 에러는 필드를 한 번 벗어난(blur) 뒤부터 보여준다 — 아직 입력 중인데 에러를 띄우지 않으려는 것.
+  // 시안 미명시, blur 기준으로 구현 (2026-09-20). 한 번 뜬 뒤에는 입력 중에도 실시간으로 갱신돼
+  // 조건을 채우면 바로 사라진다(`touched`가 계속 true). 이름·이메일·비밀번호·확인 네 필드 모두 같은 규칙.
+  const [touched, setTouched] = useState({ name: false, email: false, password: false, confirm: false });
+  const touch = (field: keyof typeof touched) => setTouched(prev => ({ ...prev, [field]: true }));
 
   const emailError =
-    email.length > 0 && !isValidEmail(email) ? SIGNUP_EMAIL_FORMAT_ERROR : undefined;
+    touched.email && email.length > 0 && !isValidEmail(email) ? SIGNUP_EMAIL_FORMAT_ERROR : undefined;
   // 시트 No.5: 조건 미충족 시 도움말 문구와 라인이 에러 컬러로 바뀐다. 별도 에러 문구는 시트에 없어
   // (목업 Case도 없음) **문구는 그대로 두고 색만 전환**한다(같은 문구를 error로 넘김).
   const passwordError =
-    password.length > 0 && !isValidPassword(password) ? SIGNUP_PASSWORD_HELPER : undefined;
+    touched.password && password.length > 0 && !isValidPassword(password)
+      ? SIGNUP_PASSWORD_HELPER
+      : undefined;
+  // 확인 필드는 비밀번호와 확인이 **둘 다 입력된 뒤**에만 비교한다(한 글자 칠 때마다 "다르다"고 뜨지 않게).
   const confirmError =
-    passwordConfirm.length > 0 && passwordConfirm !== password
+    touched.confirm && password.length > 0 && passwordConfirm.length > 0 && passwordConfirm !== password
       ? SIGNUP_PASSWORD_MISMATCH_ERROR
       : undefined;
 
@@ -107,7 +115,8 @@ function SignupInfoScreen() {
             onChangeText={setName}
             placeholder={SIGNUP_NAME_PLACEHOLDER}
             helperText={SIGNUP_NAME_HELPER}
-            error={isNameTooLong ? SIGNUP_NAME_TOO_LONG_ERROR : undefined}
+            error={touched.name && isNameTooLong ? SIGNUP_NAME_TOO_LONG_ERROR : undefined}
+            onBlur={() => touch('name')}
           />
           <TextField
             label={SIGNUP_EMAIL_LABEL}
@@ -115,6 +124,7 @@ function SignupInfoScreen() {
             onChangeText={setEmail}
             placeholder={SIGNUP_EMAIL_PLACEHOLDER}
             error={emailError}
+            onBlur={() => touch('email')}
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -125,6 +135,7 @@ function SignupInfoScreen() {
             placeholder={SIGNUP_PASSWORD_PLACEHOLDER}
             helperText={SIGNUP_PASSWORD_HELPER}
             error={passwordError}
+            onBlur={() => touch('password')}
             secureToggle
           />
           {/* 시트 프레임에는 확인 필드 아래 도움말이 없다. */}
@@ -134,6 +145,7 @@ function SignupInfoScreen() {
             onChangeText={setPasswordConfirm}
             placeholder={SIGNUP_PASSWORD_PLACEHOLDER}
             error={confirmError}
+            onBlur={() => touch('confirm')}
             secureToggle
           />
         </View>
