@@ -30,7 +30,7 @@
  * 부른다. **서버는 `totalAmount`만 항상 채우므로** 상호·결제일은 읽힌 것만 덮어쓴다
  * (`applyScanValues`). 인식에 실패해도 사진은 이미 올라가 있어 증빙으로 붙인다.
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   BackHandler,
   Linking,
@@ -247,6 +247,14 @@ function TransactionRegisterScreen() {
   const [ledgerName, setLedgerName] = useState('');
   const [memo, setMemo] = useState('');
   const [receiptItems, setReceiptItems] = useState<ReceiptItem[]>([]);
+  /**
+   * 증빙 목록의 최신 값. 스캔은 업로드와 인식으로 수 초가 걸리는데, 그 결과를 받는 콜백은
+   * `ReceiptScanningView` 가 `useEffect(..., [])` 로 처음 받은 것을 계속 들고 있다 —
+   * 그 콜백이 보는 `receiptItems` 는 스캔을 시작하던 순간의 값이라, 그걸로 상한을 재면
+   * 그 사이 늘어난 장수를 못 보고 11번째를 붙일 수 있다. 상한 판정은 이 ref 로 한다.
+   */
+  const receiptItemsRef = useRef(receiptItems);
+  receiptItemsRef.current = receiptItems;
 
   const [ledgerOptions, setLedgerOptions] = useState<LedgerOption[]>([]);
   const [screenLoadState, setScreenLoadState] = useState<ScreenLoadState>('loading');
@@ -509,7 +517,7 @@ function TransactionRegisterScreen() {
   const handleTakePhoto = async (mode: 'photo' | 'scan') => {
     // 자리가 없으면 카메라를 열지 않는다. 찍고 나서 버리면 스캔은 업로드와 인식(건당 과금)을
     // 이미 마친 뒤라 서버에 주인 없는 파일만 남는다.
-    if (receiptItems.length >= TRANSACTION_REGISTER_RECEIPT_MAX) {
+    if (receiptItemsRef.current.length >= TRANSACTION_REGISTER_RECEIPT_MAX) {
       showSnackbar(SNACKBAR_RECEIPT_MAX_LIMIT);
       return;
     }
@@ -553,7 +561,7 @@ function TransactionRegisterScreen() {
    * 똑같이 붙인다 — 사용자가 "인식은 안 됐지만 증빙으로는 남기기"를 할 수 있어야 한다.
    */
   const attachScannedReceipt = (fileId: number, previewUri: string): boolean => {
-    if (receiptItems.length >= TRANSACTION_REGISTER_RECEIPT_MAX) {
+    if (receiptItemsRef.current.length >= TRANSACTION_REGISTER_RECEIPT_MAX) {
       // 인식하는 동안 다른 경로로 증빙이 다 찼다. 그냥 버리면 올린 파일이 어디에도 연결되지
       // 않은 채 서버에 남는데, 그건 업로더 본인만 지울 수 있어 사실상 아무도 손대지 못한다.
       fileService.deleteFile(String(fileId)).catch(() => {
