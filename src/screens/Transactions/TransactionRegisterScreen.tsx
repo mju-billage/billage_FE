@@ -23,9 +23,12 @@
  * 2026-09-11부터 증빙 실제 업로드가 붙었다 — 카메라/갤러리로 고른 사진을
  * 촬영·선택 직후 `fileService.uploadFile(..., 'RECEIPT')`로 바로 업로드하고,
  * 받은 fileId를 등록/수정 요청의 `receiptFileIds`에 담는다(`receiptItems`,
- * 업로드 중인 항목은 fileId가 없어 자동으로 제외된다). 영수증 스캔(`scan`)은
- * 여전히 `utils/mockOcr.ts` mock이라 실제 파일이 없다 — OCR 서버가
- * "시작 전"이라(`docs/api-wiring.md`) 이번에도 연결하지 않는다.
+ * 업로드 중인 항목은 fileId가 없어 자동으로 제외된다).
+ *
+ * 2026-09-21: 영수증 스캔(`scan`)도 실제 OCR로 바뀌었다(`utils/mockOcr.ts` 삭제).
+ * 촬영본을 `ReceiptScanningView`가 업로드한 뒤 그 fileId로 `POST /files/{id}/ocr`을
+ * 부른다. **서버는 `totalAmount`만 항상 채우므로** 상호·결제일은 읽힌 것만 덮어쓴다
+ * (`applyScanValues`). 인식에 실패해도 사진은 이미 올라가 있어 증빙으로 붙인다.
  */
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -57,7 +60,7 @@ import type { AttachMenuKey } from './TransactionAttachMenuSheet';
 import TransactionSingleSelectSheet from './TransactionSingleSelectSheet';
 import TransactionTextInputSheet from './TransactionTextInputSheet';
 import { captureWithFeedback, type PickedImage } from '../../utils/imagePicker';
-import ReceiptScanningView from './ReceiptScanningView';
+import ReceiptScanningView, { type ScanOutcome } from './ReceiptScanningView';
 import ReceiptScanFailedView from './ReceiptScanFailedView';
 import ReceiptGalleryPickerScreen from './ReceiptGalleryPickerScreen';
 import { todayKey } from '../../utils/calendarGrid';
@@ -74,7 +77,6 @@ import {
   getApiErrorMessage,
   isNetworkError,
 } from '../../constants/apiErrorMessages';
-import type { MockScanResult } from '../../utils/mockOcr';
 import {
   FILTER_TYPE_EXPENSE,
   FILTER_TYPE_INCOME,
@@ -105,6 +107,8 @@ import {
   SCAN_RESCAN_CONFIRM_LABEL,
   SCAN_RESCAN_CONFIRM_TITLE,
   SNACKBAR_RECEIPT_ADDED,
+  SNACKBAR_SCAN_NOT_RECOGNIZED,
+  SNACKBAR_SCAN_RATE_LIMITED,
   SNACKBAR_TRANSACTION_ADDED,
   SNACKBAR_TRANSACTION_ADDED_PENDING,
   SNACKBAR_TRANSACTION_UPDATED,
@@ -142,7 +146,7 @@ type RegisterMode = 'createReal' | 'editReal';
 
 type RegisterStage =
   | { kind: 'form' }
-  | { kind: 'scanning' }
+  | { kind: 'scanning'; image: PickedImage }
   | { kind: 'scanFailed' }
   | { kind: 'gallery' };
 
@@ -155,6 +159,16 @@ type ActiveSheet =
   | 'ledger'
   | 'memo'
   | 'attachMenu';
+
+/**
+ * 스캔 결과 중 폼에 반영할 값. 서버는 `totalAmount` 만 항상 채우고 상호·결제일은
+ * 못 읽으면 `null` 로 내리므로, 읽힌 것만 덮어쓰려고 따로 담는다.
+ */
+type ScanApplyValues = {
+  amount: number;
+  date: string | null;
+  merchantName: string | null;
+};
 
 type ActiveDialog =
   | 'none'
@@ -250,7 +264,7 @@ function TransactionRegisterScreen() {
   const [stage, setStage] = useState<RegisterStage>({ kind: 'form' });
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>('none');
   const [activeDialog, setActiveDialog] = useState<ActiveDialog>('none');
-  const [pendingScanResult, setPendingScanResult] = useState<MockScanResult | null>(null);
+  const [pendingScanResult, setPendingScanResult] = useState<ScanApplyValues | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
@@ -502,7 +516,8 @@ function TransactionRegisterScreen() {
       showSnackbar(SNACKBAR_RECEIPT_ADDED);
       addPickedImages([image]);
     } else {
-      setStage({ kind: 'scanning' });
+      // 촬영본을 그대로 넘긴다 — 스캔 화면이 이걸 올리고 그 fileId 로 인식을 부른다.
+      setStage({ kind: 'scanning', image });
     }
   };
 
@@ -526,39 +541,82 @@ function TransactionRegisterScreen() {
     handleTakePhoto('scan');
   };
 
-  const handleScanComplete = (result: MockScanResult | null) => {
-    if (!result) {
+  /**
+   * 스캔한 영수증을 증빙 목록에 넣는다. 인식에 실패해도 파일은 올라가 있으므로
+   * 똑같이 붙인다 — 사용자가 "인식은 안 됐지만 증빙으로는 남기기"를 할 수 있어야 한다.
+   */
+  const attachScannedReceipt = (fileId: number, previewUri: string) => {
+    if (receiptItems.length >= TRANSACTION_REGISTER_RECEIPT_MAX) {
+      return;
+    }
+    setReceiptItems(current => [
+      ...current,
+      { key: `scan-${Date.now()}`, previewUri, uploading: false, fileId, fromScan: true },
+    ]);
+  };
+
+  const handleScanComplete = (outcome: ScanOutcome) => {
+    if (outcome.kind === 'rateLimited') {
+      // 서버가 외부 OCR 을 건당 과금으로 부른다. 재촬영을 권하는 실패 화면으로 보내면
+      // 사용자가 곧장 다시 시도하게 되므로, 폼으로 돌려보내고 알리기만 한다.
+      setStage({ kind: 'form' });
+      showSnackbar(SNACKBAR_SCAN_RATE_LIMITED);
+      return;
+    }
+    if (outcome.kind === 'failed') {
       setStage({ kind: 'scanFailed' });
       return;
     }
 
-    if (receiptItems.length < TRANSACTION_REGISTER_RECEIPT_MAX) {
-      setReceiptItems(current => [
-        ...current,
-        { key: `scan-${Date.now()}`, previewUri: '', uploading: false, fromScan: true },
-      ]);
+    attachScannedReceipt(outcome.fileId, outcome.previewUri);
+
+    if (outcome.kind === 'notRecognized') {
+      // 읽지는 못했지만 증빙으로는 붙었다. 그 사실이 실패 화면에 가려지지 않게 폼으로 돌린다.
+      setStage({ kind: 'form' });
+      setActiveDialog('none');
+      showSnackbar(SNACKBAR_SCAN_NOT_RECOGNIZED);
+      return;
     }
 
-    const amountConflict = amount !== 0 && amount !== result.amount;
-    const dateConflict = date !== todayKey() && date !== result.date;
+    const values: ScanApplyValues = {
+      amount: outcome.result.totalAmount,
+      date: outcome.result.purchasedOn,
+      merchantName: outcome.result.merchantName,
+    };
 
-    if (amountConflict || dateConflict) {
-      setPendingScanResult(result);
+    // 사용자가 이미 채워 둔 값을 말없이 덮지 않는다. 서버가 못 읽어 비운 칸은 충돌이 아니다.
+    const amountConflict = amount !== 0 && amount !== values.amount;
+    const dateConflict =
+      values.date !== null && date !== todayKey() && date !== values.date;
+    const nameConflict =
+      values.merchantName !== null && itemName !== '' && itemName !== values.merchantName;
+
+    if (amountConflict || dateConflict || nameConflict) {
+      setPendingScanResult(values);
       setStage({ kind: 'form' });
       setActiveDialog('scanApply');
       return;
     }
 
-    setAmount(result.amount);
-    setDate(result.date);
+    applyScanValues(values);
     setStage({ kind: 'form' });
     showSnackbar(SNACKBAR_RECEIPT_ADDED);
   };
 
+  /** 읽힌 값만 덮어쓴다. 못 읽은 칸(null)은 사용자가 채우거나 기본값으로 남는다. */
+  const applyScanValues = (values: ScanApplyValues) => {
+    setAmount(values.amount);
+    if (values.date !== null) {
+      setDate(values.date);
+    }
+    if (values.merchantName !== null && itemName === '') {
+      setItemName(values.merchantName);
+    }
+  };
+
   const handleApplyScanResult = () => {
     if (pendingScanResult) {
-      setAmount(pendingScanResult.amount);
-      setDate(pendingScanResult.date);
+      applyScanValues(pendingScanResult);
     }
     setPendingScanResult(null);
     setActiveDialog('none');
@@ -572,7 +630,7 @@ function TransactionRegisterScreen() {
   };
 
   if (stage.kind === 'scanning') {
-    return <ReceiptScanningView onComplete={handleScanComplete} />;
+    return <ReceiptScanningView image={stage.image} onComplete={handleScanComplete} />;
   }
 
   if (stage.kind === 'scanFailed') {
