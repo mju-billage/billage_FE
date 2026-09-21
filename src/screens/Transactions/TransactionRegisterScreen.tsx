@@ -107,6 +107,7 @@ import {
   SCAN_RESCAN_CONFIRM_LABEL,
   SCAN_RESCAN_CONFIRM_TITLE,
   SNACKBAR_RECEIPT_ADDED,
+  SNACKBAR_RECEIPT_MAX_LIMIT,
   SNACKBAR_SCAN_NOT_RECOGNIZED,
   SNACKBAR_SCAN_RATE_LIMITED,
   SNACKBAR_TRANSACTION_ADDED,
@@ -506,6 +507,12 @@ function TransactionRegisterScreen() {
    * 아무 화면 전환 없이 지금 화면(폼 또는 스캔 재시도 전 화면)에 그대로 남는다.
    */
   const handleTakePhoto = async (mode: 'photo' | 'scan') => {
+    // 자리가 없으면 카메라를 열지 않는다. 찍고 나서 버리면 스캔은 업로드와 인식(건당 과금)을
+    // 이미 마친 뒤라 서버에 주인 없는 파일만 남는다.
+    if (receiptItems.length >= TRANSACTION_REGISTER_RECEIPT_MAX) {
+      showSnackbar(SNACKBAR_RECEIPT_MAX_LIMIT);
+      return;
+    }
     const image = await captureWithFeedback(showSnackbar, () =>
       setActiveDialog('cameraPermission'),
     );
@@ -545,14 +552,20 @@ function TransactionRegisterScreen() {
    * 스캔한 영수증을 증빙 목록에 넣는다. 인식에 실패해도 파일은 올라가 있으므로
    * 똑같이 붙인다 — 사용자가 "인식은 안 됐지만 증빙으로는 남기기"를 할 수 있어야 한다.
    */
-  const attachScannedReceipt = (fileId: number, previewUri: string) => {
+  const attachScannedReceipt = (fileId: number, previewUri: string): boolean => {
     if (receiptItems.length >= TRANSACTION_REGISTER_RECEIPT_MAX) {
-      return;
+      // 인식하는 동안 다른 경로로 증빙이 다 찼다. 그냥 버리면 올린 파일이 어디에도 연결되지
+      // 않은 채 서버에 남는데, 그건 업로더 본인만 지울 수 있어 사실상 아무도 손대지 못한다.
+      fileService.deleteFile(String(fileId)).catch(() => {
+        // 지우기까지 실패하면 남겨 두는 수밖에 없다. 사용자에게 또 알릴 일은 아니다.
+      });
+      return false;
     }
     setReceiptItems(current => [
       ...current,
       { key: `scan-${Date.now()}`, previewUri, uploading: false, fileId, fromScan: true },
     ]);
+    return true;
   };
 
   const handleScanComplete = (outcome: ScanOutcome) => {
@@ -568,7 +581,21 @@ function TransactionRegisterScreen() {
       return;
     }
 
-    attachScannedReceipt(outcome.fileId, outcome.previewUri);
+    const attached = attachScannedReceipt(outcome.fileId, outcome.previewUri);
+    if (!attached) {
+      // 인식값은 여전히 쓸모가 있으므로 폼에는 반영하되, 증빙이 안 붙은 것은 분명히 알린다.
+      setStage({ kind: 'form' });
+      setActiveDialog('none');
+      if (outcome.kind === 'ok') {
+        applyScanValues({
+          amount: outcome.result.totalAmount,
+          date: outcome.result.purchasedOn,
+          merchantName: outcome.result.merchantName,
+        });
+      }
+      showSnackbar(SNACKBAR_RECEIPT_MAX_LIMIT);
+      return;
+    }
 
     if (outcome.kind === 'notRecognized') {
       // 읽지는 못했지만 증빙으로는 붙었다. 그 사실이 실패 화면에 가려지지 않게 폼으로 돌린다.
