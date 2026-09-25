@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 12,
   },
   closeButton: {

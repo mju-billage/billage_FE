@@ -45,38 +45,44 @@ function ArchiveLedgerEntriesScreen() {
   const { ledgerName, startDate, endDate, totalIncome, totalExpense, entries } = route.params;
 
   return (
-    <ScreenContainer background="primary">
+    <ScreenContainer
+      background="primary"
+      // 하단 안전영역은 흰 목록 영역이 직접 채운다(안 그러면 그 자리에 파란 띠가 남는다).
+      edges={['top']}
+    >
       <AppBar type="sub" title={ledgerName} onBackPress={() => navigation.goBack()} />
 
-      <View style={styles.body}>
+      <View style={styles.header}>
         <Text style={styles.periodText}>
           {REPORT_DETAIL_PERIOD_LABEL} {formatDateDot(startDate)} - {formatDateDot(endDate)}
         </Text>
 
         <AmountCard type="incomeExpense" income={totalIncome} expense={totalExpense} />
-
-        <ReportEntryList
-          entries={entries.map(entry => ({ ...entry, ledgerName }))}
-          onPressEntry={entry =>
-            navigation.navigate('ArchiveEntryDetail', {
-              ledgerName,
-              // `ReportEntryList`는 `TaggedReportEntry`(4필드+ledgerName+approvalStatus/
-              // receiptFiles 선택)로만 타입돼 있지만 실제로 넘어오는 객체는 위에서
-              // 스프레드한 `ArchivedEntry`(memo/createdByName 등 포함) 그대로다 — 참조가 같아 안전하게 캐스팅해서 전체 필드를 꺼낸다.
-              entry: entry as unknown as ArchivedEntry & { ledgerName: string },
-            })
-          }
-        />
       </View>
+
+      <ReportEntryList
+        sheet
+        entries={entries.map(entry => ({ ...entry, ledgerName }))}
+        onPressEntry={entry =>
+          navigation.navigate('ArchiveEntryDetail', {
+            ledgerName,
+            // `ReportEntryList`는 `TaggedReportEntry`(4필드+ledgerName+approvalStatus/
+            // receiptFiles 선택)로만 타입돼 있지만 실제로 넘어오는 객체는 위에서
+            // 스프레드한 `ArchivedEntry`(memo/createdByName 등 포함) 그대로다 — 참조가 같아 안전하게 캐스팅해서 전체 필드를 꺼낸다.
+            entry: entry as unknown as ArchivedEntry & { ledgerName: string },
+          })
+        }
+      />
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  body: {
-    flex: 1,
-    paddingHorizontal: 24,
+  // 기간 줄 + 요약 카드(파란 영역). 아래 16은 흰 목록 영역과의 파란 간격.
+  header: {
+    paddingHorizontal: 20,
     paddingTop: 12,
+    paddingBottom: 16,
     gap: 12,
   },
   periodText: {

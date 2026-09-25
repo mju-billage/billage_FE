@@ -34,7 +34,7 @@ type MenuProps = {
 /** 세로 목록형 메뉴. 섹션 사이에만 구분선을 그려 그룹을 나눈다. */
 function Menu({ sections, selectedKey, onSelect, showIcon = true }: MenuProps) {
   return (
-    <View>
+    <View >
       {sections.map((section, sectionIndex) => (
         <View key={sectionIndex}>
           {sectionIndex > 0 && (
@@ -78,6 +78,9 @@ function Menu({ sections, selectedKey, onSelect, showIcon = true }: MenuProps) {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    borderWidth: 1,
+  },
   item: {
     flexDirection: 'row',
     alignItems: 'center',

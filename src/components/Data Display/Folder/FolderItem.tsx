@@ -20,9 +20,9 @@ export const FOLDER_GRID_COLUMNS = 3;
 /** 그리드 열 사이 간격(dp). 시안 실측값 (FDR-1-PAGE-01-0, 2026-09-19). */
 export const FOLDER_GRID_COLUMN_GAP = 16;
 /** 그리드를 쓰는 화면들(FolderScreen, ReportLedgerSelectScreen)의 body 좌우 패딩. */
-const GRID_SCREEN_HORIZONTAL_PADDING = 24;
-// 화면 너비에서 좌우 패딩 24*2를 빼는 이유: 그리드를 그리는 호출 화면이 모두 body에
-// paddingHorizontal: 24를 주기 때문이다. 이 값이 다른 화면에서 그리드를 쓰면 폭 계산이
+const GRID_SCREEN_HORIZONTAL_PADDING = 20;
+// 화면 너비에서 좌우 패딩 20*2를 빼는 이유: 그리드를 그리는 호출 화면이 모두 body에
+// paddingHorizontal: 20을 주기 때문이다(2026-09-21 24 → 20). 이 값이 다른 화면에서 그리드를 쓰면 폭 계산이
 // 어긋나므로 그 화면의 패딩에 맞게 이 전제를 다시 확인해야 한다.
 function getGridItemWidth(windowWidth: number): number {
   return (

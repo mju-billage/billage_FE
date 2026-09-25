@@ -575,7 +575,7 @@ function DuesCreateScreen() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 16,
     gap: 20,
   },
@@ -629,7 +629,7 @@ const styles = StyleSheet.create({
     color: FEEDBACK_NEGATIVE_BOLD,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 16,
     paddingTop: 8,
   },

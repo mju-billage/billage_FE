@@ -236,7 +236,7 @@ function FolderBudgetListScreen() {
 
 const styles = StyleSheet.create({
   listContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 24,
   },
   stateContainer: {
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingTop: 80,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   emptyTitle: {
     ...TYPOGRAPHY.subtitle3,

@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingTop: 40,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   title: {
     ...TYPOGRAPHY.h3,
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     marginTop: 32,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
 });
 

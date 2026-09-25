@@ -385,7 +385,7 @@ function ProfileEditScreen() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 24,
   },
   avatarRow: {
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 16,
   },
 });

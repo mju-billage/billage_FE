@@ -109,7 +109,7 @@ function NoticeListScreen() {
 
 const styles = StyleSheet.create({
   listContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 8,
     gap: 12,
   },

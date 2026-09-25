@@ -123,9 +123,11 @@ import {
   SNACKBAR_DUES_PAYMENT_CONFIRMED_SUFFIX,
 } from '../../constants/duesScreenText';
 import {
+  BACKGROUND_SECONDARY,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const MENU_ICON = require('../../assets/icons/action/Menu Vertical.png');
@@ -141,6 +143,7 @@ type LoadState = 'loading' | 'error' | 'ready';
 function DuesDetailScreen() {
   const navigation = useNavigation<DuesDetailNavigationProp>();
   const route = useRoute<DuesDetailRouteProp>();
+  const insets = useSafeAreaInsets();
   const duesId = route.params.duesId;
 
   const [detail, setDetail] = useState<DuesDetail | null>(null);
@@ -399,6 +402,8 @@ function DuesDetailScreen() {
   return (
     <ScreenContainer
       background="primary"
+      // 하단 안전영역은 흰 명단 영역이 직접 채운다(안 그러면 그 자리에 파란 띠가 남는다).
+      edges={['top']}
       snackbar={
         snackbarMessage ? (
           <Snackbar visible title={snackbarMessage} />
@@ -422,7 +427,8 @@ function DuesDetailScreen() {
         }
       />
 
-      <ScrollView contentContainerStyle={styles.content}>
+      {/* 카드 캐러셀은 고정 — 스크롤은 아래 명단(미납부/납부완료 목록)만 한다. */}
+      <View style={styles.header}>
         <DuesStatusCard
           title={DUES_DETAIL_CARD_TITLE}
           dDayLabel={dDayLabel}
@@ -436,7 +442,9 @@ function DuesDetailScreen() {
           ledgerName={detail.ledger.name}
           duesAmount={detail.amount}
         />
+      </View>
 
+      <View style={[styles.listSection, { paddingBottom: insets.bottom }]}>
         <View style={styles.tabsWrapper}>
           <Tabs
             items={[
@@ -446,6 +454,7 @@ function DuesDetailScreen() {
             value={tab}
             onChange={handleChangeTab}
             showIcon={false}
+            fullWidth
           />
         </View>
 
@@ -462,55 +471,57 @@ function DuesDetailScreen() {
           )}
         </View>
 
-        {isMembersLoading ? (
-          <Text style={styles.stateText}>{DUES_DETAIL_LOADING}</Text>
-        ) : membersLoadError ? (
-          <View style={styles.membersErrorContainer}>
-            <Text style={styles.stateText}>{membersLoadError}</Text>
+        <ScrollView contentContainerStyle={styles.memberScrollContent}>
+          {isMembersLoading ? (
+            <Text style={styles.stateText}>{DUES_DETAIL_LOADING}</Text>
+          ) : membersLoadError ? (
+            <View style={styles.membersErrorContainer}>
+              <Text style={styles.stateText}>{membersLoadError}</Text>
+              <Button
+                label={DUES_DETAIL_RETRY_LABEL}
+                onPress={() => loadMembers(tab)}
+                hierarchy="secondary"
+                style={{ alignSelf: 'center' }}
+              />
+            </View>
+          ) : members.length === 0 ? (
+            <Text style={styles.emptyText}>{DUES_MEMBER_LIST_EMPTY}</Text>
+          ) : (
+            <View style={styles.memberList}>
+              {members.map(member => (
+                <MemberListItem
+                  key={member.memberId}
+                  name={member.name}
+                  amount={detail.amount}
+                  showAmount={tab === 'paid'}
+                  showCheckbox={canChangeStatus}
+                  selected={selectedMemberIds.includes(member.memberId)}
+                  onPress={
+                    canChangeStatus
+                      ? () => toggleMemberSelection(member.memberId)
+                      : undefined
+                  }
+                />
+              ))}
+            </View>
+          )}
+        </ScrollView>
+
+        {canChangeStatus && (
+          <View style={styles.ctaWrapper}>
             <Button
-              label={DUES_DETAIL_RETRY_LABEL}
-              onPress={() => loadMembers(tab)}
-              hierarchy="secondary"
-              style={{ alignSelf: 'center' }}
+              label={
+                tab === 'unpaid'
+                  ? DUES_PAYMENT_MARK_PAID_LABEL
+                  : DUES_PAYMENT_MARK_UNPAID_LABEL
+              }
+              onPress={handleChangePaymentStatus}
+              disabled={selectedMemberIds.length === 0 || isChangingStatus}
+              fullWidth
             />
           </View>
-        ) : members.length === 0 ? (
-          <Text style={styles.emptyText}>{DUES_MEMBER_LIST_EMPTY}</Text>
-        ) : (
-          <View style={styles.memberList}>
-            {members.map(member => (
-              <MemberListItem
-                key={member.memberId}
-                name={member.name}
-                amount={detail.amount}
-                showAmount={tab === 'paid'}
-                showCheckbox={canChangeStatus}
-                selected={selectedMemberIds.includes(member.memberId)}
-                onPress={
-                  canChangeStatus
-                    ? () => toggleMemberSelection(member.memberId)
-                    : undefined
-                }
-              />
-            ))}
-          </View>
         )}
-      </ScrollView>
-
-      {canChangeStatus && (
-        <View style={styles.ctaWrapper}>
-          <Button
-            label={
-              tab === 'unpaid'
-                ? DUES_PAYMENT_MARK_PAID_LABEL
-                : DUES_PAYMENT_MARK_UNPAID_LABEL
-            }
-            onPress={handleChangePaymentStatus}
-            disabled={selectedMemberIds.length === 0 || isChangingStatus}
-            fullWidth
-          />
-        </View>
-      )}
+      </View>
 
       <FolderMoreMenu
         visible={moreMenuVisible}
@@ -544,11 +555,6 @@ function DuesDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 40,
-  },
   stateContainer: {
     flex: 1,
     alignItems: 'center',
@@ -564,8 +570,24 @@ const styles = StyleSheet.create({
     gap: 16,
     paddingTop: 24,
   },
+  // 카드 캐러셀 영역(고정). 카드와 흰 명단 영역 사이 16은 파란 간격.
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 16,
+  },
+  // Tabs 이하는 흰 배경이 화면 가로 전체를 채운다(좌우 여백은 안쪽 콘텐츠 패딩으로만 유지).
+  listSection: {
+    flex: 1,
+    marginTop: 16,
+    paddingHorizontal: 20,
+    backgroundColor: BACKGROUND_SECONDARY,
+  },
+  // listSection의 좌우 패딩 24를 상쇄해 탭을 화면 가로 전체로 편다.
   tabsWrapper: {
-    marginTop: 20,
+    marginHorizontal: -20,
+  },
+  memberScrollContent: {
+    paddingBottom: 40,
   },
   memberCountRow: {
     flexDirection: 'row',
@@ -588,7 +610,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   ctaWrapper: {
-    paddingHorizontal: 24,
     paddingBottom: 16,
     paddingTop: 8,
   },

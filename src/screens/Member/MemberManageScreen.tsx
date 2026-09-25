@@ -386,7 +386,7 @@ function MemberManageScreen() {
 const styles = StyleSheet.create({
   content: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 8,
     gap: 8,
   },
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 16,
     paddingTop: 8,
   },

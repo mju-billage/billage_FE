@@ -21,7 +21,7 @@ import { TYPOGRAPHY } from '../../constants/typography';
 // 목업은 좌우 여백 약 20dp/타일 간격 약 7~8dp로 보이나 축소 이미지라 실측 필요.
 const GRID_COLUMNS = 3;
 const GRID_GAP = 8;
-const HORIZONTAL_PADDING = 24;
+const HORIZONTAL_PADDING = 20;
 
 type ReceiptGridProps = {
   items: Receipt[];

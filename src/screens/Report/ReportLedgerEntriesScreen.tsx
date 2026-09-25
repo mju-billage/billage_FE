@@ -37,32 +37,38 @@ function ReportLedgerEntriesScreen() {
   const { ledgerName, startDate, endDate, totalIncome, totalExpense, entries } = route.params;
 
   return (
-    <ScreenContainer background="primary">
+    <ScreenContainer
+      background="primary"
+      // 하단 안전영역은 흰 목록 영역이 직접 채운다(안 그러면 그 자리에 파란 띠가 남는다).
+      edges={['top']}
+    >
       <AppBar type="sub" title={ledgerName} onBackPress={() => navigation.goBack()} />
 
-      <View style={styles.body}>
+      <View style={styles.header}>
         <Text style={styles.periodText}>
           {REPORT_DETAIL_PERIOD_LABEL} {formatDateDot(startDate)} - {formatDateDot(endDate)}
         </Text>
 
         <AmountCard type="incomeExpense" income={totalIncome} expense={totalExpense} />
-
-        <ReportEntryList
-          entries={entries.map(entry => ({ ...entry, ledgerName }))}
-          onPressEntry={entry =>
-            navigation.navigate('ReportEntryDetail', { ledgerName, entry })
-          }
-        />
       </View>
+
+      <ReportEntryList
+        sheet
+        entries={entries.map(entry => ({ ...entry, ledgerName }))}
+        onPressEntry={entry =>
+          navigation.navigate('ReportEntryDetail', { ledgerName, entry })
+        }
+      />
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  body: {
-    flex: 1,
-    paddingHorizontal: 24,
+  // 기간 줄 + 요약 카드(파란 영역). 아래 16은 흰 목록 영역과의 파란 간격.
+  header: {
+    paddingHorizontal: 20,
     paddingTop: 12,
+    paddingBottom: 16,
     gap: 12,
   },
   periodText: {

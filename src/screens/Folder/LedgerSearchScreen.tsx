@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   // 앱바(`AppBar`) 아래 좌우 24 본문. 예전 `paddingTop: 60` 하드코딩은 앱바가 상단 여백을 대신해 없앴다.
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   // 시안: 검색 필드는 앱바 아래 별도 줄.
   searchWrapper: {

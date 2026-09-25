@@ -153,10 +153,6 @@ function PaymentManagementCard({
       </View>
       <View style={styles.paymentSummaryRow}>
         <View style={styles.paymentSummaryColumn}>
-          <Image
-            source={MEMBER_ICON}
-            style={[styles.memberIcon, ended && styles.iconEnded]}
-          />
           <Text style={[styles.paymentSummaryText, ended && styles.textEnded]}>
             {paidMemberCount}/{totalMemberCount}명
           </Text>

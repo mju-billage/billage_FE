@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
   },
   sheet: {
     backgroundColor: FILL_NEUTRAL_SUBTLE,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
     paddingHorizontal: 20,
     paddingTop: 12,
   },

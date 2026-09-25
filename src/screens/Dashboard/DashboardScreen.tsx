@@ -189,8 +189,13 @@ function DashboardScreen() {
       navigation.navigate('Statistics');
       return;
     }
-    // TODO: 미연결 — 'report'/'evidence-album' 카드. 화면(ReportMain, ReceiptAlbum)은 이미
-    // RootNavigator에 등록돼 있어 "구현 후 연결" 사유는 낡았다. 이 핸들러가 아직 navigate하지 않을 뿐이다.
+    if (itemId === 'report') {
+      navigation.navigate('ReportMain');
+      return;
+    }
+    if (itemId === 'evidence-album') {
+      navigation.navigate('ReceiptAlbum');
+    }
   };
 
   const handlePressDues = (duesId: string) => {

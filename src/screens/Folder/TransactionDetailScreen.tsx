@@ -347,7 +347,7 @@ function Field({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   content: {
     paddingTop: 16,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 40,
     gap: 0,
   },
@@ -410,7 +410,7 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body1,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 16,
   },
 });

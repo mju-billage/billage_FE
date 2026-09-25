@@ -1,6 +1,18 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import {
+  Image,
+  LayoutChangeEvent,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import Badge from '../Badge/Badge';
 import Divider from '../Divider/Divider';
+import CarouselIndicator from '../../Navigation/Carousel Indicator/CarouselIndicator';
 import CardBase from './CardBase';
 import { formatWon } from '../../../utils/currency';
 import {
@@ -29,7 +41,10 @@ type DuesStatusCardProps = {
   duesAmount: number;
 };
 
-/** 회비 납부 현황(인원/금액)과 납부 기간/장부 정보를 함께 보여주는 점선 카드. */
+/** 회비 납부 현황(인원/금액)과 납부 기간/장부 정보를 흰 카드 두 장으로 나눠 가로로 넘겨 보는 캐러셀.
+ * 1페이지: 회비가 모이기까지(D-day·인원·금액), 2페이지: 납부 기간·장부·회비 금액.
+ * 슬라이드 폭은 화면 전체(카드 여백은 슬라이드 안쪽 패딩)라 부모의 좌우 패딩 24를 음수 마진으로 상쇄한다
+ * — 장부 상세 캐러셀(`LedgerDetailScreen`)과 같은 방식. */
 function DuesStatusCard({
   title,
   dDayLabel,
@@ -43,57 +58,115 @@ function DuesStatusCard({
   ledgerName,
   duesAmount,
 }: DuesStatusCardProps) {
+  const { width: windowWidth } = useWindowDimensions();
+  const [pageIndex, setPageIndex] = useState(0);
+  // 두 카드 높이를 큰 쪽에 맞춘다 — 슬라이드 높이를 측정해 `minHeight`로 준다(flex 늘리기에 기대지 않음).
+  const [slideHeights, setSlideHeights] = useState<[number, number]>([0, 0]);
+  const cardMinHeight = Math.max(slideHeights[0], slideHeights[1]);
+
+  const handleSlideLayout = (index: 0 | 1) => (event: LayoutChangeEvent) => {
+    const height = event.nativeEvent.layout.height;
+    setSlideHeights(current =>
+      current[index] === height
+        ? current
+        : index === 0
+        ? [height, current[1]]
+        : [current[0], height],
+    );
+  };
+
+  const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    setPageIndex(Math.round(event.nativeEvent.contentOffset.x / windowWidth));
+  };
+
   return (
-    <CardBase variant="dashed">
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>{title}</Text>
-        <Badge label={dDayLabel} status={badgeStatus} />
-      </View>
+    <View>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={handleScrollEnd}
+        style={styles.carousel}
+        decelerationRate="fast"
+      >
+        <View
+          style={[styles.slide, { width: windowWidth }]}
+          onLayout={handleSlideLayout(0)}
+        >
+          <CardBase style={{ minHeight: cardMinHeight }}>
+            <View style={styles.headerRow}>
+              <Text style={styles.title}>{title}</Text>
+              <Badge label={dDayLabel} status={badgeStatus} />
+            </View>
 
-      <View style={styles.statusSection}>
-        <View style={styles.summaryItem}>
-          <Image source={MEMBER_ICON} style={styles.icon} />
-          <Text style={styles.summaryDenominator}>
-            <Text style={styles.summaryHighlight}>{paidMemberCount}</Text> /{' '}
-            {totalMemberCount}명
-          </Text>
+            <View style={styles.statusSection}>
+              <View style={styles.summaryItem}>
+                <Image source={MEMBER_ICON} style={styles.icon} />
+                <Text style={styles.summaryDenominator}>
+                  <Text style={styles.summaryHighlight}>{paidMemberCount}</Text> /{' '}
+                  {totalMemberCount}명
+                </Text>
+              </View>
+              <View style={styles.summaryItem}>
+                <Image source={MONEY_ICON} style={styles.icon} />
+                <Text style={styles.summaryDenominator}>
+                  <Text style={styles.summaryHighlight}>
+                    {paidAmount.toLocaleString()}
+                  </Text>{' '}
+                  / {formatWon(totalAmount)}
+                </Text>
+              </View>
+            </View>
+          </CardBase>
         </View>
-        <View style={styles.summaryItem}>
-          <Image source={MONEY_ICON} style={styles.icon} />
-          <Text style={styles.summaryDenominator}>
-            <Text style={styles.summaryHighlight}>
-              {paidAmount.toLocaleString()}
-            </Text>{' '}
-            / {formatWon(totalAmount)}
-          </Text>
-        </View>
-      </View>
 
-      <View style={styles.periodColumn}>
-        <Text style={styles.fieldLabel}>납부 기간</Text>
-        <Text style={styles.fieldValue}>
-          {periodStart} ~ {periodEnd}
-        </Text>
-      </View>
+        <View
+          style={[styles.slide, { width: windowWidth }]}
+          onLayout={handleSlideLayout(1)}
+        >
+          <CardBase style={{ minHeight: cardMinHeight }}>
+            <View style={styles.periodColumn}>
+              <Text style={styles.fieldLabel}>납부 기간</Text>
+              <Text style={styles.fieldValue}>
+                {periodStart} ~ {periodEnd}
+              </Text>
+            </View>
 
-      <View style={styles.twoColumnRow}>
-        <View style={styles.twoColumn}>
-          <Text style={styles.fieldLabel}>장부</Text>
-          <Text style={styles.fieldValue}>{ledgerName}</Text>
+            <View style={styles.twoColumnRow}>
+              <View style={styles.twoColumn}>
+                <Text style={styles.fieldLabel}>장부</Text>
+                <Text style={styles.fieldValue}>{ledgerName}</Text>
+              </View>
+              <View style={styles.columnDividerWrapper}>
+                <Divider orientation="vertical" />
+              </View>
+              <View style={styles.twoColumn}>
+                <Text style={styles.fieldLabel}>회비 금액</Text>
+                <Text style={styles.fieldValue}>{formatWon(duesAmount)}</Text>
+              </View>
+            </View>
+          </CardBase>
         </View>
-        <View style={styles.columnDividerWrapper}>
-          <Divider orientation="vertical" />
-        </View>
-        <View style={styles.twoColumn}>
-          <Text style={styles.fieldLabel}>회비 금액</Text>
-          <Text style={styles.fieldValue}>{formatWon(duesAmount)}</Text>
-        </View>
+      </ScrollView>
+      <View style={styles.indicatorRow}>
+        <CarouselIndicator count={2} selectedIndex={pageIndex} />
       </View>
-    </CardBase>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  carousel: {
+    flexGrow: 0,
+    marginHorizontal: -20,
+  },
+  slide: {
+    paddingHorizontal: 20,
+  },
+  indicatorRow: {
+    alignItems: 'center',
+    marginTop: 12,
+  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -106,7 +179,6 @@ const styles = StyleSheet.create({
   },
   statusSection: {
     gap: 8,
-    marginBottom: 28,
   },
   summaryItem: {
     flexDirection: 'row',

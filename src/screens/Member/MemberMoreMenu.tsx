@@ -1,6 +1,6 @@
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Menu, { MenuItem } from '../../components/Navigation/Menu/Menu';
-import { FILL_NEUTRAL_SUBTLE, OVERLAY_MENU_BACKDROP } from '../../constants/colors';
+import { BORDER_NEUTRAL_NORMAL, FILL_NEUTRAL_SUBTLE, OVERLAY_MENU_BACKDROP } from '../../constants/colors';
 
 type MemberMoreMenuProps = {
   visible: boolean;
@@ -42,6 +42,8 @@ const styles = StyleSheet.create({
     backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 12,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: BORDER_NEUTRAL_NORMAL,
   },
 });
 

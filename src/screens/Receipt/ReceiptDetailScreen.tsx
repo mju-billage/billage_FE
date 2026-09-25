@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 12,
   },
   backIcon: {
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 16,
   },
 });

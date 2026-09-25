@@ -21,6 +21,7 @@
  * 배지·영수증이 없는 행은 `TransactionListItem`이 납부관리 아이콘(기본)을 그린다.
  */
 import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SectionList, StyleSheet, Text, View } from 'react-native';
 import Tabs from '../../components/Navigation/Tabs/Tabs';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
@@ -32,7 +33,7 @@ import {
   REPORT_LEDGER_ENTRIES_TAB_EXPENSE,
   REPORT_LEDGER_ENTRIES_TAB_INCOME,
 } from '../../constants/reportScreenText';
-import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { BACKGROUND_SECONDARY, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 export type TaggedReportEntry = {
@@ -73,10 +74,16 @@ function groupByDate(
 type ReportEntryListProps = {
   entries: TaggedReportEntry[];
   onPressEntry: (entry: TaggedReportEntry) => void;
+  /** true면 목록 전체를 흰 배경 + 화면 가로 전체 폭으로 그리고(탭도 좌우 여백 없이 절반/삼분할),
+   * 좌우 20은 안쪽 콘텐츠 패딩으로만 준다. 부모가 좌우 패딩 없이 화면 폭 그대로 넣어야 한다.
+   * 기본 false(기존 모양 — 부모 패딩 안, 투명 배경). */
+  sheet?: boolean;
 };
 
-function ReportEntryList({ entries, onPressEntry }: ReportEntryListProps) {
+function ReportEntryList({ entries, onPressEntry, sheet = false }: ReportEntryListProps) {
   const [tab, setTab] = useState<Tab>('all');
+  const insets = useSafeAreaInsets();
+  const inset = sheet ? styles.sheetInset : undefined;
 
   const filtered = entries
     .filter(entry => {
@@ -98,10 +105,10 @@ function ReportEntryList({ entries, onPressEntry }: ReportEntryListProps) {
   }));
 
   return (
-    <View style={styles.container}>
-      <Tabs items={TABS} value={tab} onChange={setTab} showIcon={false} />
+    <View style={[styles.container, sheet && styles.containerSheet]}>
+      <Tabs items={TABS} value={tab} onChange={setTab} showIcon={false} fullWidth={sheet} />
 
-      <Text style={styles.countText}>
+      <Text style={[styles.countText, inset]}>
         {filtered.length}
         {REPORT_ENTRY_LIST_COUNT_SUFFIX}
       </Text>
@@ -114,22 +121,27 @@ function ReportEntryList({ entries, onPressEntry }: ReportEntryListProps) {
         <SectionList
           sections={sections}
           keyExtractor={(item, index) => `${item.ledgerName}-${item.occurredOn}-${index}`}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[
+            styles.listContent,
+            sheet && { paddingBottom: 24 + insets.bottom },
+          ]}
           renderSectionHeader={({ section }) => (
-            <Text style={styles.sectionHeader}>{section.title}</Text>
+            <Text style={[styles.sectionHeader, inset]}>{section.title}</Text>
           )}
           renderItem={({ item }) => (
             // 보고서 스냅샷은 approvalStatus/receiptFiles가 없어 배지·영수증이 안 뜬다.
             // TODO: 스냅샷에 receiptCount가 추가되면 그 값도 hasReceipt에 반영할 것
             // (파일 상단 주석, docs/backend-requests.md 2순위 참고).
-            <TransactionListItem
-              label={item.ledgerName}
-              itemName={item.title}
-              amount={item.type === 'INCOME' ? item.amount : -item.amount}
-              hasReceipt={(item.receiptFiles?.length ?? 0) > 0}
-              isPendingApproval={item.approvalStatus === 'PENDING'}
-              onPress={() => onPressEntry(item)}
-            />
+            <View style={inset}>
+              <TransactionListItem
+                label={item.ledgerName}
+                itemName={item.title}
+                amount={item.type === 'INCOME' ? item.amount : -item.amount}
+                hasReceipt={(item.receiptFiles?.length ?? 0) > 0}
+                isPendingApproval={item.approvalStatus === 'PENDING'}
+                onPress={() => onPressEntry(item)}
+              />
+            </View>
           )}
         />
       )}
@@ -140,6 +152,13 @@ function ReportEntryList({ entries, onPressEntry }: ReportEntryListProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  containerSheet: {
+    backgroundColor: BACKGROUND_SECONDARY,
+  },
+  // `sheet` 모드에서 콘텐츠(건수·날짜 헤더·내역 행)의 좌우 패딩.
+  sheetInset: {
+    paddingHorizontal: 20,
   },
   countText: {
     ...TYPOGRAPHY.body2,

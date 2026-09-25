@@ -10,15 +10,14 @@
  */
 import { useCallback, useState } from 'react';
 import { BackHandler, Share, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import Button from '../../components/Input/Button/Button';
 import TextArea from '../../components/Input/Text Field/TextArea';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
-import { BACKGROUND_PRIMARY } from '../../constants/colors';
 import {
   DUES_CREATE_LEAVE_CONFIRM_LABEL,
   DUES_REQUEST_LEAVE_DESCRIPTION,
@@ -66,7 +65,8 @@ function DuesRequestScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    // 전체화면 폼은 `ScreenContainer`(키보드가 뜨면 콘텐츠 영역이 줄어 하단 버튼이 키보드 위로 올라온다).
+    <ScreenContainer background="primary">
       <AppBar type="sub" title={DUES_REQUEST_TITLE} onBackPress={handleBack} />
 
       <View style={styles.body}>
@@ -76,6 +76,7 @@ function DuesRequestScreen() {
           placeholder={DUES_REQUEST_PLACEHOLDER}
           rows={10}
           autoFocus
+          filled
         />
       </View>
 
@@ -100,24 +101,20 @@ function DuesRequestScreen() {
           navigation.goBack();
         }}
       />
-    </SafeAreaView>
+    </ScreenContainer>
   );
 }
 
+// DUE-3-PAGE-04-0(납부 요청) 시안이 옅은 블루 — design-verification.md §5-7 규칙, §2 표 갱신
+// (`ScreenContainer background="primary"`).
 const styles = StyleSheet.create({
-  // DUE-3-PAGE-04-0(납부 요청) 시안이 옅은 블루 — design-verification.md §5-7 규칙,
-  // §2 표 갱신.
-  container: {
-    flex: 1,
-    backgroundColor: BACKGROUND_PRIMARY,
-  },
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 16,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 16,
     paddingTop: 8,
   },

@@ -292,7 +292,7 @@ function MenuRow({
 
 const styles = StyleSheet.create({
   content: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 8,
     gap: 12,
   },

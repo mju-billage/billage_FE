@@ -346,7 +346,7 @@ function MemberEditScreen() {
 const styles = StyleSheet.create({
   content: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 12,
   },
   stateContainer: {
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 16,
   },
 });

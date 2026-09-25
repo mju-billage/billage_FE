@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
   // 목록은 body 전체를 채우는 흰 영역이고, 카드·Tabs 헤더가 그 위에 겹친다(좌우 패딩은 안쪽만).
   listArea: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     backgroundColor: BACKGROUND_SECONDARY,
   },
   collapsingHeader: {
@@ -480,19 +480,21 @@ const styles = StyleSheet.create({
   },
   // Tabs 이하 흰 영역. 목록이 이 뒤로 스크롤되므로 배경이 불투명해야 한다.
   controls: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     backgroundColor: BACKGROUND_SECONDARY,
   },
   // controls의 좌우 패딩 24를 상쇄해 탭을 화면 가로 전체로 편다.
   tabsBleed: {
-    marginHorizontal: -24,
+    marginHorizontal: -20,
   },
   actionRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginTop: 8,
   },
+  // 필터(왼쪽 끝)·검색(오른쪽 끝) — 폭을 다 채워 `space-between`이 두 아이콘을 좌우 끝으로 민다.
   iconRow: {
+    flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 4,

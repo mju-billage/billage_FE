@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     paddingTop: 16,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   listContent: {
     paddingBottom: 24,

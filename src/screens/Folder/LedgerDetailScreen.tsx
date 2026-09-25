@@ -28,6 +28,7 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -85,7 +86,12 @@ import {
   SNACKBAR_LEDGER_RENAMED_SUFFIX,
 } from '../../constants/ledgerScreenText';
 import { SNACKBAR_BUDGET_SAVED } from '../../constants/folderScreenText';
-import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import {
+  BACKGROUND_PRIMARY,
+  BACKGROUND_SECONDARY,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const SEARCH_ICON = require('../../assets/icons/system/Search.png');
@@ -109,6 +115,7 @@ function LedgerDetailScreen() {
   const route = useRoute<LedgerDetailRouteProp>();
   const ledgerId = route.params.ledgerId;
   const { width: windowWidth } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   const [ledger, setLedger] = useState<LedgerDetail | null>(null);
   const [entries, setEntries] = useState<EntrySummary[]>([]);
@@ -347,6 +354,8 @@ function LedgerDetailScreen() {
   return (
     <ScreenContainer
       background="primary"
+      // 하단 안전영역은 흰 목록 영역이 직접 채운다(안 그러면 그 자리에 파란 띠가 남는다).
+      edges={['top']}
       snackbar={snackbar ? <Snackbar visible title={snackbar} /> : undefined}
     >
       <AppBar
@@ -360,64 +369,70 @@ function LedgerDetailScreen() {
       <SectionList
         sections={sections}
         keyExtractor={item => item.id}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingBottom: 24 + insets.bottom }]}
         stickySectionHeadersEnabled={false}
         onEndReachedThreshold={0.4}
         onEndReached={loadMoreEntries}
         ListHeaderComponent={
           <>
-            <ScrollView
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              onMomentumScrollEnd={handleScrollEnd}
-              style={styles.carousel}
-              decelerationRate="fast"
-            >
-              <View style={[styles.cardSlide, { width: windowWidth }]}>
-                <AmountCard
-                  type="incomeExpense"
-                  income={ledger.totalIncome}
-                  expense={ledger.totalExpense}
-                />
-              </View>
-              <View style={[styles.cardSlide, { width: windowWidth }]}>
-                {ledger.budget != null ? (
-                  <BudgetCard
-                    remainingBudget={ledger.remainingBudget ?? ledger.budget - ledger.totalExpense}
+            {/* 카드 캐러셀 + 인디케이터: 파란 블록(아래 여백 16이 흰 영역과의 파란 간격) */}
+            <View style={styles.cardBlock}>
+              <ScrollView
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onMomentumScrollEnd={handleScrollEnd}
+                style={styles.carousel}
+                decelerationRate="fast"
+              >
+                <View style={[styles.cardSlide, { width: windowWidth }]}>
+                  <AmountCard
+                    type="incomeExpense"
+                    income={ledger.totalIncome}
                     expense={ledger.totalExpense}
-                    budget={ledger.budget}
                   />
-                ) : (
-                  <BudgetCard state="empty" />
-                )}
+                </View>
+                <View style={[styles.cardSlide, { width: windowWidth }]}>
+                  {ledger.budget != null ? (
+                    <BudgetCard
+                      remainingBudget={ledger.remainingBudget ?? ledger.budget - ledger.totalExpense}
+                      expense={ledger.totalExpense}
+                      budget={ledger.budget}
+                    />
+                  ) : (
+                    <BudgetCard state="empty" />
+                  )}
+                </View>
+              </ScrollView>
+              <View style={styles.indicatorRow}>
+                <CarouselIndicator count={2} selectedIndex={cardIndex} />
               </View>
-            </ScrollView>
-            <View style={styles.indicatorRow}>
-              <CarouselIndicator count={2} selectedIndex={cardIndex} />
             </View>
 
-            <View style={styles.toolRow}>
-              <Pressable
-                onPress={() => setFilterSheetVisible(true)}
-                hitSlop={8}
-                accessibilityLabel="필터"
-              >
-                <Image source={FILTER_ICON} style={styles.toolIcon} />
-              </Pressable>
-              <Pressable
-                onPress={() => navigation.navigate('LedgerSearch', { ledgerId, ledgerName: ledger.name })}
-                hitSlop={8}
-                accessibilityLabel="검색"
-              >
-                <Image source={SEARCH_ICON} style={styles.toolIcon} />
-              </Pressable>
-            </View>
+            {/* 필터/검색 줄·개수: 흰 영역 시작(가로 전체, 좌우 24는 안쪽 패딩) */}
+            <View style={styles.listHeader}>
+              <View style={styles.toolRow}>
+                <Pressable
+                  onPress={() => setFilterSheetVisible(true)}
+                  hitSlop={8}
+                  accessibilityLabel="필터"
+                >
+                  <Image source={FILTER_ICON} style={styles.toolIcon} />
+                </Pressable>
+                <Pressable
+                  onPress={() => navigation.navigate('LedgerSearch', { ledgerId, ledgerName: ledger.name })}
+                  hitSlop={8}
+                  accessibilityLabel="검색"
+                >
+                  <Image source={SEARCH_ICON} style={styles.toolIcon} />
+                </Pressable>
+              </View>
 
-            <Text style={styles.countText}>
-              {entryTotal}
-              {LEDGER_COUNT_SUFFIX}
-            </Text>
+              <Text style={styles.countText}>
+                {entryTotal}
+                {LEDGER_COUNT_SUFFIX}
+              </Text>
+            </View>
           </>
         }
         ListEmptyComponent={
@@ -435,17 +450,19 @@ function LedgerDetailScreen() {
           <Text style={styles.sectionHeader}>{section.title}</Text>
         )}
         renderItem={({ item }) => (
-          <TransactionListItem
-            itemName={item.title}
-            amount={item.type === 'INCOME' ? item.amount : -item.amount}
-            hasReceipt={item.receiptCount > 0}
-            isPendingApproval={item.approvalStatus === 'PENDING'}
-            onPress={() =>
-              navigation.navigate('TransactionDetail', {
-                transactionId: item.id,
-              })
-            }
-          />
+          <View style={styles.itemWrapper}>
+            <TransactionListItem
+              itemName={item.title}
+              amount={item.type === 'INCOME' ? item.amount : -item.amount}
+              hasReceipt={item.receiptCount > 0}
+              isPendingApproval={item.approvalStatus === 'PENDING'}
+              onPress={() =>
+                navigation.navigate('TransactionDetail', {
+                  transactionId: item.id,
+                })
+              }
+            />
+          </View>
         )}
       />
 
@@ -544,13 +561,12 @@ const styles = StyleSheet.create({
   carousel: {
     flexGrow: 0,
     marginTop: 16,
-    marginHorizontal: -24,
   },
   // 슬라이드 하나 = 화면 폭 전체(JSX에서 width: windowWidth로 덮어씀) — 카드
   // 여백은 스크롤뷰가 아니라 이 안쪽 padding으로 준다(캐러셀 스냅 결함 수정,
   // 2026-09-18).
   cardSlide: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   indicatorRow: {
     alignItems: 'center',
@@ -573,9 +589,21 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
     marginBottom: 8,
   },
+  // 목록 콘텐츠 전체가 흰 배경(가로 전체). 좌우 24는 각 조각(listHeader·sectionHeader·itemWrapper)이 안쪽 패딩으로 가진다.
+  // flexGrow: 내역이 적어도 화면 아래까지 흰색이 이어지게.
   listContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
+    flexGrow: 1,
+    backgroundColor: BACKGROUND_SECONDARY,
+  },
+  cardBlock: {
+    backgroundColor: BACKGROUND_PRIMARY,
+  },
+  listHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+  },
+  itemWrapper: {
+    paddingHorizontal: 20,
   },
   // 12px+Bold 조합은 정식 스타일에 없어 body3+bold를 예외로 채택(내역 메인과 같은 헤더).
   sectionHeader: {
@@ -584,6 +612,7 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
     marginTop: 12,
     marginBottom: 6,
+    paddingHorizontal: 20,
   },
   stateContainer: {
     flex: 1,

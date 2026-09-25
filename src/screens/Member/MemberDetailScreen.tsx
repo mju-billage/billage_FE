@@ -247,7 +247,7 @@ function MemberDetailScreen() {
 
 const styles = StyleSheet.create({
   body: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 24,
     gap: 16,

@@ -292,7 +292,7 @@ function CalendarScreen() {
 const styles = StyleSheet.create({
   scrollContent: {
     backgroundColor: BACKGROUND_SECONDARY,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 40,
   },
   monthNavRow: {

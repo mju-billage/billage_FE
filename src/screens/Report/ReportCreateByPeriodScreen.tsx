@@ -283,7 +283,7 @@ function ReportCreateByPeriodScreen() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 16,
     gap: 4,
   },
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 16,
     paddingTop: 8,
   },

@@ -212,7 +212,7 @@ function WithdrawOwnershipTransferScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 24,
   },
@@ -248,7 +248,7 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_SECONDARY,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 16,
   },
   stateContainer: {
@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_DISABLED,
     textAlign: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
 });
 

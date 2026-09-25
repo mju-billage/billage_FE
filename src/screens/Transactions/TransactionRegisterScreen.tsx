@@ -845,7 +845,7 @@ function TransactionRegisterScreen() {
 const styles = StyleSheet.create({
   content: {
     paddingTop: 8,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 40,
   },
   stateContainer: {
@@ -889,7 +889,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 16,
   },
 });

@@ -18,6 +18,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import CardBase from '../../components/Data Display/Card/CardBase';
+import FolderTabShape from '../../components/Data Display/Card/FolderTabShape';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import type { ReportDetail } from '../../types/report';
 import * as reportService from '../../services/reportService';
@@ -42,6 +43,7 @@ import {
 } from '../../constants/reportScreenText';
 import {
   FEEDBACK_POSITIVE_BOLD,
+  FILL_NEUTRAL_SUBTLE,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
@@ -169,6 +171,7 @@ function ReportByPeriodDetailScreen() {
           }
         >
           <CardBase style={styles.headerCard}>
+            <FolderTabShape fill={FILL_NEUTRAL_SUBTLE} />
             <View style={styles.headerTopRow}>
               <Text style={styles.headerTitle} numberOfLines={1}>
                 {report.title}
@@ -230,7 +233,7 @@ function ReportByPeriodDetailScreen() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 8,
     gap: 8,
   },
@@ -248,8 +251,9 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
+  // 폴더 탭(`FolderTabShape`)이 카드 위로 20 튀어나와서 위 여백을 그만큼 더 둔다.
   headerCard: {
-    marginTop: 8,
+    marginTop: 24,
     gap: 4,
   },
   headerTopRow: {

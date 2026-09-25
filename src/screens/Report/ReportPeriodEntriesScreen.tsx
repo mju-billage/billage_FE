@@ -118,7 +118,7 @@ function ReportPeriodEntriesScreen() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 12,
   },
   periodText: {
@@ -128,13 +128,13 @@ const styles = StyleSheet.create({
   carousel: {
     flexGrow: 0,
     marginTop: 12,
-    marginHorizontal: -24,
+    marginHorizontal: -20,
   },
   // 슬라이드 하나 = 화면 폭 전체(JSX에서 width: windowWidth로 덮어씀) — 카드
   // 여백은 스크롤뷰가 아니라 이 안쪽 padding으로 준다(캐러셀 스냅 결함 수정,
   // 2026-09-18).
   cardSlide: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   indicatorRow: {
     alignItems: 'center',

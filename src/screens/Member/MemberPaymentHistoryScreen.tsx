@@ -208,7 +208,7 @@ function MemberPaymentHistoryScreen() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 12,
     gap: 8,
   },
