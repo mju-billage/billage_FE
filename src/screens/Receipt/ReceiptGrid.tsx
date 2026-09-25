@@ -6,7 +6,7 @@
  * 썸네일에 원본 이미지를 그대로 쓴다 — 이 API엔 별도 축소본 URL이 없다
  * (`types/receipt.ts` 주석, File.txt "이미지 압축은 하지 않습니다"). 장수가
  * 많은 모임은 그리드 전체가 원본 수십 장을 내려받는 셈이라 느려질 수 있다 —
- * 알려진 제약으로 남겨둔다(design-verification.md §5-4).
+ * 알려진 제약이다.
  */
 import { useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -16,9 +16,9 @@ import { buildAuthenticatedImageSource } from '../../utils/authenticatedImage';
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-// 폴더 그리드(`FolderItem`의 FOLDER_GRID_*)는 시안 실측 gap 16으로 변경됨, 앨범은 미실측 —
-// 그래서 이 파일의 gap 8/패딩 24는 폴더와 묶지 않고 그대로 둔다. 앨범 시안(`더보기_증빙자료앨범.png`)
-// 목업은 좌우 여백 약 20dp/타일 간격 약 7~8dp로 보이나 축소 이미지라 실측 필요.
+// 폴더 그리드(`FolderItem`의 FOLDER_GRID_*)는 gap 16이고 앨범은 별도 값이라
+// 이 파일의 gap 8/패딩은 폴더와 묶지 않는다. 앨범 시안(`더보기_증빙자료앨범.png`)
+// 목업은 좌우 여백 약 20dp/타일 간격 약 7~8dp로 보이나 축소 이미지라 실측이 필요하다.
 const GRID_COLUMNS = 3;
 const GRID_GAP = 8;
 const HORIZONTAL_PADDING = 20;

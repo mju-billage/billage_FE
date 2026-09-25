@@ -97,8 +97,8 @@ function LedgerCreateScreen() {
       if (parentId) {
         await ledgerService.createLedger(parentId, trimmedName, parsedBudget);
       } else {
-        // 최상위(폴더 탭 루트)에서 진입한 경우 — 2026-09-13 신설된
-        // POST /groups/{groupId}/ledgers로 만든다(백엔드 노티 03번).
+        // 최상위(폴더 탭 루트)에서 진입한 경우 —
+        // POST /groups/{groupId}/ledgers로 만든다.
         const group = getActiveGroup();
         if (!group) {
           setNameError(API_ERROR_DEFAULT_MESSAGE);

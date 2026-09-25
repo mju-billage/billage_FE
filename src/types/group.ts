@@ -18,9 +18,9 @@ export type GroupSummary = {
   memberCount: number;
   /**
    * 서버는 초대 코드를 모임 목록/생성/조회 응답에 안 주고 별도 발급 API
-   * (`POST /groups/{groupId}/invitations`, 2단계 GroupMembership 연동 대상)로 내려준다.
-   * 그래서 Group 1단계로 채운 모임은 항상 null이다 — 발급 화면(모임 관리자)에서 그때그때
-   * 요청해 채우는 방식으로 2단계에서 구현한다.
+   * (`POST /groups/{groupId}/invitations`)로 내려준다.
+   * 그래서 모임 캐시의 값은 항상 null이다 — 발급 화면(모임 관리자)에서 그때그때
+   * 요청해 채운다.
    */
   inviteCode: string | null;
 };

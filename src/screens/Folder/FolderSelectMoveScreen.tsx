@@ -88,9 +88,7 @@ function FolderSelectMoveScreen() {
         setLoadState('error');
         return;
       }
-      // 2026-09-13: FolderScreen과 같은 회귀가 여기도 있었다 — 최상위(folderId
-      // null)에서 장부 조회를 빈 배열로 하드코딩해 최상위 장부를 이동 대상으로
-      // 고를 수 없었다. 모임 전체 장부를 받아 최상위분만 걸러 쓴다.
+      // 최상위(folderId null)에서는 모임 전체 장부를 받아 최상위분만 걸러 쓴다.
       const [tree, allLedgers] = await Promise.all([
         folderService.getFolderTree(group.id),
         folderId

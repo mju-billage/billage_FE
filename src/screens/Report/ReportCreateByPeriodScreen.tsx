@@ -121,8 +121,7 @@ function ReportCreateByPeriodScreen() {
 
   // 안드로이드 하드웨어 back도 AppBar 백버튼과 같은 이탈 확인을 거치게 한다
   // — 등록을 안 하면 시스템 back은 `handleBack`을 거치지 않고 화면을 그냥
-  // 나가버린다(ADD-2-MODAL-01-0가 이 등록을 빠뜨려 실제로 겪은 버그,
-  // design-verification.md ADD 섹션 참고 — 같은 실수를 반복하지 않는다).
+  // 나가버린다.
   useFocusEffect(
     useCallback(() => {
       const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -157,7 +156,7 @@ function ReportCreateByPeriodScreen() {
         entryType,
       });
       // ETC-4-PAGE-04-0: 성공 시 생성 완료된 보고서 상세로 이동한다(ReportCreateByLedgerScreen과
-      // 같은 근거 — design-verification.md §5-11). navigate가 아니라 reset으로 생성 폼을
+      // 같은 근거). navigate가 아니라 reset으로 생성 폼을
       // 스택에서 걷어내 뒤로가기가 폼이 아니라 보고서 목록으로 가게 한다.
       navigation.reset({
         index: 2,

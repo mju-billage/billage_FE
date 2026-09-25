@@ -1,31 +1,21 @@
 /** @screen DSH-1-PAGE-01-0 대시보드 */
 /**
- * 5단계(Dashboard API 연동): 목(`MOCK_DASHBOARD_SUMMARY`)이 가정한 화면 구성과
- * 서버 응답 모양이 크게 다르다.
- *  - **2026-09-11 정정**: 미니 캘린더는 시안(DSH-1-PAGE-01-0, `대시보드_메인화면.png`)이
- *    실제로 존재하고 "이번 달 1일부터 2주" 월 그리드를 요구한다(요일 헤더 없이 1~14일).
+ * 목(`MOCK_DASHBOARD_SUMMARY`)이 가정한 화면 구성과 서버 응답 모양이 크게 다르다.
+ *  - 미니 캘린더는 시안(DSH-1-PAGE-01-0, `대시보드_메인화면.png`)에
+ *    있고 "이번 달 1일부터 2주" 월 그리드를 요구한다(요일 헤더 없이 1~14일).
  *    `dashboardService.getMonthlyCalendar()`(`CalendarScreen.tsx`와 같은 API,
  *    `GET /groups/{groupId}/calendar?yearMonth=...`)로 이번 달분을 따로 불러
  *    `income - expense` 합산해 채운다 — 대시보드 응답 자체의 `calendar` 필드(오늘
  *    기준 지난 14일 롤링 윈도우)는 이 월 그리드와 안 맞아 쓰지 않는다.
  *  - 회비(dues)는 `upcomingDues[]`(마감 임박 건별 D-day/납부 인원)를 그대로
  *    `DuesProgressCard` 캐러셀로 보여준다(시안 UI 요소 3번). 목록이 비면 안내 문구로 대체.
- *  - **2026-09-11 제거, 2026-09-12 사유 정정**: 잔액(AmountCard)/최근 내역
- *    (TransactionListItem)/승인 대기 섹션은 예전에 "새 데이터니 최소 형태로 얹는다"며
- *    추가했다가 다른 세션이 이유 설명 없이 주석으로 꺼둔 채(git blame `6de0cbf`)
- *    방치돼 있었다 — eslint 미사용 경고 13건의 원인이었다. **제거 사유는 "시안에
- *    없어서"가 아니다** — `GET /groups/{groupId}/dashboard`는 이 셋(`summary`/
- *    `approval`/`recentEntries`)을 실제로 내려주고 있어 서버 쪽엔 기획 근거가 있었을
- *    가능성이 높다. 이 화면(DSH-1-PAGE-01-0) 자체가 `billage-ia.md` 기준 W/F·Design
- *    모두 아직 '예정'(미확정)이라 **지금 시안엔 이 데이터가 들어갈 대응 영역이 없어서
- *    당장 그릴 근거가 없다는 뜻일 뿐** — 시안이 확정되면 재검토해야 한다
- *    (`docs/design-verification.md` §5-4 참고). 복원은 이 블록이 마지막으로 살아
- *    있던 커밋 `a7a5a18`(`git show a7a5a18:"src/screens/Dashboard/DashboardScreen.tsx"`)
- *    에서 가능하다.
+ *  - 잔액(AmountCard)/최근 내역(TransactionListItem)/승인 대기 섹션은 그리지 않는다.
+ *    `GET /groups/{groupId}/dashboard`는 이 셋(`summary`/`approval`/`recentEntries`)을
+ *    내려주지만, 이 화면(DSH-1-PAGE-01-0)의 시안엔 이 데이터가 들어갈 대응 영역이 없어
+ *    그릴 근거가 없다. 시안이 확정되면 재검토한다.
  *
  * `quickServices`는 서버에 대응 도메인이 없는 순수 클라이언트 데이터라 그대로
- * `MOCK_DASHBOARD_SUMMARY.quickServices`를 쓴다(docs/api-integration-plan.md
- * 5단계 계획에 이미 명시돼 있던 예외).
+ * `MOCK_DASHBOARD_SUMMARY.quickServices`를 쓴다.
  */
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';

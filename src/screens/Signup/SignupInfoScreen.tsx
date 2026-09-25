@@ -38,12 +38,11 @@ type SignupInfoRouteProp = RouteProp<RootStackParamList, 'SignupInfo'>;
 /**
  * 이메일 회원가입 정보 입력 화면: 이름, 이메일, 비밀번호를 받는다.
  *
- * ⚠️ 2026-09-06 흐름 변경(Auth.txt 6~8번): 예전엔 이 화면에서 바로
- * `POST /auth/signup`을 호출했는데, 명세가 "이메일 인증을 먼저 마쳐야 가입
- * 가능"으로 확정되면서 순서가 뒤집혔다 — 실제 가입 호출은
- * `EmailVerificationScreen`의 코드 검증 성공 직후로 옮겼다(2026-09-11 Swagger
- * 대조 결과 `verificationToken` 같은 건 실제로 없다 — `authService.ts` 주석
- * 참고). 이 화면은 이제 입력값만 모아 다음 화면으로 넘긴다(API 호출 없음).
+ * ⚠️ 흐름(Auth.txt 6~8번): 명세가 "이메일 인증을 먼저 마쳐야 가입 가능"이라
+ * 실제 가입 호출(`POST /auth/signup`)은
+ * `EmailVerificationScreen`의 코드 검증 성공 직후에 한다(`verificationToken` 같은
+ * 건 없다 — `authService.ts` 주석 참고). 이 화면은 입력값만 모아 다음 화면으로
+ * 넘긴다(API 호출 없음).
  * `EMAIL_ALREADY_EXISTS` 에러도 그래서 이 화면이 아니라
  * `EmailVerificationScreen`에서 처리한다 — 사용자가 인증까지 다 마친
  * 뒤에야 알게 되는 건 UX상 아쉽지만 명세가 그렇게 정의했다.
@@ -57,7 +56,7 @@ function SignupInfoScreen() {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   // 형식·조건 에러(이메일·비밀번호·확인)는 필드를 한 번 벗어난(blur) 뒤부터 보여준다 — 입력 중엔 항상 "형식 오류"라서.
   // **이름 글자수 초과만 즉시** 표시한다(Case A 목업이 키보드가 올라온 채 에러를 보여주고, 넘긴 순간 알아야 하므로).
-  // 시안 미명시, blur 기준으로 구현 (2026-09-20). 한 번 뜬 뒤에는 입력 중에도 실시간으로 갱신돼
+  // 시안 미명시, blur 기준으로 구현. 한 번 뜬 뒤에는 입력 중에도 실시간으로 갱신돼
   // 조건을 채우면 바로 사라진다(`touched`가 계속 true).
   const [touched, setTouched] = useState({ email: false, password: false, confirm: false });
   const touch = (field: keyof typeof touched) => setTouched(prev => ({ ...prev, [field]: true }));

@@ -10,19 +10,13 @@
 /** @screen FDR-4-SNACKBAR-03-0 이름 변경_완료 (activeDialog='rename' 확인 시 SNACKBAR_FOLDER_RENAMED) */
 /** @screen FDR-2-MODAL-02-0 폴더 전체 백업 (activeDialog='backup') — `design-index.json`에 등록된
  * 후보(`FDR\폴더\FDR-2-MODAL-02-0.png`)는 실제로는 "새 폴더 생성" 다이얼로그 내용이라 오배치이고,
- * 진짜 시안은 같은 이름으로 `FDR\폴더\백업\` 하위에 따로 있다(2026-09-11 확인, §5-4 참고) */
+ * 진짜 시안은 같은 이름으로 `FDR\폴더\백업\` 하위에 따로 있다 */
 /** @screen FDR-3-SNACKBAR-02-0 폴더 백업 완료 (SNACKBAR_BACKUP_DONE_TITLE/DESCRIPTION) */
 /**
- * 3-B(API 연동, 쓰기) 메모 — 0-1 폴더 해제 판단(2026-09-05 철회): 최상위
- * 폴더를 해제하면 그 직속 장부가 `folderId: null`이 되는데, 당시엔 최상위
- * 장부를 다시 조회할 API가 없어(docs/api-gaps.md (C)) "최상위 + 직속 장부
- * 있음" 조합의 해제를 UI에서 막았었다(`isUnlinkUnsafe`). `GET
- * .../folder-items`(폴더ID 생략=최상위 조회)가 실제로는 최상위 장부도
- * `LEDGER` 항목으로 그대로 내려준다는 걸 실호출로 확인해(`docs/api-gaps.md`
- * "확정됨" 6번) 그 전제가 깨졌다 — 차단을 없앴다. 백업(archive) 기능은 실제
- * API로 연동돼 있다(`archiveService.createArchive`) — 2026-09-11 Swagger
- * 대조에서 잘못된 경로(`/groups/{groupId}/folders/archive`, 실제로는 없는
- * 경로였다)를 쓰고 있던 게 드러나 `/groups/{groupId}/archives`로 고쳤다.
+ * 폴더 해제: 최상위 폴더를 해제하면 그 직속 장부가 `folderId: null`이 되는데,
+ * `GET .../folder-items`(폴더ID 생략=최상위 조회)가 최상위 장부도 `LEDGER`
+ * 항목으로 내려주므로 UI에서 막지 않는다. 백업(archive) 기능은
+ * `archiveService.createArchive`(`/groups/{groupId}/archives`)로 연동돼 있다.
  */
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
@@ -181,12 +175,9 @@ function FolderScreen() {
         return;
       }
       // 폴더 트리는 모임 전체를 한 번에 내려주므로 화면 깊이와 무관하게 호출 1번.
-      // 장부는 현재 폴더 직속분만 별도 조회한다. 2026-09-13 발견: 최상위(folderId
-      // null)에서 이 값을 그냥 빈 배열로 하드코딩해뒀었다 — 예전엔 최상위 장부
-      // 조회 API 자체가 없어 그랬던 건데, `GET /groups/{groupId}/ledgers`가
-      // 신설된 뒤에도 여기를 안 고쳐서 최상위에 장부를 만들어도 폴더 화면에
-      // 안 보이는 회귀가 났다. 최상위에서는 모임 전체 장부를 받아 `folderId
-      // === null`인 것만 걸러 쓴다.
+      // 장부는 현재 폴더 직속분만 별도 조회한다. 최상위(folderId
+      // null)에서는 `GET /groups/{groupId}/ledgers`로 모임 전체 장부를 받아
+      // `folderId === null`인 것만 걸러 쓴다.
       const [nextTree, allLedgers] = await Promise.all([
         folderService.getFolderTree(group.id),
         folderId
@@ -242,8 +233,8 @@ function FolderScreen() {
 
   // FDR-1-PAGE-01-0 시안 Case A(폴더 헤더 메뉴): 평면 5항목, 구분선 2개로
   // 3그룹(선택 이동·예산 설정 / 그리드·리스트 / 전체 백업) — 2차 메뉴 없음.
-  // 하위 폴더(비root) 메뉴는 이번 라운드 대조 대상이 아니라 그룹 구분 없이
-  // 기존 순서 그대로 두고, "그리드·리스트" 진입점만 같은 방식으로 평면화했다.
+  // 하위 폴더(비root) 메뉴는 그룹 구분 없이 기존 순서 그대로 두고,
+  // "그리드·리스트" 진입점만 같은 방식으로 평면화했다.
   const gridListItems: MenuItem[] = [
     { key: 'grid', label: VIEW_TOGGLE_GRID_LABEL, icon: GRID_ICON },
     { key: 'list', label: VIEW_TOGGLE_LIST_LABEL, icon: LIST_ICON },
@@ -418,7 +409,7 @@ function FolderScreen() {
 
       <View style={styles.body}>
         <View style={styles.searchWrapper}>
-          {/* 파란 배경 화면이라 테두리 없는 흰 pill(기본 variant) — 시안 실측 */}
+          {/* 파란 배경 화면이라 테두리 없는 흰 pill(기본 variant) */}
           <SearchField
             value={searchQuery}
             onChangeText={setSearchQuery}

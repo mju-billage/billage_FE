@@ -55,7 +55,7 @@ function SearchField({
     >
       <TextInput
         style={styles.input}
-        // 시안 실측(폴더_메인화면.png Case C): 포커스 중에도 입력 글자는 기본색이고 파란색은 커서뿐이다.
+        // 포커스 중에도 입력 글자는 기본색이고 파란색은 커서뿐이다.
         cursorColor={FOREGROUND_SECONDARY}
         selectionColor={FOREGROUND_SECONDARY}
         value={value}
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    // 시안 실측(2026-09-20, 명세서 9개 시트): 검색 필드 채움색은 9곳 전부 흰색이다 — 회색 채움은 없다.
+    // 검색 필드 채움색은 전부 흰색이다 — 회색 채움은 없다.
     // 테두리는 화면 배경이 흰색일 때만 `outline`으로 준다(파란 배경 화면은 테두리 없는 흰 pill).
     backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 24,
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
   containerSm: {
     height: 36,
   },
-  // 시안 실측 높이 48dp.
+  // 높이 48dp.
   containerLg: {
     height: 48,
   },

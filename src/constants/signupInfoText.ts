@@ -5,7 +5,7 @@ export const SIGNUP_NAME_PLACEHOLDER = '이름을 입력해주세요.';
 /** 일반 가입 이름 최대 글자 수(설명표 COM-3-PAGE-03-0 No.3 — **소셜 가입은 8자**(`SOCIAL_SIGNUP_NAME_MAX_LENGTH`)로 서로 다르다, 합치지 말 것). */
 export const SIGNUP_NAME_MAX_LENGTH = 10;
 export const SIGNUP_NAME_HELPER = '* 최대 10자 이내로 입력할 수 있어요.';
-/** 10자 초과 시 도움말 자리에 나오는 빨간 에러 문구(시트 Case A). 입력은 막지 않는다 — 불일치 #21. */
+/** 10자 초과 시 도움말 자리에 나오는 빨간 에러 문구(시트 Case A). 입력은 막지 않는다. */
 export const SIGNUP_NAME_TOO_LONG_ERROR = '* 10자를 초과하여 입력했어요.';
 export const SIGNUP_EMAIL_LABEL = '이메일';
 export const SIGNUP_EMAIL_PLACEHOLDER = '이메일을 입력해주세요.';

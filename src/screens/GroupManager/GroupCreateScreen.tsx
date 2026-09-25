@@ -1,5 +1,5 @@
 /** @screen ETC-4-PAGE-01-0 새 모임 생성 */
-/** @screen ETC-5-SNACKBAR-04-0 모임 생성 완료 (AllGroupsScreen에서 route.params.snackbarMessage로 렌더 — design-verification.md §5-11) */
+/** @screen ETC-5-SNACKBAR-04-0 모임 생성 완료 (AllGroupsScreen에서 route.params.snackbarMessage로 렌더) */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -51,8 +51,7 @@ function GroupCreateScreen() {
       await groupService.createGroup({ name: trimmedName });
       // 생성 폼(과 가입 완료 화면에서 들어왔다면 그 화면까지)을 스택에서
       // 걷어내고 모임 목록으로 이동한다 — 뒤로가기로 폼에 못 돌아가게 한다
-      // (design-verification.md §5-11, 명세에 도착 화면 명시 없어 GroupManageScreen
-      // 모임삭제와 같은 기본값 패턴 적용).
+      // (명세에 도착 화면 명시 없어 GroupManageScreen 모임삭제와 같은 기본값 패턴 적용).
       navigation.reset({
         index: 1,
         routes: [

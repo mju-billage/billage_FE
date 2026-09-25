@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
-  // 필수 별표는 시안 실측 파랑 — `TextField`·`SelectionListItem`과 같은 `FOREGROUND_SECONDARY`.
+  // 필수 별표는 파랑 — `TextField`·`SelectionListItem`과 같은 `FOREGROUND_SECONDARY`.
   required: {
     color: FOREGROUND_SECONDARY,
   },

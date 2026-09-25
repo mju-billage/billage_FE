@@ -1,11 +1,9 @@
 /** @screen DTB-2-PAGE-01-0 내역 검색_전체 */
 /**
- * 4-B(모임 전체 내역 목록 API 연동): 목(`searchTransactions`)을 걷어내고
- * `entryService.getGroupEntries({ keyword })`(Entry.txt §7)로 옮겼다. `keyword`는
- * 내역명 또는 장부명에 걸린다(명세 그대로 — placeholder 문구도 이미 그렇게
- * 돼 있었다). 타이핑마다 서버를 부르되 과도한 호출을 막으려고 300ms
+ * `entryService.getGroupEntries({ keyword })`(Entry.txt §7)로 검색한다. `keyword`는
+ * 내역명 또는 장부명에 걸린다(명세 그대로 — placeholder 문구도 그렇다). 타이핑마다 서버를 부르되 과도한 호출을 막으려고 300ms
  * 디바운스만 얹었다(`MemberManageScreen` 검색과 같은 패턴). 페이지네이션은
- * 4-A에서 확정한 무한 스크롤(FlatList/SectionList `onEndReached`) 그대로 쓴다.
+ * 무한 스크롤(FlatList/SectionList `onEndReached`) 그대로 쓴다.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, SectionList, StyleSheet, Text, View } from 'react-native';

@@ -2,26 +2,17 @@
 /** @screen FDR-4-SNACKBAR-01-0 이동 완료 / 폴더 해제_완료 (여기는 이동 완료 절반. 폴더 해제_완료는
  * FolderScreen.tsx) */
 /**
- * 0-2 다건 이동 판단 — 2026-09-05 `folder-items/move` 전환: 서버가 실제로는
- * 다건 이동 API를 갖고 있었다(명세 "미구현" 태그가 낡은 것, 실호출로 확인
- * — `docs/api-gaps.md` "확정됨" 6번). 그래서 `PATCH /folders/{id}`/
- * `PATCH /ledgers/{id}` 단건 API를 선택된 개수만큼 순차 호출하던 예전 로직을
- * `folderService.moveFolderItems()`(`POST .../folder-items/move`) 한 번
- * 호출로 바꿨다 — 서버가 한 트랜잭션으로 처리해 부분 성공이 없다(하나라도
+ * 다건 이동: `folderService.moveFolderItems()`(`POST .../folder-items/move`)
+ * 한 번 호출로 처리한다 — 서버가 한 트랜잭션으로 처리해 부분 성공이 없다(하나라도
  * 실패하면 전부 취소, 예: 목적지가 이동 대상 자신/하위면 `409
- * INVALID_PARENT_FOLDER`). "N개 성공 M개 실패" 부분 성공 집계·스낵바 문구가
- * 더 이상 필요 없어 걷어냈다.
+ * INVALID_PARENT_FOLDER`).
  *
- * 장부를 최상위(destinationFolderId: null)로 이동하는 것도 예전엔 UI에서
- * 막았다(`Ledger.txt`가 옛 단건 PATCH API의 `folderId: null` 의미를 명시하지
- * 않아서) — 새 `/move` API는 Folder.txt §7에 "`targetFolderId`가 `null`이면
- * 최상위 영역으로 이동"이라고 장부·폴더 구분 없이 명시하고, 실호출로 장부를
- * 최상위로 옮긴 뒤 `GET .../folder-items`(폴더ID 생략=최상위) 응답에 그
- * 장부가 `LEDGER` 항목으로 그대로 나타남까지 확인했다 — 이제 막을 이유가
- * 없어 그 차단도 같이 뺐다.
+ * 장부도 최상위(destinationFolderId: null)로 이동할 수 있다 — Folder.txt §7에
+ * "`targetFolderId`가 `null`이면 최상위 영역으로 이동"이라고 장부·폴더 구분 없이
+ * 명시돼 있고, 이동한 장부는 `GET .../folder-items`(폴더ID 생략=최상위) 응답에
+ * `LEDGER` 항목으로 나타난다.
  *
- * 목적지 폴더 트리 탐색(아래 `subfolders`)은 그대로 뒀다 — 이 부분은 원래도
- * `getFolderTree()`로 잘 동작했고, 이번 전환 대상이 아니다.
+ * 목적지 폴더 트리 탐색(아래 `subfolders`)은 `getFolderTree()`로 한다.
  */
 import { useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';

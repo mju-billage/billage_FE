@@ -24,7 +24,7 @@ const CLOSE_ICON = require('../../../assets/icons/action/Close.png');
 
 type TextFieldProps = {
   label?: string;
-  /** true면 라벨 우측에 파란 별표(필수 표시)를 붙인다 — 시안 실측 `#3772E4`(6개 시트 전부 파랑), 토큰은 `FOREGROUND_SECONDARY`. */
+  /** true면 라벨 우측에 파란 별표(필수 표시)를 붙인다 — `#3772E4`, 토큰은 `FOREGROUND_SECONDARY`. */
   required?: boolean;
   value: string;
   onChangeText: (text: string) => void;

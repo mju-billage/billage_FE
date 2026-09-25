@@ -68,7 +68,7 @@ const SNACKBAR_AUTO_HIDE_MS = 1600;
  * 작동함"이라 적혀 있어 `ProfileEditScreen`과 같은 바텀시트(촬영/선택) →
  * `GroupImagePickerScreen`(갤러리) 구조를 그대로 맞췄다.
  *
- * 2026-09-11부터 카메라/갤러리 둘 다 실제 촬영·선택이고, 고른 즉시
+ * 카메라/갤러리 둘 다 실제 촬영·선택이고, 고른 즉시
  * `fileService.uploadFile(..., 'GROUP_IMAGE')`로 업로드해 받은 fileId를
  * `groupImageFileId`에 채운다(업로드 중엔 저장 버튼을 막는다).
  */

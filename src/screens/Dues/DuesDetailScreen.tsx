@@ -5,7 +5,7 @@
 /** @screen DUE-3-SNACKBAR-01-0 입금 확인 ("납부 완료하기" 성공 시) */
 /** @screen DUE-3-SNACKBAR-02-0 입금 취소 ("납부 취소하기" 성공 시) */
 /**
- * 6-A(DUE 화면 구현, 조회 전용): "회비 상세_마감된 회비"와 "회비 상세_예정된
+ * "회비 상세_마감된 회비"와 "회비 상세_예정된
  * 회비" 명세가 같은 Screen ID(`DUE-2-PAGE-03-1`)를 쓴다 — 확인 결과 오기가
  * 아니라 **같은 화면의 두 상태 변형**이다. 레이아웃(앱바+캐러셀 카드+탭+리스트)
  * 이 세 파일(기본/마감/예정) 모두 번호 1~7까지 완전히 동일하고, 각 파일이
@@ -13,35 +13,32 @@
  * 정보 작성 기준만 달라진다"고 설명한다. 그래서 이 파일 하나로 세 상태를
  * `status`로 분기해 구현했다.
  *
- * 상태 판정(2026-09-04 정합성 복구 — 서버 `status`를 그대로 신뢰한다):
+ * 상태 판정(서버 `status`를 그대로 신뢰한다):
  *  - `CLOSED` → "마감된 회비": 배지 "마감", 기본 탭 '납부 완료'
  *  - `SCHEDULED` → "예정된 회비": 배지에 시작일(`startDate`) 표시, 기본 탭
- *    '미납부'. 예전엔 이 상태를 `paidCount===0`(아직 아무도 안 냄)으로
- *    추정했는데 — "시작 전"과 "시작했는데 아무도 안 냄"은 다른 상황이라
- *    틀린 판단이었다. 서버가 `SCHEDULED`를 직접 내려준다(`docs/api-gaps.md`
- *    "확정됨" 절, 시작일 기준으로 서버가 파생 — 별도 전환 API 없음).
+ *    '미납부'. `paidCount===0`으로 추정하지 않는다 — "시작 전"과
+ *    "시작했는데 아무도 안 냄"은 다른 상황이다. 서버가 `SCHEDULED`를 직접
+ *    내려준다(시작일 기준으로 서버가 파생 — 별도 전환 API 없음).
  *  - `OPEN` → "진행 중": D-day 배지(마감 임박도별 색), 기본 탭 '미납부'
  *
- * 상태별 메뉴 차이(명세·Dues.txt §1 aside 기준, 7-B-1에서 구현):
+ * 상태별 메뉴 차이(명세·Dues.txt §1 aside 기준):
  *  - `SCHEDULED`: 회비 수정 / 모임원 선택 / 회비 삭제
  *  - `OPEN`: 위 + 회비 마감
  *  - `CLOSED`: 명세엔 "회비 수정"이 남아 있으나 서버는 `DUES_ALREADY_CLOSED
- *    (409)`로 막는다 — 기획 확인 대기 항목이라(`design-verification.md`
- *    §5-4) 수정 메뉴를 넣지 않는다. API 문서 자체도 CLOSED 메뉴를 "수정·삭제"
+ *    (409)`로 막는다 — 기획 확인 대기 항목이라
+ *    수정 메뉴를 넣지 않는다. API 문서 자체도 CLOSED 메뉴를 "수정·삭제"
  *    둘로만 적어놨지만 그중 수정도 위 이유로 뺐다 — 그래서 CLOSED는 삭제
  *    하나만 남는다. 메뉴 전체가 총무(OWNER) 전용이라 ⋮ 버튼 자체를 일반
  *    관리자에게 숨긴다(2단계 UI 우선 차단 패턴).
  *
- * 납부 상태 일괄 변경(7-B-2): `canChangeStatus = viewerIsOwner && status
+ * 납부 상태 일괄 변경: `canChangeStatus = viewerIsOwner && status
  * === 'OPEN'`일 때만 체크박스·CTA를 그린다 — `SCHEDULED`(`DUES_NOT_STARTED
  * 409`)와 `CLOSED`(`DUES_ALREADY_CLOSED 409`, Dues.txt §9)는 서버가 어차피
  * 막지만, **비활성화가 아니라 아예 숨긴다**. 목업(`회비상세_마감된회비.png`/
  * `_예정된회비.png`) 둘 다 이 두 상태에서 체크박스·CTA 자체가 없다 — 회색
  * 비활성 버튼이 아니라 렌더링을 안 한다.
  *
- * `PATCH /dues/{duesId}/members`(일괄)는 명세 "미구현"이었지만 착수 전
- * 실호출로 정상 동작을 확인했다(대조표가 맞았다, `docs/backend-requests.md`
- * 확정 이동) — 그래서 단건 API 순차 호출이 아니라 이 일괄 API를 직접 쓴다.
+ * `PATCH /dues/{duesId}/members`(일괄)를 쓴다 — 단건 API 순차 호출이 아니라 이 일괄 API를 직접 쓴다.
  * 서버가 원자적으로 처리해 "일부 성공·일부 실패"가 없다(하나라도 잘못되면
  * 전체 취소) — 성공 시 서버가 돌려준 `changedCount`로 스낵바 문구를 채운다
  * (선택 인원수와 다를 수 있다 — 이미 그 상태인 대상자는 조용히 스킵됨).
@@ -185,9 +182,7 @@ function DuesDetailScreen() {
       } catch (error) {
         // 실패를 조용히 "대상자가 없어요."로 보여주면 진짜 0명인지 요청 실패인지
         // 구분이 안 돼, 다른 화면과 같은 표준 에러 패턴(문구+다시 시도)으로 통일한다.
-        // (2026-09-05 정정: "목록이 안 보인다"는 별개 제보는 이 catch와 무관한
-        // 레이아웃 버그였다 — Divider.tsx 참고. 이 catch는 진짜 네트워크 실패
-        // 케이스만 다룬다.)
+        // (이 catch는 진짜 네트워크 실패 케이스만 다룬다.)
         setMembers([]);
         setMembersLoadError(toErrorMessage(error));
       } finally {
@@ -253,7 +248,7 @@ function DuesDetailScreen() {
           ? `${result.changedCount}${SNACKBAR_DUES_PAYMENT_CONFIRMED_SUFFIX}`
           : `${result.changedCount}${SNACKBAR_DUES_PAYMENT_CANCELLED_SUFFIX}`,
       );
-      // [3-B 서버 재조회 패턴] 응답에 이미 paidCount/unpaidCount가 있지만,
+      // [서버 재조회 패턴] 응답에 이미 paidCount/unpaidCount가 있지만,
       // 캐러셀 카드(expectedTotalAmount 등)까지 한 번에 맞추려고 상세를
       // 통째로 다시 부른다 — 목록은 loadMembers가 현재 탭 기준으로 다시 가져온다.
       const updatedDetail = await duesService.getDuesDetail(duesId);
@@ -270,7 +265,6 @@ function DuesDetailScreen() {
 
   // DUE-2-PAGE-03-0 시안 Case A(CLOSED): 메뉴는 "회비 수정 / 회비 삭제"만 남는다
   // — "회비 수정"은 CLOSED에서도 노출된다("모임원 선택"/"회비 마감"만 숨는다).
-  // design-verification.md §5-13 참고.
   const menuItems: MenuItem[] = detail
     ? [
         { key: 'edit', label: DUES_MENU_EDIT_LABEL },
@@ -305,7 +299,7 @@ function DuesDetailScreen() {
     try {
       await duesService.deleteDues(detail.id);
       // navigate가 아니라 reset — 삭제된 상세 화면을 스택에서 걷어내 뒤로가기로
-      // 되돌아갈 수 없게 한다(design-verification.md §5-11).
+      // 되돌아갈 수 없게 한다.
       navigation.reset({
         index: 0,
         routes: [
@@ -336,7 +330,7 @@ function DuesDetailScreen() {
     try {
       await duesService.closeDues(detail.id);
       // navigate가 아니라 reset — 마감 폼/상세를 스택에서 걷어내 뒤로가기로
-      // 되돌아갈 수 없게 한다(design-verification.md §5-11).
+      // 되돌아갈 수 없게 한다.
       navigation.reset({
         index: 0,
         routes: [
@@ -398,7 +392,7 @@ function DuesDetailScreen() {
   const memberCount = tab === 'paid' ? detail.paidCount : detail.unpaidCount;
 
   // DUE-2-PAGE-03-0(+03-1 진행중/예정/마감 상태 전부 같은 파일) 시안이 옅은
-  // 블루 — design-verification.md §5-7/§5-13.
+  // 블루.
   return (
     <ScreenContainer
       background="primary"

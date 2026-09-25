@@ -6,14 +6,13 @@ import { BACKGROUND_PRIMARY, BACKGROUND_SECONDARY } from '../../constants/colors
 
 type ScreenContainerProps = {
   /** 'primary'=목록/조회형(옅은 블루), 'secondary'=폼/입력형(흰색) — 시안 대조로
-   * 확정된 화면만 지정한다(design-verification.md §5-7 규칙). */
+   * 확정된 화면만 지정한다. */
   background: 'primary' | 'secondary';
   edges?: readonly Edge[];
   style?: StyleProp<ViewStyle>;
   /** 키보드가 뜰 때 콘텐츠 영역을 키보드 높이만큼 줄여 하단 CTA/필드가 가려지지
    * 않게 한다(폴더_메인화면.png Case C 기준 — 콘텐츠가 줄고 하단 탭바는 키보드에
-   * 가려짐). 기본 true. 입력 필드가 없는 화면 등 불필요한 경우에만 false로 꺼라
-   * (design-verification.md §5-12). */
+   * 가려짐). 기본 true. 입력 필드가 없는 화면 등 불필요한 경우에만 false로 꺼라. */
   avoidKeyboard?: boolean;
   /** 화면 하단(안전영역 위)에 띄울 스낵바 노드. 화면마다 absolute 래퍼를 따로 두지 않게 여기서 배치한다.
    * 콘텐츠와 같은 KeyboardAvoidingView 안에 있어 키보드가 뜨면 콘텐츠 영역과 함께 키보드 위로 올라간다. */

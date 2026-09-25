@@ -6,26 +6,23 @@
 /** @screen ADD-5-MODAL-01-0 스캔 내용 반영 확인 모달 (scanApply 다이얼로그) */
 /** @screen ADD-2-SNACKBAR-01-0 등록 완료 (SNACKBAR_TRANSACTION_ADDED[_PENDING]) */
 /**
- * 4-A(Entry API 연동): 등록(신규)은 항상 실 서버로 간다 — id가 없으면
- * `mode='createReal'`, 있으면 `mode='editReal'`이다. (4-B 정리: DTB 전체 목록이
- * 실 API로 전환되며 `dtb-tx-N` 목 id를 만들어내는 곳이 사라져 이 화면의 옛
- * `editMock` 분기가 도달 불가능해졌다 — 확인 후 분기와 `types/transaction.ts`를
- * 함께 걷어냈다.)
+ * 등록(신규)은 항상 실 서버로 간다 — id가 없으면
+ * `mode='createReal'`, 있으면 `mode='editReal'`이다.
  *
- * "담당자" 필드(2026-09-05 연동): `managerUserId`는 이 모임의 관리자(`GroupMembership`,
+ * "담당자" 필드: `managerUserId`는 이 모임의 관리자(`GroupMembership`,
  * User 기준)여야 한다 — 납부 명단(`Member`)은 담당자가 될 수 없다(Entry.txt §4). 그래서
  * 선택 목록도 `groupMembershipService.getMemberships()`에서 가져온다.
  *
- * 실 API로 가는 두 모드에서 여전히 뺀 것:
+ * 실 API로 가는 두 모드에서 뺀 것:
  *  - "장부" 변경(editReal만): `PATCH /entries/{id}`에 ledgerId가 없어 등록 후엔
  *    장부를 옮길 수 없다 — 표시만 하고 못 누르게 막았다.
  *
- * 2026-09-11부터 증빙 실제 업로드가 붙었다 — 카메라/갤러리로 고른 사진을
+ * 증빙은 실제 업로드된다 — 카메라/갤러리로 고른 사진을
  * 촬영·선택 직후 `fileService.uploadFile(..., 'RECEIPT')`로 바로 업로드하고,
  * 받은 fileId를 등록/수정 요청의 `receiptFileIds`에 담는다(`receiptItems`,
  * 업로드 중인 항목은 fileId가 없어 자동으로 제외된다). 영수증 스캔(`scan`)은
- * 여전히 `utils/mockOcr.ts` mock이라 실제 파일이 없다 — OCR 서버가
- * "시작 전"이라(`docs/api-wiring.md`) 이번에도 연결하지 않는다.
+ * `utils/mockOcr.ts` mock이라 실제 파일이 없다 — OCR 서버가
+ * "시작 전"이라 연결하지 않는다.
  */
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -444,7 +441,7 @@ function TransactionRegisterScreen() {
   };
 
   /**
-   * 실제 촬영본/선택본(2026-09-06 카메라, 2026-09-11 갤러리)이 생기면 로컬
+   * 실제 촬영본/선택본이 생기면 로컬
    * 파일 uri로 썸네일을 먼저 보여주고(`uploading: true`), 곧바로
    * `fileService.uploadFile(..., 'RECEIPT')`로 업로드한다. 여러 장이면
    * **순차 업로드**다 — 한 번에 최대 10장뿐이라 병렬로 열 필요가 없고,
@@ -486,9 +483,8 @@ function TransactionRegisterScreen() {
   };
 
   /**
-   * 시스템 카메라를 직접 부른다 — 예전엔 이 앞에 프리뷰 없는 인앱 카메라 화면
-   * (`CameraCaptureView`)을 거쳤는데, 시스템 카메라 앱을 쓰는 이상 그 중간
-   * 화면은 "카메라가 두 번 열리는" 것처럼만 보여 없앴다(2026-09-06). 취소하면
+   * 시스템 카메라를 직접 부른다 — 중간에 인앱 카메라 화면을 두면
+   * "카메라가 두 번 열리는" 것처럼 보이기 때문이다. 취소하면
    * 아무 화면 전환 없이 지금 화면(폼 또는 스캔 재시도 전 화면)에 그대로 남는다.
    */
   const handleTakePhoto = async (mode: 'photo' | 'scan') => {

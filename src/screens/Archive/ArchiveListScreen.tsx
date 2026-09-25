@@ -309,9 +309,8 @@ function ArchiveListScreen() {
 
 /**
  * 'YYYY.MM.DD · HH:mm' — 카드 메타 표시 전용(시안 기준), 다른 화면과 공유하지 않아 유틸로 안 뺐다.
- * 2026-09-12: 필드명이 `archivedAt`→`createdAt`으로 바뀐 것과 별개로, 값 하나가 비어도 목록 전체
- * 렌더가 죽으면 안 돼 가드를 넣었다(이 화면의 실제 크래시 원인은 필드명이었지만, 서버 응답
- * 값 자체가 언젠가 비거나 형식이 바뀔 가능성에도 방어한다).
+ * 값 하나가 비어도 목록 전체 렌더가 죽으면 안 돼 가드를 넣었다(서버 응답 값이 비거나
+ * 형식이 바뀔 가능성에 방어한다).
  */
 function formatArchivedAt(isoDateTime: string | null | undefined): string {
   if (!isoDateTime) {

@@ -2,14 +2,11 @@
 /** @screen ETC-3-MODAL-02-0 모임 삭제하기 (deleteDialogVisible) */
 /** @screen ETC-4-SNACKBAR-04-0 모임 삭제 완료 (같은 시안 파일에 포함된 스낵바 — 착지 화면인 AllGroupsScreen.tsx에서 렌더링) */
 /**
- * "더보기 > 모임 관리" 진입점. 예전엔 이 중간 화면 없이 더보기가 바로
- * `GroupManagerScreen`("모임 관리자")으로 직행했었다 — 더보기 메뉴 라벨은
- * "모임 관리"인데 실제 도착 화면 타이틀은 "모임 관리자"라 어긋나 있었고
- * (`docs/design-verification.md` §5-4의 미해결 항목), `ETC-2-PAGE-02-0`이
- * IA상 별개 화면인지 시안 문서 오기인지 불확실했다. 시안(더보기_모임관리_
- * 모임삭제하기.png)의 배경 화면이 "< 모임 관리"라는 독립된 페이지 경로/제목으로
- * 등장하고, `design-index.json`에도 `ETC-2-PAGE-02-0.png`가 `ETC-2-PAGE-03-0.png`와
- * 별개 파일로 존재해 — 오기가 아니라 실제로 빠져 있던 화면이었다. 이 파일로 채운다.
+ * "더보기 > 모임 관리" 진입점. `GroupManagerScreen`("모임 관리자") 앞의 중간
+ * 화면이다. 시안(더보기_모임관리_모임삭제하기.png)의 배경 화면이 "< 모임 관리"라는
+ * 독립된 페이지 경로/제목으로 등장하고, `design-index.json`에도
+ * `ETC-2-PAGE-02-0.png`가 `ETC-2-PAGE-03-0.png`와 별개 파일로 존재해
+ * 별개 화면으로 구현한다.
  */
 import { useCallback, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';

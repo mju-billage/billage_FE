@@ -1,9 +1,8 @@
 /** @screen DSH-2-PAGE-03-0 대시보드 캘린더 */
 /**
- * 2026-09-06: `GET /groups/{groupId}/calendar`(월간 집계, 서버 `미구현`)와
- * `entryService.getGroupEntries`(선택 일자 내역, `from=to=그 날짜`)로 실제
- * 연동했다 — 그동안 `MOCK_CALENDAR_MONTH`(types/calendar.ts) 고정값을 쓰던
- * 화면이었다. 월간 집계 API는 날짜별 수입/지출 "합계"만 주고 개별 내역은
+ * `GET /groups/{groupId}/calendar`(월간 집계)와
+ * `entryService.getGroupEntries`(선택 일자 내역, `from=to=그 날짜`)로 연동한다.
+ * 월간 집계 API는 날짜별 수입/지출 "합계"만 주고 개별 내역은
  * 안 줘서(Dashboard.txt 3번), 날짜를 선택할 때마다 그 날짜 하루 범위로 내역
  * 목록을 별도 호출한다.
  */

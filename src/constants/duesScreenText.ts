@@ -26,7 +26,7 @@ export const DUES_MEMBER_TAB_PAID = '납부 완료';
 export const DUES_MEMBER_COUNT_SUFFIX = '명';
 export const DUES_MEMBER_LIST_EMPTY = '대상자가 없어요.';
 
-/** 회비 생성(6-B, DUE-2-PAGE-01-0 + DUE-3-PAGE-01-0) 전용 문구. */
+/** 회비 생성(DUE-2-PAGE-01-0 + DUE-3-PAGE-01-0) 전용 문구. */
 export const DUES_CREATE_TITLE = '회비 생성';
 export const DUES_CREATE_TITLE_FIELD_LABEL = '제목';
 export const DUES_CREATE_TITLE_PLACEHOLDER = '제목을 입력해주세요.';
@@ -43,17 +43,15 @@ export const DUES_CREATE_LEDGER_LABEL = '장부';
 export const DUES_CREATE_LEDGER_PLACEHOLDER = '+ 선택하기';
 
 /**
- * 화면명세서(DUE-2-PAGE-01-0)가 요구하는 "기간"(시작~마감 범위) 그대로 복원했다
- * (2026-09-04) — 6-B 당시 "서버에 시작일 필드가 없다"고 판단해 마감일 단일
- * 입력으로 줄였던 것은 그 판단 자체가 틀렸다(`docs/api-gaps.md` "확정됨" 절:
- * `startDate` 없이는 400). 범위 선택은 `DuesDateRangeSheet`(DTB-3-SHEET-01-0과
- * 같은 유형의 기간 선택 캘린더)를 새로 만들어 붙였다.
+ * 화면명세서(DUE-2-PAGE-01-0)가 요구하는 "기간"(시작~마감 범위)이다.
+ * 서버는 `startDate` 없이는 400을 준다. 범위 선택은 `DuesDateRangeSheet`(DTB-3-SHEET-01-0과
+ * 같은 유형의 기간 선택 캘린더)를 쓴다.
  */
 export const DUES_CREATE_PERIOD_LABEL = '기간';
 /** 시안(납부관리_메인_새회비생성.png No.5) placeholder 형식 문구 그대로 — 실제
  * 채워진 값은 4자리 연도("2026.04.22 ~ 2026.04.25")지만, placeholder 자체는
  * 시트에 박힌 "YY.MM.DD ~ YY.MM.DD" 표기를 그대로 쓴다(보고서 쪽 2자리 표기와
- * 다른 시트라 공용 포맷 함수로 묶지 않는다 — design-verification.md §5-13). */
+ * 다른 시트라 공용 포맷 함수로 묶지 않는다). */
 export const DUES_CREATE_PERIOD_PLACEHOLDER = 'YY.MM.DD ~ YY.MM.DD';
 
 export const DUES_CREATE_NEXT_LABEL = '다음으로';
@@ -75,8 +73,8 @@ export const DUES_MEMBER_SELECT_RETRY_LABEL = '다시 시도';
 export const SNACKBAR_DUES_CREATED_PREFIX = "'";
 export const SNACKBAR_DUES_CREATED_SUFFIX = "' 회비가 생성되었어요.";
 
-/** 회비 상세 ⋮ 메뉴(7-B-1, DUE-2-PAGE-03-0) 전용 문구. 전부 총무 전용이라
- * ⋮ 버튼 자체를 일반 관리자에게 숨긴다(2단계 UI 우선 차단 패턴). */
+/** 회비 상세 ⋮ 메뉴(DUE-2-PAGE-03-0) 전용 문구. 전부 총무 전용이라
+ * ⋮ 버튼 자체를 일반 관리자에게 숨긴다. */
 export const DUES_MENU_ACCESSIBILITY_LABEL = '회비 관리 메뉴';
 export const DUES_MENU_EDIT_LABEL = '회비 수정';
 export const DUES_MENU_MEMBERS_LABEL = '모임원 선택';
@@ -108,7 +106,7 @@ export const DUES_DELETE_CONFIRM_LABEL = '삭제';
 export const SNACKBAR_DUES_DELETED_PREFIX = "'";
 export const SNACKBAR_DUES_DELETED_SUFFIX = "' 회비가 삭제되었어요.";
 
-/** 납부 상태 일괄 변경(7-B-2, DUE-2-PAGE-03-0의 체크박스+CTA) 전용 문구.
+/** 납부 상태 일괄 변경(DUE-2-PAGE-03-0의 체크박스+CTA) 전용 문구.
  * `OPEN` 상태에서만 노출(SCHEDULED/CLOSED는 체크박스·CTA 자체를 숨김). */
 export const DUES_PAYMENT_MARK_PAID_LABEL = '납부 완료하기';
 export const DUES_PAYMENT_MARK_UNPAID_LABEL = '납부 취소하기';

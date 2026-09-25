@@ -32,12 +32,10 @@ type FileUploadResponse = {
  * 파일을 업로드한다(multipart/form-data, File.txt "1. 파일 업로드"). `fileUri`는
  * 기기의 실제 로컬 파일 경로/URI여야 한다.
  *
- * 2026-09-11부터 카메라(`utils/imagePicker.ts`의 `captureWithFeedback`)/갤러리
+ * 카메라(`utils/imagePicker.ts`의 `captureWithFeedback`)/갤러리
  * (`pickGalleryWithFeedback`)로 얻은 이미지를 촬영·선택 직후 이 함수로 곧바로
  * 업로드한다 — 호출부: `TransactionRegisterScreen`(`RECEIPT`),
  * `GroupProfileEditScreen`(`GROUP_IMAGE`), `ProfileEditScreen`(`PROFILE_IMAGE`).
- * 실호출로 fileId/purpose/fileUrl 필드명이 명세와 일치함을 확인했다(개발 서버,
- * 2026-09-11).
  */
 export async function uploadFile(
   fileUri: string,

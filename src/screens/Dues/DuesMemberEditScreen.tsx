@@ -2,7 +2,7 @@
 /** @screen DUE-4-MODAL-02-0 회비 수정_이탈 안내 (DuesEditScreen과 공유) */
 /** @screen DUE-4-SNACKBAR-04-0 회비 수정 완료 (화면 자체에서 표시 후 1.6초 뒤 상세로 복귀, DuesEditScreen과 공유) */
 /**
- * 7-B-1(회비 수정·삭제·마감): ⋮ 메뉴에서 바로 들어오는 독립 화면이다 —
+ * ⋮ 메뉴에서 바로 들어오는 독립 화면이다 —
  * `DuesEditScreen`(제목/장부/기간)과는 별개로 이 화면 혼자 `targetMemberIds`
  * 하나만 PATCH로 보낸다. 대상자 후보 목록은 `DuesCreateScreen`의 모임원
  * 선택 단계와 동일하게 `memberService.getMembers()`(모임 전체 명단)에서

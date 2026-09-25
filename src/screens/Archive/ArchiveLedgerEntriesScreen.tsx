@@ -5,13 +5,13 @@
  * 요소 3번 [상태]에 "기록 보고서 공통 로직 상속: 장부 내역 화면이나 보고서 화면에서
  * 쓰이는 컴포넌트 로직을 동일하게 사용함"이라고 명시돼 있고, 실제로 `ETC\보관함\
  * ETC-4-PAGE-05-0.png` 크롭도 `ReportLedgerEntriesScreen`과 완전히 같은 레이아웃
- * (장부명 타이틀+기간+수입/지출 요약 카드+탭+일자별 리스트)이다(2026-09-12 확인) —
+ * (장부명 타이틀+기간+수입/지출 요약 카드+탭+일자별 리스트)이다 —
  * 서로 다른 화면이 우연히 같은 번호를 받은 충돌(`ETC-3-PAGE-03-0` 사례)이 아니라,
  * 진짜로 "같은 화면 개념을 두 도메인이 공유"하는 케이스다.
  *
  * 다만 코드까지 하나로 합치진 않았다 — 보고서 스냅샷(`ReportEntrySnapshot`)은 4필드뿐
  * 이라 그 화면을 그대로 재사용할 순 없었다(보관 스냅샷 `ArchivedEntry`엔 `memo`/
- * `approvalStatus`/`createdByName`/`receiptFiles[]`까지 있음, 2026-09-12 실호출 확인).
+ * `approvalStatus`/`createdByName`/`receiptFiles[]`까지 있음).
  * 그래서 "컴포넌트 로직"만 진짜로 공유한다 — 탭+건수+일자별 그룹 리스트 조각인
  * `ReportEntryList`를 그대로 가져다 쓰고, 개별 항목 탭 시엔 richer한 데이터를 보여줄
  * 수 있는 전용 화면(`ArchiveEntryDetailScreen`, `ETC-5-PAGE-02-0`)으로 보낸다 — 스펙

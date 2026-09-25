@@ -10,8 +10,7 @@
  *
  * 탭·건수·일자별 리스트는 `ReportEntryList`(장부별·기간별 공용 조각)로 뺐다.
  *
- * ⚠️ 2026-09-06 등급 하향([구현]→[부족함], `design-verification.md` §2) —
- * 리스트 행의 영수증 아이콘이 빠졌다(스냅샷에 `receiptCount` 없음). 자세한
+ * ⚠️ 리스트 행의 영수증 아이콘이 빠져 있다(스냅샷에 `receiptCount` 없음). 자세한
  * 사유는 `ReportEntryList.tsx` 파일 상단 주석 참고.
  */
 import { StyleSheet, Text, View } from 'react-native';

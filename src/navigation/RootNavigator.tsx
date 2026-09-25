@@ -217,7 +217,7 @@ function RootNavigator() {
   useEffect(() => {
     authService.restoreSession().then(async user => {
       if (user) {
-        // [치명1] LoginScreen.goToMain()과 같은 이유 — 세션 복원으로 바로
+        // LoginScreen.goToMain()과 같은 이유 — 세션 복원으로 바로
         // Main에 진입하는 이 경로도 활성 모임 캐시를 미리 채워둬야 홈/납부관리
         // 등이 첫 포커스부터 정상 로드된다. 실패해도 로그인 상태 자체는 그대로
         // 유지한다(각 화면의 방어 로직이 나머지를 처리).

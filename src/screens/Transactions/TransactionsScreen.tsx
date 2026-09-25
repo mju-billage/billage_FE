@@ -1,18 +1,11 @@
 /** @screen DTB-1-PAGE-01-0 내역 메인 */
 /**
- * 4-B(모임 전체 내역 목록 API 연동): 목(`types/transaction.ts`, 4-B 정리로 삭제됨)을
- * 걷어내고 `entryService.getGroupEntries()`(Entry.txt §7)로 옮겼다.
- *
- * 4-B 정리(2026-09-05): 옛 `editMock`(DTB 목 데이터 수정) 경로가 완료 시
- * `navigation.navigate('Main', { screen: 'Transactions', params: { addedTransactionId } })`로
- * 이 화면에 신호를 보내 스낵바를 띄우던 게 있었는데, 그 경로 자체가 삭제되며
- * `addedTransactionId`를 만들어내는 곳이 사라졌다 — `route.params` 기반 스낵바
- * 블록과 `MainTabParamList`의 파라미터 타입을 함께 제거했다(`ADD-2-SNACKBAR-01-0`은
- * 이제 `TransactionRegisterScreen.tsx`에만 있다).
+ * 모임 전체 내역 목록은 `entryService.getGroupEntries()`(Entry.txt §7)로 조회한다.
+ * 등록 완료 스낵바(`ADD-2-SNACKBAR-01-0`)는 `TransactionRegisterScreen.tsx`에만 있다.
  *
  * 잔액 카드·건수·목록이 한 응답에 묶여 온다(명세가 "세 번 호출하지 않도록"이라고
- * 명시) — 필터를 바꿔도 `load()` 한 번만 다시 부른다. 페이지네이션은 4-A에서
- * 확정한 무한 스크롤(FlatList/SectionList `onEndReached`) 그대로 쓴다 — "더보기"
+ * 명시) — 필터를 바꿔도 `load()` 한 번만 다시 부른다. 페이지네이션은
+ * 무한 스크롤(FlatList/SectionList `onEndReached`) 그대로 쓴다 — "더보기"
  * 버튼을 새로 만들지 않았다. 탭(전체/승인요청)·필터가 바뀌면 `load()`가 매번
  * `page=0`부터 다시 불러온다(`loadMoreEntries`만 페이지를 증가시킨다).
  *

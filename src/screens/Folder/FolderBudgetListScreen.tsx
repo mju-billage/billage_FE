@@ -2,11 +2,8 @@
 /** @screen FDR-3-SHEET-01-0 장부 예산 입력 (아래 BottomSheet+TextField, FDR-3-SHEET-02-0과 동일 구현) */
 /** @screen FDR-3-SHEET-02-0 예산 설정 (같은 BottomSheet — IA상 두 ID가 같은 시트를 가리키는 것으로 판단) */
 /**
- * 2026-09-13 백엔드 노티 04번으로 신설된 `GET /groups/{groupId}/ledgers`(평평한 전체
- * 목록, 최상위 포함)를 `ledgerService.getAllLedgersInGroup()`가 쓴다 — 예전엔 이
- * API가 없어 폴더 트리 조회 1콜 + 폴더 개수만큼 병렬 호출(N+1)로 대체했고, 그 방식은
- * 최상위(폴더 없음) 장부를 아예 못 봤다. 실호출로 최상위 장부가 이 목록에 포함됨을
- * 확인했다.
+ * `GET /groups/{groupId}/ledgers`(평평한 전체 목록, 최상위 장부 포함)를
+ * `ledgerService.getAllLedgersInGroup()`가 쓴다.
  */
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
@@ -69,7 +66,7 @@ type FolderBudgetListNavigationProp = NativeStackNavigationProp<
 type LoadState = 'loading' | 'error' | 'ready';
 
 // 시안(폴더_메뉴_예산설정.png No.2): 예산 미설정 장부는 "0원"으로 노출(별도
-// 안내 문구 아님) — design-verification.md §5-16 참고.
+// 안내 문구 아님).
 function getBudgetValue(ledger: LedgerSummary): string {
   return `${(ledger.budget ?? 0).toLocaleString()}원`;
 }
@@ -161,7 +158,7 @@ function FolderBudgetListScreen() {
     }
   };
 
-  // 시안(폴더_메뉴_예산설정.png)이 옅은 블루 — design-verification.md §5-7/§5-16.
+  // 시안(폴더_메뉴_예산설정.png)이 옅은 블루.
   return (
     <ScreenContainer
       background="primary"

@@ -40,8 +40,8 @@ export const MEMBER_ADD_SUBMIT_LABEL = '추가하기';
 export const MEMBER_TAG_INPUT_TITLE = '태그';
 /**
  * Member.txt Validation은 "최대 3개(화면명세 '# 태그를 입력해 주세요 (최대 3개)')"라고
- * 명시하지만 같은 문서 필드표는 "최대 10개"라 적혀 있다 — 명세 자기모순
- * (docs/api-gaps.md 기록). 화면명세서 실제 문구("# 태그를 입력해 주세요(최대 3개)")를
+ * 명시하지만 같은 문서 필드표는 "최대 10개"라 적혀 있다 — 명세 자기모순.
+ * 화면명세서 실제 문구("# 태그를 입력해 주세요(최대 3개)")를
  * 근거로 3개로 막는다.
  */
 export const MEMBER_TAG_MAX_COUNT = 3;
@@ -69,7 +69,7 @@ export const SNACKBAR_MEMBER_BULK_ADDED_SUFFIX = '명의 모임원이 일괄 추
 export const SNACKBAR_MEMBER_BULK_ADDED_DESCRIPTION =
   '상세 정보는 개별 페이지에서 수정할 수 있어요.';
 
-// 모임원 관리 (목록) — 삭제 모드 (Case A, 7-C)
+// 모임원 관리 (목록) — 삭제 모드 (Case A)
 export const MEMBER_MANAGE_DELETE_MENU_LABEL = '모임원 삭제';
 export const MEMBER_MANAGE_SELECT_ALL_LABEL = '전체 선택';
 export const MEMBER_MANAGE_SELECT_COUNT_SUFFIX = '명';

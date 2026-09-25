@@ -18,7 +18,7 @@
  * `FilterPill` 자체는 안 건드렸다 — 그 컴포넌트를 쓰는 화면은 여전히 시안이
  * 맞다.
  *
- * ⚠️ `entryType: "ALL"`을 보내면 안 된다(2026-09-05 실호출로 확인, `400`).
+ * ⚠️ `entryType: "ALL"`을 보내면 안 된다(서버가 `400`).
  * "전체" 선택은 `reportService.createReportByLedger()`에 `entryType`을 아예
  * 안 넘기는 것으로 표현한다 — 이 화면은 그래서 `entryType` state를
  * `ReportEntryType | undefined`로 두고, "전체"일 때만 `undefined`를 유지한다.
@@ -122,8 +122,7 @@ function ReportCreateByLedgerScreen() {
 
   // 안드로이드 하드웨어 back도 AppBar 백버튼과 같은 이탈 확인을 거치게 한다
   // — 등록을 안 하면 시스템 back은 `handleBack`을 거치지 않고 화면을 그냥
-  // 나가버린다(ADD-2-MODAL-01-0가 이 등록을 빠뜨려 실제로 겪은 버그,
-  // design-verification.md ADD 섹션 참고 — 같은 실수를 반복하지 않는다).
+  // 나가버린다.
   // 포커스 중일 때만 리스너를 걸어야(`useFocusEffect`) 이 화면이 스택
   // 아래로 내려가 있을 때(장부 선택 화면 위에 있을 때 등) back을 가로채지 않는다.
   useFocusEffect(
@@ -161,7 +160,7 @@ function ReportCreateByLedgerScreen() {
       // ETC-4-PAGE-03-0 명세 No.5: 성공 시 생성 완료된 보고서 상세로 이동한다.
       // navigate가 아니라 reset — 생성 폼과 그 위에 쌓였을 수 있는 장부 선택
       // 화면을 스택에서 걷어내, 상세에서 뒤로가기를 누르면 폼이 아니라 보고서
-      // 목록(ReportMain)으로 가게 한다(design-verification.md §5-11).
+      // 목록(ReportMain)으로 가게 한다.
       navigation.reset({
         index: 2,
         routes: [

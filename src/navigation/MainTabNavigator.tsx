@@ -22,7 +22,7 @@ export type MainTabParamList = {
   Home: undefined;
   Transactions: undefined;
   Folder: undefined;
-  /** snackbarMessage: 회비 삭제·마감(7-B-1) 완료 후 이 화면으로 라우팅하며
+  /** snackbarMessage: 회비 삭제·마감 완료 후 이 화면으로 라우팅하며
    * 스낵바를 띄우는 용도(DuesDetailScreen 참고) — 삭제된 회비는 상세 화면이
    * 더는 존재하지 않고, 마감은 명세가 상세가 아니라 이 목록으로 돌아가도록
    * 명시한다. */
@@ -111,7 +111,7 @@ function MainTabNavigator() {
           // 화면 위치(폴더 깊이)만 루트로 되돌린다. unmountOnBlur는 안 쓴다
           // — 화면 전체가 언마운트되면 폴더 목록을 매번 재요청하게 된다.
           // 목록의 스크롤 위치·그리드/리스트 보기 방식은 FolderScreen 내부
-          // state라 이 초기화와 무관하게 유지된다(design-verification.md §5-11).
+          // state라 이 초기화와 무관하게 유지된다.
           tabPress: () => {
             navigation.dispatch(state =>
               CommonActions.reset({

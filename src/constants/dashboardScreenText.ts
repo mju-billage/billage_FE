@@ -8,9 +8,8 @@ export const DASHBOARD_NOTIFICATION_ACCESSIBILITY_LABEL = '알림';
 export const DASHBOARD_LOADING = '모임 현황을 불러오는 중이에요.';
 export const DASHBOARD_RETRY_LABEL = '다시 시도';
 
-/** 2026-09-11 정정 — `GET /dashboard`가 실제로는 `upcomingDues[]`(마감 임박 3건, 건별
- * D-day/납부인원)를 준다(이전 메모는 활성 회비 합계 한 줄만 온다고 잘못 적어뒀었다).
- * 캐러셀이 비었을 때만 이 문구를 쓴다. */
+/** `GET /dashboard`는 `upcomingDues[]`(마감 임박 3건, 건별
+ * D-day/납부인원)를 준다. 캐러셀이 비었을 때만 이 문구를 쓴다. */
 export const DASHBOARD_DUES_EMPTY = '진행 중인 회비가 없어요.';
 /** 회비 현황 카드(대시보드_메인화면.png UI 요소 3번) — "전체 회비가 모이기까지" +
  * "{N}명 남았어요". */

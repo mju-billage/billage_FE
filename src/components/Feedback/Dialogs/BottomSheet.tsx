@@ -21,7 +21,7 @@ type BottomSheetProps = {
  * 화면 맨 아래에 붙는다(flex column 배치) — 그래서 키보드가 뜰 때
  * `KeyboardStickyView`로 감싸기만 하면 그 즉시 위치(화면 맨 아래)에서
  * 정확히 키보드 높이만큼 위로 붙는다(디자이너 판단, 시안에 키보드 목업
- * 없음 — design-verification.md §5-12). */
+ * 없음). */
 function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
   const insets = useSafeAreaInsets();
   return (
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
   },
   // Modal 루트는 alignItems 기본값(stretch)이라 원래도 폭이 깨지진 않지만,
   // Dialog에서 실제로 폭 붕괴가 났던 것과 같은 종류의 문제라 명시해서
-  // 막아둔다(design-verification.md §5-12 정정).
+  // 막아둔다.
   stickyWrapper: {
     width: '100%',
   },

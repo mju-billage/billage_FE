@@ -1,7 +1,6 @@
 /** @screen DUE-3-PAGE-04-0 회비 상세_납부 요청 */
 /**
- * 서버 API가 없는 화면(Dues.txt "회비 요청 — 서버 기능이 아닙니다", 2026-08-30
- * 확정) — 총무가 작성한 텍스트를 OS 기본 공유 시트(`Share.share`)로 그대로
+ * 서버 API가 없는 화면(Dues.txt "회비 요청 — 서버 기능이 아닙니다") — 총무가 작성한 텍스트를 OS 기본 공유 시트(`Share.share`)로 그대로
  * 넘기기만 한다. 수신자 목록은 이 화면에서 다루지 않는다(DuesDetailScreen이
  * 이미 들고 있는 미납부 탭 데이터를 그대로 쓰고, 이 화면은 추가·삭제 UI가 없다).
  *
@@ -105,8 +104,7 @@ function DuesRequestScreen() {
   );
 }
 
-// DUE-3-PAGE-04-0(납부 요청) 시안이 옅은 블루 — design-verification.md §5-7 규칙, §2 표 갱신
-// (`ScreenContainer background="primary"`).
+// DUE-3-PAGE-04-0(납부 요청) 시안이 옅은 블루 (`ScreenContainer background="primary"`).
 const styles = StyleSheet.create({
   body: {
     flex: 1,

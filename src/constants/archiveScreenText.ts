@@ -28,7 +28,7 @@ export const ARCHIVE_DETAIL_EXPENSE_LABEL = '지출';
 
 /** 장부 요약 카드(더보기_기록보관_상세보기.png UI 요소 3번) 터치 시 진입하는
  * "장부 상세 뷰어"(`ArchiveLedgerEntriesScreen`/`ArchiveEntryDetailScreen`) 전용
- * 문구 — 2026-09-12, 시안 [액션]에 이동이 명시돼 있어 신규 추가. */
+ * 문구 — 시안 [액션]에 이동이 명시돼 있다. */
 export const ARCHIVE_ENTRY_DETAIL_TITLE = '상세 내역';
 export const ARCHIVE_ENTRY_DETAIL_TITLE_LABEL = '내역명';
 export const ARCHIVE_ENTRY_DETAIL_TYPE_LABEL = '구분';

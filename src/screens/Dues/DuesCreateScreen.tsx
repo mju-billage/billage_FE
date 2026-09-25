@@ -1,23 +1,20 @@
 /** @screen DUE-2-PAGE-01-0 새 회비 생성 (step='basic') */
 /** @screen DUE-3-PAGE-01-0 새 회비 생성_모임원 선택 (step='members') */
 /**
- * 6-B(회비 생성, 총무 전용): 두 Screen ID를 한 컴포넌트의 내부 단계(step)로
+ * 회비 생성(총무 전용): 두 Screen ID를 한 컴포넌트의 내부 단계(step)로
  * 구현했다 — 2단계(모임원 선택)에서 "<"로 1단계로 돌아갈 때 입력값이 그대로
  * 남아 있어야 하는데, 두 화면을 진짜로 분리하면 라우트 파라미터로 기본 정보를
  * 왕복시켜야 해서 더 복잡해진다. `TransactionRegisterScreen`의 내부 stage 패턴과
  * 같은 방식이다.
  *
- * 0. 기간 입력 복원(2026-09-04, 7-A 이후 정합성 복구): 6-B 당시엔 "서버에
- * 시작일 필드가 없다"고 판단해 화면명세서(DUE-2-PAGE-01-0 No.5 "기간 선택")가
- * 요구하는 시작~마감 범위를 마감일 단일 입력으로 줄였는데, 그 판단의 근거가
- * 틀렸다 — 개발 서버 실호출로 `startDate`가 실제로 필수 필드임을 확정했다
- * (`docs/api-gaps.md` "확정됨" 절: 없으면 400, `fieldErrors:[{field:"startDate"}]`).
- * 명세대로 기간 범위 입력을 되돌렸다.
+ * 기간 입력: 화면명세서(DUE-2-PAGE-01-0 No.5 "기간 선택")대로 시작~마감 범위를
+ * 받는다. `startDate`는 서버 필수 필드다(없으면 400,
+ * `fieldErrors:[{field:"startDate"}]`).
  *
  * 기존 시트 재사용:
  *  - "장부 선택"(ADD-2-SHEET-03-0)은 `TransactionSingleSelectSheet`를 그대로
  *    가져다 썼다 — 이미 title/options/selectedKey/onSelect만 받는 완전히
- *    일반화된 컴포넌트라 손댈 필요가 없었다(내역 등록 화면 회귀 없음).
+ *    일반화된 컴포넌트라 손댈 필요가 없다.
  *  - "기간 선택"(DTB-3-SHEET-01-0)은 `TransactionFilterSheet` 내부에 커스텀
  *    기간 캘린더가 있지만, 그 시트는 장부·구분·정렬까지 같이 묶인 내역 필터
  *    전용 컴포넌트라 그대로 가져다 쓸 수 없었다(억지로 재사용하면 내역 필터
@@ -27,7 +24,7 @@
  *  - 제목/금액은 화면명세서가 시트가 아니라 페이지에 바로 있는 텍스트 필드로
  *    정의해서(No.2/3), `TransactionRegisterScreen`류의 시트 패턴이 아니라
  *    `GroupCreateScreen`/`LedgerCreateScreen`류의 페이지 내 `TextField` 패턴을
- *    따랐다 — 시안과 기존 시트 스타일(테두리 버튼)이 다르지만 이번엔 맞추지
+ *    따랐다 — 시안과 기존 시트 스타일(테두리 버튼)이 다르지만 맞추지
  *    않고 기존 폼 로우 스타일(`SelectionListItem`)로 통일했다(장부/기간).
  */
 import { useCallback, useRef, useState } from 'react';
@@ -337,7 +334,7 @@ function DuesCreateScreen() {
       // DUE-4-SNACKBAR-01-0: 생성 화면이 아니라 납부관리 메인 목록에서
       // 스낵바를 보여준다(시안 확인) — DuesDetailScreen 삭제/마감과 같은 패턴.
       // navigate가 아니라 reset — 생성 폼(및 그 위에 쌓였을 수 있는 화면)을
-      // 스택에서 걷어내 뒤로가기로 폼에 못 돌아가게 한다(design-verification.md §5-11).
+      // 스택에서 걷어내 뒤로가기로 폼에 못 돌아가게 한다.
       navigation.reset({
         index: 0,
         routes: [
@@ -370,7 +367,7 @@ function DuesCreateScreen() {
   };
 
   // DUE-2-PAGE-01-0/DUE-3-PAGE-01-0(새 회비 생성 및 모임원 선택) 둘 다 시안이
-  // 흰 배경 — design-verification.md §5-7 규칙, §2 표 갱신.
+  // 흰 배경.
   if (step === 'members') {
     return (
       <ScreenContainer

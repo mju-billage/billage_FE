@@ -4,7 +4,7 @@ export const TRANSACTIONS_TAB_ALL = '전체 내역';
 export const TRANSACTIONS_TAB_PENDING = '승인요청';
 export const TRANSACTIONS_COUNT_SUFFIX = ' 건';
 export const TRANSACTIONS_EMPTY = '등록된 내역이 없어요.';
-/** 4-B(모임 전체 내역 목록 API 연동) — 디자인 시안에 로딩/에러 상태가 없어 최소 형태로 통일. */
+/** 모임 전체 내역 목록 — 디자인 시안에 로딩/에러 상태가 없어 최소 형태로 통일. */
 export const TRANSACTIONS_LOADING = '불러오는 중이에요.';
 export const TRANSACTIONS_RETRY_LABEL = '다시 시도';
 

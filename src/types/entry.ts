@@ -7,8 +7,7 @@
  * 목록 하나"로 캐시할 수 없다. 화면이 자기 조회 조건에 맞는 페이지 배열을 직접
  *들고 있고, `entryService`는 매번 서버를 그대로 불러 반환만 한다.
  *
- * `EntryListFilterValue`/`getEntryListFilterDateRange()`는 4-B 정리 때
- * `types/transaction.ts`(4-B로 통째 걷어냄)에서 옮겨왔다 — DTB 화면들이 쓰는
+ * `EntryListFilterValue`/`getEntryListFilterDateRange()` — DTB 화면들이 쓰는
  * "필터 UI 상태 → API 쿼리" 변환은 mock이 아니라 Entry 도메인 로직이라 여기가
  * 맞는 자리다.
  */
@@ -133,12 +132,10 @@ export type EntryDetail = {
   approvedAt: string | null;
   receiptFiles: EntryReceiptFile[];
   /**
-   * 마감된 회비에서 생성된 수입 내역이면 채워진다(Entry.txt §8). 2026-09-11
-   * Swagger 대조로 `GET /entries/{entryId}` 응답에 실제로 있는 걸 확인해
-   * 타입에 추가했다 — `TransactionDetailScreen.tsx`는 아직 이 필드들을 안 써서
+   * 마감된 회비에서 생성된 수입 내역이면 채워진다(Entry.txt §8). `GET /entries/{entryId}` 응답에 실제로 있다.
+   * `TransactionDetailScreen.tsx`는 아직 이 필드들을 안 써서
    * "상세 내역_납부관리_수입내역"(일반 내역과 다르게 납부자 명수·명단, "회비
-   * 상세보기" 버튼을 보여줘야 함) 변형이 지금 일반 내역과 똑같이 뜬다 —
-   * `design-verification.md`의 `DTB-2-PAGE-02-0` 행 참고, 화면 쪽 반영은 별도 작업.
+   * 상세보기" 버튼을 보여줘야 함) 변형이 지금 일반 내역과 똑같이 뜬다.
    */
   duesId: string | null;
   duesTitle: string | null;

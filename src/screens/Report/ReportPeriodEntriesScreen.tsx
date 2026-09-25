@@ -6,16 +6,14 @@
  * `더보기_보고서생성_기간보고서조회.png`인데 그 표 헤더가 `ETC-4-PAGE-05-0`로
  * 적혀 있다 — **명세서 오기다**(IA 171행은 이 내용을 07-0으로 정의, 05-0은
  * 장부 하나만 보여주는 별개 화면인데 이 시안은 캐러셀+장부명 태그가 붙은
- * 통합 리스트라 07-0 쪽 설명과 일치한다). `docs/design-verification.md`
- * §5-4에 기획 확인 항목으로 남겼다 — 이 파일은 IA 기준(07-0)으로 구현했다.
+ * 통합 리스트라 07-0 쪽 설명과 일치한다). 이 파일은 IA 기준(07-0)으로 구현했다.
  *
  * 캐러셀은 새 라이브러리 없이 `ScrollView horizontal pagingEnabled` +
  * `CarouselIndicator`로 만들었다 — `LedgerDetailScreen`이 이미 쓰는 패턴
  * 그대로 가져왔다(`react-native-gesture-handler` 등은 이 프로젝트에 없다).
  *
- * ⚠️ 2026-09-06 등급 하향([구현]→[부족함], `design-verification.md` §2) —
- * `ETC-4-PAGE-05-0`과 같은 리스트(`ReportEntryList`)를 써서 같은 이유로
- * 영수증 아이콘이 빠졌다. 자세한 사유는 `ReportEntryList.tsx` 참고.
+ * ⚠️ `ETC-4-PAGE-05-0`과 같은 리스트(`ReportEntryList`)를 써서 같은 이유로
+ * 영수증 아이콘이 빠져 있다. 자세한 사유는 `ReportEntryList.tsx` 참고.
  */
 import { useState } from 'react';
 import {
@@ -51,11 +49,8 @@ function ReportPeriodEntriesScreen() {
   const [cardIndex, setCardIndex] = useState(0);
   const { width: windowWidth } = useWindowDimensions();
 
-  // 캐러셀 스냅 결함 수정(2026-09-18): 카드 폭(화면폭-48)과 스크롤뷰의
-  // paddingLeft(24, 우측 없음)가 서로 안 맞아 2페이지부터 어긋났다 —
-  // LedgerDetailScreen과 같은 원인, 같은 수정. 슬라이드를 화면 폭 그대로 채우고
-  // 카드 여백은 슬라이드 안쪽 padding으로 옮겨 snapToInterval 없이
-  // pagingEnabled 기본 동작만으로 맞춘다.
+  // 슬라이드를 화면 폭 그대로 채우고 카드 여백은 슬라이드 안쪽 padding으로 줘서
+  // snapToInterval 없이 pagingEnabled 기본 동작만으로 스냅을 맞춘다.
   const handleScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const index = Math.round(e.nativeEvent.contentOffset.x / windowWidth);
     setCardIndex(index);
@@ -131,8 +126,7 @@ const styles = StyleSheet.create({
     marginHorizontal: -20,
   },
   // 슬라이드 하나 = 화면 폭 전체(JSX에서 width: windowWidth로 덮어씀) — 카드
-  // 여백은 스크롤뷰가 아니라 이 안쪽 padding으로 준다(캐러셀 스냅 결함 수정,
-  // 2026-09-18).
+  // 여백은 스크롤뷰가 아니라 이 안쪽 padding으로 준다.
   cardSlide: {
     paddingHorizontal: 20,
   },

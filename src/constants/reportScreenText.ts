@@ -81,9 +81,9 @@ export const REPORT_ENTRY_DETAIL_TITLE_LABEL = '내역명';
 /**
  * 이 화면은 보고서 생성 시점 스냅샷만 보여준다 — 원본 내역이 이후 수정·삭제돼도
  * 안 바뀐다(Report.txt 정책 메모). **영수증·메모가 아예 안 보이는 건 스냅샷에
- * 그 필드가 없어서다(entryId도 없음, 실호출로 확인 — `services/reportService.ts`
+ * 그 필드가 없어서다(entryId도 없음 — `services/reportService.ts`
  * 주석) — 시안은 원래 영수증 원본·상세 메모까지 조회 가능하다고 적었으니 지금은
- * 임시로 빠진 상태다(`docs/backend-requests.md` 1순위, 서버가 스냅샷에
+ * 임시로 빠진 상태다(서버가 스냅샷에
  * memo/receipts를 추가해주면 채울 것).** 문구도 "원래 이렇게 설계됐다"처럼
  * 안 읽히게 "아직"을 넣어 임시 상태임을 드러낸다.
  */

@@ -6,22 +6,17 @@
  * 갈라진다.
  *
  * 목록은 무한 스크롤이다(`TransactionsScreen`과 같은 `onEndReached` 패턴) —
- * Dues 목록(6-A, `size=50` 단일 조회)과 다른 선택인 이유는 성격 차이 때문:
+ * Dues 목록(`size=50` 단일 조회)과 다른 선택인 이유는 성격 차이 때문:
  * 회비는 마감되며 정리되지만 보고서는 **삭제 API 자체가 없어 계속
  * 누적된다**(`reportService.ts` 주석). `size=50`에 안주하면 51번째 보고서부터
  * 조용히 안 보이는, 데이터 유실처럼 보이는 버그가 된다.
  *
- * 카드 탭(2026-09-05, 7-G): `reportType`에 따라 `ReportByLedgerDetail`
+ * 카드 탭: `reportType`에 따라 `ReportByLedgerDetail`
  * (ETC-3-PAGE-02-0)/`ReportByPeriodDetail`(ETC-3-PAGE-03-0)로 분기한다.
  *
- * **2026-09-13 정정**: 예전엔 생성 성공 시 이 화면으로 `navigate(...,
- * {snackbarMessage})` 돌아오게 했었다 — 시안 캡처(더보기_보고서생성하기_장부별.png
- * Case C)가 상세가 아니라 이 목록에 스낵바가 뜨는 걸로 보였고, 그때는
- * `ReportByLedgerDetail`/`ReportByPeriodDetail` 화면 자체가 아직 없어 명세 표의
- * "상세 조회로 이동"(ETC-4-PAGE-03-0 No.5)을 따를 수 없었기 때문이다. 이제 그
- * 두 화면이 존재하므로 명세대로 상세로 직접 이동하도록 바꿨다(스낵바도 상세
- * 화면에서 뜬다) — 뒤로가기가 폼이 아니라 이 목록으로 오게 하는 스택 정리도
- * 함께 적용했다(design-verification.md §5-11 참고, `ReportCreateByLedgerScreen`/
+ * 생성 성공 시엔 명세("상세 조회로 이동", ETC-4-PAGE-03-0 No.5)대로 상세로 직접
+ * 이동한다(스낵바도 상세 화면에서 뜬다) — 뒤로가기가 폼이 아니라 이 목록으로
+ * 오게 하는 스택 정리도 함께 적용한다(`ReportCreateByLedgerScreen`/
  * `ReportCreateByPeriodScreen`).
  */
 import { useCallback, useEffect, useState } from 'react';

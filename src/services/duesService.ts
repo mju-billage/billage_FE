@@ -140,7 +140,7 @@ export async function getDuesDetail(duesId: string): Promise<DuesDetail> {
 export type CreateDuesInput = {
   title: string;
   amount: number;
-  /** 'YYYY-MM-DD'. 필수 — 2026-09-04 실호출로 확정(없으면 400,
+  /** 'YYYY-MM-DD'. 필수(없으면 400,
    * `fieldErrors:[{field:"startDate"}]`). `dueDate`보다 늦으면 안 된다. */
   startDate: string;
   /** 'YYYY-MM-DD'. */
@@ -327,10 +327,6 @@ type DuesMembersStatusUpdateResponse = {
 
 /**
  * 회비 대상자 여러 명의 납부 상태를 한 번에 바꾼다(총무 전용, Dues.txt §9).
- * 명세는 이 API를 "미구현"이라 적어놨지만 7-B-2 착수 전 실호출로 정상 동작을
- * 확인했다(대조표 "구현됨"이 맞았다) — `docs/backend-requests.md`에서
- * 상충 목록을 확정으로 옮겼다.
- *
  * 서버가 원자적으로 처리한다: `memberIds` 중 하나라도 이 회비의 대상자가
  * 아니면 요청 전체가 취소된다(Dues.txt §9 Validation) — 그래서 이 함수엔
  * "일부만 성공"이 없다, 성공하거나(`changedCount` 반환) 통째로 실패한다
@@ -341,7 +337,7 @@ type DuesMembersStatusUpdateResponse = {
  *
  * 이 API가 다시 막히는 경우를 대비해 시그니처는 일부러 "duesId+memberIds+status
  * 넣으면 결과가 나온다"로만 뒀다 — 내부를 단건 반복(`PATCH
- * /dues/{id}/members/{memberId}`, 3-B 다건 이동과 같은 순차 호출 패턴)으로
+ * /dues/{id}/members/{memberId}`, 다건 이동과 같은 순차 호출 패턴)으로
  * 바꿔도 호출부(DuesDetailScreen)는 이 함수 하나만 보므로 손댈 일이 없다.
  */
 export async function updateDuesMembersPaymentStatus(

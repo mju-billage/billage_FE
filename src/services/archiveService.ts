@@ -1,30 +1,17 @@
 /**
  * 명세 Folder (폴더).txt 5번(전체 백업)·8번(보관함) 기준.
  *
- * **2026-09-11 Swagger 대조로 전면 정정** — `archive-controller`가 실제로 존재하고
- * 구현돼 있다(명세 txt의 "시작 전" 표기는 낡은 정보였다). 다만 `createArchive`가
- * 부르던 경로(`POST /groups/{groupId}/folders/archive`)는 **실제 서버엔 없는
- * 경로**였다(실호출로 `404 RESOURCE_NOT_FOUND` 확인) — 진짜 경로는 다른 함수들과
- * 같은 `/groups/{groupId}/archives`다.
- *
- * **2026-09-12 재정정** — 그때 다시 맞춘 응답 스키마도 Swagger 예시값만 보고
- * 맞춘 것이었고 실제와 또 어긋나 있었다(실기기에서 보관함 목록 진입 즉시
- * `formatArchivedAt`이 `undefined.slice()`로 죽는 크래시로 발견). `groupId 5`에
- * 테스트 폴더/장부/내역/보관 기록을 직접 만들어 실호출로 확정:
+ * 실제 서버 응답 기준(Swagger 예시값과 다르다):
+ *  - 경로는 `/groups/{groupId}/archives`다(`/folders/archive`는 서버에 없다).
  *  - 날짜 필드는 `archivedAt`이 아니라 **`createdAt`**이다(목록·생성·상세 전부).
- *  - 목록/생성 응답엔 `totalIncome`/`totalExpense`/`balance`도 실제로 온다(예전
- *    타입엔 빠져 있었음, 화면엔 아직 안 씀).
- *  - 상세 응답은 최상위에 흩어진 모양이 아니라 실제로 `{archiveId, groupId, title,
- *    startDate, endDate, totalIncome, totalExpense, balance, entryCount, ledgers,
- *    createdAt}` 평평한 모양이다(`summary{}`로 감싸져 있지 않다 — 실호출 원본:
- *    `GET /archives/2` → `{"archiveId":2,"groupId":5,"title":"...","startDate":
- *    "2026-09-11","endDate":"2026-09-11","totalIncome":1000,"totalExpense":0,
- *    "balance":1000,"entryCount":1,"ledgers":[...],"createdAt":"..."}`, Swagger
- *    문서의 `summary{}` 래핑은 실제 응답과 다르다).
- *  - `ledgers[]` 각 항목엔 **`archivedLedgerId`도 `startDate`/`endDate`도 없다**
- *    (예전 타입은 둘 다 있다고 가정했다) — 실제로 오는 필드는 `folderName`/
- *    `ledgerName`/`budget`/`totalIncome`/`totalExpense`/`balance`/`entries[]`뿐.
- *    안정적인 id가 없어 화면(`ArchiveDetailScreen`)은 배열 인덱스를 key로 쓴다.
+ *  - 목록/생성 응답엔 `totalIncome`/`totalExpense`/`balance`도 온다(화면엔 아직 안 씀).
+ *  - 상세 응답은 `{archiveId, groupId, title, startDate, endDate, totalIncome,
+ *    totalExpense, balance, entryCount, ledgers, createdAt}` 평평한 모양이다
+ *    (`summary{}`로 감싸져 있지 않다).
+ *  - `ledgers[]` 각 항목엔 `archivedLedgerId`도 `startDate`/`endDate`도 없다 —
+ *    오는 필드는 `folderName`/`ledgerName`/`budget`/`totalIncome`/`totalExpense`/
+ *    `balance`/`entries[]`뿐. 안정적인 id가 없어 화면(`ArchiveDetailScreen`)은
+ *    배열 인덱스를 key로 쓴다.
  */
 import { request } from './apiClient';
 import type {

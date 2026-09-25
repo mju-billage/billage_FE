@@ -38,11 +38,10 @@ type SocialSignupInfoRouteProp = RouteProp<
 /**
  * 간편(소셜) 회원가입 정보 입력 화면: 소셜 프로필을 프리필해 이름과 이메일만 받는다.
  *
- * **2026-09-11 Swagger 대조**: `POST /auth/social/signup` 요청 스키마에 `email`
- * 필드가 없다 — 이 화면이 입력받은 이메일은 지금 서버로 안 보낸다(표시/수정
- * UI는 그대로 뒀다, 지울지는 기획 확인 필요).
+ * `POST /auth/social/signup` 요청 스키마에 `email`
+ * 필드가 없다 — 이 화면이 입력받은 이메일은 서버로 보내지 않는다.
  *
- * **2026-09-20**: 스키마의 `termsAgreed`(필수)는 이 화면 앞 단계인 약관동의
+ * 스키마의 `termsAgreed`(필수)는 이 화면 앞 단계인 약관동의
  * (`TermsAgreementScreen`, `COM-2-PAGE-01-0`)에서 받아 `agreements`로 넘겨 받는다 — 신규 소셜 가입은
  * 소셜 인증 → 약관동의 → 이 화면. 뒤로가기(`goBack`)는 스택상 바로 앞인 약관동의로 돌아간다(시안 No.1).
  */

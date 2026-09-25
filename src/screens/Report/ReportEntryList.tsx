@@ -11,13 +11,12 @@
  *
  * ⚠️ 시안 UI 요소 6번은 이 리스트 행에 "영수증 첨부 아이콘"이 있다고
  * 적었다. 보관함 스냅샷(`ArchivedEntry`)은 `approvalStatus`/`receiptFiles[]`가
- * 있어 `TransactionListItem`의 승인요청 배지·영수증 아이콘을 그린다(2026-09-21).
+ * 있어 `TransactionListItem`의 승인요청 배지·영수증 아이콘을 그린다.
  * 보고서 스냅샷(`GET /reports/{reportId}`의 `entries`)엔 그 필드 자체가 없어
- * (2026-09-05 실호출 확인) 보고서 두 화면은 여전히 배지·아이콘이 안 뜬다. 자리만
+ * 보고서 두 화면은 배지·아이콘이 안 뜬다. 자리만
  * 비워 두지 않은 이유: 데이터 없이 빈 아이콘 슬롯을 넣으면 나중에 실제
  * 데이터가 와서 정렬이 바뀔 때 지금 만든 레이아웃과 어긋난다.
- * `docs/backend-requests.md` 2순위 요청이 받아들여져 스냅샷에 `receiptCount`가
- * 추가되면 아래 `renderItem`의 `hasReceipt`에 그 값도 반영할 것.
+ * 스냅샷에 `receiptCount`가 추가되면 아래 `renderItem`의 `hasReceipt`에 그 값도 반영할 것.
  * 배지·영수증이 없는 행은 `TransactionListItem`이 납부관리 아이콘(기본)을 그린다.
  */
 import { useState } from 'react';
@@ -95,7 +94,7 @@ function ReportEntryList({ entries, onPressEntry, sheet = false }: ReportEntryLi
       }
       return true;
     })
-    // 보고서 상세 응답은 발생일 오름차순으로 온다(2026-09-05 실호출 확인) —
+    // 보고서 상세 응답은 발생일 오름차순으로 온다 —
     // 시안은 최신순이라 여기서 뒤집는다.
     .sort((a, b) => (a.occurredOn < b.occurredOn ? 1 : a.occurredOn > b.occurredOn ? -1 : 0));
 
@@ -131,7 +130,7 @@ function ReportEntryList({ entries, onPressEntry, sheet = false }: ReportEntryLi
           renderItem={({ item }) => (
             // 보고서 스냅샷은 approvalStatus/receiptFiles가 없어 배지·영수증이 안 뜬다.
             // TODO: 스냅샷에 receiptCount가 추가되면 그 값도 hasReceipt에 반영할 것
-            // (파일 상단 주석, docs/backend-requests.md 2순위 참고).
+            // (파일 상단 주석 참고).
             <View style={inset}>
               <TransactionListItem
                 label={item.ledgerName}

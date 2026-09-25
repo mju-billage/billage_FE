@@ -140,9 +140,8 @@ function GroupManagerScreen() {
       const result = await groupMembershipService.getMemberships(activeGroup.id);
       setMembers(result);
       setLoadState('ready');
-      // 2026-09-06: `GET .../invitations/current`(조회 전용)가 확인돼 화면 진입
-      // 시 자동으로 부른다 — 이전엔 발급 API가 멱등하지 않아(재호출마다 새 코드)
-      // 자동 호출을 못 하고 카드를 눌렀을 때만 발급했었다.
+      // `GET .../invitations/current`(조회 전용)를 화면 진입 시 자동으로 부른다 —
+      // 발급 API는 멱등하지 않아(재호출마다 새 코드) 카드를 눌렀을 때만 부른다.
       fetchInvitation(activeGroup.id, activeGroup.myRole === 'OWNER');
     } catch (error) {
       setLoadErrorMessage(toErrorMessage(error));
@@ -163,9 +162,8 @@ function GroupManagerScreen() {
     showSnackbar(message);
   };
 
-  // [치명1] 예전엔 group이 없으면(모임 캐시 미준비) 여기서 바로 null을 반환해
-  // 로딩/에러 상태조차 못 그렸다 — AppBar도 없는 완전 빈 화면으로 멈췄다. 이제
-  // group 의존 값은 group이 있을 때만 계산하고, 없을 때도 아래 loadState 분기가
+  // group이 없어도(모임 캐시 미준비) null을 반환하지 않는다 — group 의존 값은
+  // group이 있을 때만 계산하고, 없을 때도 아래 loadState 분기가
   // 에러+재시도를 보여줄 수 있게 렌더를 계속 진행한다.
   const inviteCodeText = group
     ? isIssuingInvite

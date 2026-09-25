@@ -141,7 +141,7 @@ export const WITHDRAW_REASON_NO_LONGER_NEEDED_LABEL = '이용할 필요가 없�
 export const WITHDRAW_REASON_ETC_LABEL = '직접 입력할게요';
 export const WITHDRAW_REASON_ETC_PLACEHOLDER = '탈퇴 사유를 입력해주세요';
 export const WITHDRAW_REASON_ETC_MAX_LENGTH = 30;
-/** 시안 판독 결과(2026-09-11): 표 Description(No.4)과 사유선택 화면 Case A
+/** 표 Description(No.4)과 사유선택 화면 Case A
  * 프레임은 "선택 완료"라 적었지만, 같은 화면의 메인 프레임 2장(COM-2-PAGE-05-0)과
  * 다음 화면(COM-3-MODAL-01-0)의 배경 프레임까지 총 3곳이 "탈퇴하기"로 그려져
  * 있다 — 시각적 다수를 따라 "탈퇴하기"로 확정. */

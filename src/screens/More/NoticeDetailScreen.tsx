@@ -3,8 +3,7 @@
  * 시안 UI 요소 3번은 본문 내 URL/이메일을 터치 가능한 링크로 활성화하라고
  * 하지만, RN 기본 `Text`는 플랫폼 공통으로 텍스트 일부만 자동 링크화하는
  * 수단이 없다(iOS `dataDetectorType`은 있으나 Android엔 대응 prop이 없음).
- * 이번 배치 범위에서 새 라이브러리를 들이지 않기로 해 평범한 텍스트로 두고
- * design-verification.md §5-4에 gap으로 남겼다.
+ * 새 라이브러리를 들이지 않기로 해 평범한 텍스트로 둔다.
  */
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';

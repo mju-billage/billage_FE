@@ -68,7 +68,7 @@ function ReportByPeriodDetailScreen() {
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
   // ETC-5-SNACKBAR-08-0: 생성 직후 이 화면으로 이동하며 받은 완료 메시지를
-  // 한 번만 띄운다(design-verification.md §5-11).
+  // 한 번만 띄운다.
   useEffect(() => {
     if (route.params.snackbarMessage) {
       setSnackbarMessage(route.params.snackbarMessage);

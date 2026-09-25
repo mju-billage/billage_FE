@@ -1,6 +1,4 @@
-/** 명세 `Statistics (통계분석).txt` 1절 기준 작성. 2026-09-13 백엔드 노티로 구현 완료
- * 확인, 실호출(`GET /groups/{groupId}/statistics`)로도 정상 응답 재확인했다 — "서버
- * 미구현(2026-09-06 기준)" 표기는 낡은 정보였다. */
+/** 명세 `Statistics (통계분석).txt` 1절 기준 작성. */
 import { request } from './apiClient';
 import type { StatisticsOverview } from '../types/statistics';
 

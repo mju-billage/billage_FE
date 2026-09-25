@@ -1,10 +1,10 @@
 /** @screen FDR-3-SHEET-03-0 장부상세_필터링 */
 /**
- * 4-A(Entry API 연동): 기간(period) 필터를 없앴다 — `GET /ledgers/{ledgerId}/entries`
+ * 기간(period) 필터는 없다 — `GET /ledgers/{ledgerId}/entries`
  * 쿼리 파라미터가 `type`/`status`/`keyword`/`page`/`size`/`sort`뿐이라 서버에
  * 날짜 범위로 거를 방법이 없다(전체 페이지를 다 받아와 클라이언트에서 다시 거르는
  * 건 페이지네이션 목록에서 부정확하다 — 지금 로드된 페이지 안에서만 걸러진다).
- * 대신 서버가 실제로 지원하는 승인 상태(status)를 추가했다.
+ * 대신 서버가 지원하는 승인 상태(status)로 거른다.
  */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';

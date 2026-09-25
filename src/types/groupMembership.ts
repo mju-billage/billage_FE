@@ -4,12 +4,11 @@ import type { GroupRole } from './group';
  * 가입 사용자(User)와 모임(Group)의 관리자 권한 관계(서버 `GroupMembership`).
  * 납부 관리용 명단(`Member`, `types/member.ts`)과는 별개이며 자동 연결하지 않는다.
  *
- * ⚠️ 서버 응답(`GET /groups/{groupId}/memberships`)엔 `email`이 없다(2단계에서 확인,
- * `docs/api-gaps.md` (A) 참고). 화면에서 멤버 식별은 `name` + `role`만으로 하고,
+ * ⚠️ 서버 응답(`GET /groups/{groupId}/memberships`)엔 `email`이 없다.
+ * 화면에서 멤버 식별은 `name` + `role`만으로 하고,
  * 이메일은 표시하지 않는다.
  *
- * 1단계까지는 이 파일이 목 데이터 저장소 겸 "함수 호출 = 상태 변경"이었지만, 2단계부터는
- * `group.ts`와 같은 패턴으로 순수 캐시로 바꿨다 — 실제 변경은 `groupMembershipService.ts`가
+ * 이 파일은 `group.ts`와 같은 패턴의 순수 캐시다 — 실제 변경은 `groupMembershipService.ts`가
  * API 호출 후 아래 캐시 함수를 불러 반영한다.
  */
 export type GroupMembership = {
@@ -19,7 +18,7 @@ export type GroupMembership = {
   name: string;
   role: GroupRole;
   joinedAt: string;
-  /** 프로필 이미지 URL. 서버 memberships 응답엔 아직 없다(2026-09-21 실호출) — 서버가 내려주면 그 값,
+  /** 프로필 이미지 URL. 서버 memberships 응답엔 아직 없다 — 서버가 내려주면 그 값,
    * 없으면 본인(`isMe`)만 로그인 세션의 프로필 이미지로 채우고 나머지는 null. */
   profileImageUrl: string | null;
   /** 서버 필드 아님 — userId가 `types/session.ts`의 현재 로그인 사용자와 같은지 클라이언트가 계산해서 채운다. */

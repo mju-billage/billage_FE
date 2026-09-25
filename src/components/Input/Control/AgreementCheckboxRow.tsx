@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   labelEmphasized: {
     ...TYPOGRAPHY.subtitle1,
   },
-  // 시안 실측(회원가입_약관동의.png 픽셀): `(필수)`만 파랑이고 `(선택)`은 본문과 같은 색이다.
+  // `(필수)`만 파랑이고 `(선택)`은 본문과 같은 색이다.
   tagRequired: {
     color: FOREGROUND_SECONDARY,
   },

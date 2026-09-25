@@ -1,10 +1,7 @@
 /** @screen DTB-2-PAGE-02-0 상세 내역_조회 */
 /** @screen DTB-3-MODAL-01-0 상세 내역_삭제 */
 /**
- * 4-A(Entry API 연동): 실 Entry 상세를 조회해 보여준다. (4-B 정리: DTB 전체
- * 목록이 실 API로 전환되며 `dtb-tx-N` 목 id를 만들어내는 곳이 사라져 이 화면의
- * 옛 목 데이터(`types/transaction.ts`) 분기가 도달 불가능해졌다 — 확인 후 분기와
- * 그 파일을 함께 걷어냈다. 이제 `transactionId`는 항상 실 Entry id다.)
+ * 실 Entry 상세를 조회해 보여준다. `transactionId`는 항상 실 Entry id다.
  *
  * 수정/삭제/승인은 전부 총무(OWNER) 전용(Entry.txt) — 일반 관리자는 본인이 등록한
  * 승인 대기 내역도 못 고친다. `viewerIsOwner`로 아이콘을 감춘다. 승인 진입점은
@@ -12,7 +9,7 @@
  * 장부 상세 목록에서 승인 대기 내역도 이미 탭해서 들어올 수 있어 여기가 유일하게
  * 실제로 도달 가능한 지점이다.
  *
- * **상세 내역_납부관리_수입내역 변형(2026-09-11 추가, 시안:
+ * **상세 내역_납부관리_수입내역 변형(시안:
  * `내역_상세내역조회_납부관리수입내역.png`, Screen ID 칸이 빈 데이터 기반 변형)**:
  * 마감된 회비에서 생성된 수입 내역(`entry.duesExists`)이면 납부자 명수·명단과
  * "회비 상세보기" CTA가 추가로 뜬다(`GET /entries/{id}`의 `payerCount`/`payers[]`/
@@ -21,7 +18,7 @@
  * "해당 회비 상세는 삭제되지 않는다"는 시안 문구는 삭제를 막으라는 게 아니라
  * 이 내역을 지워도 회비 기록 자체는 안 지워진다는 데이터 무결성 설명이다.
  * `duesExists === false`(회비가 나중에 삭제된 경우)의 화면 표현은 시안에 없어
- * §5-4에 기획 확인 항목으로 남겼다 — 지금은 일반 내역과 동일하게 보여준다.
+ * 기획 확인 대기 항목이다 — 지금은 일반 내역과 동일하게 보여준다.
  */
 import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';

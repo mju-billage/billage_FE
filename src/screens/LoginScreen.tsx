@@ -172,7 +172,7 @@ function LoginScreen() {
   };
 
   /**
-   * 2026-09-12: "로그인에 실패했습니다"만 뜨던 통짜 에러를 단계별로 갈랐다 —
+   * 소셜 로그인 에러를 단계별로 구분한다 —
    * SDK 실패 / 네트워크 실패 / 서버 거부(코드 포함) / 응답 파싱 실패. 각 단계는
    * `authService.socialLogin`/`socialAuthService`에 심어둔 `console.warn`으로도
    * Metro 콘솔에 남는다(`[SocialLogin]` 태그로 검색).
@@ -250,7 +250,7 @@ function LoginScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* 시안 실측(로그인_메인화면.png, 1px=1dp): 심볼 29×28 + 간격 9 + 워드마크 92×27, 전체 가운데 정렬. */}
+        {/* 로그인_메인화면.png 기준(1px=1dp): 심볼 29×28 + 간격 9 + 워드마크 92×27, 전체 가운데 정렬. */}
         <View style={styles.logoRow}>
           <Image source={LOGO_SYMBOL} style={styles.logoSymbol} resizeMode="contain" />
           <Image source={LOGO_WORDMARK} style={styles.logoWordmark} resizeMode="contain" />

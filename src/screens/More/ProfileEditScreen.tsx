@@ -10,10 +10,10 @@
  * 자체는 `ETC-4-PAGE-02-0`(이미 만든 `GroupImagePickerScreen`)을 그대로
  * 재사용한다 — 새로 만들지 않는다.
  *
- * 2026-09-11부터 카메라/갤러리 둘 다 실제 촬영·선택이고, 고른 즉시
+ * 카메라/갤러리 둘 다 실제 촬영·선택이고, 고른 즉시
  * `fileService.uploadFile(..., 'PROFILE_IMAGE')`로 업로드해 받은 fileId를
  * `profileImageFileId`에 채운다(업로드 중엔 저장 버튼을 막는다). "기본
- * 프로필로 변경하기"는 여전히 `null`만 보내면 되고 실제 파일이 필요 없다
+ * 프로필로 변경하기"는 `null`만 보내면 되고 실제 파일이 필요 없다
  * (3-state 규칙).
  */
 import { useCallback, useState } from 'react';
@@ -215,9 +215,8 @@ function ProfileEditScreen() {
     }
   };
 
-  // 시스템 카메라를 직접 부른다 — 예전엔 인앱 중간 화면(`CameraCaptureView`)을
-  // 거쳤는데, 시스템 카메라 앱을 쓰는 이상 그 중간 화면은 "카메라가 두 번
-  // 열리는" 것처럼만 보여 없앴다(2026-09-06).
+  // 시스템 카메라를 직접 부른다 — 중간에 인앱 화면을 두면 "카메라가 두 번
+  // 열리는" 것처럼 보이기 때문이다.
   const handleTakePhoto = async () => {
     const image = await captureWithFeedback(showSnackbar, () =>
       setPermissionDialogKind('camera'),

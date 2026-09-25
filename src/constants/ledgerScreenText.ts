@@ -4,7 +4,7 @@ export const LEDGER_CREATE_SUBTITLE = '새 장부로 내역 관리를 시작해�
 export const LEDGER_NAME_LABEL = '장부 이름';
 export const LEDGER_NAME_PLACEHOLDER = '장부 이름을 입력해주세요.';
 export const LEDGER_NAME_HELPER = '* 최대 20자 이내로 입력할 수 있어요.';
-/** Ledger.txt "name: 필수, 공백 문자열 불가, 최대 20자" — 서버 확정값(2026-08-30). */
+/** Ledger.txt "name: 필수, 공백 문자열 불가, 최대 20자" — 서버 확정값. */
 export const LEDGER_NAME_MAX_LENGTH = 20;
 export const LEDGER_BUDGET_LABEL = '예산 설정';
 export const LEDGER_BUDGET_PLACEHOLDER = '예산 금액을 입력해주세요.';
@@ -23,11 +23,10 @@ export const LEDGER_MENU_RENAME = '장부 이름 변경';
 export const LEDGER_MENU_DELETE = '장부 삭제';
 
 export const LEDGER_RENAME_DIALOG_TITLE = '장부 이름 변경하기';
-/** 20자 확정(2026-09-18, design-verification.md §5-16) — 시안 목업 원문은
- * "최대 10자 이내로 입력해주세요."였지만, 앱 내 이름/제목 필드 4/4가 20자(그중
+/** 20자 — 시안 목업 원문은
+ * "최대 10자 이내로 입력해주세요."지만, 앱 내 이름/제목 필드 4/4가 20자(그중
  * 3개 서버 도메인 문서 근거)이고 같은 명세서 설명표 No.2/No.3도 20을 두 번
- * 명시해 설명표+서버 근거를 따랐다. 목업의 "10"은 시안↔설명표 불일치 #8로
- * 별도 기록, 기획 확인 필요. */
+ * 명시해 설명표+서버 근거를 따랐다. 목업의 "10"은 기획 확인 필요. */
 export const LEDGER_RENAME_DIALOG_DESCRIPTION = '최대 20자까지 입력할 수 있어요.';
 export const LEDGER_RENAME_PLACEHOLDER = '변경할 이름을 입력해주세요.';
 export const LEDGER_RENAME_CONFIRM_LABEL = '변경';
@@ -59,14 +58,13 @@ export const LEDGER_ENTRIES_LOADING_MORE = '불러오는 중...';
 
 /** keyword 파라미터는 제목·메모만 검색한다(Entry.txt) — "장부명"은 뺐다(이미 그
  * 장부 안에서 검색 중이라 의미가 없다). */
-/** 시안 목업 문구를 따른다(설명표는 '검색어를 입력해주세요.', 예전 구현은 '내역명을 입력해주세요.') —
- * 불일치 #15. 장부 안 검색인데 '장부명'이 들어가는 이유는 기획 확인 필요. */
+/** 시안 목업 문구를 따른다(설명표는 '검색어를 입력해주세요.'). 장부 안 검색인데 '장부명'이 들어가는 이유는 기획 확인 필요. */
 export const LEDGER_SEARCH_PLACEHOLDER = '내역명, 장부명을 입력해주세요.';
 /** 내역 검색(`TransactionSearchScreen`)의 결과 없음 문구. 장부 안 검색(`FDR-3-PAGE-02-0`)은 마침표 없는
  * `LEDGER_ENTRY_SEARCH_EMPTY`를 따로 쓴다 — 이 상수는 다른 화면이 같이 써서 바꾸지 않았다. */
 export const LEDGER_SEARCH_EMPTY = '해당되는 내역이 없어요.';
 /** 장부 안 검색 결과 없음. 시안(원본 스펙시트 Case B, 크롭 `FDR-3-PAGE-02-0-3.png`)과 설명표 3-1 모두
- * 마침표 없음(2026-09-20 확대 확인). */
+ * 마침표 없음. */
 export const LEDGER_ENTRY_SEARCH_EMPTY = '해당되는 내역이 없어요';
 
 export const FILTER_SHEET_TITLE = '필터 선택';

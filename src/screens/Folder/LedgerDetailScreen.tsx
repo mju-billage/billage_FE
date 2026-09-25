@@ -3,11 +3,10 @@
 /** @screen FDR-3-MODAL-04-0 장부 삭제 (activeDialog='delete') */
 /** @screen FDR-4-SNACKBAR-02-0 장부 삭제_완료 (SNACKBAR_LEDGER_DELETED_SUFFIX) */
 /**
- * 4-A(Entry API 연동) — 내역 목록을 실 서버로 교체했다. 페이지네이션은 무한
- * 스크롤(FlatList onEndReached)로 확정 — 이 화면 포함 어떤 화면도 "더보기" 버튼
- * 패턴을 쓴 적이 없고 디자인 시안에도 그런 버튼이 없어서, 기존 FlatList 관례를
- * 그대로 잇는 쪽을 표준으로 삼았다(docs/api-integration-plan.md "표준 패턴" 참고,
- * Dues·Report도 이 패턴을 따르면 된다).
+ * 내역 목록은 실 서버에서 불러온다. 페이지네이션은 무한
+ * 스크롤(FlatList onEndReached) — 어떤 화면도 "더보기" 버튼
+ * 패턴을 쓰지 않고 디자인 시안에도 그런 버튼이 없어서, 기존 FlatList 관례를
+ * 그대로 잇는다.
  */
 import { useCallback, useRef, useState } from 'react';
 import {
@@ -320,12 +319,9 @@ function LedgerDetailScreen() {
     data: group.items,
   }));
 
-  // 캐러셀 스냅 결함 수정(2026-09-18): 이전엔 카드 폭(CARD_WIDTH = 화면폭-48)과
-  // 스크롤뷰 자체의 paddingLeft(24, 우측엔 없음)가 서로 안 맞아 2페이지부터
-  // 어긋났다(snapToInterval이 이 좌측 인셋을 계산에 안 넣었음, 첫 페이지는
-  // 우연히 괜찮아 보였을 뿐). 각 슬라이드를 화면 폭 그대로(windowWidth) 채우고
-  // 카드 여백은 슬라이드 안쪽 padding으로 옮겨서, pagingEnabled 기본 동작(뷰포트
-  // 폭 단위 스냅)만으로 항상 정확히 맞게 했다 — snapToInterval도 더 이상 필요 없다.
+  // 캐러셀: 각 슬라이드를 화면 폭 그대로(windowWidth) 채우고
+  // 카드 여백은 슬라이드 안쪽 padding으로 줘서, pagingEnabled 기본 동작(뷰포트
+  // 폭 단위 스냅)만으로 항상 정확히 맞는다 — snapToInterval은 필요 없다.
   const handleScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const index = Math.round(e.nativeEvent.contentOffset.x / windowWidth);
     setCardIndex(index);
@@ -563,8 +559,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   // 슬라이드 하나 = 화면 폭 전체(JSX에서 width: windowWidth로 덮어씀) — 카드
-  // 여백은 스크롤뷰가 아니라 이 안쪽 padding으로 준다(캐러셀 스냅 결함 수정,
-  // 2026-09-18).
+  // 여백은 스크롤뷰가 아니라 이 안쪽 padding으로 준다.
   cardSlide: {
     paddingHorizontal: 20,
   },

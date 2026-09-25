@@ -1,5 +1,5 @@
 /**
- * 서버 미구현(2026-09-06 기준). 명세 `Notification & Support (알림·고객지원).txt` 기준 작성.
+ * 서버 미구현. 명세 `Notification & Support (알림·고객지원).txt` 기준 작성.
  * A(알림 설정) + B(공지사항/약관/FAQ/문의) 전부 서버 API 자체가 없다 — 화면은 이 함수를
  * 실제로 호출하고, 서버가 없으니 에러 상태가 뜨는 게 정상이다.
  */
@@ -30,7 +30,7 @@ export type Faq = {
   answer: string;
 };
 
-/** 설정 > 약관 목록에 노출되는 3종(§ "화면명세 내부 불일치" 해결 — 마케팅 제외). */
+/** 설정 > 약관 목록에 노출되는 3종(마케팅 제외). */
 export type TermType = 'SERVICE' | 'PRIVACY' | 'AUTO_RECORD';
 
 type NoticeListItemResponse = {

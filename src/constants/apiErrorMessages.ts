@@ -2,13 +2,10 @@
  * API 에러 code → 화면 문구 매핑. 공통규칙 §6에 따라 화면은 서버 message가 아니라
  * code로 분기한다(§20 "서버 메시지를 화면에 직접 표시할지"가 미합의 항목이라 더더욱).
  * 도메인이 늘어날 때마다 이 파일에 `{DOMAIN}_ERROR_MESSAGES`를 추가하고
- * `API_ERROR_MESSAGES`에 합친다 — Group 1단계에서 확정한 패턴.
+ * `API_ERROR_MESSAGES`에 합친다.
  *
  * ⚠️ 도메인 블록이 통째로 빠지면 서버가 보낸 구체적 원인이 fallback 문구로 덮인다.
- * 2026-09-13 `REPORT_RANGE_EMPTY`가 이 경로로 "일시적인 문제가 발생했어요"로 표시돼
- * 서버 장애로 오독됐다(실제로는 선택한 장부에 내역 0건 — 정상 에러였다). 이 문구가
- * 뜨면 서버를 의심하기 전에 여기 매핑부터 확인할 것 — 서버 명세 대비 미매핑 코드
- * 전체 목록은 `docs/design-verification.md` §5-8 참고.
+ * "일시적인 문제가 발생했어요"가 뜨면 서버 장애로 단정하기 전에 여기 매핑부터 확인할 것.
  */
 
 /** 매핑에 없는 code가 오면 이 문구를 쓴다. */
@@ -20,7 +17,7 @@ export const API_NETWORK_ERROR_MESSAGE =
   '네트워크 연결을 확인해주세요.';
 
 /**
- * [치명1] `getActiveGroup()`이 비어 있을 때 쓴다 — 로그인/세션 복원 직후 모임
+ * `getActiveGroup()`이 비어 있을 때 쓴다 — 로그인/세션 복원 직후 모임
  * 캐시를 아직 못 채웠거나(레이스, 재시도로 해결됨) 정말 속한 모임이 없는 경우
  * (재시도로 해결 안 됨) 둘 다 이 메시지 하나로 통일한다. 원인이 뭐든 "화면이
  * 영원히 로딩 중" 상태로 남겨두지 않는 것이 목적이라 문구를 세분화하지 않았다.
@@ -37,21 +34,20 @@ const COMMON_ERROR_MESSAGES: Record<string, string> = {
   ACCESS_DENIED: '이 작업을 할 권한이 없어요.',
   INVALID_REQUEST: '입력값을 다시 확인해주세요.',
   INVALID_QUERY_PARAMETER: '목록을 불러오지 못했어요. 다시 시도해주세요.',
-  // 404 — 서버에 라우트가 없을 때도(미구현 엔드포인트) 이 코드가 온다. 예전엔 매핑이 없어
-  // "일시적인 문제가 발생했어요" fallback으로 덮였다(2026-09-19, 알림 설정·문의하기·공지사항).
+  // 404 — 서버에 라우트가 없을 때도(미구현 엔드포인트) 이 코드가 온다.
+  // 매핑이 없으면 "일시적인 문제가 발생했어요" fallback으로 덮이므로 채워둔다.
   RESOURCE_NOT_FOUND: '요청한 정보를 찾을 수 없어요.',
 };
 
 /**
- * Auth 도메인 고유 에러 코드(`Auth (인증).txt`) — 2026-09-13 신설, 매핑 전수 점검에서
- * 발견한 최우선순위 공백. 대부분 각 화면이 이미 로컬로 특수 처리하고 있어(로그인
+ * Auth 도메인 고유 에러 코드(`Auth (인증).txt`). 대부분 각 화면이 이미 로컬로 특수 처리하고 있어(로그인
  * `INVALID_CREDENTIALS`, 이메일 인증 `INVALID_VERIFICATION_CODE`/`VERIFICATION_CODE_EXPIRED`/
  * `EMAIL_ALREADY_EXISTS`, 비밀번호 변경 `INVALID_CREDENTIALS`) 이 맵까지 안 타는 경로가
  * 대부분이지만, 다른 호출부가 생기거나 로컬 분기가 빠졌을 때의 방어망으로 채운다.
  *
  * - `INVALID_CREDENTIALS`(2-2): 로그인 실패("이메일 또는 비밀번호 불일치")와 비밀번호
- *   변경 실패("현재 비밀번호 불일치") 두 맥락에서 같은 코드를 쓴다(§5-8 (c)형 문제와
- *   동일 패턴) — 두 화면 다 로컬 문구로 우회하므로 여기 값은 **비밀번호 변경 화면
+ *   변경 실패("현재 비밀번호 불일치") 두 맥락에서 같은 코드를 쓴다
+ *   — 두 화면 다 로컬 문구로 우회하므로 여기 값은 **비밀번호 변경 화면
  *   기준**(`PasswordChangeScreen`이 이 맵을 실제로 타는 유일한 곳)으로 맞췄다. 로그인
  *   화면 문구가 필요하면 `LOGIN_INVALID_CREDENTIALS_ERROR`를 따로 쓸 것 — 여기 안 바꿔도 됨.
  * - `INVALID_VERIFICATION_CODE`/`VERIFICATION_CODE_EXPIRED`(2-1, 스펙 지정): Auth.txt
@@ -86,7 +82,7 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
   VERIFICATION_CODE_EXPIRED: '인증 시간이 만료되었어요. 다시 시도해 주세요.',
   EMAIL_ALREADY_EXISTS: '이미 가입된 이메일이에요. 로그인해주세요.',
   PASSWORD_CHANGE_NOT_ALLOWED: '소셜 로그인 계정은 비밀번호를 변경할 수 없어요.',
-  // Auth.txt엔 없는 코드 — 2026-09-13 실호출로 발견(존재하지 않는 이메일로 인증 코드
+  // Auth.txt엔 없는 코드(존재하지 않는 이메일로 인증 코드
   // 검증 시도 → 404). `INVALID_VERIFICATION_CODE`(코드는 있는데 틀림)와 달리 이건
   // "발송된 인증 요청 자체가 없음"이라 문구를 분리했다.
   VERIFICATION_NOT_FOUND: '인증 요청을 찾을 수 없어요. 인증 코드를 다시 받아주세요.',
@@ -96,7 +92,7 @@ const AUTH_ERROR_MESSAGES: Record<string, string> = {
  * `GROUP_NAME_MISMATCH`(2-1, 스펙 지정): Group.txt 5번 "화면은 '모임명이 일치하지
  * 않아요.' 헬프 메시지를 띄웁니다" — `GroupManageScreen`의 로컬 상수
  * (`GROUP_DELETE_NAME_MISMATCH_ERROR`)와 동일 문구. 단, 이 코드의 서버 검증
- * 자체가 Group.txt에 `미구현`으로 명시돼 있어(클라이언트 대조만 동작) 실호출로는
+ * 자체가 Group.txt에 `미구현`으로 명시돼 있어(클라이언트 대조만 동작)
  * 아직 안 뜬다 — 서버가 붙이면 바로 맞는 문구가 나가도록 미리 채워둔다. */
 const GROUP_ERROR_MESSAGES: Record<string, string> = {
   GROUP_NOT_FOUND: '모임을 찾을 수 없어요. 이미 삭제됐을 수 있어요.',
@@ -106,7 +102,7 @@ const GROUP_ERROR_MESSAGES: Record<string, string> = {
   GROUP_NAME_MISMATCH: '모임명이 일치하지 않아요.',
 };
 
-/** GroupMembership 도메인 고유 에러 코드(2단계에서 실제로 붙지만 매핑은 여기 같이 정리).
+/** GroupMembership 도메인 고유 에러 코드.
  * `INVALID_INVITATION_CODE`/`INVITATION_EXPIRED`/`ALREADY_GROUP_MEMBER`(2-1, 스펙
  * 지정): 시안(`전체모임관리_모임추가_코드로참여하기.png` No.4 [액션])이 "유효하지 않은
  * 코드이거나 이미 가입된 모임일 경우" 실패 사유를 구분하지 않고 하나로 보여주도록
@@ -122,37 +118,37 @@ const GROUP_MEMBERSHIP_ERROR_MESSAGES: Record<string, string> = {
   ALREADY_GROUP_MEMBER: '코드가 일치하지 않아요. 다시 입력해주세요.',
 };
 
-/** Folder 도메인 고유 에러 코드(3단계). */
+/** Folder 도메인 고유 에러 코드. */
 const FOLDER_ERROR_MESSAGES: Record<string, string> = {
   FOLDER_NOT_FOUND: '폴더를 찾을 수 없어요. 이미 삭제됐을 수 있어요.',
   INVALID_PARENT_FOLDER:
     '이동할 수 없는 위치예요. 자기 자신이나 하위 폴더로는 옮길 수 없어요.',
 };
 
-/** Ledger 도메인 고유 에러 코드(3단계). */
+/** Ledger 도메인 고유 에러 코드. */
 const LEDGER_ERROR_MESSAGES: Record<string, string> = {
   LEDGER_NOT_FOUND: '장부를 찾을 수 없어요. 이미 삭제됐을 수 있어요.',
   INVALID_BUDGET: '예산은 0원 이상 999,999,999원 이하로 입력해주세요.',
   GROUP_MISMATCH: '다른 모임의 폴더로는 옮길 수 없어요.',
 };
 
-/** User 도메인 고유 에러 코드(`GET/PATCH/DELETE /auth/me`, 8-A, 11). */
+/** User 도메인 고유 에러 코드(`GET/PATCH/DELETE /auth/me`). */
 const USER_ERROR_MESSAGES: Record<string, string> = {
   USER_NOT_FOUND: '사용자 정보를 찾을 수 없어요.',
   OWNER_TRANSFER_REQUIRED: '권한을 위임할 멤버를 모두 선택해주세요.',
 };
 
-/** Member 도메인 고유 에러 코드(6-B에서 회비 생성 대상자 검증 중 실제로 붙음). */
+/** Member 도메인 고유 에러 코드(회비 생성 대상자 검증 등). */
 const MEMBER_ERROR_MESSAGES: Record<string, string> = {
   MEMBER_NOT_FOUND: '모임원을 찾을 수 없어요. 이미 삭제됐을 수 있어요.',
 };
 
-/** Dues 도메인 고유 에러 코드(6-B, 7-B-1, 7-B-2).
+/** Dues 도메인 고유 에러 코드.
  * `INVALID_PAYMENT_STATUS`(2-2, 자체 작성): Dues.txt 7번 "허용되지 않은 상태값" —
  * 정상 UI로는 유발하기 어려운 코드라(토글 값 자체가 서버가 정의한 enum 밖으로 나갈
  * 방법이 없음) 방어용으로만 채운다.
- * **2026-09-13 확인 — `UNPAID_MEMBER_EXISTS`는 안 채운다**: Dues.txt 8번(회비 마감)
- * 정책 메모가 "미납자가 남아 있어도 마감합니다(2026-08-30 화면명세 감사로 정정) ...
+ * **`UNPAID_MEMBER_EXISTS`는 안 채운다**: Dues.txt 8번(회비 마감)
+ * 정책 메모가 "미납자가 남아 있어도 마감합니다 ...
  * 기존 UNPAID_MEMBER_EXISTS(409) 제약은 **제거**합니다"라고 명시한다 — 이 코드는
  * 폐기 예정으로 문서화된 것이지 현재 유효한 에러가 아니라 (a) 목록에서 뺐다. */
 const DUES_ERROR_MESSAGES: Record<string, string> = {
@@ -163,15 +159,13 @@ const DUES_ERROR_MESSAGES: Record<string, string> = {
   INVALID_PAYMENT_STATUS: '납부 상태를 변경할 수 없어요. 다시 시도해주세요.',
 };
 
-/** Entry(내역) 도메인 고유 에러 코드(`Entry (내역).txt`) — 2026-09-13 신설, 매핑
- * 전수 점검 3순위. 화면 지정 문구 없음(2-2, 자체 작성), 서버 message 기준으로 다듬음. */
+/** Entry(내역) 도메인 고유 에러 코드(`Entry (내역).txt`). 화면 지정 문구 없음(2-2, 자체 작성), 서버 message 기준으로 다듬음. */
 const ENTRY_ERROR_MESSAGES: Record<string, string> = {
   ENTRY_NOT_FOUND: '내역을 찾을 수 없어요. 이미 삭제됐을 수 있어요.',
   ENTRY_ALREADY_APPROVED: '이미 승인된 내역이에요. 새로고침 후 다시 확인해주세요.',
 };
 
-/** File(파일) 도메인 고유 에러 코드(`File (파일).txt` 1·2번) — 2026-09-13 신설, 매핑
- * 전수 점검 4순위(이미지 업로드·증빙 경로). 화면 지정 문구 없음(2-2, 자체 작성) —
+/** File(파일) 도메인 고유 에러 코드(`File (파일).txt` 1·2번) — 이미지 업로드·증빙 경로. 화면 지정 문구 없음(2-2, 자체 작성) —
  * "무엇이 잘못됐는지 + 뭘 하면 되는지" 원칙에 맞춰 용량(10MB)·형식(jpeg/png/webp)
  * 등 File.txt 정책 메모의 구체값을 그대로 문구에 반영했다. */
 const FILE_ERROR_MESSAGES: Record<string, string> = {
@@ -182,8 +176,7 @@ const FILE_ERROR_MESSAGES: Record<string, string> = {
   FILE_DELETE_FAILED: '파일 삭제에 실패했어요. 잠시 후 다시 시도해주세요.',
 };
 
-/** OCR(영수증 인식) 도메인 고유 에러 코드(`OCR (영수증 인식).txt`) — 2026-09-13 신설,
- * 매핑 전수 점검 4순위. **서버 상태가 아직 `시작 전`이라 실호출로 검증 못 했다** —
+/** OCR(영수증 인식) 도메인 고유 에러 코드(`OCR (영수증 인식).txt`).
  * 어느 화면도 `ocrService`를 아직 안 쓴다(기능 자체 미착수). 화면 지정 문구 없음
  * (2-2, 자체 작성), 나중에 실제로 붙을 때 재검토할 것. */
 const OCR_ERROR_MESSAGES: Record<string, string> = {
@@ -192,29 +185,23 @@ const OCR_ERROR_MESSAGES: Record<string, string> = {
   OCR_PROCESSING_FAILED: '영수증 인식에 실패했어요. 잠시 후 다시 시도해주세요.',
 };
 
-/** Archive(보관함) 도메인 고유 에러 코드(Folder.txt 5·8번). 2026-09-11 Swagger 대조로
- * 서버가 실제로 구현돼 있음을 확인 — `ARCHIVE_EMPTY`는 실호출로 확인된 실제 코드,
- * 나머지 둘은 아직 실호출로 재현 못 해 명세 추정값 그대로 둔다.
+/** Archive(보관함) 도메인 고유 에러 코드(Folder.txt 5·8번). `ARCHIVE_EMPTY`는 실제 코드이고
+ * 나머지 둘은 명세 추정값이다.
  *
- * **2026-09-12 실기기로 `ARCHIVE_EMPTY` 조건 재확정**: 조건은 "장부별로 내역이 있어야
- * 한다"가 아니라 **"모임 전체에 내역이 1건도 없으면"**이다 — 장부가 여러 개 있어도
+ * `ARCHIVE_EMPTY` 조건은 **"모임 전체에 내역이 1건도 없으면"**이다 — 장부가 여러 개 있어도
  * 내역이 하나도 없으면 `ARCHIVE_EMPTY`가 나고, 내역이 1건이라도 있으면 성공하며 이때
- * **내역이 없는 빈 장부까지 전부 함께 보관된다**(둘 다 실기기로 확인). 옛 문구("보관할
- * 장부나 내역이 없어요")는 "장부만 있어도 될 것처럼" 읽혀 실제로 사용자가 겪은 혼동
- * (폴더+장부 여러 개를 만들고 백업했는데 실패)과 정확히 일치한다 — 문구를 조건에 맞게
- * 고쳤다. 디자인 시안(`FDR\폴더\백업\FDR-2-MODAL-02-0/-1.png`)엔 확인 다이얼로그 2장과
- * 완료 스낵바만 있고 이 에러 상태의 지정 문구는 없어(`docs/design-verification.md` §5-4
- * 기록) 자체 작성. */
+ * **내역이 없는 빈 장부까지 전부 함께 보관된다**. 그래서 문구도 "장부만 있어도 될
+ * 것처럼" 읽히지 않게 조건에 맞춰 썼다. 디자인 시안(`FDR\폴더\백업\FDR-2-MODAL-02-0/-1.png`)엔
+ * 확인 다이얼로그 2장과 완료 스낵바만 있고 이 에러 상태의 지정 문구는 없어 자체 작성. */
 const ARCHIVE_ERROR_MESSAGES: Record<string, string> = {
   ARCHIVE_NOT_FOUND: '보관 기록을 찾을 수 없어요. 이미 삭제됐을 수 있어요.',
   ARCHIVE_IN_PROGRESS: '이미 백업 작업이 진행 중이에요. 잠시 후 다시 시도해주세요.',
   ARCHIVE_EMPTY: '아직 등록된 내역이 없어요. 내역을 추가한 뒤 다시 시도해주세요.',
 };
 
-/** Report 도메인 고유 에러 코드(`Report (보고서).txt` 2번 에러 응답) — 2026-09-13
- * 추가. 이 블록 자체가 없어서 `REPORT_RANGE_EMPTY`(선택한 장부/기간에 담을 내역이
- * 0건일 때)가 기본 fallback 문구("일시적인 문제가 발생했어요...")로 덮여 사용자가
- * 실제 원인(빈 장부 선택)을 알 방법이 없었다 — 보고서 생성 실패 진단 중 발견. */
+/** Report 도메인 고유 에러 코드(`Report (보고서).txt` 2번 에러 응답).
+ * `REPORT_RANGE_EMPTY`는 선택한 장부/기간에 담을 내역이 0건일 때 나며, 매핑이 없으면
+ * 기본 fallback 문구로 덮여 사용자가 실제 원인(빈 장부 선택)을 알 수 없다. */
 const REPORT_ERROR_MESSAGES: Record<string, string> = {
   REPORT_NOT_FOUND: '보고서를 찾을 수 없어요. 이미 삭제됐을 수 있어요.',
   REPORT_RANGE_EMPTY: '선택한 장부·기간에 보고서로 만들 내역이 없어요.',

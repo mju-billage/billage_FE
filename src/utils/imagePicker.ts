@@ -1,6 +1,6 @@
 /**
- * `react-native-image-picker`(2026-09-06 도입) 얇은 래퍼. 카메라(`pickFromCamera`)에
- * 이어 갤러리(`pickFromGallery`, 2026-09-11 도입)까지 실제로 붙었다 —
+ * `react-native-image-picker` 얇은 래퍼. 카메라(`pickFromCamera`)와
+ * 갤러리(`pickFromGallery`)를 제공한다 —
  * `ReceiptGalleryPickerScreen`/`GroupImagePickerScreen` 둘 다 이걸 쓴다.
  *
  * `AndroidManifest.xml`에 `CAMERA`를 선언하면 그 순간부터 런타임 권한이
@@ -102,7 +102,7 @@ export async function pickFromCamera(): Promise<CameraResult> {
 /**
  * `pickFromCamera()`를 부르고 취소가 아닌 실패를 호출부에 알린다 — 여러 화면
  * (증빙자료 첨부, 모임/내 프로필 이미지)이 중간 화면 없이 이 카메라 흐름을
- * 직접 쓰게 되면서(2026-09-06) 실패 처리를 매번 다시 쓰지 않도록 공용화했다.
+ * 직접 쓰므로 실패 처리를 매번 다시 쓰지 않도록 공용화했다.
  *
  * 일반 거부/에러는 `onMessage`(스낵바 등 가벼운 알림)로 충분하지만, **영구
  * 거부("다시 묻지 않음")는 스낵바로 안 끝낸다** — 시스템 권한 다이얼로그를

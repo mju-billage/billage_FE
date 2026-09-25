@@ -22,7 +22,7 @@ export const GROUP_SWITCHER_ADD_ALL = '전체 모임 관리';
 export const ALL_GROUPS_TITLE = '전체 모임 관리';
 export const ALL_GROUPS_ROLE_TREASURER = '총무';
 export const ALL_GROUPS_ADD_NEW = '새로운 모임 추가하기';
-/** 로딩/에러 문구 — 디자인 시안에 해당 상태가 없어 최소 형태로 통일(api-integration-plan.md "표준 패턴" 참고). */
+/** 로딩/에러 문구 — 디자인 시안에 해당 상태가 없어 최소 형태로 통일. */
 export const ALL_GROUPS_LOADING = '모임 목록을 불러오는 중이에요.';
 export const ALL_GROUPS_RETRY_LABEL = '다시 시도';
 
@@ -45,16 +45,14 @@ export const JOIN_GROUP_PLACEHOLDER = '초대 코드를 입력해주세요.';
 export const JOIN_GROUP_SUBMIT_LABEL = '참여하기';
 /** 시안(전체모임관리_모임추가_코드로참여하기.png) No.4 [액션] 문구 그대로 — "유효하지
  * 않은 코드이거나 이미 가입된 모임일 경우" 실패 사유를 구분 안 하고 하나로 보여준다.
- * 2026-09-13: 만료된 코드(`INVITATION_EXPIRED`)도 같은 취급 — 시안이 실패 사유를
+ * 만료된 코드(`INVITATION_EXPIRED`)도 같은 취급 — 시안이 실패 사유를
  * 굳이 나누지 않는 설계라 그대로 따랐다. */
 export const JOIN_GROUP_INVALID_CODE_ERROR = '코드가 일치하지 않아요. 다시 입력해주세요.';
 export const SNACKBAR_GROUP_JOINED_SUFFIX = " 모임에 참여했어요.";
 
 // 모임 관리 (ETC-2-PAGE-02-0) — "모임 관리자"(GroupMembership 권한 관리)와는
-// 별개 화면이다. 더보기 > 모임 관리가 중간 화면 없이 바로 모임 관리자로
-// 직행하던 게 design-verification.md §5-4의 미해결 항목이었는데, 시안
-// (더보기_모임관리_모임삭제하기.png 배경 화면)이 "< 모임 관리"라는 별도
-// 페이지 경로/제목으로 등장해 실재를 확인했다 — 오기가 아니다.
+// 별개 화면이다. 시안(더보기_모임관리_모임삭제하기.png 배경 화면)에
+// "< 모임 관리"라는 별도 페이지 경로/제목으로 등장한다.
 export const GROUP_MANAGE_TITLE = '모임 관리';
 export const GROUP_MANAGE_PROFILE_EDIT_LABEL = '모임 프로필 변경';
 export const GROUP_MANAGE_MEMBER_MANAGE_LABEL = '모임원 관리';
@@ -92,8 +90,7 @@ export const SNACKBAR_GROUP_DELETED_PREFIX = "'";
 export const SNACKBAR_GROUP_DELETED_SUFFIX = "' 모임을 삭제했어요.";
 
 // 모임 전환 완료 (ETC-5-SNACKBAR-05-0) — 시안 이미지 0장. 다른 완료 스낵바들
-// ("'{이름}' 모임에 참여했어요." 등)의 프리픽스+서픽스 패턴을 그대로 따랐다
-// (design-verification.md §5-4에 디자인 없음으로 기록).
+// ("'{이름}' 모임에 참여했어요." 등)의 프리픽스+서픽스 패턴을 그대로 따랐다.
 export const SNACKBAR_GROUP_SWITCHED_PREFIX = "'";
 export const SNACKBAR_GROUP_SWITCHED_SUFFIX = "' 모임으로 전환했어요.";
 
@@ -102,8 +99,8 @@ export const GROUP_MANAGER_TITLE = '모임 관리자';
 /**
  * "모임원 관리"(DUE-2-PAGE-02-0) 진입 행. IA엔 "더보기 > 모임 관리 > 모임원
  * 명단 관리"로 정의돼 있지만 "모임 관리"(ETC-2-PAGE-02-0) 허브 화면 자체가
- * 없어(design-verification.md §5-4) 이 화면(현재 "모임 관리" 진입 시 실제로
- * 도착하는 화면)에 바로 둔다 — docs/api-integration-plan.md (A) 참고.
+ * 없어 이 화면(현재 "모임 관리" 진입 시 실제로
+ * 도착하는 화면)에 바로 둔다.
  */
 export const GROUP_MANAGER_MEMBER_MANAGE_LABEL = '모임원 관리';
 export const GROUP_MANAGER_INVITE_CODE_PREFIX = '초대코드 : ';

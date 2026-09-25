@@ -90,14 +90,11 @@ type GroupLedgerListItemResponse = {
 };
 
 /**
- * 모임 전체 장부 목록을 조회한다(최상위 장부 포함). 2026-09-13 백엔드 노티 04번으로
- * 신설된 `GET /groups/{groupId}/ledgers`(평평한 목록)를 쓴다 — 예전엔 이 API가 없어
- * 폴더 트리 조회 1콜 + 폴더 개수만큼 장부 목록 병렬 호출로 대체했었는데(N+1), 그
- * 방식은 최상위(폴더 없음) 장부를 아예 조회할 수 없었다(폴더에 속한 장부만 폴더별로
- * 조회하는 API만 있었으므로). 새 엔드포인트로 교체해 N+1도, 최상위 장부 누락도 함께
- * 해결됐다 — 실호출로 응답 필드가 `LedgerSummary`에 필요한 값을 전부 포함함을
- * 확인했다(`ledgerId`/`folderId`/`name`/`budget`/`totalIncome`/`totalExpense`/
- * `balance`/`remainingBudget`/`entryCount`).
+ * 모임 전체 장부 목록을 조회한다(최상위 장부 포함). `GET /groups/{groupId}/ledgers`
+ * (평평한 목록)를 쓴다 — 폴더별 장부 목록 API로는 최상위(폴더 없음) 장부를 조회할
+ * 수 없고 폴더 개수만큼 호출해야(N+1) 하기 때문이다. 응답 필드는 `LedgerSummary`에
+ * 필요한 값을 전부 포함한다(`ledgerId`/`folderId`/`name`/`budget`/`totalIncome`/
+ * `totalExpense`/`balance`/`remainingBudget`/`entryCount`).
  */
 export async function getAllLedgersInGroup(
   groupId: string,
@@ -141,11 +138,9 @@ export async function createLedger(
 }
 
 /**
- * 2026-09-13 백엔드 노티 03번으로 신설된 엔드포인트. `POST /folders/{folderId}/ledgers`
- * (위 `createLedger`)와 달리 **폴더 없이(최상위)** 장부를 만들 수 있다 —
- * `folderId`를 생략하거나 `null`이면 최상위, 값을 주면 그 폴더 안. 새 모임은 폴더가
- * 0개라 이 엔드포인트가 없으면 첫 장부조차 못 만드는 게 실제 막힘이었다(2026-09-13
- * 보고서 생성 진단 중 재확인 — 백업으로 폴더가 0개가 됐을 때도 같은 증상). 총무
+ * `POST /folders/{folderId}/ledgers`(위 `createLedger`)와 달리 **폴더 없이(최상위)**
+ * 장부를 만들 수 있다 — `folderId`를 생략하거나 `null`이면 최상위, 값을 주면 그 폴더
+ * 안. 새 모임은 폴더가 0개라 이 엔드포인트가 아니면 첫 장부를 못 만든다. 총무
  * 전용, 다른 모임 폴더를 지정하면 `GROUP_MISMATCH(409)`.
  */
 export async function createLedgerInGroup(
@@ -168,14 +163,11 @@ export async function createLedgerInGroup(
 /**
  * 장부 이름을 변경한다(Ledger.txt "4. 장부 수정", `PATCH /ledgers/{id}`).
  *
- * **2026-09-13 백엔드 노티로 확정**: 이 PATCH의 `folderId: null`은 "최상위로 이동"이
- * 아니라 **"변경 없음"**이다 — 폴더 이동은 이 엔드포인트가 아니라 완전히 별개인
+ * 이 PATCH의 `folderId: null`은 "최상위로 이동"이 아니라 **"변경 없음"**이다 —
+ * 폴더 이동은 이 엔드포인트가 아니라 완전히 별개인
  * `POST /groups/{groupId}/folder-items/move`(`targetFolderId: null`이 최상위)로
- * 처리한다(`folderService.moveFolderItems()`, `FolderMoveDestinationScreen.tsx`가 이미
- * 이 방식을 쓰고 있다 — 정상). 예전엔 이 함수가 `folderId`도 같이 받아 "이동"까지
- * 하는 것처럼 만들어 뒀었는데, 실제로 호출하는 곳이 이름 변경(`LedgerDetailScreen.tsx`)
- * 하나뿐이었고 그마저 `folderId`를 넘긴 적이 없었다(죽은 코드) — 백엔드 확인을 계기로
- * 아예 지웠다. 폴더 이동이 필요하면 `moveFolderItems()`를 쓸 것.
+ * 처리한다(`folderService.moveFolderItems()`, `FolderMoveDestinationScreen.tsx`).
+ * 그래서 이 함수는 이름 변경만 받는다.
  */
 export async function updateLedger(
   ledgerId: string,

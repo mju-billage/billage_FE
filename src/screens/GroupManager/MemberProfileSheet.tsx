@@ -196,7 +196,7 @@ function MemberProfileSheet({
                 <Chip label={ALL_GROUPS_ROLE_TREASURER} removable={false} />
               )}
             </View>
-            {/* GroupMembership 응답에 email이 없다(docs/api-gaps.md (A)) — 이름+역할만 표시. */}
+            {/* GroupMembership 응답에 email이 없다 — 이름+역할만 표시. */}
           </View>
         </View>
 

@@ -13,7 +13,7 @@
  * 올라가는 쪽으로 판단했다**(표준 폴더 탐색기 UX, `FolderScreen` 브레드크럼
  * 방식과 동일) — "선택 파기"는 최상위에서 뒤로가기를 눌러 화면 자체를
  * 나갈 때만 적용된다(그때는 확정 버튼을 안 눌렀으니 선택이 그냥 전달 안
- * 되는 것으로 자연히 파기됨). 판단 근거는 7-D 보고 참고.
+ * 되는 것으로 자연히 파기됨).
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';

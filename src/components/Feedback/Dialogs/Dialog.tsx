@@ -64,7 +64,7 @@ function Dialog({
 }: DialogProps) {
   // 더보기_기록보관_보관제목변경.png: 키보드가 뜨면 다이얼로그가 화면 중앙이
   // 아니라 키보드 상단에 붙어서 올라온다(중앙정렬 유지한 채 밀어올리는 게
-  // 아니다) — design-verification.md §5-12. 키보드가 뜬 동안만 컨테이너를
+  // 아니다). 키보드가 뜬 동안만 컨테이너를
   // 하단 정렬로 바꾸고, KeyboardStickyView가 카드를 정확히 키보드 높이만큼
   // 밀어올려 키보드 상단에 딱 붙게 한다. 레이아웃이 바뀌는 시점(keyboard
   // height가 막 0을 벗어나는/거의 0으로 돌아오는 순간)엔 translateY도 0에
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   // overlay가 alignItems:'center'라 자식(KeyboardStickyView)이 폭 지정 없으면
   // 콘텐츠 크기로 쪼그라든다 — card의 width:'100%'는 "그 부모"(이 뷰) 기준으로
   // 계산되므로, 이 뷰 자체를 overlay 폭 100%로 명시해야 card가 시안대로
-  // 화면 폭을 채운다(키보드 작업 회귀, design-verification.md §5-12 정정).
+  // 화면 폭을 채운다.
   stickyWrapper: {
     width: '100%',
   },

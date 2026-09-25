@@ -112,11 +112,10 @@ type GroupUpdateResponse = {
 };
 
 /**
- * 모임 정보를 수정한다(OWNER 전용). **2026-09-06 실호출로 확인: 전달한 필드만
- * 바뀌는 부분 갱신이다** — `PATCH /members`가 전체 교체라 필드가 날아갔던 전례와
- * 달리 이름만 보내도 이미지가 안 지워진다. `groupImageFileId`는 필드 자체를
- * 안 보내면 유지, `null`을 보내면 기본 이미지로 초기화(기존 파일도 서버가 같이
- * 지움 — DELETE /files 없이도 404로 확인됨), 값을 보내면 교체된다(Group.txt §4).
+ * 모임 정보를 수정한다(OWNER 전용). **전달한 필드만
+ * 바뀌는 부분 갱신이다** — 이름만 보내도 이미지가 안 지워진다. `groupImageFileId`는
+ * 필드 자체를 안 보내면 유지, `null`을 보내면 기본 이미지로 초기화(기존 파일도
+ * 서버가 같이 지움), 값을 보내면 교체된다(Group.txt §4).
  * 응답에 `myRole`/`memberCount`/`inviteCode`가 없어 캐시의 기존 값을 이어붙인다.
  */
 export async function updateGroup(
@@ -147,8 +146,7 @@ export async function updateGroup(
  * 지워진다(Group.txt §5 정책 메모, soft-delete 아님).
  *
  * ⚠️ 시안(더보기_모임관리_모임삭제하기.png)엔 모임명 재입력 확인 단계가 있지만
- * 서버는 `confirmName` 검사를 아직 구현하지 않았다(명세에 `미구현`으로 표기,
- * 2026-08-30 감사) — 그래서 이 함수는 이름 검증 없이 바로 호출한다. 이름 재입력
+ * 서버는 `confirmName` 검사를 아직 구현하지 않았다(명세에 `미구현`으로 표기) — 그래서 이 함수는 이름 검증 없이 바로 호출한다. 이름 재입력
  * 검증은 호출부(`GroupManageScreen`)가 클라이언트에서만 먼저 막는다. 서버가
  * `confirmName`을 구현하면 여기 body에 추가할 것.
  */

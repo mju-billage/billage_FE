@@ -60,10 +60,10 @@ type Step = 'form' | 'tags';
 /**
  * 모임원 개별 추가: 이름/전화번호/태그/메모 입력. 태그 입력(DUE-5-PAGE-01-0)은
  * 명세상 별도 페이지지만 여기선 별도 라우트로 만들지 않고 내부 스텝으로
- * 구현했다 — 회비 생성 화면(6-B, DuesCreateScreen)의 step 패턴과 동일하게,
+ * 구현했다 — 회비 생성 화면(DuesCreateScreen)의 step 패턴과 동일하게,
  * 라우트 파라미터로 값을 주고받는 대신 상태를 그대로 들고 있어야 "뒤로가기
  * 시 입력값 유지"가 자연스럽다. 태그 입력 화면의 자체 뒤로가기(취소)는
- * 이번 세션에서 편집한 태그만 버리고 이전 확정값으로 복귀한다(draftTags).
+ * 그 세션에서 편집한 태그만 버리고 이전 확정값으로 복귀한다(draftTags).
  */
 function MemberAddIndividualScreen() {
   const navigation = useNavigation<MemberAddIndividualNavigationProp>();
