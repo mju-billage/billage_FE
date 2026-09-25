@@ -79,4 +79,3 @@ yarn-error.log
 
 /shots/*
 !/shots/.gitkeep
-!/shots/INDEX.md
