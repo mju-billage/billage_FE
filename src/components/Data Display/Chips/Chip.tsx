@@ -14,7 +14,6 @@ type ChipProps = {
   onRemove?: () => void;
 };
 
-/** 제거 가능한 태그 칩. */
 function Chip({ label, removable = true, onRemove }: ChipProps) {
   return (
     <View style={styles.chip}>

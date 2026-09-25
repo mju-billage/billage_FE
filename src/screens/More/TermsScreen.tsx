@@ -1,6 +1,3 @@
-/**
- * @screen ETC-3-PAGE-11-0 약관 및 개인정보 처리방침
- */
 import { useNavigation } from '@react-navigation/native';
 import { StyleSheet, Text } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -18,10 +15,6 @@ import { TYPOGRAPHY } from '../../constants/typography';
 
 type TermsNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Terms'>;
 
-/**
- * 약관 목록: 서비스 이용 약관/개인정보 처리방침/자동 기록 서비스 이용 약관 3종
- * (가입 시 3종 동의와 다르게 마케팅 대신 자동 기록 약관이 들어간다).
- */
 function TermsScreen() {
   const navigation = useNavigation<TermsNavigationProp>();
 

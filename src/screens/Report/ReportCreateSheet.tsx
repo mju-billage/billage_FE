@@ -1,4 +1,3 @@
-/** @screen ETC-3-SHEET-05-0 보고서 생성하기 */
 import { Image, Pressable, StyleSheet, Text } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import {
@@ -19,7 +18,6 @@ type ReportCreateSheetProps = {
   onPressByPeriod: () => void;
 };
 
-/** "보고서 생성" +버튼을 누르면 뜨는 바텀시트: 장부별/기간별 생성 선택. */
 function ReportCreateSheet({
   visible,
   onClose,

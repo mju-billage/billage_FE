@@ -13,7 +13,6 @@ type CardBaseProps = {
   children: React.ReactNode;
 };
 
-/** 카드 계열 컴포넌트가 공유하는 배경/모서리/여백 베이스. */
 function CardBase({ variant = 'filled', onPress, style, children }: CardBaseProps) {
   const cardStyle = [styles.base, styles[variant], style];
 

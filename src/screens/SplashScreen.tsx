@@ -1,7 +1,6 @@
 import { Image, View, StyleSheet } from 'react-native';
 import { BASIC_0 } from '../constants/colors';
 
-/** 스플래시 화면: 앱 초기 로딩 동안 로고만 보여준다. */
 function SplashScreen() {
   return (
     <View style={styles.container}>

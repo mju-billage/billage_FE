@@ -15,32 +15,25 @@ type TooltipProps = {
 const TAIL_LENGTH = 16;
 const TAIL_DEPTH = 6;
 
-/** position별 꼬리 방향 SVG path. 몸체 사각형과 매끄럽게 이어지도록 밑변이 둥글게 말려 들어간다.
- * viewBox가 실제 렌더 크기와 정확히 일치해야 한다 (다르면 aspect-ratio 보정 때문에 몸체와 틈이 생김). */
 const TAIL_PATH: Record<TooltipPosition, { viewBox: string; d: string }> = {
-  // 말풍선이 앵커 위에 뜸 → 꼬리는 아래쪽을 향함
   top: {
     viewBox: '0 0 16 6',
     d: 'M16,0 Q13,0 11.1,2.3 L9.9,3.7 Q8,6 6.1,3.7 L4.9,2.3 Q3,0 0,0 Z',
   },
-  // 말풍선이 앵커 아래에 뜸 → 꼬리는 위쪽을 향함
   bottom: {
     viewBox: '0 0 16 6',
     d: 'M16,6 Q13,6 11.1,3.7 L9.9,2.3 Q8,0 6.1,2.3 L4.9,3.7 Q3,6 0,6 Z',
   },
-  // 말풍선이 앵커 왼쪽에 뜸 → 꼬리는 오른쪽을 향함
   left: {
     viewBox: '0 0 6 16',
     d: 'M0,16 Q0,13 2.3,11.1 L3.7,9.9 Q6,8 3.7,6.1 L2.3,4.9 Q0,3 0,0 Z',
   },
-  // 말풍선이 앵커 오른쪽에 뜸 → 꼬리는 왼쪽을 향함
   right: {
     viewBox: '0 0 6 16',
     d: 'M6,16 Q6,13 3.7,11.1 L2.3,9.9 Q0,8 2.3,6.1 L3.7,4.9 Q6,3 6,0 Z',
   },
 };
 
-/** 앵커 대비 상/하/좌/우 위치에 뜨는 말풍선 툴팁. */
 function Tooltip({
   content,
   position = 'top',

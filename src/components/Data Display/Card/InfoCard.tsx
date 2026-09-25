@@ -25,7 +25,6 @@ type InfoCardProps = {
   memoPlaceholder?: string;
 };
 
-/** 필드 목록 + 태그 + 메모를 보여주는 점선 정보 카드. */
 function InfoCard({
   fields,
   tags,
@@ -96,15 +95,12 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
-  // 필수 별표는 파랑 — `TextField`·`SelectionListItem`과 같은 `FOREGROUND_SECONDARY`.
   required: {
     color: FOREGROUND_SECONDARY,
   },
   fieldValue: {
     ...TYPOGRAPHY.subtitle3,
   },
-  // subtitle3(SemiBold)는 별도 fontFamily라 fontWeight 오버레이가 안 먹혀서
-  // 빈 값 상태는 스타일 객체 자체를 Regular 계열로 통째로 바꾼다.
   fieldValueEmpty: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_DISABLED,
@@ -127,7 +123,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  // 12px+Bold 조합은 정식 스타일에 없어 body3+bold를 예외로 채택.
   addTagText: {
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_SECONDARY,

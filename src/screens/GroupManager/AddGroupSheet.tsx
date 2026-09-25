@@ -1,4 +1,3 @@
-/** @screen ETC-3-SHEET-01-0 모임 추가 */
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Menu from '../../components/Navigation/Menu/Menu';
 import {
@@ -17,7 +16,6 @@ type AddGroupSheetProps = {
   onSelect: (key: AddGroupSheetKey) => void;
 };
 
-/** "새로운 모임 추가" 시트: 모임 생성/코드 참여 중 하나를 고른다. */
 function AddGroupSheet({ visible, onClose, onSelect }: AddGroupSheetProps) {
   return (
     <BottomSheet visible={visible} onClose={onClose}>

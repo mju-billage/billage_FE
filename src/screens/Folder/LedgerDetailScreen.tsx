@@ -1,13 +1,3 @@
-/** @screen FDR-2-PAGE-05-0 장부 상세 */
-/** @screen FDR-3-MODAL-03-0 장부 이름 변경 (activeDialog='rename') */
-/** @screen FDR-3-MODAL-04-0 장부 삭제 (activeDialog='delete') */
-/** @screen FDR-4-SNACKBAR-02-0 장부 삭제_완료 (SNACKBAR_LEDGER_DELETED_SUFFIX) */
-/**
- * 내역 목록은 실 서버에서 불러온다. 페이지네이션은 무한
- * 스크롤(FlatList onEndReached) — 어떤 화면도 "더보기" 버튼
- * 패턴을 쓰지 않고 디자인 시안에도 그런 버튼이 없어서, 기존 FlatList 관례를
- * 그대로 잇는다.
- */
 import { useCallback, useRef, useState } from 'react';
 import {
   Image,
@@ -108,7 +98,6 @@ type LoadState = 'loading' | 'error' | 'ready';
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
 
-/** 장부 상세: 수입/지출·예산 카드 캐러셀 + 거래 내역 목록 (검색/메뉴). */
 function LedgerDetailScreen() {
   const navigation = useNavigation<LedgerDetailNavigationProp>();
   const route = useRoute<LedgerDetailRouteProp>();
@@ -131,8 +120,6 @@ function LedgerDetailScreen() {
   const [dialogError, setDialogError] = useState<string | undefined>();
   const [isSubmittingDialog, setIsSubmittingDialog] = useState(false);
   const [snackbar, setSnackbar] = useState<string | null>(null);
-  // 필터 값은 서버 조회 조건이다(`toEntryFilterQuery`). 화면이 포커스될 때마다 도는 `load()`가
-  // 필터가 바뀔 때는 다시 돌면 안 돼서(전체 로딩 화면으로 돌아감) 최신 값을 ref로도 들고 있는다.
   const [filter, setFilter] = useState<LedgerFilterValue>(DEFAULT_LEDGER_FILTER);
   const filterRef = useRef<LedgerFilterValue>(DEFAULT_LEDGER_FILTER);
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
@@ -188,7 +175,6 @@ function LedgerDetailScreen() {
       setEntryPage(nextPage.page);
       setHasMoreEntries(!nextPage.last);
     } catch {
-      // 다음 페이지 실패는 조용히 무시한다 — 목록 끝에서 다시 스크롤하면 재시도된다.
     } finally {
       setIsLoadingMore(false);
     }
@@ -205,7 +191,6 @@ function LedgerDetailScreen() {
     setTimeout(() => setSnackbar(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
-  /** 필터 적용: 카드·앱바는 그대로 두고 내역 목록만 새 조건으로 첫 페이지부터 다시 받는다. */
   const handleApplyFilter = async (next: LedgerFilterValue) => {
     const previous = filterRef.current;
     filterRef.current = next;
@@ -220,7 +205,6 @@ function LedgerDetailScreen() {
       setEntryPage(firstPage.page);
       setHasMoreEntries(!firstPage.last);
     } catch (error) {
-      // 조회에 실패하면 목록은 그대로이므로 필터 값도 이전으로 되돌린다.
       filterRef.current = previous;
       setFilter(previous);
       showSnackbar(toErrorMessage(error));
@@ -312,16 +296,11 @@ function LedgerDetailScreen() {
 
   const dialogConfig = getDialogConfig(activeDialog);
 
-  // 시안: 날짜 그룹 헤더(`4월 16일 목요일`) 아래에 그날 내역 행들. 서버가 발생일 순으로 내려주므로
-  // 받은 순서 그대로 같은 날짜끼리 묶는다.
   const sections = groupEntriesByDate(entries).map(group => ({
     title: formatDateHeader(group.date),
     data: group.items,
   }));
 
-  // 캐러셀: 각 슬라이드를 화면 폭 그대로(windowWidth) 채우고
-  // 카드 여백은 슬라이드 안쪽 padding으로 줘서, pagingEnabled 기본 동작(뷰포트
-  // 폭 단위 스냅)만으로 항상 정확히 맞는다 — snapToInterval은 필요 없다.
   const handleScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const index = Math.round(e.nativeEvent.contentOffset.x / windowWidth);
     setCardIndex(index);
@@ -350,7 +329,6 @@ function LedgerDetailScreen() {
   return (
     <ScreenContainer
       background="primary"
-      // 하단 안전영역은 흰 목록 영역이 직접 채운다(안 그러면 그 자리에 파란 띠가 남는다).
       edges={['top']}
       snackbar={snackbar ? <Snackbar visible title={snackbar} /> : undefined}
     >
@@ -360,8 +338,6 @@ function LedgerDetailScreen() {
         rightIcons={[{ icon: MENU_ICON, onPress: () => setMoreMenuVisible(true) }]}
       />
 
-      {/* 시안 [상태] Scroll-away: 카드·인디케이터·필터/검색 줄·개수가 리스트 헤더라 리스트를 올리면 같이
-          화면 위로 사라진다. 앱바는 리스트 밖이라 최상단에 고정. */}
       <SectionList
         sections={sections}
         keyExtractor={item => item.id}
@@ -371,7 +347,6 @@ function LedgerDetailScreen() {
         onEndReached={loadMoreEntries}
         ListHeaderComponent={
           <>
-            {/* 카드 캐러셀 + 인디케이터: 파란 블록(아래 여백 16이 흰 영역과의 파란 간격) */}
             <View style={styles.cardBlock}>
               <ScrollView
                 horizontal
@@ -405,7 +380,6 @@ function LedgerDetailScreen() {
               </View>
             </View>
 
-            {/* 필터/검색 줄·개수: 흰 영역 시작(가로 전체, 좌우 24는 안쪽 패딩) */}
             <View style={styles.listHeader}>
               <View style={styles.toolRow}>
                 <Pressable
@@ -504,7 +478,6 @@ function LedgerDetailScreen() {
   );
 }
 
-/** 숫자만 남기고 999,999,999(Ledger.txt 예산 상한)를 넘지 않게 자른다. */
 function clampBudgetInput(text: string): string {
   const digitsOnly = text.replace(/[^0-9]/g, '');
   if (!digitsOnly) {
@@ -552,14 +525,10 @@ function getDialogConfig(activeDialog: ActiveDialog) {
 }
 
 const styles = StyleSheet.create({
-  // 리스트 콘텐츠의 좌우 패딩 24 안에 있으므로 캐러셀만 화면 폭 전체로 되돌린다(슬라이드가
-  // 화면 폭이라 페이지 스냅이 그대로 맞는다).
   carousel: {
     flexGrow: 0,
     marginTop: 16,
   },
-  // 슬라이드 하나 = 화면 폭 전체(JSX에서 width: windowWidth로 덮어씀) — 카드
-  // 여백은 스크롤뷰가 아니라 이 안쪽 padding으로 준다.
   cardSlide: {
     paddingHorizontal: 20,
   },
@@ -568,7 +537,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 16,
   },
-  // 시안: 카드 아래 한 줄 — 좌측 필터, 우측 검색.
   toolRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -584,8 +552,6 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
     marginBottom: 8,
   },
-  // 목록 콘텐츠 전체가 흰 배경(가로 전체). 좌우 24는 각 조각(listHeader·sectionHeader·itemWrapper)이 안쪽 패딩으로 가진다.
-  // flexGrow: 내역이 적어도 화면 아래까지 흰색이 이어지게.
   listContent: {
     flexGrow: 1,
     backgroundColor: BACKGROUND_SECONDARY,
@@ -600,7 +566,6 @@ const styles = StyleSheet.create({
   itemWrapper: {
     paddingHorizontal: 20,
   },
-  // 12px+Bold 조합은 정식 스타일에 없어 body3+bold를 예외로 채택(내역 메인과 같은 헤더).
   sectionHeader: {
     ...TYPOGRAPHY.body3,
     fontWeight: 'bold',

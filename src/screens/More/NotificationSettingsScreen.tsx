@@ -1,15 +1,3 @@
-/** @screen ETC-3-PAGE-08-0 알림 설정 */
-/**
- * 명세(Notification & Support.txt A-3)는 토글 6종을 모임과 무관한 "사용자 단위"
- * 설정이라고 하지만, 시안은 "일반/총무" 2종으로 화면을 나눈다(승인 요청·납부 관리
- * 토글은 총무 화면에만 있음). 두 화면 모두 같은 API·같은 데이터라 새 라우트가
- * 아니라 이 화면 하나의 권한 분기로 구현했다.
- *
- * 이 앱은 모임마다 권한(`OWNER`/`MEMBER`)이 다를 수 있어 "지금 총무인지"를 전역
- * 하나로 정하기 애매하다 — 다른 화면들(`MemberManageScreen` 등)이 쓰는
- * `getActiveGroup()?.myRole`(지금 보고 있는 모임 기준)을 그대로 재사용했다.
- * 활성 모임이 아직 없으면(캐시 미충전) 안전한 쪽인 "일반"으로 보여준다.
- */
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -65,7 +53,6 @@ type ToggleRow = {
   key: keyof NotificationSettings;
   label: string;
   description: string;
-  /** 총무 전용 토글(승인 요청/납부 관리) — 일반 회원 화면에서는 숨긴다. */
   ownerOnly?: boolean;
 };
 
@@ -104,7 +91,6 @@ const TOGGLE_ROWS: ToggleRow[] = [
   },
 ];
 
-/** 알림 설정: 토글 6종(승인 요청/납부 관리는 총무만), 누르는 즉시 저장. */
 function NotificationSettingsScreen() {
   const navigation = useNavigation<NotificationSettingsNavigationProp>();
   const [settings, setSettings] = useState<NotificationSettings | null>(null);

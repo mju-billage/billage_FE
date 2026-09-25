@@ -1,18 +1,3 @@
-/** @screen ETC-4-PAGE-05-0 보고서_장부 상세 조회 */
-/** @screen ETC-4-PAGE-05-1 보고서_장부 상세(수입/지출) — 05-0의 탭 상태, 별도 라우트 아님(ReportEntryList.tsx 탭) */
-/**
- * 장부별 보고서 상세(ETC-3-PAGE-02-0)의 장부 카드, 기간별 보고서 상세
- * (ETC-3-PAGE-03-0)의 장부 리스트 행 — 양쪽 모두 이 화면으로 뎁스인한다
- * (같은 Screen ID, 시안 UI 요소 6개가 번호·설명까지 동일). 단건 조회 API가
- * 없어(`GET /reports/{reportId}`가 이미 전체를 스냅샷으로 내려줌) 부모
- * 화면이 이미 들고 있던 데이터를 route params로 그대로 받는다 — 재조회
- * 없음.
- *
- * 탭·건수·일자별 리스트는 `ReportEntryList`(장부별·기간별 공용 조각)로 뺐다.
- *
- * ⚠️ 리스트 행의 영수증 아이콘이 빠져 있다(스냅샷에 `receiptCount` 없음). 자세한
- * 사유는 `ReportEntryList.tsx` 파일 상단 주석 참고.
- */
 import { StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -38,7 +23,6 @@ function ReportLedgerEntriesScreen() {
   return (
     <ScreenContainer
       background="primary"
-      // 하단 안전영역은 흰 목록 영역이 직접 채운다(안 그러면 그 자리에 파란 띠가 남는다).
       edges={['top']}
     >
       <AppBar type="sub" title={ledgerName} onBackPress={() => navigation.goBack()} />
@@ -63,7 +47,6 @@ function ReportLedgerEntriesScreen() {
 }
 
 const styles = StyleSheet.create({
-  // 기간 줄 + 요약 카드(파란 영역). 아래 16은 흰 목록 영역과의 파란 간격.
   header: {
     paddingHorizontal: 20,
     paddingTop: 12,

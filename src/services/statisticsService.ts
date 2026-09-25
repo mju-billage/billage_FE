@@ -1,4 +1,3 @@
-/** 명세 `Statistics (통계분석).txt` 1절 기준 작성. */
 import { request } from './apiClient';
 import type { StatisticsOverview } from '../types/statistics';
 
@@ -30,7 +29,6 @@ type StatisticsResponse = {
   };
 };
 
-/** 모임 통계/분석 통합 조회. 폴더 메인/더보기 두 진입점이 같은 데이터를 쓰므로 API 하나로 공유한다. */
 export async function getStatistics(groupId: string): Promise<StatisticsOverview> {
   const response = await request<StatisticsResponse>(
     `/api/v1/groups/${groupId}/statistics`,

@@ -18,7 +18,6 @@ type SegmentedControlProps<T extends string> = {
   onChange: (value: T) => void;
 };
 
-/** 여러 옵션 중 하나만 고르는 가로 세그먼트 컨트롤. */
 function SegmentedControl<T extends string>({
   options,
   value,

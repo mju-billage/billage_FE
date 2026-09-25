@@ -1,25 +1,3 @@
-/** @screen ETC-3-PAGE-07-0 내 프로필 */
-/** @screen ETC-4-MODAL-04-0 로그아웃 (logoutDialogVisible) */
-/** @screen ETC-5-SNACKBAR-06-0 프로필 변경 완료 (route.params.snackbarMessage로 전달받아 렌더링 — ProfileEditScreen.tsx 참고) */
-/** @screen ETC-5-SNACKBAR-07-0 비밀번호 변경 완료 (route.params.snackbarMessage로 전달받아 렌더링 — PasswordChangeScreen.tsx 참고) */
-/**
- * "내 프로필": 계정 카드(읽기 전용) + 프로필 변경/비밀번호 변경 진입 +
- * 로그인 계정 정보 + 로그아웃/회원탈퇴.
- *
- * `loginProvider`가 `EMAIL`이 아니면(카카오/네이버/구글) "비밀번호 변경"
- * 메뉴 자체를 숨긴다 — 소셜 계정엔 앱 비밀번호가 없어서다(User.txt 정책
- * 메모, `PATCH /auth/password`도 서버가 `PASSWORD_CHANGE_NOT_ALLOWED`로
- * 같은 걸 막는다).
- *
- * ⚠️ 시안(글로벌설정_내프로필.png) UI 요소 4번은 "전화번호"도 계정 정보
- * 카드에 보여주지만, `GET /auth/me` 응답엔 전화번호 필드가 아예 없다
- * (User.txt 1번 성공 응답 스키마 확인) — 표시할 데이터가 없어 그 행은
- * 만들지 않았다.
- *
- * "회원탈퇴"는 시안상 별도 "회원탈퇴 뎁스"(COM 도메인, `WithdrawGuideScreen`부터
- * 시작)로 이동한다 — 서버 API(`DELETE /auth/me`)는 아직 `미구현`이라 그 플로우
- * 끝(최종 확인 모달)에서 호출하면 에러 상태가 뜨는 게 정상이다.
- */
 import { useCallback, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -112,7 +90,6 @@ function SocialBadge({ provider }: { provider: string }) {
   );
 }
 
-/** "내 프로필": 프로필 변경/비밀번호 변경 진입 + 로그인 계정 정보 + 로그아웃/회원탈퇴. */
 function MyProfileScreen() {
   const navigation = useNavigation<MyProfileNavigationProp>();
   const route = useRoute<MyProfileRouteProp>();

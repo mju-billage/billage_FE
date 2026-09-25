@@ -10,7 +10,6 @@ type CalendarViewToggleProps = {
   onPressDaily: () => void;
 };
 
-/** "캘린더"/"일별" 보기 전환 세그먼트. "일별"은 아직 목적지가 없어 탭해도 동작하지 않는다. */
 function CalendarViewToggle({ onPressDaily }: CalendarViewToggleProps) {
   const handleChange = (value: CalendarViewMode) => {
     if (value === 'daily') {

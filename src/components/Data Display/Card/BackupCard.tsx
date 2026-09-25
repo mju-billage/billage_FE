@@ -16,7 +16,6 @@ type BackupCardProps = {
   onViewRecords: () => void;
 };
 
-/** 폴더 백업 카드: 제목 수정/삭제, 백업 정보, 기록보기 버튼으로 구성된다. */
 function BackupCard({
   title,
   dateTimeLabel,

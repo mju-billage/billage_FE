@@ -25,25 +25,17 @@ export type AppBarRightIcon = {
 };
 
 type AppBarProps = {
-  /** titleOnly=뒤로가기 없음/드롭다운 가능, sub=뒤로가기+굵은 타이틀(실사용 기본형),
-   * detailDownload=뒤로가기+2줄 타이틀+다운로드, imageSelect=뒤로가기+중앙 타이틀+선택 개수. */
   type?: AppBarType;
   title: string;
-  /** detailDownload 전용 2번째 줄 (예: YY.MM.DD). */
   subtitle?: string;
   onBackPress?: () => void;
   showDropdown?: boolean;
   onPressDropdown?: () => void;
-  /** titleOnly/sub=벨+닫기 등 최대 2개, detailDownload=다운로드 1개, imageSelect는 사용 안 함. */
   rightIcons?: AppBarRightIcon[];
-  /** imageSelect 전용 우측 텍스트("N 선택")의 N. */
   selectedCount?: number;
-  /** imageSelect 전용. false면 우측 "선택"/"N 선택" 텍스트를 아예 숨긴다(단일
-   * 선택이라 확인 버튼이 따로 없는 화면용, 예: 모임 프로필 이미지 선택). */
   showSelectionCount?: boolean;
 };
 
-/** 상단 앱바. type에 따라 titleOnly/sub/detailDownload/imageSelect 4가지 레이아웃을 지원한다. */
 function AppBar({
   type = 'sub',
   title,
@@ -139,8 +131,6 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
   },
-  // 폭이 모자랄 때 제목이 `…`로 잘리려면 이 행과 Text가 줄어들 수 있어야 한다(RN은
-  // flexShrink 기본 0이라 안 주면 numberOfLines만으로는 우측 아이콘 쪽으로 넘친다).
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',

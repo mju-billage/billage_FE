@@ -1,24 +1,3 @@
-/** @screen ETC-2-PAGE-04-0 보고서 생성 메인화면 */
-/**
- * 더보기 메인의 "보고서 생성" 메뉴에서 들어오는 화면(Report.txt, MEMBER 권한 —
- * 총무가 만든 보고서를 일반 관리자도 조회 가능). "+" 버튼이 여는
- * `ReportCreateSheet`(ETC-3-SHEET-05-0)에서 장부별/기간별 생성 폼으로
- * 갈라진다.
- *
- * 목록은 무한 스크롤이다(`TransactionsScreen`과 같은 `onEndReached` 패턴) —
- * Dues 목록(`size=50` 단일 조회)과 다른 선택인 이유는 성격 차이 때문:
- * 회비는 마감되며 정리되지만 보고서는 **삭제 API 자체가 없어 계속
- * 누적된다**(`reportService.ts` 주석). `size=50`에 안주하면 51번째 보고서부터
- * 조용히 안 보이는, 데이터 유실처럼 보이는 버그가 된다.
- *
- * 카드 탭: `reportType`에 따라 `ReportByLedgerDetail`
- * (ETC-3-PAGE-02-0)/`ReportByPeriodDetail`(ETC-3-PAGE-03-0)로 분기한다.
- *
- * 생성 성공 시엔 명세("상세 조회로 이동", ETC-4-PAGE-03-0 No.5)대로 상세로 직접
- * 이동한다(스낵바도 상세 화면에서 뜬다) — 뒤로가기가 폼이 아니라 이 목록으로
- * 오게 하는 스택 정리도 함께 적용한다(`ReportCreateByLedgerScreen`/
- * `ReportCreateByPeriodScreen`).
- */
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -100,7 +79,6 @@ function ReportMainScreen() {
     try {
       let group = getActiveGroup();
       if (!group) {
-        // [치명1] 로그인 직후 첫 포커스처럼 모임 캐시가 아직 없는 순간 대비.
         await groupService.getMyGroups();
         group = getActiveGroup();
       }
@@ -141,7 +119,6 @@ function ReportMainScreen() {
       setPage(nextPage.page);
       setHasMore(!nextPage.last);
     } catch {
-      // 다음 페이지 실패는 조용히 무시한다 — 다시 스크롤하면 재시도된다.
     } finally {
       setIsLoadingMore(false);
     }

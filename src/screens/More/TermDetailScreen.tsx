@@ -1,11 +1,3 @@
-/** @screen ETC-4-PAGE-XX-0 약관 상세 (서비스 이용 약관 / 개인정보 처리방침 / 자동 기록 서비스 이용 약관 공용) */
-/**
- * 가입 플로우의 `TermsOfServiceScreen`/`PrivacyPolicyScreen`은 로컬 상수
- * 전문(`constants/terms.ts`)을 그대로 보여주지만, 이 화면(설정 > 약관)은
- * 명세상 서버에서 전문을 받아온다(`GET /api/v1/terms/{termType}`, 서버
- * 미구현) — 그래서 `LegalDocumentView`를 그대로 재사용하되 로딩/에러를 감싸는
- * 얇은 래퍼로 새로 만들었다.
- */
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -35,7 +27,6 @@ type TermDetailNavigationProp = NativeStackNavigationProp<RootStackParamList, 'T
 type TermDetailRouteProp = RouteProp<RootStackParamList, 'TermDetail'>;
 type LoadState = 'loading' | 'error' | 'ready';
 
-/** 약관 전문 상세: 서버에서 받아온 본문을 `LegalDocumentView`로 보여준다. */
 function TermDetailScreen() {
   const navigation = useNavigation<TermDetailNavigationProp>();
   const route = useRoute<TermDetailRouteProp>();

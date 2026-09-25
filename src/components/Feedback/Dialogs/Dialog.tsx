@@ -25,23 +25,17 @@ type DialogProps = {
   textFieldPlaceholder?: string;
   textFieldKeyboardType?: KeyboardTypeOptions;
   textFieldMaxLength?: number;
-  /** 서버 fieldErrors 등 인라인 필드 에러 — 있으면 입력 필드 아래에 그대로 보여준다. */
   textFieldError?: string;
-  /** true면 다이얼로그가 열리자마자 입력 필드에 자동 포커스(키보드 노출)한다. */
   autoFocusTextField?: boolean;
   cancelLabel?: string;
   confirmLabel?: string;
   onCancel?: () => void;
   onConfirm: () => void;
-  /** true면 취소 버튼 없이 confirm 버튼 하나만 보여준다(단순 안내 모달용). */
   singleButton?: boolean;
-  /** true면 confirm 버튼을 빨간색(파괴적 액션)으로 보여준다. */
   destructive?: boolean;
-  /** true면 confirm 버튼을 비활성화한다(요청 진행 중 중복 제출 방지 등). */
   confirmDisabled?: boolean;
 };
 
-/** 제목/설명/입력필드를 조합할 수 있는 확인 모달. */
 function Dialog({
   visible,
   title,
@@ -62,13 +56,6 @@ function Dialog({
   destructive = false,
   confirmDisabled = false,
 }: DialogProps) {
-  // 더보기_기록보관_보관제목변경.png: 키보드가 뜨면 다이얼로그가 화면 중앙이
-  // 아니라 키보드 상단에 붙어서 올라온다(중앙정렬 유지한 채 밀어올리는 게
-  // 아니다). 키보드가 뜬 동안만 컨테이너를
-  // 하단 정렬로 바꾸고, KeyboardStickyView가 카드를 정확히 키보드 높이만큼
-  // 밀어올려 키보드 상단에 딱 붙게 한다. 레이아웃이 바뀌는 시점(keyboard
-  // height가 막 0을 벗어나는/거의 0으로 돌아오는 순간)엔 translateY도 0에
-  // 가까워 전환이 튀지 않는다.
   const isKeyboardVisible = useKeyboardState(state => state.isVisible);
 
   return (
@@ -131,10 +118,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     paddingBottom: 0,
   },
-  // overlay가 alignItems:'center'라 자식(KeyboardStickyView)이 폭 지정 없으면
-  // 콘텐츠 크기로 쪼그라든다 — card의 width:'100%'는 "그 부모"(이 뷰) 기준으로
-  // 계산되므로, 이 뷰 자체를 overlay 폭 100%로 명시해야 card가 시안대로
-  // 화면 폭을 채운다.
   stickyWrapper: {
     width: '100%',
   },

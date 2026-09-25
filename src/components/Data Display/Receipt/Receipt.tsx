@@ -20,7 +20,6 @@ type ReceiptProps = {
   total: number;
 };
 
-/** 상품명/수량/금액 목록과 합계를 보여주는 영수증 카드. */
 function Receipt({ items, total }: ReceiptProps) {
   return (
     <View>

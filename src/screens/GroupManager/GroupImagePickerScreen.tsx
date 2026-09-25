@@ -1,11 +1,3 @@
-/** @screen ETC-4-PAGE-02-0 이미지 선택 (모임 프로필/내 프로필 단일 선택) */
-/**
- * 실제 사진은 이 화면이 아니라
- * 시스템 포토 피커(`utils/imagePicker.ts`의 `pickGalleryWithFeedback`,
- * `launchImageLibrary`, 단일 선택은 `limit=1`)가 보여준다 — 그래서 이 화면은
- * 그리드를 그리는 대신 마운트되자마자 피커를 띄우고 결과를 그대로 호출부에
- * 넘기는 다리 역할만 한다(`ReceiptGalleryPickerScreen`과 동일한 이유).
- */
 import { useEffect, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,7 +14,6 @@ type GroupImagePickerScreenProps = {
   onPermanentlyDenied: () => void;
 };
 
-/** 시스템 갤러리를 열어 사진 한 장을 선택한다(모임/내 프로필 이미지 공용). */
 function GroupImagePickerScreen({
   onPicked,
   onBack,

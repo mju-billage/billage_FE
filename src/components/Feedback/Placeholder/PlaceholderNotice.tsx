@@ -6,7 +6,6 @@ type PlaceholderNoticeProps = {
   title: string;
 };
 
-/** 아직 구현되지 않은 탭에 보여주는 공용 안내 화면. */
 function PlaceholderNotice({ title }: PlaceholderNoticeProps) {
   return (
     <View style={styles.container}>

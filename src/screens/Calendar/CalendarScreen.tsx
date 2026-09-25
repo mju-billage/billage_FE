@@ -1,11 +1,3 @@
-/** @screen DSH-2-PAGE-03-0 대시보드 캘린더 */
-/**
- * `GET /groups/{groupId}/calendar`(월간 집계)와
- * `entryService.getGroupEntries`(선택 일자 내역, `from=to=그 날짜`)로 연동한다.
- * 월간 집계 API는 날짜별 수입/지출 "합계"만 주고 개별 내역은
- * 안 줘서(Dashboard.txt 3번), 날짜를 선택할 때마다 그 날짜 하루 범위로 내역
- * 목록을 별도 호출한다.
- */
 import { useCallback, useState } from 'react';
 import {
   Image,
@@ -15,12 +7,10 @@ import {
   Text,
   View,
 } from 'react-native';
-import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
-import Divider from '../../components/Data Display/Divider/Divider';
 import Calendar from '../../components/Data Display/Calendar/Calendar';
 import Button from '../../components/Input/Button/Button';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
@@ -66,7 +56,6 @@ function toIsoDate(year: number, month: number, date: number): string {
   return `${year}-${String(month).padStart(2, '0')}-${String(date).padStart(2, '0')}`;
 }
 
-/** 캘린더 전체보기 화면. */
 function CalendarScreen() {
   const navigation = useNavigation<CalendarScreenNavigationProp>();
   const now = new Date();

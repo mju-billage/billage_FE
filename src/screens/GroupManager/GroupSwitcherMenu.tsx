@@ -13,7 +13,6 @@ type GroupSwitcherMenuProps = {
   onPressAllGroups: () => void;
 };
 
-/** 더보기 화면 상단 모임명 옆 "⌄"를 누르면 뜨는 모임 전환 팝오버. */
 function GroupSwitcherMenu({
   visible,
   onClose,

@@ -1,23 +1,3 @@
-/** @screen ETC-4-PAGE-04-0 기간별 보고서 생성 */
-/** @screen ETC-5-MODAL-01-0 보고서_이탈방지 (leaveDialogVisible) */
-/** @screen ETC-5-SNACKBAR-08-0 보고서_생성완료 (SNACKBAR_REPORT_CREATED, ReportMainScreen에서 렌더) */
-/**
- * "기간별 보고서 생성하기"에서 들어오는 생성 폼. 장부를 받지 않는다 — 지정한
- * 기간 안에 내역이 있는 모든 장부를 서버가 자동으로 담는다(Report.txt).
- *
- * 기간 선택 시트는 시안이 `DTB-3-SHEET-01-0`(재사용 대상)로 명시했고, 그
- * ID는 이미 `DuesCreateScreen`이 `DuesDateRangeSheet`로 구현해 둔 것과
- * 정확히 같다 — 그래서 새로 안 만들고 그대로 가져다 썼다.
- * `DuesDateRangeSheet`엔 원래 "취소" 버튼과 날짜 미리보기 텍스트가 없었는데,
- * 이 화면이 쓰는 시안과 내역 필터링 시안(같은 ID)이 둘 다 요구하고 있어
- * 그 컴포넌트 자체를 보강했다(Dues 호출부도 그대로 호환, 해당 파일 주석
- * 참고) — 그래서 지금은 시안과 시트 안쪽이 정확히 맞는다.
- *
- * 다만 이 화면 자체(시트 밖) 필드 표기는 시안 예시가 "YY.MM.DD ~ YY.MM.DD"
- * (2자리 연도)인데, 여기서는 `DuesCreateScreen`이 이미 쓰고 있는
- * "YYYY.MM.DD - YYYY.MM.DD"(4자리 연도) 표기를 그대로 따랐다 — 폼 필드
- * 자체는 4자리가 맞다고 확인됨(시트 안 미리보기만 2자리가 의도).
- */
 import { useCallback, useState } from 'react';
 import { BackHandler, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -73,13 +53,10 @@ const CALENDAR_ICON = require('../../assets/icons/system/Calendar.png');
 
 type ReportCreateByPeriodNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-/** 'YYYY.MM.DD' → 'YYYY-MM-DD'(Report API 형식, Dues와 동일 관례). */
 function toIsoDate(dotDate: string): string {
   return dotDate.replace(/\./g, '-');
 }
 
-/** 'YYYY.MM.DD' → 'YY.MM.DD'(시안 ETC-4-PAGE-04-0 No.3 표기, 2자리 연도) — 실제
- * API 전송용 `startDate`/`endDate` 상태값(4자리)은 그대로 두고 화면 표시에만 쓴다. */
 function toShortDate(dotDate: string): string {
   const [year, month, day] = dotDate.split('.');
   return `${year.slice(2)}.${month}.${day}`;
@@ -119,9 +96,6 @@ function ReportCreateByPeriodScreen() {
     }
   };
 
-  // 안드로이드 하드웨어 back도 AppBar 백버튼과 같은 이탈 확인을 거치게 한다
-  // — 등록을 안 하면 시스템 back은 `handleBack`을 거치지 않고 화면을 그냥
-  // 나가버린다.
   useFocusEffect(
     useCallback(() => {
       const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -155,9 +129,6 @@ function ReportCreateByPeriodScreen() {
         endDate: toIsoDate(endDate),
         entryType,
       });
-      // ETC-4-PAGE-04-0: 성공 시 생성 완료된 보고서 상세로 이동한다(ReportCreateByLedgerScreen과
-      // 같은 근거). navigate가 아니라 reset으로 생성 폼을
-      // 스택에서 걷어내 뒤로가기가 폼이 아니라 보고서 목록으로 가게 한다.
       navigation.reset({
         index: 2,
         routes: [

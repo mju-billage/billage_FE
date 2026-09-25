@@ -1,13 +1,3 @@
-/** @screen ETC-3-PAGE-03-0 기간별 보고서 조회 */
-/** @screen ETC-3-PAGE-03-1 기간별 보고서 상세(수입/지출) — 03-0의 탭 상태, 별도 라우트 아님 */
-/**
- * `ReportByLedgerDetailScreen`과 자매 화면(같은 이유로 상세 재조회) — 다른
- * 점은 헤더 카드 자체가 "이 기간 전체" 요약이고 눌러서 통합 시간순
- * (`ReportPeriodEntriesScreen`, ETC-4-PAGE-07-0)으로 가는 진입점을 겸한다는
- * 것. 리스트의 개별 장부 행은 금액 없이 이름만 보여주고(시안 No.4 데이터),
- * 눌렀을 때 그 장부 하나만 필터링된 `ReportLedgerEntriesScreen`(05-0,
- * `ReportByLedgerDetailScreen`과 공유)으로 간다.
- */
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Image, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -67,8 +57,6 @@ function ReportByPeriodDetailScreen() {
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
-  // ETC-5-SNACKBAR-08-0: 생성 직후 이 화면으로 이동하며 받은 완료 메시지를
-  // 한 번만 띄운다.
   useEffect(() => {
     if (route.params.snackbarMessage) {
       setSnackbarMessage(route.params.snackbarMessage);
@@ -251,7 +239,6 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
-  // 폴더 탭(`FolderTabShape`)이 카드 위로 20 튀어나와서 위 여백을 그만큼 더 둔다.
   headerCard: {
     marginTop: 24,
     gap: 4,

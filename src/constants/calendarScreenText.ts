@@ -1,4 +1,3 @@
-/** CalendarScreen 전용 문구. */
 export const CALENDAR_SCREEN_TITLE = '';
 export const CALENDAR_VIEW_TOGGLE_CALENDAR_LABEL = '캘린더';
 export const CALENDAR_VIEW_TOGGLE_DAILY_LABEL = '일별';

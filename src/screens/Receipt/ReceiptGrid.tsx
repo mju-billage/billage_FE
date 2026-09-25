@@ -1,13 +1,3 @@
-/**
- * 앨범 메인(ETC-2-PAGE-05-0)·앨범 내 검색(ETC-3-PAGE-05-0) 둘 다 쓰는 3열 그리드.
- * 두 화면이 필터/검색창만 다르고 "그리드+무한스크롤+빈 상태" 로직이 완전히
- * 같아 이 조각만 분리했다.
- *
- * 썸네일에 원본 이미지를 그대로 쓴다 — 이 API엔 별도 축소본 URL이 없다
- * (`types/receipt.ts` 주석, File.txt "이미지 압축은 하지 않습니다"). 장수가
- * 많은 모임은 그리드 전체가 원본 수십 장을 내려받는 셈이라 느려질 수 있다 —
- * 알려진 제약이다.
- */
 import { useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Thumbnail from '../../components/Data Display/Image Placeholder/Thumbnail';
@@ -16,9 +6,6 @@ import { buildAuthenticatedImageSource } from '../../utils/authenticatedImage';
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-// 폴더 그리드(`FolderItem`의 FOLDER_GRID_*)는 gap 16이고 앨범은 별도 값이라
-// 이 파일의 gap 8/패딩은 폴더와 묶지 않는다. 앨범 시안(`더보기_증빙자료앨범.png`)
-// 목업은 좌우 여백 약 20dp/타일 간격 약 7~8dp로 보이나 축소 이미지라 실측이 필요하다.
 const GRID_COLUMNS = 3;
 const GRID_GAP = 8;
 const HORIZONTAL_PADDING = 20;

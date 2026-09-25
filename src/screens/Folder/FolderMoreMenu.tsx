@@ -5,18 +5,12 @@ import { BORDER_NEUTRAL_NORMAL, FILL_NEUTRAL_SUBTLE, OVERLAY_MENU_BACKDROP } fro
 type FolderMoreMenuProps = {
   visible: boolean;
   onClose: () => void;
-  /** 구분선 없는 단일 그룹 메뉴. `sections`를 주면 이쪽은 무시된다. */
   items?: MenuItem[];
-  /** 그룹 단위 배열 — 그룹 사이에 구분선이 들어간다(폴더 메인 헤더 메뉴처럼
-   * 여러 그룹으로 나뉘는 경우, FDR-1-PAGE-01-0). */
   sections?: MenuItem[][];
   onSelect: (key: string) => void;
-  /** true면 항목 아이콘을 보여준다(기본 false — 기존 호출부는 아이콘 없는
-   * 텍스트 전용 메뉴였다). */
   showIcon?: boolean;
 };
 
-/** 폴더 화면 우상단 ⋮ 버튼을 누르면 뜨는 팝오버 메뉴. */
 function FolderMoreMenu({
   visible,
   onClose,

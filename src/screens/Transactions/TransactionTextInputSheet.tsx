@@ -1,5 +1,3 @@
-/** @screen ADD-2-SHEET-01-0 내역명 입력 */
-/** @screen ADD-2-SHEET-04-0 메모 입력 */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
@@ -21,7 +19,6 @@ type TransactionTextInputSheetProps = {
   onSave: (value: string) => void;
 };
 
-/** 내역명/메모 등 한 줄 텍스트 입력용 공용 바텀시트. placeholder 자체가 글자수 제한 안내문이다. */
 function TransactionTextInputSheet({
   visible,
   title,

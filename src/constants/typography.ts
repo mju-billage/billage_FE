@@ -1,8 +1,3 @@
-// Typography Style.pdf / Primitive Typography.pdf 기준 타이포그래피 시맨틱 스타일.
-// PyeojinGothic-Regular/-Bold는 TTF name table상 같은 Family("Pyeojin Gothic")로 묶여
-// fontWeight:'bold'로 굵기를 고를 수 있지만, Medium/Semi-bold/Light는 각자 독립된
-// Family라서 fontWeight로 못 고르고 fontFamily 자체를 바꿔야 한다.
-// letterSpacing 값 출처: Typography Style.pdf (2-1 Typography Style).
 const FONT_FAMILY = {
   light: 'Pyeojin Gothic Light',
   regular: 'Pyeojin Gothic',

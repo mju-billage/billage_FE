@@ -10,7 +10,6 @@ import type {
 
 type EntryListItemResponse = {
   entryId: number;
-  /** 모임 전체 목록(§7)에만 있다 — 장부별 목록(§1)은 이미 한 장부로 스코프돼 없다. */
   ledgerId?: number;
   ledgerName?: string;
   type: EntryType;
@@ -21,7 +20,6 @@ type EntryListItemResponse = {
   createdByUserId: number;
   createdByName: string;
   receiptCount: number;
-  /** 모임 전체 목록(§7)에만 있다. */
   duesId?: number | null;
 };
 
@@ -151,7 +149,6 @@ export type EntryListParams = {
   keyword?: string;
   page?: number;
   size?: number;
-  /** 예: 'occurredOn,desc'. 기본 정렬은 서버 기본값(occurredOn,desc + id,desc)을 쓴다. */
   sort?: string;
 };
 
@@ -159,15 +156,10 @@ export type EntryListPage = {
   items: EntrySummary[];
   page: number;
   totalPages: number;
-  /** 필터·검색 조건이 반영된 전체 건수(페이지와 무관). */
   totalElements: number;
   last: boolean;
 };
 
-/**
- * 장부의 내역 목록을 조회한다(페이지네이션). 화면이 페이지 배열을 직접 들고
- * 있다가 다음 페이지를 이어 붙인다 — 서비스는 캐시하지 않는다(types/entry.ts 참고).
- */
 export async function getEntries(
   ledgerId: string,
   params: EntryListParams = {},
@@ -202,15 +194,11 @@ export async function getEntries(
 }
 
 export type GroupEntryListParams = {
-  /** 다중 선택, 비우면 모임의 모든 장부. */
   ledgerIds?: string[];
   type?: EntryType;
-  /** 「승인 요청」 탭은 `'PENDING'`. */
   status?: EntryApprovalStatus;
-  /** 발생일 기간 'YYYY-MM-DD'. 1/3/6개월 프리셋은 호출자가 날짜로 환산해서 넣는다. */
   from?: string;
   to?: string;
-  /** 내역명 또는 장부명, 최대 20자. */
   keyword?: string;
   page?: number;
   size?: number;
@@ -225,12 +213,6 @@ export type GroupEntryPage = {
   last: boolean;
 };
 
-/**
- * 모임 전체 내역 목록을 조회한다(Entry.txt §7) — 장부 하나로 스코프된 `getEntries()`와
- * 달리 장부를 여러 개 가로질러 보고, 상단 잔액 카드가 쓸 `summary`도 같은 응답에
- * 묶여 온다. 필터가 바뀔 때마다 잔액 카드·목록 건수·리스트를 각각 따로 부르지
- * 말 것 — 이 호출 하나로 셋 다 나온다(명세가 명시적으로 경고하는 지점).
- */
 export async function getGroupEntries(
   groupId: string,
   params: GroupEntryListParams = {},
@@ -273,7 +255,6 @@ export async function getGroupEntries(
   };
 }
 
-/** 내역 상세를 조회한다. */
 export async function getEntryDetail(entryId: string): Promise<EntryDetail> {
   const response = await request<EntryDetailResponse>(`/api/v1/entries/${entryId}`, {
     method: 'GET',
@@ -285,12 +266,9 @@ export type CreateEntryInput = {
   type: EntryType;
   title: string;
   amount: number;
-  /** 'YYYY-MM-DD'. */
   occurredOn: string;
   memo?: string;
-  /** 담당자(`GroupMembership.userId`). 안 보내면 서버가 등록자 본인으로 채운다. */
   managerUserId?: string;
-  /** 이미 업로드된(`fileService.uploadFile(..., 'RECEIPT')`) 파일의 fileId, 최대 10장. */
   receiptFileIds?: number[];
 };
 
@@ -299,12 +277,6 @@ export type CreatedEntry = {
   approvalStatus: EntryApprovalStatus;
 };
 
-/**
- * 내역을 등록한다. 승인 상태는 서버가 결정한다(요청에 넣는 필드가 아니다) —
- * 등록자가 총무(OWNER)면 즉시 APPROVED, 일반 관리자(MEMBER)면 PENDING으로
- * 생성된다(Entry.txt 정책 메모, "기획 글로벌 정책"). 화면은 반환된
- * `approvalStatus`로 안내 문구만 갈라 보여주면 된다 — 직접 정할 수 없다.
- */
 export async function createEntry(
   ledgerId: string,
   input: CreateEntryInput,
@@ -335,21 +307,12 @@ export async function createEntry(
 export type UpdateEntryInput = {
   title?: string;
   amount?: number;
-  /** 'YYYY-MM-DD'. */
   occurredOn?: string;
   memo?: string;
-  /** 담당자(`GroupMembership.userId`)를 바꾼다. 명단(Member)은 담당자가 될 수 없다(Entry.txt §4). */
   managerUserId?: string;
-  /**
-   * ⚠️ 전달하면 증빙 전체 교체다 — 목록에서 빠진 파일은 저장소에서도 삭제된다.
-   * 이 키 자체를 객체에 넣지 않아야 기존 증빙이 그대로 유지된다(Entry.txt "4. 내역
-   * 수정" 정책 메모). 호출자가 실제로 증빙을 바꿨을 때만 넣어라 — 습관적으로
-   * 항상 채워 보내면 안 건드린 증빙까지 조용히 삭제된다.
-   */
   receiptFileIds?: number[];
 };
 
-/** 내역을 수정한다(전달한 필드만 반영). 총무(OWNER) 전용. */
 export async function updateEntry(
   entryId: string,
   updates: UpdateEntryInput,
@@ -379,7 +342,6 @@ export async function updateEntry(
   });
 }
 
-/** 내역을 삭제한다(증빙 파일도 함께 삭제). 총무(OWNER) 전용. */
 export async function deleteEntry(entryId: string): Promise<void> {
   await request<void>(`/api/v1/entries/${entryId}`, { method: 'DELETE' });
 }
@@ -391,7 +353,6 @@ export type ApprovedEntry = {
   approvedAt: string;
 };
 
-/** 승인 대기 내역을 승인한다. 총무(OWNER) 전용. 이미 승인된 내역이면 409. */
 export async function approveEntry(entryId: string): Promise<ApprovedEntry> {
   const response = await request<EntryApproveResponse>(
     `/api/v1/entries/${entryId}/approve`,

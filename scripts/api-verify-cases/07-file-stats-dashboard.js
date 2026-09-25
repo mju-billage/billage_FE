@@ -8,7 +8,7 @@ module.exports = {
   cases: [
     {
       name: 'file-upload',
-      skip: 'multipart/form-data 업로드 — 이 엔진은 JSON 바디만 지원(api-call.js 설계 자체가 Buffer.from(JSON, utf8) 경로 전용). 실기기 수동 검증 필요(이전 라운드에 O 확인됨, docs/api-wiring.md 참고)',
+      skip: 'multipart/form-data 업로드 — 이 엔진은 JSON 바디만 지원(api-call.js 설계 자체가 Buffer.from(JSON, utf8) 경로 전용). 실기기 수동 검증 필요(이전 라운드에 O 확인됨)',
     },
     {
       name: 'file-content-get',

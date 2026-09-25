@@ -1,4 +1,3 @@
-/** @screen ETC-2-PAGE-07-0 폴더/장부 통계/분석 */
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -85,7 +84,6 @@ function expenseShareColor(item: StatisticsExpenseShareItem, index: number): str
   return EXPENSE_SHARE_COLORS[index] ?? GREY_300;
 }
 
-/** 폴더/장부 통계/분석: 활성 장부 요약, 예산 대비 소비, 장부별 지출 비율을 한 화면에서 보여준다. */
 function StatisticsScreen() {
   const navigation = useNavigation<StatisticsScreenNavigationProp>();
   const [overview, setOverview] = useState<StatisticsOverview | null>(null);

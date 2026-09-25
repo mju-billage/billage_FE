@@ -17,7 +17,6 @@ type CheckBoxProps = {
   disabled?: boolean;
 };
 
-/** 체크 표시가 있는 선택 컨트롤. square(각진)/circle(원형) 두 모양을 지원한다. */
 function CheckBox({
   checked,
   onToggle,

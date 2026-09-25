@@ -5,7 +5,7 @@
  * 그대로 재사용한다(요청 바디는 항상 `Buffer.from(JSON.stringify(...), 'utf8')` 경로로
  * 나간다 — 셸 인코딩 사고를 구조적으로 차단하는 이유는 `api-call.js` 헤더 주석 참고).
  *
- * 목적: `docs/api-wiring.md`의 Swagger 77개 엔드포인트 각각에 대해 "스키마 대조"가
+ * 목적: Swagger 77개 엔드포인트 각각에 대해 "스키마 대조"가
  * 아니라 "실제로 호출해서 기대한 응답이 오는가"를 확인한다.
  *
  * 케이스 파일은 이 스크립트가 아니라 `scripts/api-verify-cases/*.js`에 단계별로

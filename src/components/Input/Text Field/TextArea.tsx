@@ -18,13 +18,10 @@ type TextAreaProps = {
   error?: string;
   rows?: number;
   maxLength?: number;
-  /** true면 화면 진입 시 이 영역에 자동 포커스 + 시스템 키보드를 띄운다. */
   autoFocus?: boolean;
-  /** true면 입력 박스 배경을 흰색으로 채운다(옅은 블루 화면 위에서 박스가 배경에 묻히지 않게). 기본 false(투명). */
   filled?: boolean;
 };
 
-/** 여러 줄 입력이 가능한 박스형 텍스트 영역. */
 function TextArea({
   value,
   onChangeText,

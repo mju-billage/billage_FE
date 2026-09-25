@@ -1,13 +1,3 @@
-/** @screen ETC-2-PAGE-02-0 모임 관리 */
-/** @screen ETC-3-MODAL-02-0 모임 삭제하기 (deleteDialogVisible) */
-/** @screen ETC-4-SNACKBAR-04-0 모임 삭제 완료 (같은 시안 파일에 포함된 스낵바 — 착지 화면인 AllGroupsScreen.tsx에서 렌더링) */
-/**
- * "더보기 > 모임 관리" 진입점. `GroupManagerScreen`("모임 관리자") 앞의 중간
- * 화면이다. 시안(더보기_모임관리_모임삭제하기.png)의 배경 화면이 "< 모임 관리"라는
- * 독립된 페이지 경로/제목으로 등장하고, `design-index.json`에도
- * `ETC-2-PAGE-02-0.png`가 `ETC-2-PAGE-03-0.png`와 별개 파일로 존재해
- * 별개 화면으로 구현한다.
- */
 import { useCallback, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -80,7 +70,6 @@ type ConfirmKind = 'none' | 'leave' | 'leave-blocked' | 'delete';
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
 
-/** "모임 관리": 모임 프로필 변경/모임원 관리 진입 + 모임 나가기/삭제하기(파괴적 액션). */
 function GroupManageScreen() {
   const navigation = useNavigation<GroupManageNavigationProp>();
   const [group, setGroup] = useState<GroupSummary | undefined>(getActiveGroup());
@@ -122,9 +111,6 @@ function GroupManageScreen() {
         setLoadState('error');
         return;
       }
-      // "모임 나가기"가 마지막 총무 여부를 즉시 판단할 수 있도록 관리자 목록도 같이
-      // 받아둔다(멤버 목록 화면 자체는 여기서 보여주지 않는다 — MemberProfileSheet와
-      // 같은 이유로 캐시가 필요).
       await groupMembershipService.getMemberships(activeGroup.id);
       setLoadState('ready');
     } catch (error) {
@@ -186,9 +172,6 @@ function GroupManageScreen() {
     try {
       await groupService.deleteGroup(group.id);
       setConfirmKind('none');
-      // AllGroups 하나만 남기고 리셋하면 그 화면의 뒤로가기/모임 선택이 기댈 이전
-      // 화면이 없어져 깨진다 — Main(더보기 탭)을 밑에 남겨 정상적인 goBack 대상을
-      // 만들어준다.
       navigation.reset({
         index: 1,
         routes: [

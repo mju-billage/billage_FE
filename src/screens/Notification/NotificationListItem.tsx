@@ -18,7 +18,6 @@ type NotificationListItemProps = {
   onPress: () => void;
 };
 
-/** 알림 목록의 항목 하나. 설명 중 [이름] 부분은 강조 표시한다. */
 function NotificationListItem({ item, onPress }: NotificationListItemProps) {
   const lines = item.body.split('\n');
 

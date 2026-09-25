@@ -15,7 +15,6 @@ type BudgetCardProps =
       budget: number;
     };
 
-/** 남은 예산과 지출/예산 진행률을 보여주는 카드. 예산 미설정 시 안내 문구만 표시한다. */
 function BudgetCard(props: BudgetCardProps) {
   if (props.state === 'empty') {
     return (

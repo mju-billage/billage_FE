@@ -11,12 +11,9 @@ type AmountCardProps = (
   | { type: 'income'; income: number; incomeCount: number }
   | { type: 'expense'; expense: number; expenseCount: number }
 ) & {
-  /** false면 합계 행(+구분선)을 안 그린다 — 명세상 합계 행이 없는 카드용
-   * (예: ETC-4-PAGE-07-0 Card 1). 기본 true(기존 동작 그대로). */
   showTotal?: boolean;
 };
 
-/** 라벨+금액 행이 반복되고(기본) 합계가 나오는 금액 요약 카드. */
 function AmountCard(props: AmountCardProps) {
   const { showTotal = true } = props;
   const rows = getRows(props);

@@ -9,10 +9,6 @@ type MemberMoreMenuProps = {
   onSelect: (key: string) => void;
 };
 
-/**
- * 모임원 관리 화면 우상단 ⋮ 버튼을 누르면 뜨는 팝오버 메뉴. 명세(Case A)의
- * "모임원 추가"/"모임원 삭제" 두 항목 모두 `MemberManageScreen`이 넘겨준다.
- */
 function MemberMoreMenu({ visible, onClose, items, onSelect }: MemberMoreMenuProps) {
   if (!visible) {
     return null;

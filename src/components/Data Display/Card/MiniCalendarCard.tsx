@@ -15,7 +15,6 @@ type MiniCalendarCardProps = {
   onPress: () => void;
 };
 
-/** 대시보드 상단의 이번 달 2주치 미니 캘린더 카드. */
 function MiniCalendarCard({ data, onPress }: MiniCalendarCardProps) {
   const amountsByDate = Object.fromEntries(
     data.days.map(day => [day.date, day.amount]),

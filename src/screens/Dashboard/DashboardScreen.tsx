@@ -1,22 +1,3 @@
-/** @screen DSH-1-PAGE-01-0 대시보드 */
-/**
- * 목(`MOCK_DASHBOARD_SUMMARY`)이 가정한 화면 구성과 서버 응답 모양이 크게 다르다.
- *  - 미니 캘린더는 시안(DSH-1-PAGE-01-0, `대시보드_메인화면.png`)에
- *    있고 "이번 달 1일부터 2주" 월 그리드를 요구한다(요일 헤더 없이 1~14일).
- *    `dashboardService.getMonthlyCalendar()`(`CalendarScreen.tsx`와 같은 API,
- *    `GET /groups/{groupId}/calendar?yearMonth=...`)로 이번 달분을 따로 불러
- *    `income - expense` 합산해 채운다 — 대시보드 응답 자체의 `calendar` 필드(오늘
- *    기준 지난 14일 롤링 윈도우)는 이 월 그리드와 안 맞아 쓰지 않는다.
- *  - 회비(dues)는 `upcomingDues[]`(마감 임박 건별 D-day/납부 인원)를 그대로
- *    `DuesProgressCard` 캐러셀로 보여준다(시안 UI 요소 3번). 목록이 비면 안내 문구로 대체.
- *  - 잔액(AmountCard)/최근 내역(TransactionListItem)/승인 대기 섹션은 그리지 않는다.
- *    `GET /groups/{groupId}/dashboard`는 이 셋(`summary`/`approval`/`recentEntries`)을
- *    내려주지만, 이 화면(DSH-1-PAGE-01-0)의 시안엔 이 데이터가 들어갈 대응 영역이 없어
- *    그릴 근거가 없다. 시안이 확정되면 재검토한다.
- *
- * `quickServices`는 서버에 대응 도메인이 없는 순수 클라이언트 데이터라 그대로
- * `MOCK_DASHBOARD_SUMMARY.quickServices`를 쓴다.
- */
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -81,12 +62,6 @@ type DashboardScreenNavigationProp = CompositeNavigationProp<
 
 type LoadState = 'loading' | 'error' | 'ready';
 
-/**
- * `GET /groups/{groupId}/calendar?yearMonth=...`(월간 집계) 응답을 미니 캘린더가
- * 쓰는 모양으로 바꾼다 — `CalendarScreen.tsx`의 `income - expense` 합산 방식과 동일.
- * 대시보드 응답 자체의 `calendar` 필드(오늘 기준 지난 14일 롤링 윈도우)는 안 쓴다 —
- * 시안(DSH-1-PAGE-01-0)이 요구하는 건 "이번 달 1일부터 2주"라 월 그리드 API가 맞다.
- */
 function toMiniCalendarData(
   year: number,
   month: number,
@@ -103,7 +78,6 @@ function toMiniCalendarData(
   };
 }
 
-/** 홈 탭 대시보드 화면: 모임 현황(잔액/승인 대기/회비)과 최근 내역, 빠른 서비스 진입점을 보여준다. */
 function DashboardScreen() {
   const navigation = useNavigation<DashboardScreenNavigationProp>();
 
@@ -129,8 +103,6 @@ function DashboardScreen() {
     try {
       let group = getActiveGroup();
       if (!group) {
-        // [치명1] 로그인 직후 첫 포커스처럼 모임 캐시가 아직 없는 순간 대비 —
-        // "다시 시도"가 실제로 동작하도록 여기서 한 번 더 직접 불러온다.
         await groupService.getMyGroups();
         group = getActiveGroup();
       }

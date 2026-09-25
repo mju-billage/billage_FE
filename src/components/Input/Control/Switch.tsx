@@ -16,7 +16,6 @@ const TRACK_WIDTH = 44;
 const TRACK_HEIGHT = 24;
 const THUMB_SIZE = 20;
 
-/** iOS 스타일 토글 스위치. */
 function Switch({ value, onValueChange, disabled = false }: SwitchToggleProps) {
   return (
     <Pressable

@@ -13,7 +13,6 @@ type DateFieldProps = {
   placeholder?: string;
 };
 
-/** 시작일~종료일을 두 컬럼으로 보여주는 요약 필드. 탭하면 캘린더가 열리는 것을 전제로 한다. */
 function DateField({
   startDate,
   endDate,

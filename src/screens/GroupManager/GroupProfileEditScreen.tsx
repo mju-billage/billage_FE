@@ -1,4 +1,3 @@
-/** @screen ETC-3-PAGE-01-0 모임 프로필 변경 */
 import { useState } from 'react';
 import { ActivityIndicator, Image, Linking, Pressable, StyleSheet, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -55,23 +54,11 @@ type GroupProfileEditNavigationProp = NativeStackNavigationProp<
 >;
 
 type Stage = 'form' | 'imagePicker';
-/** 저장 시 보낼 이미지 상태 — 'none'=안 건드림(필드 생략), 'uploaded'=새로 업로드해
- * `groupImageFileId`로 보낼 fileId가 있음. */
 type ImageAction = 'none' | 'uploaded';
 type PermissionDialogKind = 'camera' | 'gallery' | null;
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
 
-/**
- * "모임 프로필 변경": 모임명 + 대표 이미지를 수정한다. 이미지 선택 로직은
- * 시안 UI 요소 2번에 "글로벌 프로필 설정의 이미지 제어 로직과 100% 동일하게
- * 작동함"이라 적혀 있어 `ProfileEditScreen`과 같은 바텀시트(촬영/선택) →
- * `GroupImagePickerScreen`(갤러리) 구조를 그대로 맞췄다.
- *
- * 카메라/갤러리 둘 다 실제 촬영·선택이고, 고른 즉시
- * `fileService.uploadFile(..., 'GROUP_IMAGE')`로 업로드해 받은 fileId를
- * `groupImageFileId`에 채운다(업로드 중엔 저장 버튼을 막는다).
- */
 function GroupProfileEditScreen() {
   const navigation = useNavigation<GroupProfileEditNavigationProp>();
   const group = getActiveGroup();

@@ -1,13 +1,3 @@
-/** @screen COM-2-PAGE-04-0 탈퇴하기_권한 이전 */
-/**
- * 회원 탈퇴 플로우 2단계([Case A] 전용): 유일한 총무로 있는 모임마다 새 총무를
- * 1명씩 골라야 한다. 시안 UI 요소 3번 그대로 모임(그룹)별 단일 선택 —
- * 다른 멤버를 선택하면 같은 모임 안의 기존 선택은 자동 해제된다.
- *
- * 실제 권한 이전 API 호출은 여기서 하지 않는다 — 선택 결과(`ownershipTransfers`)를
- * 다음 화면(`WithdrawReason`)으로 들고 가서 최종 확인 모달에서 탈퇴 요청과 한
- * 트랜잭션으로 같이 보낸다(Auth.txt 11번 정책 메모).
- */
 import { useCallback, useState } from 'react';
 import {
   Image,
@@ -64,7 +54,6 @@ type RouteProps = RouteProp<RootStackParamList, 'WithdrawOwnershipTransfer'>;
 
 type LoadState = 'loading' | 'error' | 'ready';
 
-/** "탈퇴하기" 2단계([Case A]): 모임별 새 총무 선택. */
 function WithdrawOwnershipTransferScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<RouteProps>();

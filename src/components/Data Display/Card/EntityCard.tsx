@@ -35,7 +35,6 @@ type EntityCardProps =
     }
   | { type: 'newGroup'; onPress: () => void };
 
-/** 프로필/모임 요약 정보를 보여주는 카드. type에 따라 4가지 레이아웃을 지원한다. */
 function EntityCard(props: EntityCardProps) {
   if (props.type === 'newGroup') {
     return (

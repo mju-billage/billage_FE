@@ -1,5 +1,3 @@
-/** @screen DUE-2-PAGE-02-0 모임원 관리 */
-/** @screen DUE-5-SNACKBAR-02-0 모임원 삭제 완료 */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -58,25 +56,6 @@ type MemberManageRouteProp = RouteProp<RootStackParamList, 'MemberManage'>;
 type LoadState = 'loading' | 'error' | 'ready';
 type Mode = 'view' | 'delete';
 
-/**
- * 모임원 관리(목록): "납부관리" 메인의 모임원 아이콘, "더보기 > 모임 관리자"
- * 화면 양쪽에서 진입한다(IA DUE-2-PAGE-02-0 비고) — 뒤로가기는 스택 기본
- * 동작(goBack)만으로 진입 경로별 분기가 자연히 처리된다(둘 다 이 화면을
- * push하는 쪽이므로 되돌아갈 곳도 각자 다르다).
- *
- * 검색은 클라이언트 필터링이 아니라 서버 `keyword` 파라미터를 그대로 쓴다
- * (Member.txt) — 타이핑마다 서버를 부르되, 과도한 호출을 막기 위해 300ms
- * 디바운스만 얹었다(명세의 "실시간 필터링" 자체는 그대로 유지).
- *
- * "모임원 삭제" 모드(명세 Case A)를 이 화면 안의 별도 `mode`로 구현했다
- * (새 라우트가 아니다) — 시안이 "좌측(백 버튼): 삭제 모드를 취소하고 이전
- * 화면(모임원 관리 메인)으로 복귀"라고 명시해, 뒤로가기가 스택을 나가지 않고
- * `mode`만 되돌린다. 삭제 모드에선 ⋮ 메뉴를 숨긴다 — 시안엔 아이콘이 남아
- * 있지만 이 상태에서의 동작이 명세에 없어(추가 시트를 다시 여는 것도 어색함)
- * 안전하게 숨겼다. 단건 삭제(`MemberDetailScreen`)에서 돌아올 때 실어 보내는
- * `route.params.snackbarMessage`도 여기서 같은 스낵바로 띄운다
- * (`DuesScreen`의 회비 삭제 스낵바 패턴과 동일).
- */
 function MemberManageScreen() {
   const navigation = useNavigation<MemberManageNavigationProp>();
   const route = useRoute<MemberManageRouteProp>();
@@ -115,8 +94,6 @@ function MemberManageScreen() {
     try {
       let group = getActiveGroup();
       if (!group) {
-        // [치명1] 로그인 직후 첫 포커스처럼 모임 캐시가 아직 없는 순간 대비 —
-        // "다시 시도"가 실제로 동작하도록 여기서 한 번 더 직접 불러온다.
         await groupService.getMyGroups();
         group = getActiveGroup();
       }

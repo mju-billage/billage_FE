@@ -1,4 +1,3 @@
-/** TermsAgreementScreen 전용 문구. */
 export const TERMS_AGREEMENT_TITLE = '약관 동의';
 export const AGREE_ALL_LABEL = '전체 동의';
 export const AGREE_SERVICE_LABEL = '서비스 이용 약관';

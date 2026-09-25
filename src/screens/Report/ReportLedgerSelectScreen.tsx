@@ -1,20 +1,3 @@
-/** @screen ETC-5-PAGE-01-0 장부별 보고서 생성_장부 선택 */
-/**
- * "장부" 선택하기에서 여는 폴더 트리 브라우저. `GET .../folder-items`
- * (`folderService.getFolderItems()`)로 폴더+장부를 한 그리드에 섞어 받는다
- * — 폴더를 누르면 그 폴더 안으로 뎁스인(FOLDER), 장부를 누르면 다중 선택
- * 토글(LEDGER)이라 `FolderSelectMoveScreen`(이동 대상 선택 — 거긴 폴더도
- * "선택" 대상이라 뎁스인이 없다)과는 인터랙션이 다르다.
- *
- * ⚠️ 뒤로가기 동작은 명세 표(No.1 액션)가 "선택된 내역을 파기하고 이전
- * 화면으로 복귀"라고만 적어 다단계 폴더 안에서의 동작이 명시돼 있지 않다
- * (시안 캡처에도 하위 폴더 진입 상태가 없다). 폴더 한 단계 들어간 뒤 뒤로
- * 가기를 누르면 화면 전체를 나가버리는 게 아니라 **한 단계만 위로
- * 올라가는 쪽으로 판단했다**(표준 폴더 탐색기 UX, `FolderScreen` 브레드크럼
- * 방식과 동일) — "선택 파기"는 최상위에서 뒤로가기를 눌러 화면 자체를
- * 나갈 때만 적용된다(그때는 확정 버튼을 안 눌렀으니 선택이 그냥 전달 안
- * 되는 것으로 자연히 파기됨).
- */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';

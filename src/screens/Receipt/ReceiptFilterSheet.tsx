@@ -1,15 +1,3 @@
-/** @screen ETC-3-SHEET-06-0 증빙자료 필터링 */
-/**
- * 증빙자료 앨범 필터 바텀시트: 기간/장부/구분. `TransactionFilterSheet`(DTB
- * 도메인)를 거의 그대로 옮겨왔지만 **정렬 섹션은 뺐다** — 서버가 발생일
- * 내림차순으로 고정 정렬해 내려주고, `sort` 쿼리 파라미터를 보내면 값과
- * 무관하게 `500`이 난다(`receiptService.ts` 주석 참고). 정렬 토글을 그대로
- * 두면 눌러도 결과가 안 바뀌는 죽은 UI가 된다.
- *
- * `EntryListFilterValue`를 그대로 재사용한다(File.txt "필터·검색 규칙은 Entry
- * 7번과 같은 조건") — `sort` 필드는 타입엔 남아 있지만 이 화면에서 UI로
- * 노출하지도, `receiptService.getReceipts()`에 넘기지도 않는다.
- */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';

@@ -1,10 +1,3 @@
-/**
- * 핀치줌·더블탭·팬을 지원하는 이미지 뷰어. `ReceiptDetailScreen`(ETC-3-PAGE-04-0)
- * 에서 처음 구현했던 걸 `TransactionReceiptDetailScreen`(DTB-3-PAGE-01-0)과
- * 공유하려고 뽑아냈다 — 두 화면 다 "증빙 이미지 원본을 몰입감 있게 보여주는"
- * 같은 상호작용이라 로직 자체는 손대지 않았다. 새 네이티브 의존성
- * (react-native-gesture-handler 등) 없이 RN 코어 `PanResponder`만 쓴다.
- */
 import { useRef, useState } from 'react';
 import { Animated, PanResponder, StyleSheet, useWindowDimensions, View } from 'react-native';
 
@@ -30,8 +23,6 @@ type ZoomableImageProps = {
 
 function ZoomableImage({ uri, headers }: ZoomableImageProps) {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-  // PanResponder는 최초 렌더에서 한 번만 만들어져 핸들러가 그때의 값을 붙잡으므로, 회전 후 크기를
-  // 읽으려면 매 렌더 갱신되는 ref를 통해 읽어야 한다.
   const windowSizeRef = useRef({ width: windowWidth, height: windowHeight });
   windowSizeRef.current = { width: windowWidth, height: windowHeight };
 

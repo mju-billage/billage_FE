@@ -1,23 +1,3 @@
-/** @screen ETC-3-PAGE-03-0 더보기 > 보관함 > 기록 보기 */
-/**
- * IA는 이 ID를 보고서 상세(`ReportByPeriodDetailScreen`)와 같다고 적었지만, 실제
- * 스펙시트(`더보기_기록보관_상세보기.png`, ver 0.25)는
- * **표 헤더에 독립적으로 `ETC-3-PAGE-03-0`을 할당**하고 있고 UI 구성도
- * 전혀 다르다(앱바 타이틀+닫기 버튼, 읽기전용 "백업 일시" 텍스트, 장부 요약
- * 카드 리스트) — IA와 스펙시트가 서로 다른 화면에 같은 ID를 준 충돌이다.
- *
- * **드릴다운**: 보관 상세(`GET /archives/{id}`)는
- * `ledgers[].entries[]`에 `memo`/`approvalStatus`/
- * `createdByName`/`receiptFiles[]`까지 전부 내려준다(`archiveService.ts`의
- * `ArchivedEntry` 참고). 스펙시트 UI 요소 3번 [액션]("개별 카드 영역 터치 시 ... '장부 상세
- * 뷰어' 화면으로 이동")에 따라 카드를 누르면
- * `ArchiveLedgerEntriesScreen`(`@screen ETC-4-PAGE-05-0` — 보고서 쪽과 공유 ID,
- * 장부 하나의 내역 목록, `ReportEntryList` 재사용)으로, 개별 내역을 또 누르면
- * `ArchiveEntryDetailScreen`(`@screen ETC-5-PAGE-02-0` — 역시 공유 ID, 영수증·메모까지
- * 표시)으로 이동한다. 같은 UI 요소의 [상태]가 "내역 유무에 따라 '확장형 카드'
- * 또는 장부명만 노출되는 '심플 리스트'로 렌더링"이라고 명시해, 빈 장부(entries
- * 0건)는 금액 없이 이름+화살표만 보여준다(둘 다 보여주되 형태만 다르다).
- */
 import { useCallback, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { FlatList } from 'react-native';
@@ -135,11 +115,6 @@ function ArchiveDetailScreen() {
         onBackPress={() => navigation.goBack()}
         rightIcons={[
           {
-            /* 명세: 닫기는 "뷰어 모드를 완전히 종료하고 보관함 메인으로 이동" —
-               이 화면은 보관함 메인에서 1뎁스로만 진입해(다른 화면에서 push 없음)
-               백버튼과 목적지가 같다. goBack()이 별도 push 없이 정확히 그 화면으로
-               돌아가 스택이 안 쌓인다, navigate('Archive')는 새 인스턴스를 push해
-               중복 히스토리를 남기므로 안 쓴다. */
             icon: CLOSE_ICON,
             onPress: () => navigation.goBack(),
             accessibilityLabel: 'close',
@@ -183,13 +158,8 @@ function ArchiveDetailScreen() {
                       </Text>
                       <Image source={CHEVRON_RIGHT_ICON} style={styles.chevronIcon} />
                     </View>
-                    {/* 시안 UI 요소 3번 [상태]: 내역 유무에 따라 금액이 모두 포함된
-                        "확장형 카드" 또는 장부명만 노출되는 "심플 리스트"로 렌더링한다. */}
                     {hasEntries && (
                       <>
-                        {/* 장부별 기간 필드는 서버에 없다 — 보관
-                            기록 전체의 기간(archive.startDate/endDate)을 대신 쓴다,
-                            한 스냅샷 안 장부는 전부 같은 기간이라 값은 맞다. */}
                         <Text style={styles.periodText}>
                           {formatDateDot(archive.startDate)} - {formatDateDot(archive.endDate)}
                         </Text>

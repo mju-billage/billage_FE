@@ -22,7 +22,6 @@ type AvatarListProps = {
 const AVATAR_SIZE = 28;
 const CORNER_RADIUS = getSquircleRadius(AVATAR_SIZE);
 
-/** 이니셜/이미지 아바타가 겹쳐진 캡슐형 인원 목록. maxVisible을 넘으면 "+n"으로 표시한다. */
 function AvatarList({
   members,
   maxVisible = 3,

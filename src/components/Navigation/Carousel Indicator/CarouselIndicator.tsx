@@ -9,7 +9,6 @@ type CarouselIndicatorProps = {
   selectedIndex: number;
 };
 
-/** 캐러셀/슬라이드의 현재 페이지 위치를 보여주는 점 인디케이터. */
 function CarouselIndicator({ count, selectedIndex }: CarouselIndicatorProps) {
   return (
     <View style={styles.row}>

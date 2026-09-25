@@ -1,11 +1,3 @@
-/** @screen ADD-2-SHEET-05-0 증빙자료 등록 */
-/**
- * 실제 사진은 이 화면이 아니라 시스템 포토 피커(`utils/imagePicker.ts`의
- * `pickGalleryWithFeedback`, `launchImageLibrary`)가 보여준다 — 그래서 이 화면은
- * 그리드를 그리는 대신 마운트되자마자 피커를 띄우고 결과를 그대로 호출부에
- * 넘기는 다리 역할만 한다(자체 그리드를 두면 "시스템 피커가 한 번 더 뜨는 것"처럼
- * 보여 의미가 없다).
- */
 import { useEffect, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,7 +13,6 @@ type ReceiptGalleryPickerScreenProps = {
   onPermanentlyDenied: () => void;
 };
 
-/** 시스템 갤러리를 열어 증빙 사진을 다중 선택한다(남은 자리만큼). */
 function ReceiptGalleryPickerScreen({
   remainingSlots,
   onPicked,

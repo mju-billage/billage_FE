@@ -19,19 +19,16 @@ export type MenuItem = {
   key: string;
   label: string;
   icon?: ImageSourcePropType;
-  /** true면 라벨을 위험(빨강) 색으로 표시한다(모임 나가기 등 파괴적 액션용). */
   destructive?: boolean;
 };
 
 type MenuProps = {
-  /** 그룹 단위 배열. 그룹 사이에만 구분선이 들어가고, 그룹 안 항목 사이엔 구분선이 없다. */
   sections: MenuItem[][];
   selectedKey?: string;
   onSelect: (key: string) => void;
   showIcon?: boolean;
 };
 
-/** 세로 목록형 메뉴. 섹션 사이에만 구분선을 그려 그룹을 나눈다. */
 function Menu({ sections, selectedKey, onSelect, showIcon = true }: MenuProps) {
   return (
     <View >

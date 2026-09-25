@@ -1,5 +1,3 @@
-/** 숫자만 남은 전화번호(01012345678)를 010-1234-5678 형태의 표기로 바꾼다.
- * 9~11자리가 아니면 하이픈 없이 숫자만 그대로 보여준다(Member.txt §필드). */
 export function formatPhoneNumber(raw: string | null | undefined): string {
   if (!raw) {
     return '';
@@ -17,7 +15,6 @@ export function formatPhoneNumber(raw: string | null | undefined): string {
   return digits;
 }
 
-/** 전화번호 입력값이 서버 검증(숫자·하이픈·공백만, 숫자 9~11자리)을 통과하는지 앞단에서 미리 확인한다. */
 export function isValidPhoneNumber(raw: string): boolean {
   if (!/^[0-9\-\s]+$/.test(raw)) {
     return false;

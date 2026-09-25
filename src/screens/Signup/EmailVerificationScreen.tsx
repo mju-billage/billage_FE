@@ -1,10 +1,3 @@
-/** @screen COM-4-PAGE-01-0 이메일 인증 */
-/**
- * 이메일 인증 코드 발송/재전송/검증을 실제 API로 호출한다(`email-verification-controller`,
- * `authService.ts` 주석 참고).
- * 검증 성공 시 이 화면이 실제 회원가입(`POST /auth/signup`)까지 마무리한다 —
- * `SignupInfoScreen`은 가입을 호출하지 않는다(Auth.txt 8번, 순서가 "인증 먼저").
- */
 import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -70,7 +63,6 @@ function formatCountdown(seconds: number): string {
     .padStart(2, '0')}`;
 }
 
-/** 이메일 인증 코드 입력 화면: 6자리 코드와 남은 시간을 보여준다. */
 function EmailVerificationScreen() {
   const navigation = useNavigation<EmailVerificationNavigationProp>();
   const route = useRoute<EmailVerificationRouteProp>();

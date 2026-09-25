@@ -1,4 +1,3 @@
-/** @screen ETC-3-PAGE-09-0 공지사항 */
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -29,7 +28,6 @@ import { TYPOGRAPHY } from '../../constants/typography';
 type NoticeListNavigationProp = NativeStackNavigationProp<RootStackParamList, 'NoticeList'>;
 type LoadState = 'loading' | 'error' | 'ready';
 
-/** 공지사항 목록(최신순). 항목 탭 시 상세로 이동한다. */
 function NoticeListScreen() {
   const navigation = useNavigation<NoticeListNavigationProp>();
   const [notices, setNotices] = useState<NoticeSummary[]>([]);

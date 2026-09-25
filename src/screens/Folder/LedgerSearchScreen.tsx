@@ -1,4 +1,3 @@
-/** @screen FDR-3-PAGE-02-0 내역 검색_장부 */
 import { useCallback, useEffect, useState } from 'react';
 import { Keyboard, SectionList, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -43,7 +42,6 @@ type LedgerSearchNavigationProp = NativeStackNavigationProp<
 >;
 type LedgerSearchRouteProp = RouteProp<RootStackParamList, 'LedgerSearch'>;
 
-/** 장부 상세에서 진입하는 내역 검색 화면: 제목/메모 검색(keyword) + 필터 시트. */
 function LedgerSearchScreen() {
   const navigation = useNavigation<LedgerSearchNavigationProp>();
   const route = useRoute<LedgerSearchRouteProp>();
@@ -87,8 +85,6 @@ function LedgerSearchScreen() {
           setSearchError(undefined);
         }
       } catch (error) {
-        // "결과 없음"과 "요청 실패"를 구분한다 — 전에는 둘 다 빈 목록으로만
-        // 보여서 사용자가 검색이 실패한 건지 그냥 결과가 없는 건지 알 수 없었다.
         if (reset) {
           setResults([]);
           setHasMore(false);
@@ -106,14 +102,11 @@ function LedgerSearchScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ledgerId, query, filter]);
 
-  // 서버가 발생일 순으로 내려주므로 받은 순서 그대로 같은 날짜끼리 묶는다(최신순/과거순 모두).
   const sections = groupEntriesByDate(results).map(group => ({
     title: formatDateHeader(group.date),
     data: group.items,
   }));
 
-  // 설명표 No.1: 백버튼은 키보드를 내리고 검색어를 파기한 뒤 이전 화면으로 돌아간다. 검색어(`query`)는
-  // 이 화면의 로컬 상태라 화면이 pop되면 함께 사라지므로 파기를 따로 할 필요는 없다 — 키보드만 내린다.
   const handleBack = () => {
     Keyboard.dismiss();
     navigation.goBack();
@@ -164,9 +157,6 @@ function LedgerSearchScreen() {
             <Text style={styles.emptyTitle}>{LEDGER_ENTRY_SEARCH_EMPTY}</Text>
           </View>
         ) : (
-          // 시안: 날짜 그룹 헤더(`4월 16일 목요일`) 단위로 묶고, 리스트를 스크롤하면 시야 확보를 위해
-          // 키보드가 자동으로 닫힌다(설명표 No.3 [액션] Dismiss). `handled`는 키보드가 떠 있어도 행을
-          // 첫 탭에 바로 열게 한다.
           <SectionList
             sections={sections}
             keyExtractor={item => item.id}
@@ -212,12 +202,10 @@ function LedgerSearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  // 앱바(`AppBar`) 아래 좌우 24 본문. 예전 `paddingTop: 60` 하드코딩은 앱바가 상단 여백을 대신해 없앴다.
   body: {
     flex: 1,
     paddingHorizontal: 20,
   },
-  // 시안: 검색 필드는 앱바 아래 별도 줄.
   searchWrapper: {
     marginTop: 8,
     marginBottom: 12,
@@ -230,7 +218,6 @@ const styles = StyleSheet.create({
   listContent: {
     paddingBottom: 24,
   },
-  // 장부 상세·내역 메인과 같은 그룹 헤더(12px+Bold는 정식 스타일에 없어 body3+bold 예외).
   sectionHeader: {
     ...TYPOGRAPHY.body3,
     fontWeight: 'bold',

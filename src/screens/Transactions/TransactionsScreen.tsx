@@ -1,20 +1,3 @@
-/** @screen DTB-1-PAGE-01-0 내역 메인 */
-/**
- * 모임 전체 내역 목록은 `entryService.getGroupEntries()`(Entry.txt §7)로 조회한다.
- * 등록 완료 스낵바(`ADD-2-SNACKBAR-01-0`)는 `TransactionRegisterScreen.tsx`에만 있다.
- *
- * 잔액 카드·건수·목록이 한 응답에 묶여 온다(명세가 "세 번 호출하지 않도록"이라고
- * 명시) — 필터를 바꿔도 `load()` 한 번만 다시 부른다. 페이지네이션은
- * 무한 스크롤(FlatList/SectionList `onEndReached`) 그대로 쓴다 — "더보기"
- * 버튼을 새로 만들지 않았다. 탭(전체/승인요청)·필터가 바뀌면 `load()`가 매번
- * `page=0`부터 다시 불러온다(`loadMoreEntries`만 페이지를 증가시킨다).
- *
- * 장부 목록(`ledgerOptions`)은 `load()`와 완전히 분리했다 — `loadLedgerOptions()`가
- * 별도 `useFocusEffect`로, 필터/탭과 무관하게 화면에 포커스될 때마다 한 번만
- * 불린다. 그래서 필터 칩을 눌러도 장부 목록은 다시 안 부르고, 대신 "장부 추가"로
- * `LedgerCreate`에 갔다가 돌아오는 포커스 복귀 시점엔 갱신된다 — 별도 이벤트
- * 연결 없이 포커스 재진입만으로 새 장부가 목록에 반영된다.
- */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -117,7 +100,6 @@ function getFilterChips(
   return chips;
 }
 
-/** 내역 메인 화면: 전체 내역/승인요청 탭, 요약 카드, 날짜별 거래 목록을 보여준다. */
 function TransactionsScreen() {
   const navigation = useNavigation<TransactionsScreenNavigationProp>();
   const [tab, setTab] = useState<TransactionsTab>('all');
@@ -173,8 +155,6 @@ function TransactionsScreen() {
     try {
       let group = getActiveGroup();
       if (!group) {
-        // [치명1] 로그인 직후 첫 포커스처럼 모임 캐시가 아직 없는 순간 대비 —
-        // "다시 시도"가 실제로 동작하도록 여기서 한 번 더 직접 불러온다.
         await groupService.getMyGroups();
         group = getActiveGroup();
       }
@@ -198,8 +178,6 @@ function TransactionsScreen() {
     }
   }, [buildParams]);
 
-  // 필터/탭과 무관하게 포커스될 때마다 한 번만 불린다 — 필터 칩을 눌러도 다시
-  // 부르지 않고, "장부 추가" 후 돌아왔을 때는 포커스 복귀로 갱신된다.
   const loadLedgerOptions = useCallback(async () => {
     let group = getActiveGroup();
     if (!group) {
@@ -213,8 +191,6 @@ function TransactionsScreen() {
       const ledgers = await ledgerService.getAllLedgersInGroup(group.id);
       setLedgerOptions(ledgers.map(l => ({ id: l.id, name: l.name })));
     } catch {
-      // 필터 칩/시트 보조 데이터라 실패해도 조용히 넘어간다 — 메인 목록 조회
-      // 쪽의 에러 상태·재시도가 화면 상태를 대표한다.
     }
   }, []);
 
@@ -236,7 +212,6 @@ function TransactionsScreen() {
       setPage(nextPage.page);
       setHasMore(!nextPage.last);
     } catch {
-      // 다음 페이지 실패는 조용히 무시한다 — 목록 끝에서 다시 스크롤하면 재시도된다.
     } finally {
       setIsLoadingMore(false);
     }
@@ -261,8 +236,6 @@ function TransactionsScreen() {
 
   const filterChips = getFilterChips(filter, ledgerOptions);
 
-  // 접히는 헤더: 카드 블록(파란 영역) 높이만큼 스크롤되는 동안 헤더가 같이 올라가고, 그 뒤엔
-  // Tabs~건수 블록이 AppBar 아래에 붙은 채 목록만 스크롤된다.
   const showList = loadState === 'ready' && entries.length > 0;
   const listTopInset = cardBlockHeight + controlsHeight;
   const headerTranslateY = scrollY.interpolate({
@@ -278,7 +251,6 @@ function TransactionsScreen() {
     [scrollY],
   );
 
-  // 목록이 사라지는 상태(로딩·에러·빈 목록)에선 스크롤 위치가 0으로 돌아가므로 헤더도 펼친다.
   useEffect(() => {
     if (!showList) {
       scrollY.setValue(0);
@@ -340,7 +312,6 @@ function TransactionsScreen() {
               scrollEventThrottle={16}
               onEndReachedThreshold={0.4}
               onEndReached={loadMoreEntries}
-              // 접히는 헤더가 목록 위에 겹쳐 있어, 그 높이만큼 위를 비워 둔다.
               ListHeaderComponent={<View style={{ height: listTopInset }} />}
               ListFooterComponent={
                 isLoadingMore ? (
@@ -369,7 +340,6 @@ function TransactionsScreen() {
           )}
         </View>
 
-        {/* 스크롤하면 수입/지출/합계 카드는 위로 사라지고 Tabs·필터 줄·칩·건수는 AppBar 아래에 붙어 남는다. */}
         <Animated.View
           style={[styles.collapsingHeader, { transform: [{ translateY: headerTranslateY }] }]}
         >
@@ -446,12 +416,10 @@ function TransactionsScreen() {
 }
 
 const styles = StyleSheet.create({
-  // overflow hidden: 위로 밀려 올라간 카드가 AppBar를 덮지 않게 자른다.
   body: {
     flex: 1,
     overflow: 'hidden',
   },
-  // 목록은 body 전체를 채우는 흰 영역이고, 카드·Tabs 헤더가 그 위에 겹친다(좌우 패딩은 안쪽만).
   listArea: {
     flex: 1,
     paddingHorizontal: 20,
@@ -464,19 +432,16 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 1,
   },
-  // 파란 카드 블록. 위 12·아래 16(카드와 흰 영역 사이 간격)까지 포함해 접힌다.
   summarySection: {
     paddingTop: 12,
     paddingBottom: 16,
     paddingHorizontal: 20,
     backgroundColor: BACKGROUND_PRIMARY,
   },
-  // Tabs 이하 흰 영역. 목록이 이 뒤로 스크롤되므로 배경이 불투명해야 한다.
   controls: {
     paddingHorizontal: 20,
     backgroundColor: BACKGROUND_SECONDARY,
   },
-  // controls의 좌우 패딩 24를 상쇄해 탭을 화면 가로 전체로 편다.
   tabsBleed: {
     marginHorizontal: -20,
   },
@@ -485,7 +450,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     marginTop: 8,
   },
-  // 필터(왼쪽 끝)·검색(오른쪽 끝) — 폭을 다 채워 `space-between`이 두 아이콘을 좌우 끝으로 민다.
   iconRow: {
     flex: 1,
     flexDirection: 'row',
@@ -503,11 +467,9 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
     marginBottom: 8,
   },
-  // 탭바가 화면 위에 겹쳐 있어 그 높이 + 기존 96(FAB 가림 방지)만큼 비운다.
   listContent: {
     paddingBottom: BOTTOM_NAVIGATION_HEIGHT + 96,
   },
-  // 12px+Bold 조합은 정식 스타일에 없어 body3+bold를 예외로 채택.
   sectionHeader: {
     ...TYPOGRAPHY.body3,
     fontWeight: 'bold',

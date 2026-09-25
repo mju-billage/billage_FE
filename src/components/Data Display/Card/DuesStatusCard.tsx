@@ -28,8 +28,6 @@ const MONEY_ICON = require('../../../assets/icons/content/Money.png');
 type DuesStatusCardProps = {
   title: string;
   dDayLabel: string;
-  /** D-day 배지 색상. 회비 상세(DUE-2-PAGE-03-0류)는 상태에 따라 다른 색이 필요하다
-   * (진행 중=위험도별 색, 마감/예정=중립) — 기본값은 기존 호출부 동작을 유지한다. */
   badgeStatus?: 'positive' | 'warning' | 'destructive' | 'neutral';
   paidMemberCount: number;
   totalMemberCount: number;
@@ -41,10 +39,6 @@ type DuesStatusCardProps = {
   duesAmount: number;
 };
 
-/** 회비 납부 현황(인원/금액)과 납부 기간/장부 정보를 흰 카드 두 장으로 나눠 가로로 넘겨 보는 캐러셀.
- * 1페이지: 회비가 모이기까지(D-day·인원·금액), 2페이지: 납부 기간·장부·회비 금액.
- * 슬라이드 폭은 화면 전체(카드 여백은 슬라이드 안쪽 패딩)라 부모의 좌우 패딩 24를 음수 마진으로 상쇄한다
- * — 장부 상세 캐러셀(`LedgerDetailScreen`)과 같은 방식. */
 function DuesStatusCard({
   title,
   dDayLabel,
@@ -60,7 +54,6 @@ function DuesStatusCard({
 }: DuesStatusCardProps) {
   const { width: windowWidth } = useWindowDimensions();
   const [pageIndex, setPageIndex] = useState(0);
-  // 두 카드 높이를 큰 쪽에 맞춘다 — 슬라이드 높이를 측정해 `minHeight`로 준다(flex 늘리기에 기대지 않음).
   const [slideHeights, setSlideHeights] = useState<[number, number]>([0, 0]);
   const cardMinHeight = Math.max(slideHeights[0], slideHeights[1]);
 

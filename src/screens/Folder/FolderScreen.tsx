@@ -1,23 +1,3 @@
-/** @screen FDR-1-PAGE-01-0 폴더 메인 (그리드/리스트 뷰, isRoot=true) */
-/** @screen FDR-2-PAGE-04-0 폴더 상세 (그리드/리스트 뷰, isRoot=false — 같은 화면 재사용) */
-/** @screen FDR-2-MODAL-01-0 새 폴더 생성 (activeDialog='newFolder') */
-/** @screen FDR-3-MODAL-01-0 폴더 이름 변경 (activeDialog='rename') */
-/** @screen FDR-3-MODAL-02-0 폴더 해제 (activeDialog='unlink') */
-/** @screen FDR-3-MODAL-05-0 새 폴더 생성 (FDR-2-MODAL-01-0과 동일 activeDialog='newFolder' — IA상 ID 중복으로 보임) */
-/** @screen FDR-3-SNACKBAR-01-0 새 폴더 생성_완료 (SNACKBAR_FOLDER_CREATED_SUFFIX) */
-/** @screen FDR-4-SNACKBAR-01-0 이동 완료 / 폴더 해제_완료 (여기는 폴더 해제_완료 절반. 이동 완료는
- * FolderMoveDestinationScreen.tsx) */
-/** @screen FDR-4-SNACKBAR-03-0 이름 변경_완료 (activeDialog='rename' 확인 시 SNACKBAR_FOLDER_RENAMED) */
-/** @screen FDR-2-MODAL-02-0 폴더 전체 백업 (activeDialog='backup') — `design-index.json`에 등록된
- * 후보(`FDR\폴더\FDR-2-MODAL-02-0.png`)는 실제로는 "새 폴더 생성" 다이얼로그 내용이라 오배치이고,
- * 진짜 시안은 같은 이름으로 `FDR\폴더\백업\` 하위에 따로 있다 */
-/** @screen FDR-3-SNACKBAR-02-0 폴더 백업 완료 (SNACKBAR_BACKUP_DONE_TITLE/DESCRIPTION) */
-/**
- * 폴더 해제: 최상위 폴더를 해제하면 그 직속 장부가 `folderId: null`이 되는데,
- * `GET .../folder-items`(폴더ID 생략=최상위 조회)가 최상위 장부도 `LEDGER`
- * 항목으로 내려주므로 UI에서 막지 않는다. 백업(archive) 기능은
- * `archiveService.createArchive`(`/groups/{groupId}/archives`)로 연동돼 있다.
- */
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import {
@@ -125,7 +105,6 @@ type ActiveDialog =
   | null;
 type LoadState = 'loading' | 'error' | 'ready';
 
-/** 폴더 메인/하위 폴더 공용 화면. params가 없으면 폴더 탭 최상위, 있으면 해당 폴더 내부다. */
 function FolderScreen() {
   const navigation = useNavigation<FolderScreenNavigationProp>();
   const route = useRoute<FolderScreenRouteProp>();
@@ -164,8 +143,6 @@ function FolderScreen() {
     try {
       let group = getActiveGroup();
       if (!group) {
-        // [치명1] 로그인 직후 첫 포커스처럼 모임 캐시가 아직 없는 순간 대비 —
-        // "다시 시도"가 실제로 동작하도록 여기서 한 번 더 직접 불러온다.
         await groupService.getMyGroups();
         group = getActiveGroup();
       }
@@ -174,10 +151,6 @@ function FolderScreen() {
         setLoadState('error');
         return;
       }
-      // 폴더 트리는 모임 전체를 한 번에 내려주므로 화면 깊이와 무관하게 호출 1번.
-      // 장부는 현재 폴더 직속분만 별도 조회한다. 최상위(folderId
-      // null)에서는 `GET /groups/{groupId}/ledgers`로 모임 전체 장부를 받아
-      // `folderId === null`인 것만 걸러 쓴다.
       const [nextTree, allLedgers] = await Promise.all([
         folderService.getFolderTree(group.id),
         folderId
@@ -231,10 +204,6 @@ function FolderScreen() {
     }
   };
 
-  // FDR-1-PAGE-01-0 시안 Case A(폴더 헤더 메뉴): 평면 5항목, 구분선 2개로
-  // 3그룹(선택 이동·예산 설정 / 그리드·리스트 / 전체 백업) — 2차 메뉴 없음.
-  // 하위 폴더(비root) 메뉴는 그룹 구분 없이 기존 순서 그대로 두고,
-  // "그리드·리스트" 진입점만 같은 방식으로 평면화했다.
   const gridListItems: MenuItem[] = [
     { key: 'grid', label: VIEW_TOGGLE_GRID_LABEL, icon: GRID_ICON },
     { key: 'list', label: VIEW_TOGGLE_LIST_LABEL, icon: LIST_ICON },
@@ -399,9 +368,6 @@ function FolderScreen() {
         title={isRoot ? FOLDER_SCREEN_TITLE : folderName ?? ''}
         onBackPress={() => navigation.goBack()}
         rightIcons={[
-          // 시안 No.1: 통계/분석 아이콘 + ⋮ 메뉴 두 개. 폴더 메인과 폴더 상세
-          // (FDR-2-PAGE-04-0 Case A 목업) 모두 둘 다 있다. 상세에서 누르면 폴더 메인과
-          // 같은 동작(모임 전체 통계 화면) — 폴더 범위 통계는 명세에 없다.
           { icon: STATISTICS_ICON, onPress: () => navigation.navigate('Statistics') },
           { icon: MENU_ICON, onPress: () => setMoreMenuVisible(true) },
         ]}
@@ -409,7 +375,6 @@ function FolderScreen() {
 
       <View style={styles.body}>
         <View style={styles.searchWrapper}>
-          {/* 파란 배경 화면이라 테두리 없는 흰 pill(기본 variant) */}
           <SearchField
             value={searchQuery}
             onChangeText={setSearchQuery}

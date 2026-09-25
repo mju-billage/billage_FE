@@ -23,7 +23,6 @@ export const Default: Story = {
   },
 };
 
-/** DUE-2-PAGE-03-1(회비 상세_마감된 회비): 마감 배지는 중립색. */
 export const Closed: Story = {
   args: {
     title: '회비가 모이기까지',
@@ -40,7 +39,6 @@ export const Closed: Story = {
   },
 };
 
-/** DUE-2-PAGE-03-1(회비 상세_예정된 회비): 배지에 시작일(생성일 대체)을 표시, 중립색. */
 export const Upcoming: Story = {
   args: {
     title: '회비가 모이기까지',

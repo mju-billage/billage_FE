@@ -1,4 +1,3 @@
-/** @screen ADD-2-SHEET-05-0 증빙자료 등록 */
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Menu from '../../components/Navigation/Menu/Menu';
 import type { MenuItem } from '../../components/Navigation/Menu/Menu';
@@ -26,7 +25,6 @@ type TransactionAttachMenuSheetProps = {
   onSelect: (key: AttachMenuKey) => void;
 };
 
-/** 증빙자료 추가 버튼을 누르면 뜨는 바텀시트: 영수증 스캔/사진 촬영/사진 선택. */
 function TransactionAttachMenuSheet({
   visible,
   onClose,

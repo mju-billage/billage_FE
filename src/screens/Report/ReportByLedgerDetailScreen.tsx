@@ -1,15 +1,3 @@
-/** @screen ETC-3-PAGE-02-0 장부별 보고서 조회 */
-/** @screen ETC-3-PAGE-02-1 장부별 보고서 상세(수입/지출) — 02-0의 탭 상태, 별도 라우트 아님 */
-/**
- * 보고서 생성 메인(`ReportMainScreen`)의 장부별 탭 카드를 눌러 들어오는 상세
- * 화면. 목록에 없던 `ledgers[].entries`가 필요해 `GET /reports/{reportId}`로
- * 다시 조회한다(생성 직후 응답을 재사용하지 않음 — 목록↔상세 화면이 분리된
- * 스택이라 생성 시점 데이터를 들고 다닐 방법이 마땅치 않고, 상세 조회 API가
- * MEMBER 권한으로 별도 공개돼 있어 그냥 새로 부르는 쪽이 단순하다).
- *
- * 공유 버튼은 서버에 보고서 웹뷰/PDF 응답이 없어(Report.txt 정책 메모) OS
- * 공유 시트에 텍스트 요약만 실어 보낸다 — 새 API도 새 의존성도 필요 없다.
- */
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Image, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -70,8 +58,6 @@ function ReportByLedgerDetailScreen() {
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
-  // ETC-5-SNACKBAR-08-0: 생성 직후 이 화면으로 이동하며 받은 완료 메시지를
-  // 한 번만 띄운다.
   useEffect(() => {
     if (route.params.snackbarMessage) {
       setSnackbarMessage(route.params.snackbarMessage);
@@ -247,12 +233,10 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
     textAlign: 'right',
   },
-  // 폴더 탭(`FolderTabShape`)이 카드 위로 20 튀어나와서 위 여백을 그만큼 더 둔다.
   headerCard: {
     marginTop: 24,
     gap: 4,
   },
-  // 기간별 상세(`ReportByPeriodDetailScreen`)의 기간 줄과 같은 스타일.
   periodText: {
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
@@ -274,7 +258,6 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     gap: 12,
   },
-  // 카드 = 제목 줄(장부명 + > 아이콘, 같은 줄) / 구분선 / 수입·지출 줄.
   ledgerTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -296,7 +279,6 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.subtitle1,
     flex: 1,
   },
-  // 장부명 줄과 수입/지출 줄 사이 구분선.
   ledgerDivider: {
     marginVertical: 8,
   },

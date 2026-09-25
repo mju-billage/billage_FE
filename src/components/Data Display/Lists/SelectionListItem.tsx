@@ -28,7 +28,6 @@ type SelectionListItemProps =
       onValueChange?: (value: boolean) => void;
     };
 
-/** 설정 화면 등에서 쓰는 선택 행. 값 선택(picker) 또는 토글(switch) 두 타입을 지원한다. */
 function SelectionListItem(props: SelectionListItemProps) {
   if (props.type === 'switch') {
     return (

@@ -1,4 +1,3 @@
-/** @screen ADD-4-PAGE-01-1 영수증 스캔 실패 */
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Button from '../../components/Input/Button/Button';
@@ -22,7 +21,6 @@ type ReceiptScanFailedViewProps = {
   onClose: () => void;
 };
 
-/** 영수증 인식(OCR)에 실패했을 때 보여주는 전체화면. */
 function ReceiptScanFailedView({ onRetry, onClose }: ReceiptScanFailedViewProps) {
   const insets = useSafeAreaInsets();
 
@@ -82,7 +80,6 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
     textAlign: 'center',
   },
-  // 회색 자리표시 박스(160×160)를 그래픽으로 교체 — 자리 크기는 그대로, 비율은 contain으로 유지(356×344 원본).
   graphic: {
     width: 160,
     height: 160,

@@ -57,7 +57,6 @@ export const Ended: Story = {
   },
 };
 
-/** DUE-1-PAGE-01-0 목록: 마감 여유(D-7 초과) — positive. */
 export const ActiveDueSoon: Story = {
   args: {
     type: 'paymentManagement',
@@ -73,7 +72,6 @@ export const ActiveDueSoon: Story = {
   },
 };
 
-/** DUE-1-PAGE-01-0 목록: 마감 경고(D-3 초과 ~ D-7 이하) — warning. */
 export const ActiveDueWarning: Story = {
   args: {
     type: 'paymentManagement',
@@ -89,7 +87,6 @@ export const ActiveDueWarning: Story = {
   },
 };
 
-/** DUE-1-PAGE-01-0 목록: 마감 경과·임박(D-Day ~ D-3 이하, 경과 포함) — destructive. */
 export const ActiveDueUrgent: Story = {
   args: {
     type: 'paymentManagement',

@@ -1,21 +1,3 @@
-/** @screen ETC-4-PAGE-15-0 프로필 변경 */
-/** @screen ETC-4-SHEET-02-0 프로필 변경_사진 변경 (imageMenuVisible) */
-/**
- * "프로필 변경": 이름 + 대표 이미지를 수정한다. `GroupProfileEditScreen.tsx`와
- * 구조가 거의 같지만 이미지 선택 진입 방식이 다르다 — 모임 쪽은 아바타를
- * 누르면 바로 `GroupImagePickerScreen`(그리드)으로 가지만, 이 화면은 시안
- * (글로벌설정_내프로필_프로필변경-1.png, 실제 Screen ID는 파일명과 달리
- * `ETC-4-SHEET-02-0`이었다 — 표 헤더로 직접 확인)대로 먼저 바텀시트(사진
- * 촬영하기 / 사진 선택하기 / 기본 프로필로 변경하기)를 띄운다. 그리드 화면
- * 자체는 `ETC-4-PAGE-02-0`(이미 만든 `GroupImagePickerScreen`)을 그대로
- * 재사용한다 — 새로 만들지 않는다.
- *
- * 카메라/갤러리 둘 다 실제 촬영·선택이고, 고른 즉시
- * `fileService.uploadFile(..., 'PROFILE_IMAGE')`로 업로드해 받은 fileId를
- * `profileImageFileId`에 채운다(업로드 중엔 저장 버튼을 막는다). "기본
- * 프로필로 변경하기"는 `null`만 보내면 되고 실제 파일이 필요 없다
- * (3-state 규칙).
- */
 import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
@@ -88,12 +70,9 @@ type ProfileEditNavigationProp = NativeStackNavigationProp<
 type Stage = 'form' | 'imagePicker';
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
-/** 저장 시 보낼 이미지 상태 — 'none'=안 건드림(필드 생략), 'reset'=기본으로
- * 초기화(null 전송), 'uploaded'=새로 업로드해 fileId가 있음. */
 type ImageAction = 'none' | 'reset' | 'uploaded';
 type PermissionDialogKind = 'camera' | 'gallery' | null;
 
-/** "프로필 변경": 이름 + 대표 이미지 수정. */
 function ProfileEditScreen() {
   const navigation = useNavigation<ProfileEditNavigationProp>();
   const user = getCurrentUser();
@@ -131,9 +110,6 @@ function ProfileEditScreen() {
     }
   };
 
-  // 안드로이드 하드웨어 back도 같은 이탈 확인을 거치게 한다(ReportCreateByLedgerScreen
-  // 패턴) — 포커스 중일 때만 걸어야 카메라/이미지 선택 스테이지 위에 있을 때
-  // 뒤로가기를 가로채지 않는다.
   useFocusEffect(
     useCallback(() => {
       if (stage !== 'form') {
@@ -215,8 +191,6 @@ function ProfileEditScreen() {
     }
   };
 
-  // 시스템 카메라를 직접 부른다 — 중간에 인앱 화면을 두면 "카메라가 두 번
-  // 열리는" 것처럼 보이기 때문이다.
   const handleTakePhoto = async () => {
     const image = await captureWithFeedback(showSnackbar, () =>
       setPermissionDialogKind('camera'),

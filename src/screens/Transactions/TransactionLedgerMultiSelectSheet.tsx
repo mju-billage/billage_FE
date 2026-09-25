@@ -1,4 +1,3 @@
-/** @screen DTB-3-SHEET-02-0 장부 복수 선택 */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
@@ -20,7 +19,6 @@ type LedgerOption = { id: string; name: string };
 
 type TransactionLedgerMultiSelectSheetProps = {
   visible: boolean;
-  /** 실 API에서 부모(`TransactionFilterSheet`)가 가져와 내려준다. */
   options: LedgerOption[];
   selectedIds: string[];
   onClose: () => void;
@@ -28,7 +26,6 @@ type TransactionLedgerMultiSelectSheetProps = {
   onPressCreateNewLedger: () => void;
 };
 
-/** 필터 시트의 "장부" 다중선택 바텀시트. 장부가 없으면 안내문+생성 링크를 보여준다. */
 function TransactionLedgerMultiSelectSheet({
   visible,
   options,

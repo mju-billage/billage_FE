@@ -1,17 +1,3 @@
-/** @screen ETC-2-PAGE-09-0 더보기_설정 (허브) */
-/**
- * "더보기 > 설정" 진입점(시안: 더보기_글로벌설정.png).
- *
- * 시안 UI 요소 4번 "고객 지원 및 정보" 그룹(공지사항/문의하기/약관 및 정책/
- * 앱 버전 정보)은 각각 별도 Screen ID(Support 도메인)를 갖는다. "앱 버전 정보"만은
- * 애초에 이동이 없는 항목이라(시안: "터치 시 현재 앱 버전을 확인하며 이동
- * 없음") `ToolsMenu`의 `tag`로 버전 문자열을 보여준다(칩 옆 화살표까지는
- * 못 없앤다 — `ToolsMenu`에 그 변형이 없고 이번 범위에서 공용 컴포넌트를
- * 새로 건드리지 않기로 했다).
- *
- * 로그아웃(ETC-4-MODAL-04-0)은 이 허브가 아니라 "내 프로필"(ETC-3-PAGE-07-0)
- * 하단(`MyProfileScreen.tsx`)에 있다.
- */
 import { useCallback, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -65,7 +51,6 @@ type SettingsNavigationProp = NativeStackNavigationProp<
 
 type LoadState = 'loading' | 'error' | 'ready';
 
-/** "설정" 허브: 글로벌 프로필 카드 + 알림 설정 + 고객 지원 및 정보. */
 function SettingsScreen() {
   const navigation = useNavigation<SettingsNavigationProp>();
   const [profile, setProfile] = useState<AuthUserResponse | null>(null);
@@ -200,7 +185,6 @@ const styles = StyleSheet.create({
   profileName: {
     ...TYPOGRAPHY.subtitle2,
   },
-  // "고객 지원 및 정보" 제목+항목 4개를 흰 카드 하나로 묶는다. 위 16(제목), 아래는 항목 자체 패딩 12가 있어 4만.
   supportCard: {
     paddingTop: 16,
     paddingBottom: 4,

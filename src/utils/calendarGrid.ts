@@ -1,6 +1,5 @@
 export type CalendarGridCell = { date: number } | null;
 
-/** 해당 연/월의 날짜를 일요일 시작 7열 주 단위 그리드로 계산한다. */
 export function getMonthGridWeeks(
   year: number,
   month: number,
@@ -26,7 +25,6 @@ export function getMonthGridWeeks(
   return weeks;
 }
 
-/** year/month에서 delta개월만큼 이동한 연/월을 계산한다(연도 롤오버 처리). */
 export function shiftMonth(
   year: number,
   month: number,
@@ -38,7 +36,6 @@ export function shiftMonth(
   return { year: newYear, month: newMonth + 1 };
 }
 
-/** 'YYYY.MM.DD' 형식의 날짜 키를 만든다. */
 export function formatDateKey(year: number, month: number, date: number) {
   return `${year}.${String(month).padStart(2, '0')}.${String(date).padStart(
     2,
@@ -46,7 +43,6 @@ export function formatDateKey(year: number, month: number, date: number) {
   )}`;
 }
 
-/** 오늘 날짜를 'YYYY.MM.DD' 형식으로 반환한다. */
 export function todayKey(): string {
   const now = new Date();
   return formatDateKey(now.getFullYear(), now.getMonth() + 1, now.getDate());

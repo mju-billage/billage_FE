@@ -1,12 +1,3 @@
-/** @screen DUE-3-PAGE-04-0 회비 상세_납부 요청 */
-/**
- * 서버 API가 없는 화면(Dues.txt "회비 요청 — 서버 기능이 아닙니다") — 총무가 작성한 텍스트를 OS 기본 공유 시트(`Share.share`)로 그대로
- * 넘기기만 한다. 수신자 목록은 이 화면에서 다루지 않는다(DuesDetailScreen이
- * 이미 들고 있는 미납부 탭 데이터를 그대로 쓰고, 이 화면은 추가·삭제 UI가 없다).
- *
- * 이탈 방지는 `ReportCreateByLedgerScreen` 패턴(뒤로가기+하드웨어 back 모두
- * `handleBack` 경유)을 그대로 따랐다 — 텍스트 1자 이상 입력 시에만 확인 모달을 띄운다.
- */
 import { useCallback, useState } from 'react';
 import { BackHandler, Share, StyleSheet, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -64,7 +55,6 @@ function DuesRequestScreen() {
   };
 
   return (
-    // 전체화면 폼은 `ScreenContainer`(키보드가 뜨면 콘텐츠 영역이 줄어 하단 버튼이 키보드 위로 올라온다).
     <ScreenContainer background="primary">
       <AppBar type="sub" title={DUES_REQUEST_TITLE} onBackPress={handleBack} />
 
@@ -104,7 +94,6 @@ function DuesRequestScreen() {
   );
 }
 
-// DUE-3-PAGE-04-0(납부 요청) 시안이 옅은 블루 (`ScreenContainer background="primary"`).
 const styles = StyleSheet.create({
   body: {
     flex: 1,

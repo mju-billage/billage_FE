@@ -25,7 +25,6 @@ const LABEL_BY_TYPE: Record<AttachmentAddButtonType, string> = {
   gallery: '카메라',
 };
 
-/** 영수증/증빙자료 첨부용 정사각 버튼. attachmentAdd(아웃라인)와 gallery(진한 배경) 두 타입을 지원한다. */
 function AttachmentAddButton({
   type = 'attachmentAdd',
   onPress,

@@ -1,22 +1,3 @@
-/** @screen ETC-5-PAGE-02-0 보관함_내역 상세 (보고서 쪽 "상세 내역 조회"와 같은 ID, 아래 주석 참고) */
-/**
- * **Screen ID는 보고서 쪽(`ReportEntryDetailScreen`)과 의도적으로 같다** — 위
- * `ArchiveLedgerEntriesScreen.tsx` 주석과 같은 이유("기록 보고서 공통 로직 상속").
- * `ETC\보관함\ETC-5-PAGE-02-0.png` 크롭은 금액/지출일/
- * 내역명/담당자/장부/메모/증빙 자료(썸네일 2장)까지 있는 화면이다. **보고서 쪽 크롭
- * (`ETC\보고서 생성\ETC-5-PAGE-02-0.png`)도 이것과 같은 전체 항목이다**.
- * 보고서 쪽 화면이 5필드뿐인 건 시안 차이가
- * 아니라 서버 스냅샷에 `memo`·`receipts`가 없어서다.
- *
- * 그래서 코드까지는 재사용하지 않았다 — 보고서 쪽 `ReportEntryDetailScreen`은 스냅샷에
- * `memo`/`receipts`가 없어 5개 필드만 보여주는 반쪽 화면인데(그 파일 상단 주석 참고),
- * 보관 스냅샷(`ArchivedEntry`)엔 실제로 `memo`/`approvalStatus`/`createdByName`/
- * `receiptFiles[]`까지 있어 그 화면을 재사용하지 않고 이 화면을
- * 새로 만들었다 — 읽기 전용(수정·삭제 불가, 시안 [액션] 명시)이라 승인/삭제 액션은 없다.
- * "담당자" 라벨은 크롭 그대로다 — 실제 API엔 별도 담당자 필드가 없어 `createdByName`
- * (등록한 사람)을 이 자리에 매핑했다, Entry 도메인의 담당자(`managerUserId`) 개념과는
- * 다르다(보관 스냅샷 시점엔 등록자만 남는다).
- */
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';

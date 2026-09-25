@@ -1,4 +1,3 @@
-/** @screen COM-3-PAGE-04-0 비밀번호 재설정_완료 */
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -22,7 +21,6 @@ type PasswordResetSentRouteProp = RouteProp<
   'PasswordResetSent'
 >;
 
-/** 비밀번호 재설정 완료 화면: 임시 비밀번호 발송 안내와 로그인 복귀 버튼을 보여준다. */
 function PasswordResetSentScreen() {
   const navigation = useNavigation<PasswordResetSentNavigationProp>();
   const { params } = useRoute<PasswordResetSentRouteProp>();
