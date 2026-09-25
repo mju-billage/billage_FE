@@ -34,7 +34,6 @@ import {
   FOREGROUND_NEUTRAL_NORMAL,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { version: APP_VERSION } = require('../../../package.json');
 
 const BELL_ICON = require('../../assets/icons/communication/Bell.png');
