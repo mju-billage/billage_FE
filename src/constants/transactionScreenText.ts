@@ -71,6 +71,12 @@ export const SCAN_FAILED_SUBTITLE = '영수증 전체가 잘 나오도록 촬영
 export const SCAN_FAILED_RETRY_LABEL = '다시 촬영하기';
 
 export const SNACKBAR_RECEIPT_ADDED = '영수증을 등록했어요.';
+/** 인식은 못 했지만 촬영본은 증빙으로 붙었다 — 사용자가 헛수고했다고 느끼지 않게 그 사실을 알린다. */
+export const SNACKBAR_SCAN_NOT_RECOGNIZED =
+  '영수증을 인식하지 못했어요. 사진은 증빙으로 첨부했어요.';
+/** 인식 요청 한도 초과. 재촬영을 권하면 안 된다 — 서버가 외부 OCR 을 건당 과금으로 부른다. */
+export const SNACKBAR_SCAN_RATE_LIMITED =
+  '영수증 인식을 너무 많이 요청했어요. 잠시 후 다시 시도해주세요.';
 export const SNACKBAR_RECEIPT_MAX_LIMIT =
   '사진은 최대 10장까지 첨부할 수 있어요.';
 export const SNACKBAR_TRANSACTION_ADDED = '내역이 추가되었어요.';
