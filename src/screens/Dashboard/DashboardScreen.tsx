@@ -85,6 +85,7 @@ function DashboardScreen() {
   const [miniCalendar, setMiniCalendar] = useState<MiniCalendarData | null>(null);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
+  const [groupName, setGroupName] = useState(getActiveGroup()?.name ?? '');
 
   const nickname = getCurrentUser()?.name ?? '';
 
@@ -106,6 +107,7 @@ function DashboardScreen() {
         await groupService.getMyGroups();
         group = getActiveGroup();
       }
+      setGroupName(group?.name ?? '');
       if (!group) {
         setLoadErrorMessage(NO_ACTIVE_GROUP_MESSAGE);
         setLoadState('error');
@@ -171,7 +173,9 @@ function DashboardScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         <View style={styles.headerRow}>
-          <Text style={styles.nickname}>{nickname}</Text>
+          <Text style={styles.groupName} numberOfLines={1}>
+            {groupName}
+          </Text>
           <IconButton
             icon={BELL_ICON}
             onPress={handlePressNotification}
@@ -268,8 +272,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 60,
   },
-  nickname: {
+  groupName: {
     ...TYPOGRAPHY.h3,
+    flex: 1,
+    marginRight: 8,
   },
   sectionTitle: {
     ...TYPOGRAPHY.subtitle1,
