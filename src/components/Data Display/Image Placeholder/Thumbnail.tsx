@@ -13,15 +13,12 @@ const IMAGE_ICON = require('../../../assets/icons/content/Image.png');
 
 type ThumbnailProps = {
   imageUri?: string;
-  /** imageUri가 인증이 필요한 경로(File 도메인 fileUrl 등)일 때 같이 전달한다. */
   imageHeaders?: Record<string, string>;
   size?: number;
   onRemove?: () => void;
-  /** 업로드 진행 중 — 이미지 위에 스피너를 덮고 제거 버튼을 숨긴다. */
   uploading?: boolean;
 };
 
-/** 작은 정사각 이미지 썸네일. 우상단에 겹쳐진 제거 버튼을 옵션으로 보여준다. */
 function Thumbnail({
   imageUri,
   imageHeaders,

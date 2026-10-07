@@ -1,35 +1,3 @@
-/** @screen DUE-2-PAGE-01-0 새 회비 생성 (step='basic') */
-/** @screen DUE-3-PAGE-01-0 새 회비 생성_모임원 선택 (step='members') */
-/**
- * 6-B(회비 생성, 총무 전용): 두 Screen ID를 한 컴포넌트의 내부 단계(step)로
- * 구현했다 — 2단계(모임원 선택)에서 "<"로 1단계로 돌아갈 때 입력값이 그대로
- * 남아 있어야 하는데, 두 화면을 진짜로 분리하면 라우트 파라미터로 기본 정보를
- * 왕복시켜야 해서 더 복잡해진다. `TransactionRegisterScreen`의 내부 stage 패턴과
- * 같은 방식이다.
- *
- * 0. 기간 입력 복원(2026-09-04, 7-A 이후 정합성 복구): 6-B 당시엔 "서버에
- * 시작일 필드가 없다"고 판단해 화면명세서(DUE-2-PAGE-01-0 No.5 "기간 선택")가
- * 요구하는 시작~마감 범위를 마감일 단일 입력으로 줄였는데, 그 판단의 근거가
- * 틀렸다 — 개발 서버 실호출로 `startDate`가 실제로 필수 필드임을 확정했다
- * (`docs/api-gaps.md` "확정됨" 절: 없으면 400, `fieldErrors:[{field:"startDate"}]`).
- * 명세대로 기간 범위 입력을 되돌렸다.
- *
- * 기존 시트 재사용:
- *  - "장부 선택"(ADD-2-SHEET-03-0)은 `TransactionSingleSelectSheet`를 그대로
- *    가져다 썼다 — 이미 title/options/selectedKey/onSelect만 받는 완전히
- *    일반화된 컴포넌트라 손댈 필요가 없었다(내역 등록 화면 회귀 없음).
- *  - "기간 선택"(DTB-3-SHEET-01-0)은 `TransactionFilterSheet` 내부에 커스텀
- *    기간 캘린더가 있지만, 그 시트는 장부·구분·정렬까지 같이 묶인 내역 필터
- *    전용 컴포넌트라 그대로 가져다 쓸 수 없었다(억지로 재사용하면 내역 필터
- *    동작에 회귀 위험) — 대신 같은 상호작용을 새 컴포넌트
- *    `DuesDateRangeSheet`로 옮겨 적었다. 진짜 재사용 가능한 조각(`Calendar`
- *    컴포넌트 자체)은 그대로 썼다 — `TransactionFilterSheet`는 손대지 않았다.
- *  - 제목/금액은 화면명세서가 시트가 아니라 페이지에 바로 있는 텍스트 필드로
- *    정의해서(No.2/3), `TransactionRegisterScreen`류의 시트 패턴이 아니라
- *    `GroupCreateScreen`/`LedgerCreateScreen`류의 페이지 내 `TextField` 패턴을
- *    따랐다 — 시안과 기존 시트 스타일(테두리 버튼)이 다르지만 이번엔 맞추지
- *    않고 기존 폼 로우 스타일(`SelectionListItem`)로 통일했다(장부/기간).
- */
 import { useCallback, useRef, useState } from 'react';
 import {
   BackHandler,
@@ -115,7 +83,6 @@ type MemberLoadState = 'loading' | 'error' | 'ready';
 
 type DuesCreateNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-/** 'YYYY.MM.DD' → 'YYYY-MM-DD'(Dues API 형식). */
 function toIsoDate(dotDate: string): string {
   return dotDate.replace(/\./g, '-');
 }
@@ -175,9 +142,6 @@ function DuesCreateScreen() {
     }
   };
 
-  // 안드로이드 하드웨어 back(ReportCreateByLedgerScreen 패턴). `members` 단계에선
-  // 화면 상단 back 버튼과 같이 `basic` 단계로 되돌아간다(입력값 유지, 이탈 아님).
-  // `basic` 단계에선 `handleClose`와 동일하게 입력값이 있을 때만 이탈 확인을 띄운다.
   useFocusEffect(
     useCallback(() => {
       const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -195,22 +159,6 @@ function DuesCreateScreen() {
     }, [step, hasInput]),
   );
 
-  /**
-   * 자릿수(최대 9자, `DUES_AMOUNT_MAX`=999,999,999가 9자리 최댓값이라 자릿수
-   * 제한만으로 상한이 그대로 지켜진다) 기준으로 막는다 — 콤마가 섞인 표시
-   * 문자열엔 maxLength를 못 쓴다(자릿수와 문자 길이가 안 맞음).
-   *
-   * 10번째 숫자를 누르거나(자릿수 초과) 실제 값이 그대로인 입력(예: 빈
-   * 칸에서 "0")이 들어오면 setState를 아예 안 한다(클램프해서 되돌리는 게
-   * 아니라 그 입력 자체를 무시). 근데 React는 controlled TextInput의 `value`
-   * prop이 이전 렌더와 값이 같으면(Object.is 동일) 그 prop을 네이티브로
-   * 다시 안 내려보낸다 — 리렌더 자체가 스킵되는 게 아니라(컴포넌트 함수는
-   * 다시 돌아도), 리컨실러가 "값 안 바뀐 prop"을 커밋 단계에서 걸러내는
-   * 것이라 네이티브 EditText는 이미 그려버린 초과/무효 글자를 그대로 들고
-   * 있는다. 그래서 이 두 경우엔 `setNativeProps`로 TextInput 인스턴스를
-   * 직접 건드려 강제로 되돌린다 — React 밖에서 명령형으로 native text를
-   * 다시 쓰는 것이라 prop diffing을 안 거치고 무조건 반영된다.
-   */
   const handleAmountChange = (text: string) => {
     const digitsOnly = text.replace(/[^0-9]/g, '');
     const revertNative = () => {
@@ -252,7 +200,6 @@ function DuesCreateScreen() {
       const ledgers = await ledgerService.getAllLedgersInGroup(group.id);
       setLedgerOptions(ledgers.map(l => ({ id: l.id, name: l.name })));
     } catch {
-      // 장부 목록 실패는 조용히 무시한다 — 시트를 열면 빈 목록 안내가 뜨고, 다시 열면 재시도된다.
     }
   }, []);
 
@@ -334,10 +281,6 @@ function DuesCreateScreen() {
         targetMemberIds: selectedMemberIds.map(Number),
         ledgerId,
       });
-      // DUE-4-SNACKBAR-01-0: 생성 화면이 아니라 납부관리 메인 목록에서
-      // 스낵바를 보여준다(시안 확인) — DuesDetailScreen 삭제/마감과 같은 패턴.
-      // navigate가 아니라 reset — 생성 폼(및 그 위에 쌓였을 수 있는 화면)을
-      // 스택에서 걷어내 뒤로가기로 폼에 못 돌아가게 한다(design-verification.md §5-11).
       navigation.reset({
         index: 0,
         routes: [
@@ -369,8 +312,6 @@ function DuesCreateScreen() {
     }
   };
 
-  // DUE-2-PAGE-01-0/DUE-3-PAGE-01-0(새 회비 생성 및 모임원 선택) 둘 다 시안이
-  // 흰 배경 — design-verification.md §5-7 규칙, §2 표 갱신.
   if (step === 'members') {
     return (
       <ScreenContainer
@@ -575,7 +516,7 @@ function DuesCreateScreen() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 16,
     gap: 20,
   },
@@ -629,7 +570,7 @@ const styles = StyleSheet.create({
     color: FEEDBACK_NEGATIVE_BOLD,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 16,
     paddingTop: 8,
   },

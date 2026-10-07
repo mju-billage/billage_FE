@@ -1,4 +1,3 @@
-/** @screen FDR-3-PAGE-03-0 새 장부 생성 */
 import { useCallback, useState } from 'react';
 import { BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -48,7 +47,6 @@ type LedgerCreateNavigationProp = NativeStackNavigationProp<
 >;
 type LedgerCreateRouteProp = RouteProp<RootStackParamList, 'LedgerCreate'>;
 
-/** "새 장부 생성하기": 이름(필수, 최대 10자)과 예산(선택)을 입력해 장부를 만든다. */
 function LedgerCreateScreen() {
   const navigation = useNavigation<LedgerCreateNavigationProp>();
   const route = useRoute<LedgerCreateRouteProp>();
@@ -71,7 +69,6 @@ function LedgerCreateScreen() {
     }
   };
 
-  // 안드로이드 하드웨어 back도 같은 이탈 확인을 거치게 한다(ReportCreateByLedgerScreen 패턴).
   useFocusEffect(
     useCallback(() => {
       const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -97,8 +94,6 @@ function LedgerCreateScreen() {
       if (parentId) {
         await ledgerService.createLedger(parentId, trimmedName, parsedBudget);
       } else {
-        // 최상위(폴더 탭 루트)에서 진입한 경우 — 2026-09-13 신설된
-        // POST /groups/{groupId}/ledgers로 만든다(백엔드 노티 03번).
         const group = getActiveGroup();
         if (!group) {
           setNameError(API_ERROR_DEFAULT_MESSAGE);
@@ -141,7 +136,6 @@ function LedgerCreateScreen() {
       }
       snackbarOffset={68}
     >
-      {/* 키보드에 가린 필드도 스크롤로 볼 수 있게 한다. 하단 CTA(footer)는 스크롤 밖에 고정. */}
       <ScrollView
         style={styles.scroll}
         keyboardShouldPersistTaps="handled"
@@ -213,7 +207,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 60,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   scroll: {
     flex: 1,

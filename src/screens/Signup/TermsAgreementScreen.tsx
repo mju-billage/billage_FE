@@ -1,4 +1,3 @@
-/** @screen COM-2-PAGE-01-0 약관 동의 */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -46,8 +45,6 @@ const INITIAL_AGREEMENTS: Agreements = {
   age: false,
 };
 
-/** 약관 동의 화면: 전체 동의 및 개별 약관 체크박스를 보여준다. 일반 가입과 신규 소셜 가입이 함께 쓴다 —
- * 소셜 가입은 `route.params.socialProfile`이 있고, 동의를 마치면 `SocialSignupInfo`로 이어진다. */
 function TermsAgreementScreen() {
   const navigation = useNavigation<TermsAgreementNavigationProp>();
   const socialProfile = useRoute<TermsAgreementRouteProp>().params?.socialProfile;
@@ -146,7 +143,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 60,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   backRow: {
     marginBottom: 16,

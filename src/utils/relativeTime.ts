@@ -1,5 +1,3 @@
-/** ISO 날짜문자열을 "방금 전"/"N분 전"/"N시간 전"/"N일 전"/날짜(N월 N일)로 바꾼다.
- * 서버는 `createdAt`만 내려주고 경과 시간 표기는 클라이언트가 만든다(명세 정책). */
 export function formatRelativeTime(isoDateTime: string, now: Date = new Date()): string {
   const created = new Date(isoDateTime);
   const diffMs = now.getTime() - created.getTime();

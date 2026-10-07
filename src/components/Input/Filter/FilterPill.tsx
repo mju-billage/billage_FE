@@ -13,7 +13,6 @@ type FilterPillProps = {
   onPress: () => void;
 };
 
-/** 필터 바텀시트의 단일/다중 선택 칩(둥근 알약형, 선택 시 채워짐). */
 function FilterPill({ label, active, onPress }: FilterPillProps) {
   return (
     <Pressable
@@ -43,8 +42,6 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.chips,
     color: FOREGROUND_NEUTRAL_NORMAL,
   },
-  // Medium 계열 fontFamily는 fontWeight 오버레이가 안 먹혀서(별도 폰트 파일),
-  // 선택 상태는 굵기 대신 색상 대비로만 표현한다.
   pillLabelActive: {
     color: FOREGROUND_INVERSE,
   },

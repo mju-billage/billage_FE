@@ -18,7 +18,6 @@ type AgreementCheckboxRowProps = {
   emphasized?: boolean;
 };
 
-/** 약관 동의 화면의 체크박스 한 줄: 라벨, 필수/선택 태그, 상세 화면 이동 화살표를 보여준다. */
 function AgreementCheckboxRow({
   label,
   checked,
@@ -70,7 +69,6 @@ const styles = StyleSheet.create({
   labelEmphasized: {
     ...TYPOGRAPHY.subtitle1,
   },
-  // 시안 실측(회원가입_약관동의.png 픽셀): `(필수)`만 파랑이고 `(선택)`은 본문과 같은 색이다.
   tagRequired: {
     color: FOREGROUND_SECONDARY,
   },

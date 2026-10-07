@@ -1,5 +1,3 @@
-/** @screen ETC-1-PAGE-01-0 더보기 메인 */
-/** @screen ETC-5-SNACKBAR-05-0 모임 전환 완료 (GroupSwitcherMenu.onSelectGroup, 시안 이미지 0장) */
 import { useCallback, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -58,7 +56,6 @@ const SETTING_ICON = require('../../assets/icons/system/Setting.png');
 
 type MoreScreenNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-/** 더보기 탭 메인 화면: 모임 전환, 모임원 미리보기, 모임 관리/보고서/증빙자료/통계/보관함/설정 진입점. */
 function MoreScreen() {
   const navigation = useNavigation<MoreScreenNavigationProp>();
   const [group, setGroup] = useState(getActiveGroup());
@@ -76,7 +73,6 @@ function MoreScreen() {
       await groupService.getMyGroups();
       const activeGroup = getActiveGroup();
       setGroup(activeGroup);
-      // 모임 관리자 카드용. 실패해도 더보기 화면 자체는 띄운다(카드만 비어 보임).
       try {
         setAdmins(
           activeGroup ? await groupMembershipService.getMemberships(activeGroup.id) : [],
@@ -139,7 +135,6 @@ function MoreScreen() {
     );
   }
 
-  // 가나다순. 프로필 이미지가 있으면 이미지, 없으면 이니셜(AvatarList가 처리), 4명 초과분은 +N.
   const adminAvatars = [...admins]
     .sort((a, b) => a.name.localeCompare(b.name, 'ko'))
     .map(item => ({
@@ -318,8 +313,6 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_SECONDARY,
   },
-  // 흰 카드 안에 메뉴를 넣는다. 항목 자체가 위아래 12·좌우 4 패딩을 갖고 있어 카드 패딩을 줄여
-  // 관리자 카드와 내용 시작 위치(위 16·좌 16)를 맞춘다.
   menuCard: {
     marginTop: 12,
     paddingVertical: 4,

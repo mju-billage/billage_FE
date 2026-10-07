@@ -48,7 +48,6 @@ const ROWS: KeyDef[][] = [
   ],
 ];
 
-/** 금액 입력 전용 커스텀 숫자 키패드(4x4). 시스템 키보드 대신 사용한다. */
 function NumericKeypad({
   onPressDigit,
   onPressDecimal,

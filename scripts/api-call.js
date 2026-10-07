@@ -4,8 +4,8 @@
  * 진단용 API 호출 스크립트. 의존성 없음(Node 표준 라이브러리만).
  *
  * 왜 필요한가: curl -d '...'로 한글(비ASCII)을 보내면 Windows 셸 환경에서 인코딩이
- * 깨져 서버가 400 INVALID_REQUEST(fieldErrors 빈 배열)로 응답하는 사고가 이 세션에서
- * 이미 두 번 재발했다(2026-09-13, 보고서 생성 제목/회원가입 이름 필드) — 둘 다 서버를
+ * 깨져 서버가 400 INVALID_REQUEST(fieldErrors 빈 배열)로 응답하는 사고가 반복돼
+ * 왔다 — 매번 서버를
  * 의심했지만 실제로는 서버가 멀쩡했다. 이 스크립트는 요청 바디를 셸 인자가 아니라
  * JSON 파일에서 읽어 `Buffer.from(JSON.stringify(body), 'utf8')`로 직접 보내므로,
  * 셸 코드페이지를 아예 거치지 않는다 — 구조적으로 같은 사고가 날 수 없다.
@@ -48,7 +48,7 @@ const DEFAULT_PASSWORD = 'Billage1!Verify';
 
 // --- 민감 값 마스킹 ---------------------------------------------------------
 // 이 스크립트의 콘솔 출력은 그대로 대화에 붙는 워크플로에서 쓰인다. 로그인 응답의 토큰이나
-// 요청 바디의 비밀번호가 원문으로 찍히면 그대로 노출되므로(2026-09-20 액세스 토큰 노출 사고)
+// 요청 바디의 비밀번호가 원문으로 찍히면 그대로 노출되므로
 // 출력 직전에 항상 가린다. 서버로 나가는 요청/응답 자체는 건드리지 않고 출력만 바꾼다.
 const TOKEN_KEYS = new Set(['accesstoken', 'refreshtoken', 'token', 'idtoken', 'authorization', 'cookie', 'set-cookie']);
 const SECRET_KEYS = new Set(['password', 'newpassword', 'currentpassword', 'passwordconfirm', 'confirmpassword', 'secret']);

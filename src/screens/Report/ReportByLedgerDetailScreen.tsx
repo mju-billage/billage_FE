@@ -1,15 +1,3 @@
-/** @screen ETC-3-PAGE-02-0 장부별 보고서 조회 */
-/** @screen ETC-3-PAGE-02-1 장부별 보고서 상세(수입/지출) — 02-0의 탭 상태, 별도 라우트 아님 */
-/**
- * 보고서 생성 메인(`ReportMainScreen`)의 장부별 탭 카드를 눌러 들어오는 상세
- * 화면. 목록에 없던 `ledgers[].entries`가 필요해 `GET /reports/{reportId}`로
- * 다시 조회한다(생성 직후 응답을 재사용하지 않음 — 목록↔상세 화면이 분리된
- * 스택이라 생성 시점 데이터를 들고 다닐 방법이 마땅치 않고, 상세 조회 API가
- * MEMBER 권한으로 별도 공개돼 있어 그냥 새로 부르는 쪽이 단순하다).
- *
- * 공유 버튼은 서버에 보고서 웹뷰/PDF 응답이 없어(Report.txt 정책 메모) OS
- * 공유 시트에 텍스트 요약만 실어 보낸다 — 새 API도 새 의존성도 필요 없다.
- */
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Image, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -20,6 +8,8 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import CardBase from '../../components/Data Display/Card/CardBase';
+import Divider from '../../components/Data Display/Divider/Divider';
+import FolderTabShape from '../../components/Data Display/Card/FolderTabShape';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import type { ReportDetail } from '../../types/report';
 import * as reportService from '../../services/reportService';
@@ -44,6 +34,7 @@ import {
 } from '../../constants/reportScreenText';
 import {
   FEEDBACK_POSITIVE_BOLD,
+  FILL_NEUTRAL_SUBTLE,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
@@ -67,8 +58,6 @@ function ReportByLedgerDetailScreen() {
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
-  // ETC-5-SNACKBAR-08-0: 생성 직후 이 화면으로 이동하며 받은 완료 메시지를
-  // 한 번만 띄운다(design-verification.md §5-11).
   useEffect(() => {
     if (route.params.snackbarMessage) {
       setSnackbarMessage(route.params.snackbarMessage);
@@ -160,8 +149,12 @@ function ReportByLedgerDetailScreen() {
         </Text>
 
         <CardBase style={styles.headerCard}>
+          <FolderTabShape fill={FILL_NEUTRAL_SUBTLE} />
           <Text style={styles.headerTitle} numberOfLines={1}>
             {report.title}
+          </Text>
+          <Text style={styles.periodText}>
+            {formatDateDot(report.startDate)} - {formatDateDot(report.endDate)}
           </Text>
         </CardBase>
 
@@ -188,11 +181,17 @@ function ReportByLedgerDetailScreen() {
                   })
                 }
               >
-                <CardBase style={styles.ledgerCard}>
-                  <View style={styles.ledgerCardTextColumn}>
+                <CardBase>
+                  <View style={styles.ledgerTitleRow}>
                     <Text style={styles.ledgerName} numberOfLines={1}>
                       {item.ledgerName}
                     </Text>
+                    <Image source={CHEVRON_RIGHT_ICON} style={styles.chevron} />
+                  </View>
+                  <View style={styles.ledgerDivider}>
+                    <Divider />
+                  </View>
+                  <View style={styles.ledgerAmounts}>
                     <View style={styles.amountRow}>
                       <Text style={styles.amountLabel}>{REPORT_DETAIL_INCOME_LABEL}</Text>
                       <Text style={styles.ledgerIncome}>{formatWon(item.totalIncome)}원</Text>
@@ -202,7 +201,6 @@ function ReportByLedgerDetailScreen() {
                       <Text style={styles.ledgerExpense}>{formatExpense(item.totalExpense)}</Text>
                     </View>
                   </View>
-                  <Image source={CHEVRON_RIGHT_ICON} style={styles.chevron} />
                 </CardBase>
               </Pressable>
             )}
@@ -216,7 +214,7 @@ function ReportByLedgerDetailScreen() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 8,
     gap: 8,
   },
@@ -236,7 +234,12 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   headerCard: {
-    marginTop: 8,
+    marginTop: 24,
+    gap: 4,
+  },
+  periodText: {
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   headerTitle: {
     ...TYPOGRAPHY.subtitle1,
@@ -255,13 +258,13 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
     gap: 12,
   },
-  ledgerCard: {
+  ledgerTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 8,
   },
-  ledgerCardTextColumn: {
-    flex: 1,
+  ledgerAmounts: {
     gap: 4,
   },
   amountRow: {
@@ -273,7 +276,11 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   ledgerName: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.subtitle1,
+    flex: 1,
+  },
+  ledgerDivider: {
+    marginVertical: 8,
   },
   ledgerIncome: {
     ...TYPOGRAPHY.body2,

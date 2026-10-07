@@ -15,7 +15,6 @@ type CheckListItemProps = {
   onPress?: () => void;
 };
 
-/** 선택 시 체크마크가 붙는 리스트 항목. */
 function CheckListItem({
   label,
   selected = false,

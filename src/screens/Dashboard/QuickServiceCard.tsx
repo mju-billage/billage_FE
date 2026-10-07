@@ -11,7 +11,6 @@ type QuickServiceCardProps = {
   onPress: () => void;
 };  
 
-/** 대시보드 하단의 보고서/통계/증빙자료 바로가기 카드. */
 function QuickServiceCard({ item, onPress }: QuickServiceCardProps) {
   return (
     <Pressable style={styles.card} onPress={onPress}>

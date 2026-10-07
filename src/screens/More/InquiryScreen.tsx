@@ -1,10 +1,3 @@
-/** @screen ETC-3-PAGE-10-0 문의하기 */
-/**
- * 디자인 '진행' 중(2026.05.27 기준, 화면명세서 표 확인). 시안엔 문의 작성 폼이
- * 없고 FAQ 아코디언 + 읽기 전용 문의 메일 표시만 있어 그대로 따랐다 — 명세의
- * `POST /api/v1/inquiries`(문의 접수)는 이 화면에서 호출하지 않는다(폼이
- * 생기면 `supportService.submitInquiry`를 그대로 쓰면 된다).
- */
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -38,7 +31,6 @@ import { TYPOGRAPHY } from '../../constants/typography';
 type InquiryNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Inquiry'>;
 type LoadState = 'loading' | 'error' | 'ready';
 
-/** 문의하기: FAQ 아코디언 목록 + 읽기 전용 문의 메일 안내. */
 function InquiryScreen() {
   const navigation = useNavigation<InquiryNavigationProp>();
   const [faqs, setFaqs] = useState<Faq[]>([]);
@@ -114,7 +106,7 @@ function InquiryScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 40,
   },

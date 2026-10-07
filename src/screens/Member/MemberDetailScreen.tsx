@@ -1,22 +1,3 @@
-/** @screen DUE-3-PAGE-03-0 모임원 상세_조회 */
-/** @screen DUE-4-MODAL-01-0 모임원 삭제 */
-/** @screen DUE-5-SNACKBAR-02-0 모임원 삭제 완료 */
-/**
- * 7-C: DUE 도메인의 마지막 조각. 목록(`MemberManageScreen`)에서 행을 누르면
- * 들어오는 상세 화면 — 수정(연필)·삭제(휴지통) 아이콘은 총무(OWNER) 전용이라
- * 일반 관리자에겐 숨긴다(2단계 UI 우선 차단 패턴, `DuesDetailScreen`과 동일).
- * 조회 자체는 MEMBER 권한이라 둘 다 볼 수 있다(Member.txt §6).
- *
- * 삭제 확인 모달 문구("기존 납부 내역은 그대로 유지돼요.")는 시안
- * (`모임원삭제-1.png`) 그대로다 — 다만 이 문구는 "이미 마감된 회비로 생성된
- * 장부 수입 내역"에 한정된 이야기(Member.txt §8 정책 메모)이고, **진행 중인
- * 회비의 참여 데이터는 삭제 시 Hard Delete된다**(§5). 시안 문구만 보면 이
- * 차이가 드러나지 않아 기획 확인 항목으로 올렸다(`design-verification.md` §5-4).
- *
- * 삭제 성공 후엔 이 화면 자체가 다시 열릴 수 없으니(모임원이 없어짐)
- * `MemberManage`로 `navigate`해 스낵바 문구를 실어 보낸다(`DuesDetailScreen`의
- * 회비 삭제 패턴과 동일) — 이 화면은 스택에서 사라진다.
- */
 import { useCallback, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -247,7 +228,7 @@ function MemberDetailScreen() {
 
 const styles = StyleSheet.create({
   body: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 24,
     gap: 16,

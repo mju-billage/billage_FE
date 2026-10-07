@@ -1,32 +1,3 @@
-/** @screen ADD-1-PAGE-01-0 내역 추가 */
-/** @screen DTB-3-PAGE-02-0 상세 내역_수정 (existing transactionId로 진입 시) */
-/** @screen DTB-4-MODAL-01-0 상세 내역_수정 이탈 안내 (leave 다이얼로그) */
-/** @screen ADD-2-MODAL-01-0 이탈 방지 모달 (DTB-4-MODAL-01-0과 동일 다이얼로그, IA ID 중복) */
-/** @screen ADD-4-PAGE-01-0 영수증 스캔 성공 (handleScanComplete에서 필드 반영) */
-/** @screen ADD-5-MODAL-01-0 스캔 내용 반영 확인 모달 (scanApply 다이얼로그) */
-/** @screen ADD-2-SNACKBAR-01-0 등록 완료 (SNACKBAR_TRANSACTION_ADDED[_PENDING]) */
-/**
- * 4-A(Entry API 연동): 등록(신규)은 항상 실 서버로 간다 — id가 없으면
- * `mode='createReal'`, 있으면 `mode='editReal'`이다. (4-B 정리: DTB 전체 목록이
- * 실 API로 전환되며 `dtb-tx-N` 목 id를 만들어내는 곳이 사라져 이 화면의 옛
- * `editMock` 분기가 도달 불가능해졌다 — 확인 후 분기와 `types/transaction.ts`를
- * 함께 걷어냈다.)
- *
- * "담당자" 필드(2026-09-05 연동): `managerUserId`는 이 모임의 관리자(`GroupMembership`,
- * User 기준)여야 한다 — 납부 명단(`Member`)은 담당자가 될 수 없다(Entry.txt §4). 그래서
- * 선택 목록도 `groupMembershipService.getMemberships()`에서 가져온다.
- *
- * 실 API로 가는 두 모드에서 여전히 뺀 것:
- *  - "장부" 변경(editReal만): `PATCH /entries/{id}`에 ledgerId가 없어 등록 후엔
- *    장부를 옮길 수 없다 — 표시만 하고 못 누르게 막았다.
- *
- * 2026-09-11부터 증빙 실제 업로드가 붙었다 — 카메라/갤러리로 고른 사진을
- * 촬영·선택 직후 `fileService.uploadFile(..., 'RECEIPT')`로 바로 업로드하고,
- * 받은 fileId를 등록/수정 요청의 `receiptFileIds`에 담는다(`receiptItems`,
- * 업로드 중인 항목은 fileId가 없어 자동으로 제외된다). 영수증 스캔(`scan`)은
- * 여전히 `utils/mockOcr.ts` mock이라 실제 파일이 없다 — OCR 서버가
- * "시작 전"이라(`docs/api-wiring.md`) 이번에도 연결하지 않는다.
- */
 import { useCallback, useEffect, useState } from 'react';
 import {
   BackHandler,
@@ -167,11 +138,6 @@ type ScreenLoadState = 'loading' | 'error' | 'ready';
 
 type LedgerOption = { id: string; name: string };
 
-/** 증빙 한 장. 새로 촬영/선택한 항목은 `uploading:true`로 시작해 업로드가
- * 끝나면 `fileId`가 채워진다 — `fileId`가 없는 항목(업로드 중/스캔 mock)은
- * 제출 시 자동으로 빠진다. `fromScan`은 영수증 스캔이 만든 항목 표시다 — "이미
- * 스캔한 적 있는가"(재스캔 덮어쓰기 확인)는 이 항목이 목록에 남아 있는지로 판단해서,
- * 썸네일을 지우면 그 판정도 함께 사라진다. */
 type ReceiptItem = {
   key: string;
   previewUri: string;
@@ -183,12 +149,10 @@ type ReceiptItem = {
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
 
-/** 'YYYY.MM.DD' → 'YYYY-MM-DD'(Entry API 형식). */
 function toIsoDate(dotDate: string): string {
   return dotDate.replace(/\./g, '-');
 }
 
-/** 'YYYY-MM-DD'(서버) → 'YYYY.MM.DD'(이 화면/TransactionDateSheet 형식). */
 function fromIsoDate(isoDate: string): string {
   return isoDate.replace(/-/g, '.');
 }
@@ -211,7 +175,6 @@ type TransactionRegisterRouteProp = RouteProp<
   'TransactionRegister'
 >;
 
-/** 내역 추가/수정 화면. 금액/일자/내역명/(담당자)/장부/메모 입력 + 증빙자료 촬영/스캔/갤러리 첨부. */
 function TransactionRegisterScreen() {
   const navigation = useNavigation<TransactionRegisterNavigationProp>();
   const route = useRoute<TransactionRegisterRouteProp>();
@@ -237,7 +200,6 @@ function TransactionRegisterScreen() {
   const [screenLoadState, setScreenLoadState] = useState<ScreenLoadState>('loading');
   const [screenErrorMessage, setScreenErrorMessage] = useState('');
 
-  // editReal 저장 시 "실제로 바뀐 것만" 서버로 보내기 위한 원본 스냅샷(0-1).
   const [initialSnapshot, setInitialSnapshot] = useState<{
     title: string;
     amount: number;
@@ -269,8 +231,6 @@ function TransactionRegisterScreen() {
     try {
       const group = getActiveGroup();
       if (group) {
-        // 담당자 후보는 이 모임의 관리자(GroupMembership)다 — 납부 명단(Member)이
-        // 아니다(Entry.txt §4). createReal/editReal 둘 다 필요해 공통으로 가져온다.
         const memberships = await groupMembershipService.getMemberships(group.id);
         setManagerOptions(memberships.map(m => ({ key: m.userId, label: m.name })));
       }
@@ -350,11 +310,6 @@ function TransactionRegisterScreen() {
     navigation.goBack();
   };
 
-  // 안드로이드 하드웨어 back(ReportCreateByLedgerScreen 패턴). `form` 단계에선
-  // 화면 상단 back 버튼과 똑같이 이탈 확인 모달을 띄운다 — 이 화면의 `handleBack`은
-  // 입력 여부와 무관하게 항상 모달을 띄우므로 하드웨어 back도 그대로 맞춘다.
-  // `gallery`/`scanning`/`scanFailed` 단계에선 화면을 나가는 대신 폼 단계로
-  // 돌아간다(각 하위 화면의 onBack/onClose와 동일한 동작).
   useFocusEffect(
     useCallback(() => {
       const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -415,9 +370,6 @@ function TransactionRegisterScreen() {
           if (managerUserId && managerUserId !== initialSnapshot.managerUserId) {
             updates.managerUserId = managerUserId;
           }
-          // 업로드가 끝나 fileId가 생긴 항목만 비교한다 — 업로드 중이거나
-          // 스캔 mock 항목(fileId 없음)은 제외된다(제출 자체가 업로드 중엔
-          // 막혀 있어 도달하지 않는다).
           if (!sameNumberSet(uploadedReceiptFileIds, initialSnapshot.receiptFileIds)) {
             updates.receiptFileIds = uploadedReceiptFileIds;
           }
@@ -443,14 +395,6 @@ function TransactionRegisterScreen() {
     setReceiptItems(current => current.filter(item => item.key !== key));
   };
 
-  /**
-   * 실제 촬영본/선택본(2026-09-06 카메라, 2026-09-11 갤러리)이 생기면 로컬
-   * 파일 uri로 썸네일을 먼저 보여주고(`uploading: true`), 곧바로
-   * `fileService.uploadFile(..., 'RECEIPT')`로 업로드한다. 여러 장이면
-   * **순차 업로드**다 — 한 번에 최대 10장뿐이라 병렬로 열 필요가 없고,
-   * 실패했을 때 어느 장부터 실패했는지 순서대로 보여줄 수 있어 실패 처리가
-   * 단순해진다.
-   */
   const uploadReceiptImage = async (key: string, image: PickedImage) => {
     try {
       const uploaded = await fileService.uploadFile(
@@ -485,12 +429,6 @@ function TransactionRegisterScreen() {
     }
   };
 
-  /**
-   * 시스템 카메라를 직접 부른다 — 예전엔 이 앞에 프리뷰 없는 인앱 카메라 화면
-   * (`CameraCaptureView`)을 거쳤는데, 시스템 카메라 앱을 쓰는 이상 그 중간
-   * 화면은 "카메라가 두 번 열리는" 것처럼만 보여 없앴다(2026-09-06). 취소하면
-   * 아무 화면 전환 없이 지금 화면(폼 또는 스캔 재시도 전 화면)에 그대로 남는다.
-   */
   const handleTakePhoto = async (mode: 'photo' | 'scan') => {
     const image = await captureWithFeedback(showSnackbar, () =>
       setActiveDialog('cameraPermission'),
@@ -845,7 +783,7 @@ function TransactionRegisterScreen() {
 const styles = StyleSheet.create({
   content: {
     paddingTop: 8,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 40,
   },
   stateContainer: {
@@ -889,7 +827,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 16,
   },
 });

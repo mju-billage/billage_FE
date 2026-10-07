@@ -1,13 +1,3 @@
-/** @screen ETC-2-PAGE-06-0 더보기 > 보관함 */
-/** @screen ETC-3-MODAL-03-0 보관함 기록 삭제 (activeDialog='delete') */
-/** @screen ETC-3-MODAL-04-0 기록 제목 변경 (activeDialog='rename') */
-/** @screen ETC-4-SNACKBAR-01-0 기록 삭제 완료 */
-/** @screen ETC-4-SNACKBAR-02-0 제목 변경 완료 */
-/**
- * 시안 카드에 "1GB"/"500mb" 같은 용량 표시가 있지만 Folder.txt 8번 API
- * 응답(목록)엔 용량 필드가 없다 — `ledgerCount`로 대체했다(공통규칙: 시안과
- * API가 다르면 API를 따르고 보고).
- */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -53,14 +43,12 @@ import { TYPOGRAPHY } from '../../constants/typography';
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const CLOSE_ICON = require('../../assets/icons/action/Close.png');
 
-/** ETC-4-SNACKBAR-01-0/02-0 스펙시트 모두 "3초 후 자동 소멸" 명시 — 이 화면 전용 상수라 다른 화면엔 영향 없음. */
 const SNACKBAR_AUTO_HIDE_MS = 3000;
 
 type ArchiveListNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type LoadState = 'loading' | 'error' | 'ready';
 type ActiveDialog = 'rename' | 'delete' | null;
 
-/** 보관 기록(archive) 목록: 제목 변경·삭제, 상세("기록보기")는 보고서 상세 화면을 재사용한다. */
 function ArchiveListScreen() {
   const navigation = useNavigation<ArchiveListNavigationProp>();
   const snackbarTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -307,12 +295,6 @@ function ArchiveListScreen() {
   );
 }
 
-/**
- * 'YYYY.MM.DD · HH:mm' — 카드 메타 표시 전용(시안 기준), 다른 화면과 공유하지 않아 유틸로 안 뺐다.
- * 2026-09-12: 필드명이 `archivedAt`→`createdAt`으로 바뀐 것과 별개로, 값 하나가 비어도 목록 전체
- * 렌더가 죽으면 안 돼 가드를 넣었다(이 화면의 실제 크래시 원인은 필드명이었지만, 서버 응답
- * 값 자체가 언젠가 비거나 형식이 바뀔 가능성에도 방어한다).
- */
 function formatArchivedAt(isoDateTime: string | null | undefined): string {
   if (!isoDateTime) {
     return '';
@@ -324,7 +306,6 @@ function formatArchivedAt(isoDateTime: string | null | undefined): string {
 
 const ARCHIVE_TITLE_TRUNCATE_LENGTH = 10;
 
-/** 명세: "제목의 글자수는 10자 이상이 넘어갈 시 말줄임" — 폭 기준(numberOfLines)이 아니라 글자수 기준. */
 function truncateArchiveTitle(title: string): string {
   if (title.length <= ARCHIVE_TITLE_TRUNCATE_LENGTH) {
     return title;
@@ -335,7 +316,7 @@ function truncateArchiveTitle(title: string): string {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 16,
   },
   stateContainer: {

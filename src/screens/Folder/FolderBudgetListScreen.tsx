@@ -1,13 +1,3 @@
-/** @screen FDR-2-PAGE-02-0 전체 예산 설정 목록 */
-/** @screen FDR-3-SHEET-01-0 장부 예산 입력 (아래 BottomSheet+TextField, FDR-3-SHEET-02-0과 동일 구현) */
-/** @screen FDR-3-SHEET-02-0 예산 설정 (같은 BottomSheet — IA상 두 ID가 같은 시트를 가리키는 것으로 판단) */
-/**
- * 2026-09-13 백엔드 노티 04번으로 신설된 `GET /groups/{groupId}/ledgers`(평평한 전체
- * 목록, 최상위 포함)를 `ledgerService.getAllLedgersInGroup()`가 쓴다 — 예전엔 이
- * API가 없어 폴더 트리 조회 1콜 + 폴더 개수만큼 병렬 호출(N+1)로 대체했고, 그 방식은
- * 최상위(폴더 없음) 장부를 아예 못 봤다. 실호출로 최상위 장부가 이 목록에 포함됨을
- * 확인했다.
- */
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -51,7 +41,6 @@ import { TYPOGRAPHY } from '../../constants/typography';
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
 
-/** 숫자만 남기고 999,999,999(Ledger.txt 예산 상한)를 넘지 않게 자른다. */
 function clampBudgetInput(text: string): string {
   const digitsOnly = text.replace(/[^0-9]/g, '');
   if (!digitsOnly) {
@@ -68,13 +57,10 @@ type FolderBudgetListNavigationProp = NativeStackNavigationProp<
 >;
 type LoadState = 'loading' | 'error' | 'ready';
 
-// 시안(폴더_메뉴_예산설정.png No.2): 예산 미설정 장부는 "0원"으로 노출(별도
-// 안내 문구 아님) — design-verification.md §5-16 참고.
 function getBudgetValue(ledger: LedgerSummary): string {
   return `${(ledger.budget ?? 0).toLocaleString()}원`;
 }
 
-/** 폴더 탭 최상위 ⋮ 메뉴의 "전체 예산 설정": 모임 전체 장부를 나열한다(읽기 전용). */
 function FolderBudgetListScreen() {
   const navigation = useNavigation<FolderBudgetListNavigationProp>();
 
@@ -102,8 +88,6 @@ function FolderBudgetListScreen() {
     try {
       let group = getActiveGroup();
       if (!group) {
-        // [치명1] 로그인 직후 첫 포커스처럼 모임 캐시가 아직 없는 순간 대비 —
-        // "다시 시도"가 실제로 동작하도록 여기서 한 번 더 직접 불러온다.
         await groupService.getMyGroups();
         group = getActiveGroup();
       }
@@ -113,8 +97,6 @@ function FolderBudgetListScreen() {
         return;
       }
       const result = await ledgerService.getAllLedgersInGroup(group.id);
-      // 시안 No.2 [상태]: "최신 생성된 장부순으로 리스트업" — 서버 응답 순서를
-      // 신뢰하지 않고 createdAt 내림차순으로 직접 정렬한다.
       const sorted = [...result].sort((a, b) =>
         (b.createdAt ?? '').localeCompare(a.createdAt ?? ''),
       );
@@ -161,7 +143,6 @@ function FolderBudgetListScreen() {
     }
   };
 
-  // 시안(폴더_메뉴_예산설정.png)이 옅은 블루 — design-verification.md §5-7/§5-16.
   return (
     <ScreenContainer
       background="primary"
@@ -236,7 +217,7 @@ function FolderBudgetListScreen() {
 
 const styles = StyleSheet.create({
   listContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 24,
   },
   stateContainer: {
@@ -253,7 +234,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingTop: 80,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   emptyTitle: {
     ...TYPOGRAPHY.subtitle3,

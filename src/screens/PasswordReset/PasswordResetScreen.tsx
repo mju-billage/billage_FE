@@ -1,4 +1,3 @@
-/** @screen COM-2-PAGE-02-0 비밀번호 재설정 */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -28,7 +27,6 @@ type PasswordResetNavigationProp = NativeStackNavigationProp<
   'PasswordReset'
 >;
 
-/** 비밀번호 재설정 화면: 임시 비밀번호를 받을 이메일을 입력받는다. */
 function PasswordResetScreen() {
   const navigation = useNavigation<PasswordResetNavigationProp>();
   const [email, setEmail] = useState('');
@@ -85,7 +83,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 60,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   backRow: {
     marginBottom: 16,

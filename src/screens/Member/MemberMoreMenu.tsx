@@ -1,6 +1,6 @@
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
 import Menu, { MenuItem } from '../../components/Navigation/Menu/Menu';
-import { FILL_NEUTRAL_SUBTLE, OVERLAY_MENU_BACKDROP } from '../../constants/colors';
+import { BORDER_NEUTRAL_NORMAL, FILL_NEUTRAL_SUBTLE, OVERLAY_MENU_BACKDROP } from '../../constants/colors';
 
 type MemberMoreMenuProps = {
   visible: boolean;
@@ -9,10 +9,6 @@ type MemberMoreMenuProps = {
   onSelect: (key: string) => void;
 };
 
-/**
- * 모임원 관리 화면 우상단 ⋮ 버튼을 누르면 뜨는 팝오버 메뉴. 명세(Case A)의
- * "모임원 추가"/"모임원 삭제" 두 항목 모두 `MemberManageScreen`이 넘겨준다(7-C).
- */
 function MemberMoreMenu({ visible, onClose, items, onSelect }: MemberMoreMenuProps) {
   if (!visible) {
     return null;
@@ -42,6 +38,8 @@ const styles = StyleSheet.create({
     backgroundColor: FILL_NEUTRAL_SUBTLE,
     borderRadius: 12,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: BORDER_NEUTRAL_NORMAL,
   },
 });
 

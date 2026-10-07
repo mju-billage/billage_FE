@@ -12,7 +12,6 @@ type FilterChipProps = {
   active?: boolean;
 };
 
-/** "+텍스트" 형태의 아웃라인 필터 칩. */
 function FilterChip({ label, onPress, active = false }: FilterChipProps) {
   return (
     <Pressable

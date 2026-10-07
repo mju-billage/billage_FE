@@ -1,12 +1,3 @@
-/** @screen DTB-2-PAGE-01-0 내역 검색_전체 */
-/**
- * 4-B(모임 전체 내역 목록 API 연동): 목(`searchTransactions`)을 걷어내고
- * `entryService.getGroupEntries({ keyword })`(Entry.txt §7)로 옮겼다. `keyword`는
- * 내역명 또는 장부명에 걸린다(명세 그대로 — placeholder 문구도 이미 그렇게
- * 돼 있었다). 타이핑마다 서버를 부르되 과도한 호출을 막으려고 300ms
- * 디바운스만 얹었다(`MemberManageScreen` 검색과 같은 패턴). 페이지네이션은
- * 4-A에서 확정한 무한 스크롤(FlatList/SectionList `onEndReached`) 그대로 쓴다.
- */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, SectionList, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -49,7 +40,6 @@ type TransactionSearchNavigationProp = NativeStackNavigationProp<
 
 type SearchState = 'idle' | 'loading' | 'error' | 'ready';
 
-/** 내역 메인 화면의 검색 화면: 내역명/장부명으로 모임 전체 내역을 검색한다. */
 function TransactionSearchScreen() {
   const navigation = useNavigation<TransactionSearchNavigationProp>();
   const [query, setQuery] = useState('');
@@ -137,7 +127,6 @@ function TransactionSearchScreen() {
       setPage(nextPage.page);
       setHasMore(!nextPage.last);
     } catch {
-      // 다음 페이지 실패는 조용히 무시한다 — 목록 끝에서 다시 스크롤하면 재시도된다.
     } finally {
       setIsLoadingMore(false);
     }
@@ -227,12 +216,11 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     paddingTop: 16,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   listContent: {
     paddingBottom: 24,
   },
-  // 12px+Bold 조합은 정식 스타일에 없어 body3+bold를 예외로 채택.
   sectionHeader: {
     ...TYPOGRAPHY.body3,
     fontWeight: 'bold',

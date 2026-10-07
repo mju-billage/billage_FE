@@ -1,33 +1,3 @@
-/** @screen DUE-3-PAGE-06-0 회비 수정 */
-/** @screen DUE-4-MODAL-02-0 회비 수정_이탈 안내 (이 화면과 DuesMemberEditScreen이 공유) */
-/** @screen DUE-4-SNACKBAR-04-0 회비 수정 완료 (화면 자체에서 표시 후 1.6초 뒤 상세로 복귀) */
-/**
- * 7-B-1(회비 수정·삭제·마감): 제목/장부/기간만 다룬다 — 금액은 서버가 절대
- * 수정 불가로 막는 필드라(Dues.txt §4 "amount는 수정할 수 없습니다",
- * `DUES_AMOUNT_IMMUTABLE 400`) 화면명세 그대로 값만 보여주고
- * `TextField disabled`로 입력을 막는다. 모임원(대상자) 변경은 명세상 이
- * 화면의 필드가 아니라 ⋮ 메뉴에서 바로 진입하는 별도 화면
- * (`DuesMemberEditScreen`, DUE-3-PAGE-02-0)이다 — `DuesCreateScreen`처럼
- * 한 컴포넌트의 내부 step으로 묶지 않았다(생성과 달리 수정은 두 화면이
- * 서로 독립적으로 각자 PATCH를 보내고 각자 회비 상세로 돌아간다).
- *
- * `UpdateDuesInput`에 startDate를 포함한 이유는 duesService.ts 주석 참고 —
- * PATCH 예시 바디엔 없지만 "금액 제외 전 필드 수정 가능" 정책 메모가 명시적.
- *
- * 화면명세서 표는 앱바 우측에 "X(닫기)"가 있다고 적었으나, 실제 목업
- * 이미지엔 좌측 "<"(백 버튼) 하나뿐이고 우측엔 아무 아이콘도 없다 — 다른
- * 표 셀을 복사해 오며 안 고친 것으로 보여 목업을 따랐다. 이탈 확인(입력값
- * 변경 시 "수정한 내용은 저장되지 않아요" 모달)은 그 "<" 버튼 자체에 붙인다.
- *
- * **2026-09-17 정정**: "CLOSED 상태는 진입 방법이 없다"고 적었던 건 틀렸다 —
- * DUE-2-PAGE-03-0 시안 Case A(마감된 회비)를 다시 대조하니 "회비 수정" 메뉴가
- * CLOSED에서도 그대로 노출된다(숨는 건 "모임원 선택"/"회비 마감"뿐). 그래서
- * CLOSED 상태로도 이 화면에 정상 진입할 수 있고, 제목/장부/기간은 이 화면이
- * 상태를 안 보고 항상 편집 가능하게 둔다(시안에 CLOSED 전용 잠금 규정이
- * 없음 — design-verification.md §5-13). 금액만 항상 비활성(서버 강제).
- * 제출 시엔 서버가 `DUES_ALREADY_CLOSED(409)`로 막는다 — 즉 CLOSED 회비는
- * "값은 고칠 수 있어 보이지만 저장은 항상 실패"하는 상태다(현재 동작 그대로 둠).
- */
 import { useCallback, useEffect, useState } from 'react';
 import { BackHandler, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -90,12 +60,10 @@ type LedgerOption = { id: string; name: string };
 type DuesEditNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type DuesEditRouteProp = RouteProp<RootStackParamList, 'DuesEdit'>;
 
-/** 'YYYY-MM-DD'(서버) → 'YYYY.MM.DD'(이 화면/DuesDateRangeSheet 형식). */
 function fromIsoDate(isoDate: string): string {
   return isoDate.replace(/-/g, '.');
 }
 
-/** 'YYYY.MM.DD' → 'YYYY-MM-DD'(Dues API 형식). */
 function toIsoDate(dotDate: string): string {
   return dotDate.replace(/\./g, '-');
 }
@@ -185,7 +153,6 @@ function DuesEditScreen() {
     }
   };
 
-  // 안드로이드 하드웨어 back도 같은 이탈 확인을 거치게 한다(ReportCreateByLedgerScreen 패턴).
   useFocusEffect(
     useCallback(() => {
       const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -211,7 +178,6 @@ function DuesEditScreen() {
       const ledgers = await ledgerService.getAllLedgersInGroup(groupId);
       setLedgerOptions(ledgers.map(l => ({ id: l.id, name: l.name })));
     } catch {
-      // 장부 목록 실패는 조용히 무시한다 — 시트를 열면 빈 목록 안내가 뜨고, 다시 열면 재시도된다.
     }
   };
 
@@ -368,7 +334,7 @@ function DuesEditScreen() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 16,
     gap: 20,
   },
@@ -418,7 +384,7 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_DISABLED,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 16,
     paddingTop: 8,
   },

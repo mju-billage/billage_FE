@@ -8,7 +8,6 @@ type BackButtonProps = {
   size?: number;
 };
 
-/** 화면 상단의 뒤로가기 화살표 버튼. */
 function BackButton({ onPress, size = 28 }: BackButtonProps) {
   const iconSize = size * 0.6;
 

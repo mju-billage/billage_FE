@@ -17,7 +17,6 @@ type SnackbarProps = {
   onClose?: () => void;
 };
 
-/** 화면 하단에 뜨는 어두운 배경의 토스트. title/description/action/close가 각각 독립적으로 optional하다. */
 function Snackbar({
   visible,
   title,

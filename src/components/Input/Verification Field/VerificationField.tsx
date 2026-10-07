@@ -16,11 +16,9 @@ type VerificationFieldProps = {
   onChangeText: (text: string) => void;
   length?: number;
   disabled?: boolean;
-  /** 코드 불일치/만료 등 서버 검증 실패 문구 — 있으면 박스 테두리를 빨갛게 표시하고 아래에 노출한다. */
   error?: string;
 };
 
-/** 인증 코드 입력용 자릿수 박스 UI(이메일 인증 6자리, 계좌 인증 3자리 등). 숨겨진 입력창 하나로 값을 받아 시각화한다. */
 function VerificationField({
   value,
   onChangeText,

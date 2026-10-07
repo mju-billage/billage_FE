@@ -1,4 +1,3 @@
-/** @screen ADD-2-SHEET-07-0 일자 선택 캘린더 */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
@@ -24,7 +23,6 @@ function parseDateKey(date: string): { year: number; month: number } {
   return { year, month };
 }
 
-/** 단일 날짜 선택 바텀시트. 기존 range-select `Calendar`를 같은 날짜를 start/end에 넣어 단일선택처럼 쓴다. */
 function TransactionDateSheet({
   visible,
   title,

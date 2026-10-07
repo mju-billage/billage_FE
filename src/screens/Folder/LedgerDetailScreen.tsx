@@ -1,14 +1,3 @@
-/** @screen FDR-2-PAGE-05-0 장부 상세 */
-/** @screen FDR-3-MODAL-03-0 장부 이름 변경 (activeDialog='rename') */
-/** @screen FDR-3-MODAL-04-0 장부 삭제 (activeDialog='delete') */
-/** @screen FDR-4-SNACKBAR-02-0 장부 삭제_완료 (SNACKBAR_LEDGER_DELETED_SUFFIX) */
-/**
- * 4-A(Entry API 연동) — 내역 목록을 실 서버로 교체했다. 페이지네이션은 무한
- * 스크롤(FlatList onEndReached)로 확정 — 이 화면 포함 어떤 화면도 "더보기" 버튼
- * 패턴을 쓴 적이 없고 디자인 시안에도 그런 버튼이 없어서, 기존 FlatList 관례를
- * 그대로 잇는 쪽을 표준으로 삼았다(docs/api-integration-plan.md "표준 패턴" 참고,
- * Dues·Report도 이 패턴을 따르면 된다).
- */
 import { useCallback, useRef, useState } from 'react';
 import {
   Image,
@@ -28,6 +17,7 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -85,7 +75,12 @@ import {
   SNACKBAR_LEDGER_RENAMED_SUFFIX,
 } from '../../constants/ledgerScreenText';
 import { SNACKBAR_BUDGET_SAVED } from '../../constants/folderScreenText';
-import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import {
+  BACKGROUND_PRIMARY,
+  BACKGROUND_SECONDARY,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const SEARCH_ICON = require('../../assets/icons/system/Search.png');
@@ -103,12 +98,12 @@ type LoadState = 'loading' | 'error' | 'ready';
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
 
-/** 장부 상세: 수입/지출·예산 카드 캐러셀 + 거래 내역 목록 (검색/메뉴). */
 function LedgerDetailScreen() {
   const navigation = useNavigation<LedgerDetailNavigationProp>();
   const route = useRoute<LedgerDetailRouteProp>();
   const ledgerId = route.params.ledgerId;
   const { width: windowWidth } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   const [ledger, setLedger] = useState<LedgerDetail | null>(null);
   const [entries, setEntries] = useState<EntrySummary[]>([]);
@@ -125,8 +120,6 @@ function LedgerDetailScreen() {
   const [dialogError, setDialogError] = useState<string | undefined>();
   const [isSubmittingDialog, setIsSubmittingDialog] = useState(false);
   const [snackbar, setSnackbar] = useState<string | null>(null);
-  // 필터 값은 서버 조회 조건이다(`toEntryFilterQuery`). 화면이 포커스될 때마다 도는 `load()`가
-  // 필터가 바뀔 때는 다시 돌면 안 돼서(전체 로딩 화면으로 돌아감) 최신 값을 ref로도 들고 있는다.
   const [filter, setFilter] = useState<LedgerFilterValue>(DEFAULT_LEDGER_FILTER);
   const filterRef = useRef<LedgerFilterValue>(DEFAULT_LEDGER_FILTER);
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
@@ -182,7 +175,6 @@ function LedgerDetailScreen() {
       setEntryPage(nextPage.page);
       setHasMoreEntries(!nextPage.last);
     } catch {
-      // 다음 페이지 실패는 조용히 무시한다 — 목록 끝에서 다시 스크롤하면 재시도된다.
     } finally {
       setIsLoadingMore(false);
     }
@@ -199,7 +191,6 @@ function LedgerDetailScreen() {
     setTimeout(() => setSnackbar(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
-  /** 필터 적용: 카드·앱바는 그대로 두고 내역 목록만 새 조건으로 첫 페이지부터 다시 받는다. */
   const handleApplyFilter = async (next: LedgerFilterValue) => {
     const previous = filterRef.current;
     filterRef.current = next;
@@ -214,7 +205,6 @@ function LedgerDetailScreen() {
       setEntryPage(firstPage.page);
       setHasMoreEntries(!firstPage.last);
     } catch (error) {
-      // 조회에 실패하면 목록은 그대로이므로 필터 값도 이전으로 되돌린다.
       filterRef.current = previous;
       setFilter(previous);
       showSnackbar(toErrorMessage(error));
@@ -306,19 +296,11 @@ function LedgerDetailScreen() {
 
   const dialogConfig = getDialogConfig(activeDialog);
 
-  // 시안: 날짜 그룹 헤더(`4월 16일 목요일`) 아래에 그날 내역 행들. 서버가 발생일 순으로 내려주므로
-  // 받은 순서 그대로 같은 날짜끼리 묶는다.
   const sections = groupEntriesByDate(entries).map(group => ({
     title: formatDateHeader(group.date),
     data: group.items,
   }));
 
-  // 캐러셀 스냅 결함 수정(2026-09-18): 이전엔 카드 폭(CARD_WIDTH = 화면폭-48)과
-  // 스크롤뷰 자체의 paddingLeft(24, 우측엔 없음)가 서로 안 맞아 2페이지부터
-  // 어긋났다(snapToInterval이 이 좌측 인셋을 계산에 안 넣었음, 첫 페이지는
-  // 우연히 괜찮아 보였을 뿐). 각 슬라이드를 화면 폭 그대로(windowWidth) 채우고
-  // 카드 여백은 슬라이드 안쪽 padding으로 옮겨서, pagingEnabled 기본 동작(뷰포트
-  // 폭 단위 스냅)만으로 항상 정확히 맞게 했다 — snapToInterval도 더 이상 필요 없다.
   const handleScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const index = Math.round(e.nativeEvent.contentOffset.x / windowWidth);
     setCardIndex(index);
@@ -347,6 +329,7 @@ function LedgerDetailScreen() {
   return (
     <ScreenContainer
       background="primary"
+      edges={['top']}
       snackbar={snackbar ? <Snackbar visible title={snackbar} /> : undefined}
     >
       <AppBar
@@ -355,69 +338,71 @@ function LedgerDetailScreen() {
         rightIcons={[{ icon: MENU_ICON, onPress: () => setMoreMenuVisible(true) }]}
       />
 
-      {/* 시안 [상태] Scroll-away: 카드·인디케이터·필터/검색 줄·개수가 리스트 헤더라 리스트를 올리면 같이
-          화면 위로 사라진다. 앱바는 리스트 밖이라 최상단에 고정. */}
       <SectionList
         sections={sections}
         keyExtractor={item => item.id}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { paddingBottom: 24 + insets.bottom }]}
         stickySectionHeadersEnabled={false}
         onEndReachedThreshold={0.4}
         onEndReached={loadMoreEntries}
         ListHeaderComponent={
           <>
-            <ScrollView
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              onMomentumScrollEnd={handleScrollEnd}
-              style={styles.carousel}
-              decelerationRate="fast"
-            >
-              <View style={[styles.cardSlide, { width: windowWidth }]}>
-                <AmountCard
-                  type="incomeExpense"
-                  income={ledger.totalIncome}
-                  expense={ledger.totalExpense}
-                />
-              </View>
-              <View style={[styles.cardSlide, { width: windowWidth }]}>
-                {ledger.budget != null ? (
-                  <BudgetCard
-                    remainingBudget={ledger.remainingBudget ?? ledger.budget - ledger.totalExpense}
+            <View style={styles.cardBlock}>
+              <ScrollView
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                onMomentumScrollEnd={handleScrollEnd}
+                style={styles.carousel}
+                decelerationRate="fast"
+              >
+                <View style={[styles.cardSlide, { width: windowWidth }]}>
+                  <AmountCard
+                    type="incomeExpense"
+                    income={ledger.totalIncome}
                     expense={ledger.totalExpense}
-                    budget={ledger.budget}
                   />
-                ) : (
-                  <BudgetCard state="empty" />
-                )}
+                </View>
+                <View style={[styles.cardSlide, { width: windowWidth }]}>
+                  {ledger.budget != null ? (
+                    <BudgetCard
+                      remainingBudget={ledger.remainingBudget ?? ledger.budget - ledger.totalExpense}
+                      expense={ledger.totalExpense}
+                      budget={ledger.budget}
+                    />
+                  ) : (
+                    <BudgetCard state="empty" />
+                  )}
+                </View>
+              </ScrollView>
+              <View style={styles.indicatorRow}>
+                <CarouselIndicator count={2} selectedIndex={cardIndex} />
               </View>
-            </ScrollView>
-            <View style={styles.indicatorRow}>
-              <CarouselIndicator count={2} selectedIndex={cardIndex} />
             </View>
 
-            <View style={styles.toolRow}>
-              <Pressable
-                onPress={() => setFilterSheetVisible(true)}
-                hitSlop={8}
-                accessibilityLabel="필터"
-              >
-                <Image source={FILTER_ICON} style={styles.toolIcon} />
-              </Pressable>
-              <Pressable
-                onPress={() => navigation.navigate('LedgerSearch', { ledgerId, ledgerName: ledger.name })}
-                hitSlop={8}
-                accessibilityLabel="검색"
-              >
-                <Image source={SEARCH_ICON} style={styles.toolIcon} />
-              </Pressable>
-            </View>
+            <View style={styles.listHeader}>
+              <View style={styles.toolRow}>
+                <Pressable
+                  onPress={() => setFilterSheetVisible(true)}
+                  hitSlop={8}
+                  accessibilityLabel="필터"
+                >
+                  <Image source={FILTER_ICON} style={styles.toolIcon} />
+                </Pressable>
+                <Pressable
+                  onPress={() => navigation.navigate('LedgerSearch', { ledgerId, ledgerName: ledger.name })}
+                  hitSlop={8}
+                  accessibilityLabel="검색"
+                >
+                  <Image source={SEARCH_ICON} style={styles.toolIcon} />
+                </Pressable>
+              </View>
 
-            <Text style={styles.countText}>
-              {entryTotal}
-              {LEDGER_COUNT_SUFFIX}
-            </Text>
+              <Text style={styles.countText}>
+                {entryTotal}
+                {LEDGER_COUNT_SUFFIX}
+              </Text>
+            </View>
           </>
         }
         ListEmptyComponent={
@@ -435,17 +420,19 @@ function LedgerDetailScreen() {
           <Text style={styles.sectionHeader}>{section.title}</Text>
         )}
         renderItem={({ item }) => (
-          <TransactionListItem
-            itemName={item.title}
-            amount={item.type === 'INCOME' ? item.amount : -item.amount}
-            hasReceipt={item.receiptCount > 0}
-            isPendingApproval={item.approvalStatus === 'PENDING'}
-            onPress={() =>
-              navigation.navigate('TransactionDetail', {
-                transactionId: item.id,
-              })
-            }
-          />
+          <View style={styles.itemWrapper}>
+            <TransactionListItem
+              itemName={item.title}
+              amount={item.type === 'INCOME' ? item.amount : -item.amount}
+              hasReceipt={item.receiptCount > 0}
+              isPendingApproval={item.approvalStatus === 'PENDING'}
+              onPress={() =>
+                navigation.navigate('TransactionDetail', {
+                  transactionId: item.id,
+                })
+              }
+            />
+          </View>
         )}
       />
 
@@ -491,7 +478,6 @@ function LedgerDetailScreen() {
   );
 }
 
-/** 숫자만 남기고 999,999,999(Ledger.txt 예산 상한)를 넘지 않게 자른다. */
 function clampBudgetInput(text: string): string {
   const digitsOnly = text.replace(/[^0-9]/g, '');
   if (!digitsOnly) {
@@ -539,25 +525,18 @@ function getDialogConfig(activeDialog: ActiveDialog) {
 }
 
 const styles = StyleSheet.create({
-  // 리스트 콘텐츠의 좌우 패딩 24 안에 있으므로 캐러셀만 화면 폭 전체로 되돌린다(슬라이드가
-  // 화면 폭이라 페이지 스냅이 그대로 맞는다).
   carousel: {
     flexGrow: 0,
     marginTop: 16,
-    marginHorizontal: -24,
   },
-  // 슬라이드 하나 = 화면 폭 전체(JSX에서 width: windowWidth로 덮어씀) — 카드
-  // 여백은 스크롤뷰가 아니라 이 안쪽 padding으로 준다(캐러셀 스냅 결함 수정,
-  // 2026-09-18).
   cardSlide: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   indicatorRow: {
     alignItems: 'center',
     marginTop: 12,
     marginBottom: 16,
   },
-  // 시안: 카드 아래 한 줄 — 좌측 필터, 우측 검색.
   toolRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -574,16 +553,26 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   listContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
+    flexGrow: 1,
+    backgroundColor: BACKGROUND_SECONDARY,
   },
-  // 12px+Bold 조합은 정식 스타일에 없어 body3+bold를 예외로 채택(내역 메인과 같은 헤더).
+  cardBlock: {
+    backgroundColor: BACKGROUND_PRIMARY,
+  },
+  listHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+  },
+  itemWrapper: {
+    paddingHorizontal: 20,
+  },
   sectionHeader: {
     ...TYPOGRAPHY.body3,
     fontWeight: 'bold',
     color: FOREGROUND_NEUTRAL_SUBTLE,
     marginTop: 12,
     marginBottom: 6,
+    paddingHorizontal: 20,
   },
   stateContainer: {
     flex: 1,

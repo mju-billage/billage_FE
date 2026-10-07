@@ -15,7 +15,6 @@ type AccordionProps = {
   defaultOpen?: boolean;
 };
 
-/** 제목을 누르면 항목 목록이 펼쳐지는 아코디언. 항목 사이엔 구분선 없이 간격만 있다. */
 function Accordion({ title, items, defaultOpen = false }: AccordionProps) {
   const [open, setOpen] = useState(defaultOpen);
 

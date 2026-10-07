@@ -32,17 +32,10 @@ type ButtonProps = {
   negative?: boolean;
   icon?: ImageSourcePropType;
   disabled?: boolean;
-  /** true면 전체 너비의 큰 버튼(온보딩 등 주요 CTA)으로 렌더링한다. */
   fullWidth?: boolean;
-  /** 기본 배치(auto 너비일 때 왼쪽 정렬)를 벗어나야 할 때만 쓴다 — 예:
-   * `alignItems:'center'` 컨테이너 안의 "다시 시도" 버튼을 실제로 가운데
-   * 두려면 `style={{ alignSelf: 'center' }}`. `buttonAuto`의 고정
-   * `alignSelf:'flex-start'`는 시트 하단의 flex:1 취소 버튼엔 필요해서
-   * 못 없앤다(검증 중 발견 — 없애면 그 버튼들이 늘어나 버림). */
   style?: StyleProp<ViewStyle>;
 };
 
-/** 필박스 버튼. hierarchy/negative로 색을, fullWidth로 온보딩용 전체너비 큰 버튼 여부를 정한다. */
 function Button({
   label,
   onPress,

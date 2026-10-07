@@ -20,14 +20,11 @@ type IconButtonProps = {
   disabled?: boolean;
   showPushBadge?: boolean;
   accessibilityLabel?: string;
-  /** true면 사진/카메라 미리보기처럼 배경이 일정하지 않은 곳 위에서도 보이도록
-   * 항상 반투명 어두운 배경 + 흰색 아이콘으로 렌더링한다. */
   overlay?: boolean;
 };
 
 const ICON_SIZE = 24;
 
-/** 아이콘 하나만 있는 미니멀 버튼. 우상단에 알림 뱃지 점을 옵션으로 표시한다. */
 function IconButton({
   icon,
   onPress,

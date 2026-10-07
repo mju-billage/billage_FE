@@ -84,7 +84,6 @@ import * as groupService from '../services/groupService';
 
 export type RootStackParamList = {
   Login: { snackbarMessage?: string } | undefined;
-  // 일반 가입은 params 없이, 신규 소셜 가입자는 `socialProfile`을 들고 온다(약관동의 뒤 `SocialSignupInfo`로 이어짐).
   TermsAgreement: { socialProfile?: SocialProfile } | undefined;
   TermsOfService: undefined;
   PrivacyPolicy: undefined;
@@ -204,10 +203,6 @@ export type RootStackParamList = {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-/**
- * 앱 진입점 내비게이터: 로딩 중엔 스플래시를 보여주며 저장된 Refresh Token으로
- * 세션 복원을 시도하고, 이후 로그인 여부에 따라 로그인 화면 또는 메인 화면으로 진입한다.
- */
 function RootNavigator() {
   const [isLoading, setIsLoading] = useState(true);
   const [initialRouteName, setInitialRouteName] = useState<'Login' | 'Main'>(
@@ -217,14 +212,9 @@ function RootNavigator() {
   useEffect(() => {
     authService.restoreSession().then(async user => {
       if (user) {
-        // [치명1] LoginScreen.goToMain()과 같은 이유 — 세션 복원으로 바로
-        // Main에 진입하는 이 경로도 활성 모임 캐시를 미리 채워둬야 홈/납부관리
-        // 등이 첫 포커스부터 정상 로드된다. 실패해도 로그인 상태 자체는 그대로
-        // 유지한다(각 화면의 방어 로직이 나머지를 처리).
         try {
           await groupService.getMyGroups();
         } catch {
-          // 무시
         }
       }
       setInitialRouteName(user ? 'Main' : 'Login');

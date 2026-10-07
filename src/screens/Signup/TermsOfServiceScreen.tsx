@@ -1,4 +1,3 @@
-/** @screen COM-3-PAGE-01-0 약관 상세 (서비스 이용 약관) */
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -13,7 +12,6 @@ type TermsOfServiceNavigationProp = NativeStackNavigationProp<
   'TermsOfService'
 >;
 
-/** 서비스 이용 약관 전문을 보여주는 상세 화면. */
 function TermsOfServiceScreen() {
   const navigation = useNavigation<TermsOfServiceNavigationProp>();
   return (

@@ -1,4 +1,3 @@
-/** @screen FDR-2-PAGE-01-0 이동 대상 선택 */
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -52,7 +51,6 @@ function getItemSubtitle(item: FolderListItem): string {
     : LEDGER_ITEM_BUDGET_UNSET;
 }
 
-/** 폴더 최상위/하위에서 "선택 이동"으로 진입: 이동시킬 폴더/장부를 다중 선택한다. */
 function FolderSelectMoveScreen() {
   const navigation = useNavigation<FolderSelectMoveNavigationProp>();
   const route = useRoute<FolderSelectMoveRouteProp>();
@@ -78,8 +76,6 @@ function FolderSelectMoveScreen() {
     try {
       let group = getActiveGroup();
       if (!group) {
-        // [치명1] 같은 취약점 — "다시 시도"가 실제로 동작하도록 여기서 한 번
-        // 더 직접 불러온다.
         await groupService.getMyGroups();
         group = getActiveGroup();
       }
@@ -88,9 +84,6 @@ function FolderSelectMoveScreen() {
         setLoadState('error');
         return;
       }
-      // 2026-09-13: FolderScreen과 같은 회귀가 여기도 있었다 — 최상위(folderId
-      // null)에서 장부 조회를 빈 배열로 하드코딩해 최상위 장부를 이동 대상으로
-      // 고를 수 없었다. 모임 전체 장부를 받아 최상위분만 걸러 쓴다.
       const [tree, allLedgers] = await Promise.all([
         folderService.getFolderTree(group.id),
         folderId
@@ -199,7 +192,7 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
     paddingTop: 16,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   listContent: {
     paddingBottom: 24,

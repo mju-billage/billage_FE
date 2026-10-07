@@ -1,6 +1,3 @@
-/** @screen ETC-2-PAGE-01-0 전체 모임 관리 */
-/** @screen ETC-4-SNACKBAR-04-0 모임 삭제 완료 (route.params.snackbarMessage로 전달받아 렌더링 — GroupManageScreen.tsx 참고) */
-/** @screen ETC-5-SNACKBAR-03-0 모임 참여 완료 */
 import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -45,7 +42,6 @@ type AllGroupsRouteProp = RouteProp<RootStackParamList, 'AllGroups'>;
 type SheetKey = 'none' | 'add' | 'join';
 type LoadState = 'loading' | 'error' | 'ready';
 
-/** 전체 모임 관리: 내가 속한 모임 목록 + 새 모임 추가(생성/코드 참여). */
 function AllGroupsScreen() {
   const navigation = useNavigation<AllGroupsNavigationProp>();
   const route = useRoute<AllGroupsRouteProp>();
@@ -168,7 +164,7 @@ function AllGroupsScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 8,
     paddingBottom: 24,
     gap: 12,

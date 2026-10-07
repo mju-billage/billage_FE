@@ -1,4 +1,3 @@
-/** @screen COM-5-PAGE-01-0 가입 완료 */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -22,17 +21,11 @@ type SignupCompleteNavigationProp = NativeStackNavigationProp<
   'SignupComplete'
 >;
 
-/** 가입 완료 환영 화면: 모임 생성/참여로 이어지는 다음 액션을 보여준다. */
 function SignupCompleteScreen() {
   const navigation = useNavigation<SignupCompleteNavigationProp>();
   const [joinSheetVisible, setJoinSheetVisible] = useState(false);
 
   const handleCreateGroup = () => {
-    // navigate 그대로 둔다 — 생성을 취소하고 뒤로가기를 누르면 이 선택 화면
-    // (모임 생성하기/코드로 참여하기)으로 돌아오는 게 맞는 동작이다. "가입 완료
-    // 화면이 뒤로가기로 남아 있으면 안 된다"는 건 생성이 *성공*했을 때 얘기이고,
-    // 그건 GroupCreateScreen의 성공 처리가 스택 전체를 reset하는 것으로 이미
-    // 해결된다(design-verification.md §5-11) — 이 화면 자체를 건드릴 필요 없음.
     navigation.navigate('GroupCreate');
   };
 
@@ -79,7 +72,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 60,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   backRow: {
     marginBottom: 16,

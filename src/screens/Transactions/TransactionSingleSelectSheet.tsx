@@ -1,5 +1,3 @@
-/** @screen ADD-2-SHEET-02-0 담당자 선택 */
-/** @screen ADD-2-SHEET-03-0 장부 단일 선택 */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
@@ -24,12 +22,10 @@ type TransactionSingleSelectSheetProps = {
   selectedKey?: string;
   onClose: () => void;
   onSelect: (key: string) => void;
-  /** 옵션이 없을 때(예: 장부) 안내문 아래에 보여줄 생성 링크. */
   emptyStateCreateLabel?: string;
   onPressEmptyStateCreate?: () => void;
 };
 
-/** 담당자/장부(등록폼) 선택용 공용 단일선택 바텀시트. */
 function TransactionSingleSelectSheet({
   visible,
   title,

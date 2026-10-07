@@ -1,4 +1,3 @@
-/** @screen DUE-3-SHEET-02-0 모임원 추가 선택 */
 import { Image, Pressable, StyleSheet, Text } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import {
@@ -19,7 +18,6 @@ type MemberAddSheetProps = {
   onPressBulk: () => void;
 };
 
-/** "모임원 추가"를 누르면 뜨는 바텀시트: 개별 추가하기 / 일괄 추가하기 선택. */
 function MemberAddSheet({
   visible,
   onClose,

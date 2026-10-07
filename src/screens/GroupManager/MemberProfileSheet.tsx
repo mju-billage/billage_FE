@@ -1,11 +1,3 @@
-/** @screen ETC-3-MODAL-01-0 모임 나가기(일반) (confirmKind='leave') */
-/** @screen ETC-3-MODAL-01-1 모임 나가기(총무) (confirmKind='leave-blocked', 마지막 총무가 나가려 할 때) */
-/** @screen ETC-3-SHEET-03-0 총무 프로필 (member.role==='OWNER') */
-/** @screen ETC-3-SHEET-04-0 일반 프로필 (member.role==='MEMBER') */
-/** @screen ETC-4-MODAL-01-0 일반 전환하기 (confirmKind='demote') */
-/** @screen ETC-4-MODAL-02-0 총무 전환하기 (confirmKind='promote') */
-/** @screen ETC-4-MODAL-03-0 모임 내보내기 (confirmKind='kick') */
-/** @screen ETC-5-SNACKBAR-02-0 모임 내보내기 완료 (스낵바 렌더링은 GroupManagerScreen.tsx) */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
@@ -65,15 +57,11 @@ type MemberProfileSheetProps = {
   member: GroupMembership | null;
   groupId: string;
   onClose: () => void;
-  /** 권한 변경/나가기 후 목록 새로고침 + 스낵바 문구 전달용. */
   onChanged: (snackbarMessage: string) => void;
-  /** 요청 실패 시 에러 문구 전달용(같은 화면의 Snackbar를 재사용 — 표준 패턴 §확장). */
   onError: (message: string) => void;
-  /** 내가 모임을 나간 뒤 모임 관리자 화면 자체를 벗어나야 할 때 호출. */
   onLeftGroup: () => void;
 };
 
-/** 모임원 프로필 바텀시트. 본인이면 "모임 나가기"만, 타인이면(내가 총무일 때만) 권한 전환을 보여준다. */
 function MemberProfileSheet({
   visible,
   member,
@@ -90,8 +78,6 @@ function MemberProfileSheet({
     return null;
   }
 
-  // 내가 총무일 때만 남의 권한을 바꿀 수 있다(PATCH memberships 권한: OWNER) — 서버가
-  // 403으로도 막지만, 애초에 일반 계정에겐 버튼 자체를 안 보여주는 쪽으로 먼저 막는다.
   const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
 
   const closeAll = () => {
@@ -196,7 +182,6 @@ function MemberProfileSheet({
                 <Chip label={ALL_GROUPS_ROLE_TREASURER} removable={false} />
               )}
             </View>
-            {/* GroupMembership 응답에 email이 없다(docs/api-gaps.md (A)) — 이름+역할만 표시. */}
           </View>
         </View>
 

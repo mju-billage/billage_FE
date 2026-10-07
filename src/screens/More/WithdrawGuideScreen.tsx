@@ -1,17 +1,3 @@
-/** @screen COM-1-PAGE-02-0 탈퇴하기_안내사항 */
-/**
- * 회원 탈퇴 플로우 1단계: 유의사항 안내 + 분기 판단.
- *
- * 시안 UI 요소 2번 액션 그대로: CTA("확인했어요")를 누르면 유저의 총무 상태에
- * 따라 분기한다 — [Case A] 유일한 총무로 있는 모임이 1개 이상이면 "권한 이전"
- * (`WithdrawOwnershipTransfer`)으로, [Case B] 없으면 곧장 "사유 선택"
- * (`WithdrawReason`)으로 이동한다. 이 판단에 필요한 조회(내 모임 목록 +
- * 모임별 ownerCount)를 화면 진입 시 미리 해 둔다 — CTA를 누른 다음에야
- * 로딩하면 버튼 두 번 탭 사이 지연이 어색해서다.
- *
- * `DELETE /auth/me` 자체(권한 이전 데이터 포함)는 마지막 확인 모달에서 한
- * 번에 처리된다(Auth.txt 11번 정책 메모) — 이 화면은 오직 분기 판단만 한다.
- */
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -50,13 +36,6 @@ type WithdrawGuideNavigationProp = NativeStackNavigationProp<
 
 type LoadState = 'loading' | 'error' | 'ready';
 
-/**
- * 유일한 총무로 있는 모임 목록을 가려낸다([Case A] 분기 판단용).
- * Auth.txt 11번 정책 메모: "본인 외에 관리자가 아무도 없는 모임은 위임 대상이
- * 아니며, 화면에도 나오지 않습니다. 이런 모임은 탈퇴와 함께 모임째 삭제됩니다"
- * — 그래서 위임할 다른 멤버가 아예 없는 모임은 이 목록에서 제외한다(그런
- * 모임은 [Case B]와 동일하게 취급되어 서버가 계정 삭제와 함께 처리한다).
- */
 async function findSoleOwnerGroups(): Promise<
   { groupId: string; name: string }[]
 > {
@@ -78,7 +57,6 @@ async function findSoleOwnerGroups(): Promise<
   return soleOwnerGroups;
 }
 
-/** "탈퇴하기" 1단계: 유의사항 안내. */
 function WithdrawGuideScreen() {
   const navigation = useNavigation<WithdrawGuideNavigationProp>();
   const [loadState, setLoadState] = useState<LoadState>('loading');
@@ -179,7 +157,7 @@ function WithdrawGuideScreen() {
 
 const styles = StyleSheet.create({
   content: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 24,
   },
@@ -202,7 +180,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 16,
   },
   stateContainer: {
@@ -215,7 +193,7 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_DISABLED,
     textAlign: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
 });
 

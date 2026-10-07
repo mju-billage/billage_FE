@@ -1,4 +1,3 @@
-/** @screen COM-1-PAGE-01-0 로그인 */
 import { useCallback, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -74,7 +73,6 @@ const SOCIAL_INITIAL_BY_TYPE: Record<SocialType, string> = {
   Google: 'G',
 };
 
-/** 로그인 화면 전용 소셜 로그인 원형 배지 버튼. */
 function SocialLoginBadge({
   type,
   onPress,
@@ -111,7 +109,6 @@ const socialBadgeStyles = StyleSheet.create({
   },
 });
 
-/** 로그인 화면: 이메일/비밀번호 로그인과 소셜 로그인 진입점을 보여준다. */
 function LoginScreen() {
   const navigation = useNavigation<LoginNavigationProp>();
   const route = useRoute<LoginRouteProp>();
@@ -134,15 +131,9 @@ function LoginScreen() {
   );
 
   const goToMain = async () => {
-    // [치명1] 홈/납부관리 등 여러 화면이 getActiveGroup()이 이미 채워져 있다고
-    // 가정하고 포커스 시 바로 그걸 읽는다 — 로그인 직후 첫 진입이면 아직 아무도
-    // 모임 목록을 안 불러온 상태라 그 화면들이 조용히 로딩에 멈춰 있었다. 여기서
-    // 미리 채워 넣는다. 실패해도(네트워크 등) 로그인 자체를 막을 이유는 없고,
-    // 각 화면 자체에도 "모임 없음" 상태를 보여주는 방어 로직을 따로 둔다.
     try {
       await groupService.getMyGroups();
     } catch {
-      // 무시 — 각 화면의 방어 로직(활성 모임 없음 상태)이 대신 처리한다.
     }
     navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
   };
@@ -166,17 +157,10 @@ function LoginScreen() {
 
   const handleLogin = () => performLogin({ email, password });
 
-  /** 백엔드 연동 없이 프론트 화면 흐름만 확인하기 위해 곧바로 메인 화면으로 이동한다. */
   const handleMockLogin = () => {
     goToMain();
   };
 
-  /**
-   * 2026-09-12: "로그인에 실패했습니다"만 뜨던 통짜 에러를 단계별로 갈랐다 —
-   * SDK 실패 / 네트워크 실패 / 서버 거부(코드 포함) / 응답 파싱 실패. 각 단계는
-   * `authService.socialLogin`/`socialAuthService`에 심어둔 `console.warn`으로도
-   * Metro 콘솔에 남는다(`[SocialLogin]` 태그로 검색).
-   */
   const handleSocialLogin = async (provider: SocialType) => {
     setLoginError(undefined);
     let profile: SocialProfile | null;
@@ -188,7 +172,7 @@ function LoginScreen() {
       return;
     }
     if (!profile) {
-      return; // 사용자가 로그인을 취소함
+      return;
     }
 
     try {
@@ -199,8 +183,6 @@ function LoginScreen() {
       goToMain();
     } catch (error) {
       if (error instanceof ApiError && error.code === 'SOCIAL_MEMBER_NOT_FOUND') {
-        // 신규 소셜 가입자: 소셜 인증 → 약관동의(COM-2-PAGE-01-0) → 간편 가입 정보 입력(COM-3-PAGE-02-0)
-        // (시안 `COM-3-PAGE-02-0` 페이지 경로·뒤로가기 = 약관동의). 약관 없이 가입하면 서버가 400을 준다.
         navigation.navigate('TermsAgreement', { socialProfile: profile });
       } else if (error instanceof SocialAuthParseError) {
         setLoginError(LOGIN_SOCIAL_PARSE_ERROR);
@@ -243,14 +225,12 @@ function LoginScreen() {
         snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
       }
     >
-      {/* 키보드에 가린 필드도 스크롤로 볼 수 있게 한다(keyboardShouldPersistTaps: 키보드가 떠 있어도 첫 탭이 먹게). */}
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* 시안 실측(로그인_메인화면.png, 1px=1dp): 심볼 29×28 + 간격 9 + 워드마크 92×27, 전체 가운데 정렬. */}
         <View style={styles.logoRow}>
           <Image source={LOGO_SYMBOL} style={styles.logoSymbol} resizeMode="contain" />
           <Image source={LOGO_WORDMARK} style={styles.logoWordmark} resizeMode="contain" />
@@ -337,7 +317,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 80,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   scroll: {
     flex: 1,

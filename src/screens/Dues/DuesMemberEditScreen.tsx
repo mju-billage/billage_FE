@@ -1,20 +1,3 @@
-/** @screen DUE-3-PAGE-02-0 회비 수정_모임원 선택 */
-/** @screen DUE-4-MODAL-02-0 회비 수정_이탈 안내 (DuesEditScreen과 공유) */
-/** @screen DUE-4-SNACKBAR-04-0 회비 수정 완료 (화면 자체에서 표시 후 1.6초 뒤 상세로 복귀, DuesEditScreen과 공유) */
-/**
- * 7-B-1(회비 수정·삭제·마감): ⋮ 메뉴에서 바로 들어오는 독립 화면이다 —
- * `DuesEditScreen`(제목/장부/기간)과는 별개로 이 화면 혼자 `targetMemberIds`
- * 하나만 PATCH로 보낸다. 대상자 후보 목록은 `DuesCreateScreen`의 모임원
- * 선택 단계와 동일하게 `memberService.getMembers()`(모임 전체 명단)에서
- * 가져오고, 이미 이 회비에 배정된 대상자(체크 상태의 초기값)는
- * `duesService.getDuesMembers(duesId)`를 `status` 없이 불러 미납부+납부완료
- * 전체를 합친 목록으로 구한다(Dues.txt §6 — status 생략 시 전체 반환).
- *
- * 정책상 이미 `PAID`인 대상자를 체크 해제해도 막지 않는다(Dues.txt §4 정책
- * 메모: "이미 PAID인 대상자를 제거하는 것도 막지 않으며, 그 사람의 납부
- * 기록도 함께 삭제") — 그래서 이 화면은 대상자의 납부 상태를 구분해서
- * 보여주거나 경고하지 않는다, 명세에도 그런 경고 UI가 없다.
- */
 import { useCallback, useEffect, useState } from 'react';
 import { BackHandler, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -136,7 +119,6 @@ function DuesMemberEditScreen() {
     }
   };
 
-  // 안드로이드 하드웨어 back도 같은 이탈 확인을 거치게 한다(ReportCreateByLedgerScreen 패턴).
   useFocusEffect(
     useCallback(() => {
       const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -298,7 +280,7 @@ function DuesMemberEditScreen() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 16,
   },
   stateContainer: {

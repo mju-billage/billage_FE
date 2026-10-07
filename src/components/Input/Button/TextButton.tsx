@@ -25,7 +25,6 @@ type TextButtonProps = {
   hierarchy?: TextButtonHierarchy;
   icon?: ImageSourcePropType;
   disabled?: boolean;
-  /** true면 라벨에 밑줄을 긋는다(기본 false). 로그인 화면의 `비밀번호를 잊으셨나요?`/`회원가입하기`처럼 시안이 밑줄을 요구하는 곳에서만 켠다. */
   underline?: boolean;
 };
 
@@ -36,7 +35,6 @@ const PRESSED_BG_BY_HIERARCHY: Record<TextButtonHierarchy, object> = {
   negative: { backgroundColor: FEEDBACK_NEGATIVE_SUBTLE },
 };
 
-/** 배경 없는 텍스트 전용 버튼. hierarchy에 따라 색상만 다르고, 누르면 옅은 배경 하이라이트가 뜬다. */
 function TextButton({
   label,
   onPress,

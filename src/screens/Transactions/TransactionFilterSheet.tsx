@@ -1,5 +1,3 @@
-/** @screen DTB-2-SHEET-01-0 내역 필터링 */
-/** @screen DTB-3-SHEET-01-0 기간 선택 캘린더 (customStart/customEnd 커스텀 기간용 내부 Calendar 시트) */
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
@@ -45,16 +43,12 @@ type LedgerOption = { id: string; name: string };
 type TransactionFilterSheetProps = {
   visible: boolean;
   value: EntryListFilterValue;
-  /** 실 API(`ledgerService.getAllLedgersInGroup`)에서 부모가 가져와 내려준다 —
-   * 이 시트와 하위 `TransactionLedgerMultiSelectSheet`가 열릴 때마다 따로
-   * 부르지 않는다. */
   ledgerOptions: LedgerOption[];
   onClose: () => void;
   onApply: (value: EntryListFilterValue) => void;
   onPressCreateNewLedger: () => void;
 };
 
-/** 내역 메인 화면의 필터 바텀시트: 장부/기간/구분/정렬 순서. */
 function TransactionFilterSheet({
   visible,
   value,
@@ -253,7 +247,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionLabel: {
-    // 12px 1:1 대응 Bold 스타일이 시맨틱에 없어 body3(Regular family)에 fontWeight만 덧씌움.
     ...TYPOGRAPHY.body3,
     fontWeight: 'bold',
     color: FOREGROUND_NEUTRAL_NORMAL,

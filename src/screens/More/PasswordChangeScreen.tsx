@@ -1,9 +1,3 @@
-/** @screen ETC-4-PAGE-17-0 비밀번호 변경 */
-/**
- * 서버 미구현(2026-09-06 기준, `authService.changePassword` 참고) — 화면은
- * 명세대로 실제 호출을 만들어두고, 지금은 호출하면 에러 상태가 뜨는 게
- * 정상이다(서버가 열리면 코드 수정 없이 붙는다).
- */
 import { useCallback, useState } from 'react';
 import { BackHandler, ScrollView, StyleSheet, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -46,7 +40,6 @@ type PasswordChangeNavigationProp = NativeStackNavigationProp<
   'PasswordChange'
 >;
 
-/** "비밀번호 변경": 현재/새/새 비밀번호 확인 3필드. */
 function PasswordChangeScreen() {
   const navigation = useNavigation<PasswordChangeNavigationProp>();
   const [currentPassword, setCurrentPassword] = useState('');
@@ -205,11 +198,11 @@ function PasswordChangeScreen() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 24,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 16,
   },
 });

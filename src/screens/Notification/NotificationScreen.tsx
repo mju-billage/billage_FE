@@ -1,10 +1,3 @@
-/** @screen DSH-2-PAGE-01-0 알림 목록 */
-/**
- * 2026-09-06: `GET/PATCH /notifications`(서버 `미구현`)로 실제 연동했다 — 그동안
- * `MOCK_NOTIFICATIONS`(types/notification.ts, 이제 삭제) 고정값을 그대로 보여주던
- * 화면이었다. 항목 탭 시 읽음 처리 후 `targetType`에 따라 해당 상세로 이동한다
- * (`GROUP`은 대응하는 단일 상세 화면이 없어 읽음 처리만 하고 이동은 생략).
- */
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -43,7 +36,6 @@ type NotificationScreenNavigationProp = NativeStackNavigationProp<
 
 type LoadState = 'loading' | 'error' | 'ready';
 
-/** 알림 목록 화면. */
 function NotificationScreen() {
   const navigation = useNavigation<NotificationScreenNavigationProp>();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -89,7 +81,6 @@ function NotificationScreen() {
     try {
       await supportService.markNotificationRead(item.id);
     } catch {
-      // 읽음 처리 실패는 조용히 무시한다 — 화면 이동 자체를 막을 정도의 문제는 아니다.
     }
 
     if (item.targetType === 'ENTRY') {
@@ -99,7 +90,6 @@ function NotificationScreen() {
     } else if (item.targetType === 'NOTICE') {
       navigation.navigate('NoticeDetail', { noticeId: item.targetId });
     }
-    // targetType === 'GROUP'은 대응하는 단일 상세 화면이 없어 읽음 처리만 한다.
   };
 
   return (

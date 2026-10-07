@@ -1,23 +1,3 @@
-/** @screen DUE-4-PAGE-03-0 모임원 상세_수정 */
-/** @screen COM-1-SNACKBAR-02-0 수정 완료 */
-/**
- * 7-C: 모임원 상세(`MemberDetailScreen`)의 연필 아이콘에서 들어오는 독립
- * 화면이다. `MemberAddIndividualScreen`(7-A)과 필드 구성(이름/전화번호/태그/
- * 메모)이 완전히 같지만 명세가 Screen ID를 따로 배정하고("모임원 상세_수정")
- * 진입/이탈 동작도 다르다(수정은 기존 값을 채운 채 시작, 뒤로가기가 확인
- * 모달 없이 즉시 파기) — `DuesCreateScreen`/`DuesEditScreen`처럼 두 화면을
- * 분리해서 구현했다.
- *
- * ⚠️ 저장은 `memberService.updateMember()`로 보내며, 이 PATCH는 **부분 수정이
- * 아니라 통째 교체다**(Member.txt §4 aside). 그래서 바뀐 필드만 골라 보내는
- * `DuesEditScreen`/`entryService.updateEntry` 패턴을 쓰면 안 된다 — 손대지 않은
- * `phoneNumber`/`tags`/`memo`까지 서버가 비워버린다. 여기서는 항상 폼의 현재
- * 값 전체를 보낸다(`hasChanges`는 "저장할 필요가 있는지"만 판단할 뿐 전송
- * 내용을 줄이는 데 쓰지 않는다).
- *
- * 뒤로가기(백 버튼)는 시안(`모임원조회_모임원수정.png` No.1)에 이탈 확인
- * 모달 언급이 없어 `DuesEditScreen`과 달리 바로 파기하고 복귀한다.
- */
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -346,7 +326,7 @@ function MemberEditScreen() {
 const styles = StyleSheet.create({
   content: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 12,
   },
   stateContainer: {
@@ -377,7 +357,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   footer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 16,
   },
 });

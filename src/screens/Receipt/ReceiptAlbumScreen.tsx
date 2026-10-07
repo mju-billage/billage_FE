@@ -1,16 +1,3 @@
-/** @screen ETC-2-PAGE-05-0 증빙자료 앨범 */
-/**
- * 더보기 메인의 "증빙자료 앨범" 메뉴에서 들어오는 화면(File.txt "3. 증빙자료
- * 앨범 조회", MEMBER 권한 — 총무·일반 관리자 모두 조회 가능). 필터·검색
- * 규칙이 "Entry 7번(모임 전체 내역 목록)과 같은 조건"이라고 명시돼 있어
- * `TransactionsScreen`의 필터 상태(`EntryListFilterValue`)·무한 스크롤
- * 패턴을 그대로 가져왔다 — 다만 그리드라 `TransactionFilterSheet`를 그대로
- * 쓰지 않고 정렬 섹션만 뺀 `ReceiptFilterSheet`를 따로 만들었다(이유는 그
- * 파일 주석 참고, `sort` 파라미터가 서버에서 500을 낸다).
- *
- * 썸네일 터치 시 이동하는 "자료 상세"(`ReceiptDetail`)는 단건 조회 API가
- * 없어 이 화면이 이미 들고 있는 항목 데이터를 그대로 route params로 넘긴다.
- */
 import { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -124,7 +111,6 @@ function ReceiptAlbumScreen() {
     try {
       let group = getActiveGroup();
       if (!group) {
-        // [치명1] 로그인 직후 첫 포커스처럼 모임 캐시가 아직 없는 순간 대비.
         await groupService.getMyGroups();
         group = getActiveGroup();
       }
@@ -157,7 +143,6 @@ function ReceiptAlbumScreen() {
       const ledgers = await ledgerService.getAllLedgersInGroup(group.id);
       setLedgerOptions(ledgers.map(l => ({ id: l.id, name: l.name })));
     } catch {
-      // 필터 시트 보조 데이터라 실패해도 조용히 넘어간다.
     }
   }, []);
 
@@ -176,7 +161,6 @@ function ReceiptAlbumScreen() {
       setPage(nextPage.page);
       setHasMore(!nextPage.last);
     } catch {
-      // 다음 페이지 실패는 조용히 무시한다 — 다시 스크롤하면 재시도된다.
     } finally {
       setIsLoadingMore(false);
     }
@@ -282,7 +266,7 @@ function ReceiptAlbumScreen() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 8,
     gap: 8,
   },

@@ -33,7 +33,6 @@ const TEXT_COLOR_BY_STATUS: Record<BadgeStatus, string> = {
   neutral: FOREGROUND_NEUTRAL_NORMAL,
 };
 
-/** 상태를 색상으로 표시하는 알약형 뱃지. */
 function Badge({ label, status = 'neutral', icon }: BadgeProps) {
   return (
     <View

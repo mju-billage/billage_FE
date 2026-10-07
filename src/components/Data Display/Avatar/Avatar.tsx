@@ -29,12 +29,10 @@ type AvatarProps =
 
 const SIZE_BY_KEY: Record<AvatarSize, number> = { sm: 28, md: 36, lg: 48 };
 
-/** Avatar가 쓰는 스퀴클(둥근 네모) 모서리 반지름 공식. 같은 모양을 쓰는 다른 곳(AvatarList, EntityCard)도 공유한다. */
 export function getSquircleRadius(dimension: number): number {
   return dimension * (7 / 24);
 }
 
-/** 원형 아바타. 아이콘/이니셜/이미지 세 종류를 지원한다. */
 function Avatar(props: AvatarProps) {
   const size = props.size ?? 'md';
   const variant = props.style ?? 'default';

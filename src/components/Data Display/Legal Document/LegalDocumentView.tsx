@@ -10,7 +10,6 @@ type LegalDocumentViewProps = {
   onPressBack: () => void;
 };
 
-/** 약관/정책 전문을 제목 + 스크롤 가능한 본문으로 보여주는 공용 레이아웃. */
 function LegalDocumentView({
   title,
   bodyText,
@@ -28,7 +27,7 @@ function LegalDocumentView({
 
 const styles = StyleSheet.create({
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 40,
   },
   body: {

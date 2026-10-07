@@ -1,4 +1,3 @@
-/** @screen ADD-2-SHEET-06-0 금액 입력 */
 import { useRef, useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
@@ -12,8 +11,6 @@ import {
 } from '../../constants/transactionScreenText';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-/** Entry(최대 999,999,999)와 Dues(최대 999,999,999) 둘 다 같은 상한이라 공용 시트에
- * 하드코딩했다 — 다른 상한이 필요한 도메인이 생기면 그때 prop으로 뺀다. */
 const MAX_AMOUNT = 999_999_999;
 
 type TransactionAmountSheetProps = {
@@ -23,7 +20,6 @@ type TransactionAmountSheetProps = {
   onSave: (amount: number) => void;
 };
 
-/** 금액 입력 바텀시트. 안드로이드 기본 숫자 키보드로 입력받는다(키보드 위치는 `BottomSheet`가 처리). */
 function TransactionAmountSheet({
   visible,
   value,
@@ -38,7 +34,6 @@ function TransactionAmountSheet({
   const handleChangeText = (text: string) => {
     const nextDigits = text.replace(/[^0-9]/g, '').replace(/^0+(?=\d)/, '');
     if (Number(nextDigits) > MAX_AMOUNT || nextDigits === digits) {
-      // 상한 초과·변화 없음이면 state가 그대로라 리렌더가 스킵돼 네이티브 입력창이 어긋난다 — 되돌린다.
       inputRef.current?.setNativeProps({ text: formatted });
       return;
     }

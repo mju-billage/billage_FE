@@ -1,4 +1,3 @@
-// PasswordResetScreen과 PasswordResetSentScreen이 공유하는 문구
 export const PASSWORD_RESET_TITLE = '비밀번호 재설정';
 export const PASSWORD_RESET_SUBTITLE =
   '임시 비밀번호를 받을\n이메일 주소를 입력해주세요';

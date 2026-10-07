@@ -1,14 +1,14 @@
 /** 7단계 — 파일·통계·대시보드. groupId 6 전용.
  * 파일 업로드(`POST /files`)는 multipart/form-data라 이 엔진(JSON 바디 전용, `Buffer.from(
  * JSON.stringify(...), 'utf8')` 경로만 지원)으로는 실호출을 못 만든다 — SKIP 처리하고
- * 사유를 남긴다(이미 이전 라운드에 실기기로 O 확인된 상태라 회귀 위험은 낮다). 나머지
+ * 사유를 남긴다. 나머지
  * 3개(통계/대시보드/캘린더)는 실제로 호출한다. */
 module.exports = {
   stage: '7단계 — 파일·통계·대시보드',
   cases: [
     {
       name: 'file-upload',
-      skip: 'multipart/form-data 업로드 — 이 엔진은 JSON 바디만 지원(api-call.js 설계 자체가 Buffer.from(JSON, utf8) 경로 전용). 실기기 수동 검증 필요(이전 라운드에 O 확인됨, docs/api-wiring.md 참고)',
+      skip: 'multipart/form-data 업로드 — 이 엔진은 JSON 바디만 지원(api-call.js 설계 자체가 Buffer.from(JSON, utf8) 경로 전용). 실기기 수동 검증 필요',
     },
     {
       name: 'file-content-get',

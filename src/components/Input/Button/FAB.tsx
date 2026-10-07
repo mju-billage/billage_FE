@@ -5,7 +5,6 @@ import { BOTTOM_NAVIGATION_HEIGHT } from '../../Navigation/Bottom Navigation/Bot
 
 type FloatingActionButtonProps = {
   onPress: () => void;
-  /** true면 아이콘+라벨이 있는 알약형(pill)으로, false면 원형 아이콘 버튼으로 렌더링한다. */
   extended?: boolean;
   label?: string;
 };
@@ -13,7 +12,6 @@ type FloatingActionButtonProps = {
 const SIZE = 46;
 const DocumentAddIconImage = require('../../../assets/icons/content/DocumentAdd.png');
 
-/** 문서(가로줄 2개) + 우하단 plus 배지로 구성한 "내역 추가" 아이콘. */
 function DocumentAddIcon() {
   return (
     <View style={styles.icon}>
@@ -25,7 +23,6 @@ function DocumentAddIcon() {
   );
 }
 
-/** 화면 우하단에 고정되는 액션 버튼(FAB). extended=true면 아이콘+텍스트 알약형으로 확장된다. */
 function FloatingActionButton({
   onPress,
   extended = false,
@@ -50,7 +47,6 @@ const styles = StyleSheet.create({
   button: {
     position: 'absolute',
     right: 24,
-    // 탭 화면에선 탭바가 화면 위에 겹쳐 있어 그 위로 12 띄운다.
     bottom: BOTTOM_NAVIGATION_HEIGHT + 12,
     height: SIZE,
     backgroundColor: NAVY_800,

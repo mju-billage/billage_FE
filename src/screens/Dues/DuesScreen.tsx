@@ -1,24 +1,3 @@
-/** @screen DUE-1-PAGE-01-0 납부관리 메인 */
-/** @screen DUE-4-SNACKBAR-01-0 회비 생성 완료 (DuesCreateScreen 성공 시 route.params.snackbarMessage로 렌더) */
-/** @screen DUE-4-SNACKBAR-02-0 회비 마감 완료 (DuesDetailScreen 마감 성공 시 렌더) */
-/** @screen DUE-4-SNACKBAR-03-0 회비 삭제 완료 (DuesDetailScreen 삭제 성공 시 렌더) */
-/**
- * 6-A(DUE 화면 구현, 조회 전용): 목 데이터 없이 처음부터 실 API로 붙인다.
- * "+"(회비 생성, 6-B)와 "모임원 관리" 아이콘(7-A)은 이제 둘 다 연결돼 있다.
- *
- * 정렬은 서버가 명세 순서(예정 시작일순 → 진행중 마감임박순 → 마감)로 고정
- * 정렬해 내려준다 — 클라이언트 재정렬을 하지 않는다(2026-09-04 정합성 복구,
- * `docs/api-gaps.md` 참고. 예전엔 서버가 정렬을 안 준다고 잘못 판단해
- * `sortDuesForList`로 재정렬했었다). D-day는 여전히 클라이언트 계산이다 — 서버는
- * `startDate`/`dueDate` 원본 날짜만 주고 D-day 문자열 자체는 안 준다(Dues.txt).
- *
- * 7-B-1(회비 수정·삭제·마감): `DuesDetailScreen`의 삭제·마감 확인 모달이 성공
- * 후 `navigation.navigate('Main', {screen:'Dues', params:{snackbarMessage}})`로
- * 이 화면까지 라우팅하며 스낵바 문구를 실어 보낸다 — 삭제는 상세 화면 자체가
- * 없어지고, 마감은 명세가 상세가 아니라 이 목록으로 돌아가도록 정해 두 액션
- * 다 이 화면에서 결과를 보여준다. `useFocusEffect(load)`가 재포커스마다
- * 어차피 다시 불러오므로 목록 자체는 별도 갱신 로직 없이 최신 상태로 보인다.
- */
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -102,7 +81,6 @@ function toCardProps(dues: DuesSummary) {
   };
 }
 
-/** 납부관리 메인: 회비 목록(전체/진행중 탭)을 카드로 보여준다. */
 function DuesScreen() {
   const navigation = useNavigation<DuesNavigationProp>();
   const route = useRoute<DuesRouteProp>();
@@ -128,8 +106,6 @@ function DuesScreen() {
     try {
       let group = getActiveGroup();
       if (!group) {
-        // [치명1] 로그인 직후 첫 포커스처럼 모임 캐시가 아직 없는 순간 대비 —
-        // "다시 시도"가 실제로 동작하도록 여기서 한 번 더 직접 불러온다.
         await groupService.getMyGroups();
         group = getActiveGroup();
       }
@@ -155,10 +131,6 @@ function DuesScreen() {
     }, [load]),
   );
 
-  // 회비 삭제·마감(7-B-1, DuesDetailScreen) 완료 후 이 화면으로 라우팅하며
-  // 넘겨준 스낵바 문구 — 삭제된 회비는 상세로 돌아갈 곳이 없고, 마감은
-  // 명세가 상세가 아니라 이 목록으로 돌아가도록 정해뒀다(둘 다 회비 상세의
-  // 확인 모달에서 시작). 소비 즉시 파라미터를 지워 재포커스 시 중복 노출을 막는다.
   useEffect(() => {
     if (route.params?.snackbarMessage) {
       setSnackbarMessage(route.params.snackbarMessage);
@@ -201,8 +173,6 @@ function DuesScreen() {
         type="titleOnly"
         title={DUES_MAIN_TITLE}
         rightIcons={[
-          // 회비 생성은 총무 전용(Dues.txt) — 일반 관리자에겐 버튼 자체를 숨긴다(2단계
-          // UI 우선 차단 패턴). 모임원 관리는 대상 화면이 아직 없어 계속 no-op.
           ...(viewerIsOwner
             ? [
                 {

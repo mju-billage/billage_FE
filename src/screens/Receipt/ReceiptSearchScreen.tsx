@@ -1,15 +1,3 @@
-/** @screen ETC-3-PAGE-05-0 증빙자료 앨범 내 검색 */
-/**
- * 앨범 메인의 돋보기 아이콘에서 들어오는 검색 전용 화면. 검색 범위는
- * File.txt "keyword: 내역명·메모 검색"(Entry 7번과 동일 규칙) — 장부명은
- * 검색하지 않는다. 시안이 "실시간 검색(On-change)"이라고 적었지만
- * 7-A(모임원 검색)와 같은 이유로 타이핑마다 서버를 부르는 대신 300ms
- * 디바운스를 얹었다.
- *
- * 진입 시 곧바로 전체 목록을 보여주지 않는다 — 시안엔 "빈 검색어" 상태가
- * 없고(Case A/B 둘 다 텍스트가 입력된 상태부터 시작), 앨범 메인과 똑같은
- * 목록을 검색어 없이 또 한 번 불러오는 건 낭비다. 키워드를 입력해야 조회한다.
- */
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -89,8 +77,6 @@ function ReceiptSearchScreen() {
       setHasMore(!result.last);
       setSearchError(undefined);
     } catch (error) {
-      // "결과 없음"과 "요청 실패"를 구분한다 — 전에는 둘 다 빈 목록으로만 보여서
-      // 사용자가 검색이 실패한 건지 그냥 결과가 없는 건지 알 수 없었다.
       if (pageToLoad === 0) {
         setReceipts([]);
         setHasMore(false);
@@ -176,7 +162,7 @@ function ReceiptSearchScreen() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 8,
     gap: 8,
   },

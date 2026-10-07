@@ -24,7 +24,6 @@ type ReportCardProps = {
   onPress?: () => void;
 };
 
-/** 좌상단에 폴더 탭 모양(svg)이 붙는 리포트 카드. 수입/지출 요약을 보여준다. */
 function ReportCard({
   title,
   dateRangeLabel,
@@ -91,7 +90,6 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
-  // 12px+Bold 조합은 정식 스타일에 없어 body3+bold를 예외로 채택.
   income: {
     ...TYPOGRAPHY.body3,
     fontWeight: 'bold',

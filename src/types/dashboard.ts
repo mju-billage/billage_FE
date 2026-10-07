@@ -2,7 +2,6 @@ import type { ImageSourcePropType } from 'react-native';
 
 export type MiniCalendarDay = {
   date: number;
-  /** null이면 그날 입출금 내역이 없다. 양수는 입금, 음수는 지출. */
   amount: number | null;
 };
 

@@ -1,13 +1,3 @@
-/** @screen ETC-3-PAGE-03-0 기간별 보고서 조회 */
-/** @screen ETC-3-PAGE-03-1 기간별 보고서 상세(수입/지출) — 03-0의 탭 상태, 별도 라우트 아님 */
-/**
- * `ReportByLedgerDetailScreen`과 자매 화면(같은 이유로 상세 재조회) — 다른
- * 점은 헤더 카드 자체가 "이 기간 전체" 요약이고 눌러서 통합 시간순
- * (`ReportPeriodEntriesScreen`, ETC-4-PAGE-07-0)으로 가는 진입점을 겸한다는
- * 것. 리스트의 개별 장부 행은 금액 없이 이름만 보여주고(시안 No.4 데이터),
- * 눌렀을 때 그 장부 하나만 필터링된 `ReportLedgerEntriesScreen`(05-0,
- * `ReportByLedgerDetailScreen`과 공유)으로 간다.
- */
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Image, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -18,6 +8,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import CardBase from '../../components/Data Display/Card/CardBase';
+import FolderTabShape from '../../components/Data Display/Card/FolderTabShape';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import type { ReportDetail } from '../../types/report';
 import * as reportService from '../../services/reportService';
@@ -42,6 +33,7 @@ import {
 } from '../../constants/reportScreenText';
 import {
   FEEDBACK_POSITIVE_BOLD,
+  FILL_NEUTRAL_SUBTLE,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
@@ -65,8 +57,6 @@ function ReportByPeriodDetailScreen() {
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
-  // ETC-5-SNACKBAR-08-0: 생성 직후 이 화면으로 이동하며 받은 완료 메시지를
-  // 한 번만 띄운다(design-verification.md §5-11).
   useEffect(() => {
     if (route.params.snackbarMessage) {
       setSnackbarMessage(route.params.snackbarMessage);
@@ -169,6 +159,7 @@ function ReportByPeriodDetailScreen() {
           }
         >
           <CardBase style={styles.headerCard}>
+            <FolderTabShape fill={FILL_NEUTRAL_SUBTLE} />
             <View style={styles.headerTopRow}>
               <Text style={styles.headerTitle} numberOfLines={1}>
                 {report.title}
@@ -230,7 +221,7 @@ function ReportByPeriodDetailScreen() {
 const styles = StyleSheet.create({
   body: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingTop: 8,
     gap: 8,
   },
@@ -249,7 +240,7 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   headerCard: {
-    marginTop: 8,
+    marginTop: 24,
     gap: 4,
   },
   headerTopRow: {

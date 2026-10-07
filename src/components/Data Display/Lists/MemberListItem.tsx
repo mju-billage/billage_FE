@@ -17,7 +17,6 @@ type MemberListItemProps = {
   onPress?: () => void;
 };
 
-/** 체크박스 + 이름 + 금액으로 구성된 모임원 목록 행. */
 function MemberListItem({
   name,
   amount,

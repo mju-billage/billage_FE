@@ -1,4 +1,3 @@
-/** @screen ETC-4-SHEET-01-0 모임 참여 */
 import { useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
@@ -26,7 +25,6 @@ type JoinGroupSheetProps = {
   onJoined: (group: GroupSummary) => void;
 };
 
-/** "코드로 참여하기" 시트: 초대 코드를 입력해 모임에 참여한다. */
 function JoinGroupSheet({ visible, onClose, onJoined }: JoinGroupSheetProps) {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | undefined>();
@@ -49,10 +47,6 @@ function JoinGroupSheet({ visible, onClose, onJoined }: JoinGroupSheetProps) {
       setCode('');
       onJoined(group);
     } catch (fetchError) {
-      // GroupMembership.txt 3번: INVALID_INVITATION_CODE/INVITATION_EXPIRED/
-      // ALREADY_GROUP_MEMBER 세 코드 모두 시안이 "코드가 일치하지 않아요"
-      // 하나로 묶어서 보여준다(apiErrorMessages.ts GROUP_MEMBERSHIP_ERROR_MESSAGES
-      // 참고) — 그 외 코드(네트워크 실패 제외)는 공용 매핑을 그대로 쓴다.
       if (isNetworkError(fetchError)) {
         setError(API_NETWORK_ERROR_MESSAGE);
       } else if (fetchError instanceof ApiError) {

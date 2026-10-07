@@ -25,21 +25,15 @@ type CalendarProps = {
   selectedEndDate?: string;
   disabledDates?: string[];
   outlinedDates?: string[];
-  /** 날짜 아래에 표시할 날짜별 금액(일자 → 금액). */
   amountsByDate?: Record<number, number | null | undefined>;
-  /** 앞에서부터 보여줄 주(week) 수. 기본값은 해당 월 전체. */
   weeksToShow?: number;
-  /** 내부 월이동 헤더 노출 여부. 기본 true. */
   showHeader?: boolean;
-  /** false면 날짜 셀이 탭 불가능한 순수 표시용이 된다. 기본 true. */
   interactive?: boolean;
   onSelectDate?: (date: string) => void;
   onChangeMonth?: (delta: number) => void;
   showDateFields?: boolean;
 };
 
-/** 앱 전체에서 쓰는 유일한 날짜 그리드 컴포넌트. 범위 선택형 바텀시트부터 대시보드 미니 미리보기,
- * 내역 탭 전체 월 보기까지 옵션으로 커버한다. */
 function Calendar({
   year,
   month,
@@ -143,9 +137,6 @@ function Calendar({
 
             return (
               <View key={cellIndex} style={styles.dayCell}>
-                {/* 명세 No.3 [액션]: "시작일/종료일/사이 구간이 시각적으로 구분되어야 함" —
-                    사이 구간은 옅은 배경 띠로 이어 붙이고, 전체 구간의 양 끝(시작일/종료일)
-                    쪽만 둥글게 처리한다(안쪽 경계는 각지게 둬야 셀 사이가 이어져 보인다). */}
                 {(isInRange || isRangeStart || isRangeEnd) && (
                   <View
                     style={[

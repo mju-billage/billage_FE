@@ -25,8 +25,6 @@ type DuesProgressCardProps = (
       type: 'paymentManagement';
       title: string;
       dateBadgeLabel: string;
-      /** D-day 배지 색상('active' 상태에서만 적용) — 기본 'neutral'(기존 동작 유지).
-       * DUE 목록(DUE-1-PAGE-01-0)의 마감 임박도별 색 구분에 쓴다. */
       dateBadgeStatus?: DateBadgeStatus;
       paidMemberCount: number;
       totalMemberCount: number;
@@ -36,23 +34,10 @@ type DuesProgressCardProps = (
     }
 ) & {
   state?: DuesProgressCardState;
-  /** 카드 전체를 누를 수 있게 한다(예: DUE-1-PAGE-01-0 목록 → 상세 이동). */
   onPress?: () => void;
-  /** true면 가로 캐러셀용 고정 폭(280) 대신 부모 너비에 맞춘다(세로 리스트용). */
   fullWidth?: boolean;
 };
 
-/**
- * 회비 모금 진행 현황 카드. 대시보드용(dashboard)과 수납관리용(paymentManagement) 두 레이아웃을 지원한다.
- * `state='upcoming'`이면 D-day 배지 대신 시작일을 텍스트로, `state='ended'`면 회색 카드로 종료를 표시한다.
- *
- * 검증 중 "진행률 바가 안 보인다"는 [결함]이 나왔다 — 카드가 흰 배경 위에 얹혀
- * ProgressBar 기본 트랙색(FILL_NEUTRAL_NORMAL, #F3F4F6)과 대비가 거의 없어서
- * 생긴 문제였다(로직/데이터는 정상 — progressRatio 계산과 채움 폭 자체는
- * 문제 없음). ProgressBar에 추가한 `trackColor`로 여기서만 더 진한
- * BORDER_NEUTRAL_NORMAL(#E5E7EB)을 준다 — 이 화면(DUE-1-PAGE-01-0) 시안은
- * 퍼센트 숫자 없이 바만(+인원/금액 텍스트) 보여주므로 `showLabel`은 그대로 둔다.
- */
 function DuesProgressCard(props: DuesProgressCardProps) {
   const state = props.state ?? 'active';
   const inner =
@@ -153,10 +138,6 @@ function PaymentManagementCard({
       </View>
       <View style={styles.paymentSummaryRow}>
         <View style={styles.paymentSummaryColumn}>
-          <Image
-            source={MEMBER_ICON}
-            style={[styles.memberIcon, ended && styles.iconEnded]}
-          />
           <Text style={[styles.paymentSummaryText, ended && styles.textEnded]}>
             {paidMemberCount}/{totalMemberCount}명
           </Text>

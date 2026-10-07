@@ -1,4 +1,3 @@
-/** @screen FDR-2-SHEET-01-0 새 장부 생성 */
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Menu from '../../components/Navigation/Menu/Menu';
 import type { MenuItem } from '../../components/Navigation/Menu/Menu';
@@ -22,9 +21,6 @@ type NewItemSheetProps = {
   onPressNewFolder: () => void;
 };
 
-/** "+" 버튼을 누르면 뜨는 바텀시트: 새 장부 생성하기 / 새 폴더 생성하기 선택.
- * 2026-09-13: 최상위(폴더 없음)에서도 `POST /groups/{groupId}/ledgers`로 장부를
- * 만들 수 있게 돼(백엔드 노티 03번) "새 장부 생성하기"를 더 이상 숨기지 않는다. */
 function NewItemSheet({
   visible,
   onClose,
