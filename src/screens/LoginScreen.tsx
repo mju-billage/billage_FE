@@ -24,8 +24,11 @@ import { ApiError } from '../services/apiClient';
 import * as authService from '../services/authService';
 import { SocialAuthParseError } from '../services/authService';
 import * as socialAuthService from '../services/socialAuthService';
-import * as groupService from '../services/groupService';
-import { getApiErrorMessage, isNetworkError } from '../constants/apiErrorMessages';
+import {
+  getApiErrorMessage,
+  isNetworkError,
+  toUserErrorMessage,
+} from '../constants/apiErrorMessages';
 import {
   LOGIN_EMAIL_PLACEHOLDER,
   LOGIN_PASSWORD_PLACEHOLDER,
@@ -130,15 +133,14 @@ function LoginScreen() {
     }, [route.params?.snackbarMessage]),
   );
 
-  const goToMain = async () => {
-    try {
-      await groupService.getMyGroups();
-    } catch {
-    }
-    navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+  const goToMain = () => {
+    navigation.reset({ index: 0, routes: [{ name: 'PostLogin' }] });
   };
 
   const performLogin = async (credentials: authService.LoginRequest) => {
+    if (isSubmitting) {
+      return;
+    }
     setLoginError(undefined);
     setIsSubmitting(true);
     try {
@@ -148,7 +150,7 @@ function LoginScreen() {
       if (error instanceof ApiError && error.code === 'INVALID_CREDENTIALS') {
         setLoginError(LOGIN_INVALID_CREDENTIALS_ERROR);
       } else {
-        setLoginError(LOGIN_GENERIC_ERROR);
+        setLoginError(toUserErrorMessage(error, LOGIN_GENERIC_ERROR));
       }
     } finally {
       setIsSubmitting(false);
@@ -158,7 +160,7 @@ function LoginScreen() {
   const handleLogin = () => performLogin({ email, password });
 
   const handleMockLogin = () => {
-    goToMain();
+    navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
   };
 
   const handleSocialLogin = async (provider: SocialType) => {
@@ -187,7 +189,7 @@ function LoginScreen() {
       } else if (error instanceof SocialAuthParseError) {
         setLoginError(LOGIN_SOCIAL_PARSE_ERROR);
       } else if (error instanceof ApiError) {
-        setLoginError(getApiErrorMessage(error.code));
+        setLoginError(getApiErrorMessage(error.code, error.message));
       } else if (isNetworkError(error)) {
         setLoginError(LOGIN_SOCIAL_NETWORK_ERROR);
       } else {

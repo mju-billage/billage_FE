@@ -111,3 +111,5 @@ export const SNACKBAR_ROLE_CHANGED_PREFIX = "'";
 export const SNACKBAR_ROLE_CHANGED_SUFFIX = "'님의 권한을 변경했어요.";
 export const SNACKBAR_MEMBER_REMOVED_PREFIX = "'";
 export const SNACKBAR_MEMBER_REMOVED_SUFFIX = "'님을 모임에서 내보냈어요.";
+export const MORE_ADMINS_LOAD_FAILED =
+  '관리자 목록을 불러오지 못했어요. 잠시 후 다시 시도해주세요.';

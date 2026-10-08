@@ -10,7 +10,7 @@ import ToolsMenu from '../../components/Navigation/Menu/ToolsMenu';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import Button from '../../components/Input/Button/Button';
 import MemberProfileSheet from './MemberProfileSheet';
-import { getActiveGroup } from '../../types/group';
+import { getActiveGroup, getCachedGroups } from '../../types/group';
 import type { GroupSummary } from '../../types/group';
 import type { GroupMembership } from '../../types/groupMembership';
 import * as groupMembershipService from '../../services/groupMembershipService';
@@ -69,7 +69,7 @@ function GroupManagerScreen() {
       return API_NETWORK_ERROR_MESSAGE;
     }
     if (error instanceof ApiError) {
-      return getApiErrorMessage(error.code);
+      return getApiErrorMessage(error.code, error.message);
     }
     return API_ERROR_DEFAULT_MESSAGE;
   };
@@ -96,8 +96,9 @@ function GroupManagerScreen() {
             await groupMembershipService.createInvitation(groupId);
             setGroup(getActiveGroup());
             return;
-          } catch {
+          } catch (createError) {
             setInviteError(true);
+            showSnackbar(toErrorMessage(createError));
             return;
           }
         }
@@ -105,6 +106,7 @@ function GroupManagerScreen() {
           return;
         }
         setInviteError(true);
+        showSnackbar(toErrorMessage(error));
       } finally {
         setIsIssuingInvite(false);
       }
@@ -245,7 +247,13 @@ function GroupManagerScreen() {
         onClose={() => setSelectedMember(null)}
         onChanged={handleMemberChanged}
         onError={showSnackbar}
-        onLeftGroup={() => navigation.pop(2)}
+        onLeftGroup={() => {
+          if (getCachedGroups().length === 0) {
+            navigation.reset({ index: 0, routes: [{ name: 'PostLogin' }] });
+            return;
+          }
+          navigation.pop(2);
+        }}
       />
     </ScreenContainer>
   );

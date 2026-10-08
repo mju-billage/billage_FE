@@ -109,7 +109,7 @@ function PasswordChangeScreen() {
       } else if (error instanceof ApiError && error.code === 'INVALID_CREDENTIALS') {
         setCurrentPasswordError(PASSWORD_CHANGE_CURRENT_MISMATCH_ERROR);
       } else if (error instanceof ApiError) {
-        setCurrentPasswordError(getApiErrorMessage(error.code));
+        setCurrentPasswordError(getApiErrorMessage(error.code, error.message));
       } else {
         setCurrentPasswordError(API_ERROR_DEFAULT_MESSAGE);
       }

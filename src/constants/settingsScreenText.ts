@@ -134,3 +134,7 @@ export const TERMS_LIST_PRIVACY_LABEL = '개인정보 처리방침';
 export const TERMS_LIST_AUTO_RECORD_LABEL = '자동 기록 서비스 이용 약관';
 export const TERM_DETAIL_LOADING = '약관을 불러오는 중이에요.';
 export const TERM_DETAIL_RETRY_LABEL = '다시 시도';
+export const WITHDRAW_OWNER_TRANSFER_REQUIRED_ERROR =
+  '총무 권한을 넘겨야 하는 모임이 생겼어요. 이전 화면에서 권한 위임을 다시 진행해주세요.';
+export const WITHDRAW_SUCCESSOR_NOT_FOUND_ERROR =
+  '권한을 넘길 관리자가 모임을 나갔어요. 이전 화면에서 다른 관리자를 선택해주세요.';

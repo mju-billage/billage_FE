@@ -50,7 +50,7 @@ function JoinGroupSheet({ visible, onClose, onJoined }: JoinGroupSheetProps) {
       if (isNetworkError(fetchError)) {
         setError(API_NETWORK_ERROR_MESSAGE);
       } else if (fetchError instanceof ApiError) {
-        setError(getApiErrorMessage(fetchError.code));
+        setError(getApiErrorMessage(fetchError.code, fetchError.message));
       } else {
         setError(JOIN_GROUP_INVALID_CODE_ERROR);
       }

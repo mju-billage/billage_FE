@@ -47,6 +47,7 @@ import {
   API_NETWORK_ERROR_MESSAGE,
   getApiErrorMessage,
   isNetworkError,
+  toUserErrorMessage,
 } from '../../constants/apiErrorMessages';
 import {
   LEDGER_BUDGET_DIALOG_TITLE,
@@ -82,6 +83,9 @@ import {
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import {
+  SNACKBAR_LOAD_MORE_FAILED,
+} from '../../constants/commonText';
 
 const SEARCH_ICON = require('../../assets/icons/system/Search.png');
 const FILTER_ICON = require('../../assets/icons/system/Filter.png');
@@ -129,7 +133,7 @@ function LedgerDetailScreen() {
       return API_NETWORK_ERROR_MESSAGE;
     }
     if (error instanceof ApiError) {
-      return getApiErrorMessage(error.code);
+      return getApiErrorMessage(error.code, error.message);
     }
     return API_ERROR_DEFAULT_MESSAGE;
   };
@@ -137,7 +141,7 @@ function LedgerDetailScreen() {
   const fieldOrGeneralError = (error: unknown, field: string): string => {
     if (error instanceof ApiError) {
       const fieldError = error.fieldErrors.find(fe => fe.field === field);
-      return fieldError?.reason ?? getApiErrorMessage(error.code);
+      return fieldError?.reason ?? getApiErrorMessage(error.code, error.message);
     }
     return toErrorMessage(error);
   };
@@ -154,6 +158,7 @@ function LedgerDetailScreen() {
       setEntryTotal(firstPage.totalElements);
       setEntryPage(firstPage.page);
       setHasMoreEntries(!firstPage.last);
+      loadMoreFailedRef.current = false;
       setLoadState('ready');
     } catch (error) {
       setLoadErrorMessage(toErrorMessage(error));
@@ -162,7 +167,7 @@ function LedgerDetailScreen() {
   }, [ledgerId]);
 
   const loadMoreEntries = useCallback(async () => {
-    if (isLoadingMore || !hasMoreEntries) {
+    if (loadMoreFailedRef.current || isLoadingMore || !hasMoreEntries) {
       return;
     }
     setIsLoadingMore(true);
@@ -174,7 +179,9 @@ function LedgerDetailScreen() {
       setEntries(current => [...current, ...nextPage.items]);
       setEntryPage(nextPage.page);
       setHasMoreEntries(!nextPage.last);
-    } catch {
+    } catch (error) {
+      loadMoreFailedRef.current = true;
+      showSnackbar(toUserErrorMessage(error, SNACKBAR_LOAD_MORE_FAILED));
     } finally {
       setIsLoadingMore(false);
     }
@@ -185,6 +192,8 @@ function LedgerDetailScreen() {
       load();
     }, [load]),
   );
+
+  const loadMoreFailedRef = useRef(false);
 
   const showSnackbar = (message: string) => {
     setSnackbar(message);
@@ -204,6 +213,7 @@ function LedgerDetailScreen() {
       setEntryTotal(firstPage.totalElements);
       setEntryPage(firstPage.page);
       setHasMoreEntries(!firstPage.last);
+      loadMoreFailedRef.current = false;
     } catch (error) {
       filterRef.current = previous;
       setFilter(previous);

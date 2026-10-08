@@ -115,7 +115,7 @@ function LedgerCreateScreen() {
         setNameError(API_NETWORK_ERROR_MESSAGE);
       } else if (error instanceof ApiError) {
         const nameFieldError = error.fieldErrors.find(fe => fe.field === 'name');
-        setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code));
+        setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code, error.message));
       } else {
         setNameError(API_ERROR_DEFAULT_MESSAGE);
       }

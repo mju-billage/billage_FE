@@ -3,6 +3,7 @@ import type { NavigatorScreenParams } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import SplashScreen from '../screens/SplashScreen';
+import PostLoginScreen from '../screens/PostLoginScreen';
 import { useEffect, useState } from 'react';
 import LoginScreen from '../screens/LoginScreen';
 import TermsAgreementScreen from '../screens/Signup/TermsAgreementScreen';
@@ -80,7 +81,6 @@ import type { ReportEntrySnapshot, ReportLedgerDetail, ReportSummary } from '../
 import type { ArchivedEntry } from '../types/archive';
 import { SocialProfile } from '../types/social';
 import * as authService from '../services/authService';
-import * as groupService from '../services/groupService';
 
 export type RootStackParamList = {
   Login: { snackbarMessage?: string } | undefined;
@@ -97,6 +97,8 @@ export type RootStackParamList = {
     agreements: authService.SignupAgreements;
   };
   SignupComplete: undefined;
+  PostLogin: undefined;
+  GroupOnboarding: undefined;
   PasswordReset: undefined;
   PasswordResetSent: { email: string };
   Main: NavigatorScreenParams<MainTabParamList> | undefined;
@@ -205,19 +207,13 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
   const [isLoading, setIsLoading] = useState(true);
-  const [initialRouteName, setInitialRouteName] = useState<'Login' | 'Main'>(
-    'Login',
-  );
+  const [initialRouteName, setInitialRouteName] = useState<
+    'Login' | 'PostLogin'
+  >('Login');
 
   useEffect(() => {
-    authService.restoreSession().then(async user => {
-      if (user) {
-        try {
-          await groupService.getMyGroups();
-        } catch {
-        }
-      }
-      setInitialRouteName(user ? 'Main' : 'Login');
+    authService.restoreSession().then(session => {
+      setInitialRouteName(session === 'signedOut' ? 'Login' : 'PostLogin');
       setIsLoading(false);
     });
   }, []);
@@ -258,6 +254,11 @@ function RootNavigator() {
           />
           <Stack.Screen
             name="SignupComplete"
+            component={SignupCompleteScreen}
+          />
+          <Stack.Screen name="PostLogin" component={PostLoginScreen} />
+          <Stack.Screen
+            name="GroupOnboarding"
             component={SignupCompleteScreen}
           />
           <Stack.Screen name="PasswordReset" component={PasswordResetScreen} />

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -12,11 +12,7 @@ import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import * as authService from '../../services/authService';
 import { ApiError } from '../../services/apiClient';
-import {
-  API_ERROR_DEFAULT_MESSAGE,
-  API_NETWORK_ERROR_MESSAGE,
-  isNetworkError,
-} from '../../constants/apiErrorMessages';
+import { toUserErrorMessage } from '../../constants/apiErrorMessages';
 import {
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
@@ -26,14 +22,11 @@ import { TYPOGRAPHY } from '../../constants/typography';
 import {
   EMAIL_VERIFICATION_TITLE,
   EMAIL_VERIFICATION_SUBTITLE,
-  EMAIL_VERIFICATION_SEND_BUTTON_LABEL,
   EMAIL_VERIFICATION_TIMER_LABEL,
   EMAIL_VERIFICATION_RESEND_PROMPT,
   EMAIL_VERIFICATION_RESEND_LINK_LABEL,
   SNACKBAR_EMAIL_VERIFICATION_RESENT,
-  EMAIL_VERIFICATION_INVALID_CODE_ERROR,
-  EMAIL_VERIFICATION_CODE_EXPIRED_ERROR,
-  EMAIL_VERIFICATION_NOT_FOUND_ERROR,
+  SNACKBAR_SIGNUP_DONE_LOGIN_REQUIRED,
   EMAIL_VERIFICATION_SEND_FAILED_ERROR,
 } from '../../constants/emailVerificationScreenText';
 import {
@@ -69,100 +62,105 @@ function EmailVerificationScreen() {
   const { email, name, password, agreements } = route.params;
 
   const [code, setCode] = useState('');
-  const [isCodeSent, setIsCodeSent] = useState(false);
   const [secondsLeft, setSecondsLeft] = useState(COUNTDOWN_SECONDS);
   const [isSending, setIsSending] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [codeError, setCodeError] = useState<string | undefined>();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+  const sendingRef = useRef(false);
+  const confirmingRef = useRef(false);
+  const verifiedRef = useRef(false);
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
     setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
-  const toErrorMessage = (error: unknown): string =>
-    isNetworkError(error) ? API_NETWORK_ERROR_MESSAGE : API_ERROR_DEFAULT_MESSAGE;
-
   useEffect(() => {
-    if (!isCodeSent || secondsLeft <= 0) {
+    if (secondsLeft <= 0) {
       return;
     }
     const timer = setTimeout(() => setSecondsLeft(prev => prev - 1), 1000);
     return () => clearTimeout(timer);
-  }, [isCodeSent, secondsLeft]);
-
-  const handleSendCode = useCallback(async () => {
-    if (isSending) {
-      return;
-    }
-    setIsSending(true);
-    try {
-      await authService.sendEmailVerification(email);
-      setIsCodeSent(true);
-      setSecondsLeft(COUNTDOWN_SECONDS);
-      setCode('');
-    } catch (error) {
-      showSnackbar(
-        isNetworkError(error) ? API_NETWORK_ERROR_MESSAGE : EMAIL_VERIFICATION_SEND_FAILED_ERROR,
-      );
-    } finally {
-      setIsSending(false);
-    }
-  }, [email, isSending]);
+  }, [secondsLeft]);
 
   const handleResend = async () => {
-    if (isSending) {
+    if (sendingRef.current) {
       return;
     }
+    sendingRef.current = true;
     setIsSending(true);
     try {
       await authService.sendEmailVerification(email);
       setSecondsLeft(COUNTDOWN_SECONDS);
       setCode('');
       setCodeError(undefined);
+      verifiedRef.current = false;
       showSnackbar(SNACKBAR_EMAIL_VERIFICATION_RESENT);
     } catch (error) {
-      showSnackbar(
-        isNetworkError(error) ? API_NETWORK_ERROR_MESSAGE : EMAIL_VERIFICATION_SEND_FAILED_ERROR,
-      );
+      showSnackbar(toUserErrorMessage(error, EMAIL_VERIFICATION_SEND_FAILED_ERROR));
     } finally {
+      sendingRef.current = false;
       setIsSending(false);
     }
   };
 
+  const toConfirmErrorMessage = (error: unknown): string => {
+    if (error instanceof ApiError && error.fieldErrors.length > 0) {
+      return error.fieldErrors[0].reason;
+    }
+    return toUserErrorMessage(error, SIGNUP_GENERIC_ERROR);
+  };
+
   const handleNext = async () => {
-    if (code.length !== CODE_LENGTH || isConfirming) {
+    if (code.length !== CODE_LENGTH || confirmingRef.current) {
       return;
     }
+    confirmingRef.current = true;
     setCodeError(undefined);
     setIsConfirming(true);
     try {
-      await authService.confirmEmailVerification(email, code);
+      if (!verifiedRef.current) {
+        await authService.confirmEmailVerification(email, code);
+        verifiedRef.current = true;
+      }
       await authService.signup({
         email,
         password,
         name,
         agreements,
       });
+      try {
+        await authService.login({ email, password });
+      } catch {
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'Login',
+              params: { snackbarMessage: SNACKBAR_SIGNUP_DONE_LOGIN_REQUIRED },
+            },
+          ],
+        });
+        return;
+      }
       navigation.navigate('SignupComplete');
     } catch (error) {
-      if (error instanceof ApiError) {
-        if (error.code === 'INVALID_VERIFICATION_CODE') {
-          setCodeError(EMAIL_VERIFICATION_INVALID_CODE_ERROR);
-        } else if (error.code === 'VERIFICATION_CODE_EXPIRED') {
-          setCodeError(EMAIL_VERIFICATION_CODE_EXPIRED_ERROR);
-        } else if (error.code === 'EMAIL_ALREADY_EXISTS') {
-          setCodeError(SIGNUP_EMAIL_ALREADY_EXISTS_ERROR);
-        } else if (error.code === 'VERIFICATION_NOT_FOUND') {
-          setCodeError(EMAIL_VERIFICATION_NOT_FOUND_ERROR);
-        } else {
-          setCodeError(SIGNUP_GENERIC_ERROR);
-        }
-      } else {
-        setCodeError(toErrorMessage(error));
+      if (error instanceof ApiError && error.code === 'EMAIL_ALREADY_EXISTS') {
+        navigation.reset({
+          index: 0,
+          routes: [
+            { name: 'Login', params: { snackbarMessage: SIGNUP_EMAIL_ALREADY_EXISTS_ERROR } },
+          ],
+        });
+        return;
       }
+      if (error instanceof ApiError && error.code === 'EMAIL_NOT_VERIFIED') {
+        verifiedRef.current = false;
+      }
+      setCodeError(toConfirmErrorMessage(error));
     } finally {
+      confirmingRef.current = false;
       setIsConfirming(false);
     }
   };
@@ -181,17 +179,6 @@ function EmailVerificationScreen() {
       <Text style={styles.title}>{EMAIL_VERIFICATION_TITLE}</Text>
       <Text style={styles.subtitle}>{EMAIL_VERIFICATION_SUBTITLE}</Text>
 
-      {!isCodeSent && (
-        <View style={styles.sendButtonRow}>
-          <Button
-            label={EMAIL_VERIFICATION_SEND_BUTTON_LABEL}
-            onPress={handleSendCode}
-            disabled={isSending}
-            fullWidth
-          />
-        </View>
-      )}
-
       <View style={styles.codeSection}>
         <VerificationField
           value={code}
@@ -200,31 +187,26 @@ function EmailVerificationScreen() {
             setCodeError(undefined);
           }}
           length={CODE_LENGTH}
-          disabled={!isCodeSent}
           error={codeError}
         />
-        {isCodeSent && (
-          <Text style={styles.timerText}>
-            {EMAIL_VERIFICATION_TIMER_LABEL}{' '}
-            <Text style={styles.timerValue}>
-              {formatCountdown(secondsLeft)}
-            </Text>
+        <Text style={styles.timerText}>
+          {EMAIL_VERIFICATION_TIMER_LABEL}{' '}
+          <Text style={styles.timerValue}>
+            {formatCountdown(secondsLeft)}
           </Text>
-        )}
+        </Text>
       </View>
 
-      {isCodeSent && (
-        <View style={styles.resendRow}>
-          <Text style={styles.resendLabel}>
-            {EMAIL_VERIFICATION_RESEND_PROMPT}
-          </Text>
-          <TextButton
-            label={EMAIL_VERIFICATION_RESEND_LINK_LABEL}
-            onPress={handleResend}
-            disabled={isSending}
-          />
-        </View>
-      )}
+      <View style={styles.resendRow}>
+        <Text style={styles.resendLabel}>
+          {EMAIL_VERIFICATION_RESEND_PROMPT}
+        </Text>
+        <TextButton
+          label={EMAIL_VERIFICATION_RESEND_LINK_LABEL}
+          onPress={handleResend}
+          disabled={isSending}
+        />
+      </View>
 
       <View style={styles.footer}>
         <Button
@@ -254,9 +236,6 @@ const styles = StyleSheet.create({
   subtitle: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_NORMAL,
-    marginBottom: 24,
-  },
-  sendButtonRow: {
     marginBottom: 24,
   },
   codeSection: {

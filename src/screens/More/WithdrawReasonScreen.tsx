@@ -36,6 +36,8 @@ import {
   WITHDRAW_REASON_SUBMIT_LABEL,
   WITHDRAW_REASON_TITLE,
   WITHDRAW_REASON_USAGE_UNCLEAR_LABEL,
+  WITHDRAW_OWNER_TRANSFER_REQUIRED_ERROR,
+  WITHDRAW_SUCCESSOR_NOT_FOUND_ERROR,
 } from '../../constants/settingsScreenText';
 import { FEEDBACK_NEGATIVE_BOLD } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
@@ -100,11 +102,19 @@ function WithdrawReasonScreen() {
       );
     } catch (error) {
       setConfirmDialogVisible(false);
+      if (error instanceof ApiError && error.code === 'OWNER_TRANSFER_REQUIRED') {
+        setErrorMessage(WITHDRAW_OWNER_TRANSFER_REQUIRED_ERROR);
+        return;
+      }
+      if (error instanceof ApiError && error.code === 'MEMBERSHIP_NOT_FOUND') {
+        setErrorMessage(WITHDRAW_SUCCESSOR_NOT_FOUND_ERROR);
+        return;
+      }
       setErrorMessage(
         isNetworkError(error)
           ? API_NETWORK_ERROR_MESSAGE
           : error instanceof ApiError
-          ? getApiErrorMessage(error.code)
+          ? getApiErrorMessage(error.code, error.message)
           : API_ERROR_DEFAULT_MESSAGE,
       );
     } finally {

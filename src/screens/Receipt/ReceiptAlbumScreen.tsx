@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -27,6 +27,7 @@ import {
   NO_ACTIVE_GROUP_MESSAGE,
   getApiErrorMessage,
   isNetworkError,
+  toUserErrorMessage,
 } from '../../constants/apiErrorMessages';
 import {
   RECEIPT_ALBUM_COUNT_SUFFIX,
@@ -41,6 +42,11 @@ import {
 } from '../../constants/ledgerScreenText';
 import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import {
+  SNACKBAR_LEDGER_OPTIONS_LOAD_FAILED,
+  SNACKBAR_LOAD_MORE_FAILED,
+} from '../../constants/commonText';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 
 const FILTER_ICON = require('../../assets/icons/system/Filter.png');
 const SEARCH_ICON = require('../../assets/icons/system/Search.png');
@@ -79,6 +85,14 @@ function ReceiptAlbumScreen() {
   const [hasMore, setHasMore] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [loadState, setLoadState] = useState<LoadState>('loading');
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+
+  const loadMoreFailedRef = useRef(false);
+
+  const showSnackbar = (message: string) => {
+    setSnackbarMessage(message);
+    setTimeout(() => setSnackbarMessage(null), 1600);
+  };
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
 
@@ -87,7 +101,7 @@ function ReceiptAlbumScreen() {
       return API_NETWORK_ERROR_MESSAGE;
     }
     if (error instanceof ApiError) {
-      return getApiErrorMessage(error.code);
+      return getApiErrorMessage(error.code, error.message);
     }
     return API_ERROR_DEFAULT_MESSAGE;
   };
@@ -123,6 +137,7 @@ function ReceiptAlbumScreen() {
       setReceipts(firstPage.items);
       setPage(firstPage.page);
       setHasMore(!firstPage.last);
+      loadMoreFailedRef.current = false;
       setLoadState('ready');
     } catch (error) {
       setLoadErrorMessage(toErrorMessage(error));
@@ -142,12 +157,13 @@ function ReceiptAlbumScreen() {
     try {
       const ledgers = await ledgerService.getAllLedgersInGroup(group.id);
       setLedgerOptions(ledgers.map(l => ({ id: l.id, name: l.name })));
-    } catch {
+    } catch (error) {
+      showSnackbar(toUserErrorMessage(error, SNACKBAR_LEDGER_OPTIONS_LOAD_FAILED));
     }
   }, []);
 
   const loadMore = useCallback(async () => {
-    if (isLoadingMore || !hasMore) {
+    if (loadMoreFailedRef.current || isLoadingMore || !hasMore) {
       return;
     }
     const group = getActiveGroup();
@@ -160,7 +176,9 @@ function ReceiptAlbumScreen() {
       setReceipts(current => [...current, ...nextPage.items]);
       setPage(nextPage.page);
       setHasMore(!nextPage.last);
-    } catch {
+    } catch (error) {
+      loadMoreFailedRef.current = true;
+      showSnackbar(toUserErrorMessage(error, SNACKBAR_LOAD_MORE_FAILED));
     } finally {
       setIsLoadingMore(false);
     }
@@ -200,7 +218,10 @@ function ReceiptAlbumScreen() {
   };
 
   return (
-    <ScreenContainer background="secondary">
+    <ScreenContainer
+      background="secondary"
+      snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
+    >
       <AppBar type="sub" title={RECEIPT_ALBUM_TITLE} onBackPress={() => navigation.goBack()} />
 
       <View style={styles.body}>

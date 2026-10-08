@@ -34,6 +34,7 @@ import {
   API_NETWORK_ERROR_MESSAGE,
   getApiErrorMessage,
   isNetworkError,
+  toUserErrorMessage,
 } from '../../constants/apiErrorMessages';
 import {
   DUES_CREATE_AMOUNT_LABEL,
@@ -71,6 +72,9 @@ import {
   FOREGROUND_PRIMARY,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import {
+  SNACKBAR_LEDGER_OPTIONS_LOAD_FAILED,
+} from '../../constants/commonText';
 
 const CLOSE_ICON = require('../../assets/icons/action/Close.png');
 const CALENDAR_ICON = require('../../assets/icons/system/Calendar.png');
@@ -116,7 +120,7 @@ function DuesCreateScreen() {
       return API_NETWORK_ERROR_MESSAGE;
     }
     if (error instanceof ApiError) {
-      return getApiErrorMessage(error.code);
+      return getApiErrorMessage(error.code, error.message);
     }
     return API_ERROR_DEFAULT_MESSAGE;
   };
@@ -199,7 +203,8 @@ function DuesCreateScreen() {
     try {
       const ledgers = await ledgerService.getAllLedgersInGroup(group.id);
       setLedgerOptions(ledgers.map(l => ({ id: l.id, name: l.name })));
-    } catch {
+    } catch (error) {
+      showSnackbar(toUserErrorMessage(error, SNACKBAR_LEDGER_OPTIONS_LOAD_FAILED));
     }
   }, []);
 

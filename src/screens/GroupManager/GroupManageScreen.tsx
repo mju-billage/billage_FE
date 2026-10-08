@@ -11,7 +11,7 @@ import Divider from '../../components/Data Display/Divider/Divider';
 import Button from '../../components/Input/Button/Button';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
-import { getActiveGroup } from '../../types/group';
+import { getActiveGroup, getCachedGroups } from '../../types/group';
 import type { GroupSummary } from '../../types/group';
 import * as groupService from '../../services/groupService';
 import * as groupMembershipService from '../../services/groupMembershipService';
@@ -92,7 +92,7 @@ function GroupManageScreen() {
       return API_NETWORK_ERROR_MESSAGE;
     }
     if (error instanceof ApiError) {
-      return getApiErrorMessage(error.code);
+      return getApiErrorMessage(error.code, error.message);
     }
     return API_ERROR_DEFAULT_MESSAGE;
   };
@@ -149,6 +149,10 @@ function GroupManageScreen() {
     try {
       await groupMembershipService.leaveGroup(group.id);
       setConfirmKind('none');
+      if (getCachedGroups().length === 0) {
+        navigation.reset({ index: 0, routes: [{ name: 'PostLogin' }] });
+        return;
+      }
       navigation.goBack();
     } catch (error) {
       handleApiError(error);
@@ -170,8 +174,12 @@ function GroupManageScreen() {
     }
     setIsSubmitting(true);
     try {
-      await groupService.deleteGroup(group.id);
+      await groupService.deleteGroup(group.id, deleteInput);
       setConfirmKind('none');
+      if (getCachedGroups().length === 0) {
+        navigation.reset({ index: 0, routes: [{ name: 'PostLogin' }] });
+        return;
+      }
       navigation.reset({
         index: 1,
         routes: [

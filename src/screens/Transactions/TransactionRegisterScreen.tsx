@@ -76,6 +76,7 @@ import {
   API_NETWORK_ERROR_MESSAGE,
   getApiErrorMessage,
   isNetworkError,
+  toUserErrorMessage,
 } from '../../constants/apiErrorMessages';
 import {
   FILTER_TYPE_EXPENSE,
@@ -273,7 +274,7 @@ function TransactionRegisterScreen() {
       return API_NETWORK_ERROR_MESSAGE;
     }
     if (error instanceof ApiError) {
-      return getApiErrorMessage(error.code);
+      return getApiErrorMessage(error.code, error.message);
     }
     return API_ERROR_DEFAULT_MESSAGE;
   };
@@ -460,9 +461,9 @@ function TransactionRegisterScreen() {
           item.key === key ? { ...item, uploading: false, fileId: Number(uploaded.id) } : item,
         ),
       );
-    } catch {
+    } catch (error) {
       setReceiptItems(current => current.filter(item => item.key !== key));
-      showSnackbar(SNACKBAR_IMAGE_UPLOAD_FAILED);
+      showSnackbar(toUserErrorMessage(error, SNACKBAR_IMAGE_UPLOAD_FAILED));
     }
   };
 
@@ -552,7 +553,8 @@ function TransactionRegisterScreen() {
       return;
     }
     if (outcome.kind === 'failed') {
-      setStage({ kind: 'scanFailed' });
+      setStage({ kind: 'form' });
+      showSnackbar(outcome.message);
       return;
     }
 
@@ -576,7 +578,7 @@ function TransactionRegisterScreen() {
       // 읽지는 못했지만 증빙으로는 붙었다. 그 사실이 실패 화면에 가려지지 않게 폼으로 돌린다.
       setStage({ kind: 'form' });
       setActiveDialog('none');
-      showSnackbar(SNACKBAR_SCAN_NOT_RECOGNIZED);
+      showSnackbar(outcome.message ?? SNACKBAR_SCAN_NOT_RECOGNIZED);
       return;
     }
 

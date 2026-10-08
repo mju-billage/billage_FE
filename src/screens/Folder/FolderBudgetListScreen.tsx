@@ -78,7 +78,7 @@ function FolderBudgetListScreen() {
       return API_NETWORK_ERROR_MESSAGE;
     }
     if (error instanceof ApiError) {
-      return getApiErrorMessage(error.code);
+      return getApiErrorMessage(error.code, error.message);
     }
     return API_ERROR_DEFAULT_MESSAGE;
   };
@@ -134,7 +134,7 @@ function FolderBudgetListScreen() {
     } catch (error) {
       if (error instanceof ApiError) {
         const fieldError = error.fieldErrors.find(fe => fe.field === 'budget');
-        setBudgetError(fieldError?.reason ?? getApiErrorMessage(error.code));
+        setBudgetError(fieldError?.reason ?? getApiErrorMessage(error.code, error.message));
       } else {
         setBudgetError(toErrorMessage(error));
       }

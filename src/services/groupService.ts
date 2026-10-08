@@ -118,7 +118,13 @@ export async function updateGroup(
   return group;
 }
 
-export async function deleteGroup(groupId: string): Promise<void> {
-  await request<void>(`/api/v1/groups/${groupId}`, { method: 'DELETE' });
+export async function deleteGroup(
+  groupId: string,
+  confirmName: string,
+): Promise<void> {
+  await request<void>(`/api/v1/groups/${groupId}`, {
+    method: 'DELETE',
+    body: JSON.stringify({ confirmName }),
+  });
   removeGroupFromCache(groupId);
 }

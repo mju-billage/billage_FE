@@ -89,7 +89,7 @@ function MemberProfileSheet({
     if (isNetworkError(error)) {
       onError(API_NETWORK_ERROR_MESSAGE);
     } else if (error instanceof ApiError) {
-      onError(getApiErrorMessage(error.code));
+      onError(getApiErrorMessage(error.code, error.message));
     } else {
       onError(API_ERROR_DEFAULT_MESSAGE);
     }

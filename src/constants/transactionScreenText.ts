@@ -75,6 +75,10 @@ export const SNACKBAR_RECEIPT_ADDED = '영수증을 등록했어요.';
 export const SNACKBAR_SCAN_NOT_RECOGNIZED =
   '영수증을 인식하지 못했어요. 사진은 증빙으로 첨부했어요.';
 /** 인식 요청 한도 초과. 재촬영을 권하면 안 된다 — 서버가 외부 OCR 을 건당 과금으로 부른다. */
+export const SNACKBAR_SCAN_ERROR_ATTACHED =
+  '영수증 인식 중 문제가 생겼어요. 사진은 증빙으로 첨부했어요.';
+export const SNACKBAR_SCAN_NETWORK_ERROR_ATTACHED =
+  '네트워크 연결을 확인해주세요. 사진은 증빙으로 첨부했어요.';
 export const SNACKBAR_SCAN_RATE_LIMITED =
   '영수증 인식을 너무 많이 요청했어요. 잠시 후 다시 시도해주세요.';
 export const SNACKBAR_RECEIPT_MAX_LIMIT =

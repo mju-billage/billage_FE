@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -10,6 +10,8 @@ import Button from '../../components/Input/Button/Button';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { ApiError } from '../../services/apiClient';
 import * as authService from '../../services/authService';
+import * as groupService from '../../services/groupService';
+import { toUserErrorMessage } from '../../constants/apiErrorMessages';
 import { TYPOGRAPHY } from '../../constants/typography';
 import {
   SIGNUP_INFO_TITLE,
@@ -41,11 +43,16 @@ function SocialSignupInfoScreen() {
   const email = profile.email;
   const [signupError, setSignupError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const submittingRef = useRef(false);
 
   const isNameTooLong = name.length > SOCIAL_SIGNUP_NAME_MAX_LENGTH;
   const canProceed = name.trim().length > 0 && !isNameTooLong;
 
   const handleNext = async () => {
+    if (submittingRef.current) {
+      return;
+    }
+    submittingRef.current = true;
     setSignupError(undefined);
     setIsSubmitting(true);
     try {
@@ -53,17 +60,24 @@ function SocialSignupInfoScreen() {
         provider: profile.provider,
         providerToken: profile.providerToken,
         name,
-        termsAgreed:
-          agreements.termsOfService && agreements.privacyPolicy && agreements.ageOver14,
+        agreements,
       });
+      const groups = await groupService.getMyGroups().catch(() => null);
+      if (groups && groups.length > 0) {
+        navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+        return;
+      }
       navigation.navigate('SignupComplete');
     } catch (error) {
       if (error instanceof ApiError && error.code === 'EMAIL_ALREADY_EXISTS') {
         setSignupError(SIGNUP_EMAIL_ALREADY_EXISTS_ERROR);
+      } else if (error instanceof ApiError && error.fieldErrors.length > 0) {
+        setSignupError(error.fieldErrors[0].reason);
       } else {
-        setSignupError(SOCIAL_SIGNUP_GENERIC_ERROR);
+        setSignupError(toUserErrorMessage(error, SOCIAL_SIGNUP_GENERIC_ERROR));
       }
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
     }
   };

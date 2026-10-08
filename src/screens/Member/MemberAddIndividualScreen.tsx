@@ -119,7 +119,7 @@ function MemberAddIndividualScreen() {
           setNameError(nameFieldError?.reason);
           setPhoneError(phoneFieldError?.reason);
         } else {
-          setFormError(getApiErrorMessage(error.code));
+          setFormError(getApiErrorMessage(error.code, error.message));
         }
       } else {
         setFormError(API_ERROR_DEFAULT_MESSAGE);

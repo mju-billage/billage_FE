@@ -36,6 +36,7 @@ import {
   NO_ACTIVE_GROUP_MESSAGE,
   getApiErrorMessage,
   isNetworkError,
+  toUserErrorMessage,
 } from '../../constants/apiErrorMessages';
 import {
   FILTER_TYPE_EXPENSE,
@@ -59,6 +60,11 @@ import {
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import {
+  SNACKBAR_LEDGER_OPTIONS_LOAD_FAILED,
+  SNACKBAR_LOAD_MORE_FAILED,
+} from '../../constants/commonText';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 
 const FILTER_ICON = require('../../assets/icons/system/Filter.png');
 const SEARCH_ICON = require('../../assets/icons/system/Search.png');
@@ -113,6 +119,14 @@ function TransactionsScreen() {
   const [hasMore, setHasMore] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [loadState, setLoadState] = useState<LoadState>('loading');
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+
+  const loadMoreFailedRef = useRef(false);
+
+  const showSnackbar = (message: string) => {
+    setSnackbarMessage(message);
+    setTimeout(() => setSnackbarMessage(null), 1600);
+  };
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const [cardBlockHeight, setCardBlockHeight] = useState(0);
@@ -124,7 +138,7 @@ function TransactionsScreen() {
       return API_NETWORK_ERROR_MESSAGE;
     }
     if (error instanceof ApiError) {
-      return getApiErrorMessage(error.code);
+      return getApiErrorMessage(error.code, error.message);
     }
     return API_ERROR_DEFAULT_MESSAGE;
   };
@@ -171,6 +185,7 @@ function TransactionsScreen() {
       setEntries(firstPage.items);
       setPage(firstPage.page);
       setHasMore(!firstPage.last);
+      loadMoreFailedRef.current = false;
       setLoadState('ready');
     } catch (error) {
       setLoadErrorMessage(toErrorMessage(error));
@@ -190,12 +205,13 @@ function TransactionsScreen() {
     try {
       const ledgers = await ledgerService.getAllLedgersInGroup(group.id);
       setLedgerOptions(ledgers.map(l => ({ id: l.id, name: l.name })));
-    } catch {
+    } catch (error) {
+      showSnackbar(toUserErrorMessage(error, SNACKBAR_LEDGER_OPTIONS_LOAD_FAILED));
     }
   }, []);
 
   const loadMoreEntries = useCallback(async () => {
-    if (isLoadingMore || !hasMore) {
+    if (loadMoreFailedRef.current || isLoadingMore || !hasMore) {
       return;
     }
     const group = getActiveGroup();
@@ -211,7 +227,9 @@ function TransactionsScreen() {
       setEntries(current => [...current, ...nextPage.items]);
       setPage(nextPage.page);
       setHasMore(!nextPage.last);
-    } catch {
+    } catch (error) {
+      loadMoreFailedRef.current = true;
+      showSnackbar(toUserErrorMessage(error, SNACKBAR_LOAD_MORE_FAILED));
     } finally {
       setIsLoadingMore(false);
     }
@@ -274,7 +292,11 @@ function TransactionsScreen() {
   };
 
   return (
-    <ScreenContainer background="primary" edges={['top']}>
+    <ScreenContainer
+      background="primary"
+      edges={['top']}
+      snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
+    >
       <AppBar type="titleOnly" title={TRANSACTIONS_TITLE} />
 
       <View style={styles.body}>

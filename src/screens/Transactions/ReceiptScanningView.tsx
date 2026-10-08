@@ -4,6 +4,12 @@ import * as fileService from '../../services/fileService';
 import * as ocrService from '../../services/ocrService';
 import { ApiError } from '../../services/apiClient';
 import type { PickedImage } from '../../utils/imagePicker';
+import { isNetworkError, toUserErrorMessage } from '../../constants/apiErrorMessages';
+import { SNACKBAR_IMAGE_UPLOAD_FAILED } from '../../constants/commonText';
+import {
+  SNACKBAR_SCAN_ERROR_ATTACHED,
+  SNACKBAR_SCAN_NETWORK_ERROR_ATTACHED,
+} from '../../constants/transactionScreenText';
 import {
   BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_NORMAL,
@@ -19,9 +25,9 @@ const PREVIEW_SIZE = 240;
  */
 export type ScanOutcome =
   | { kind: 'ok'; result: ocrService.OcrResult; fileId: number; previewUri: string }
-  | { kind: 'notRecognized'; fileId: number; previewUri: string }
+  | { kind: 'notRecognized'; fileId: number; previewUri: string; message?: string }
   | { kind: 'rateLimited' }
-  | { kind: 'failed' };
+  | { kind: 'failed'; message: string };
 
 type ReceiptScanningViewProps = {
   image: PickedImage;
@@ -107,9 +113,12 @@ async function scanReceipt(image: PickedImage): Promise<ScanOutcome> {
       'RECEIPT',
     );
     fileId = Number(uploaded.id);
-  } catch {
+  } catch (error) {
     // 올리지도 못했으면 남은 파일이 없다 — 증빙으로 붙일 것도 없다.
-    return { kind: 'failed' };
+    return {
+      kind: 'failed',
+      message: toUserErrorMessage(error, SNACKBAR_IMAGE_UPLOAD_FAILED),
+    };
   }
 
   try {
@@ -128,7 +137,14 @@ async function scanReceipt(image: PickedImage): Promise<ScanOutcome> {
       }
     }
     // 장애(OCR_PROCESSING_FAILED)나 네트워크 문제. 파일은 올라갔으니 증빙으로는 쓸 수 있다.
-    return { kind: 'notRecognized', fileId, previewUri: image.uri };
+    return {
+      kind: 'notRecognized',
+      fileId,
+      previewUri: image.uri,
+      message: isNetworkError(error)
+        ? SNACKBAR_SCAN_NETWORK_ERROR_ATTACHED
+        : SNACKBAR_SCAN_ERROR_ATTACHED,
+    };
   }
 }
 

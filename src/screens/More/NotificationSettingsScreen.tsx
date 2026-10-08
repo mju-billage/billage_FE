@@ -99,6 +99,9 @@ function NotificationSettingsScreen() {
   const [updateErrorKey, setUpdateErrorKey] = useState<keyof NotificationSettings | null>(
     null,
   );
+  const [updateErrorMessage, setUpdateErrorMessage] = useState(
+    NOTIFICATION_SETTINGS_UPDATE_ERROR,
+  );
 
   const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
 
@@ -107,7 +110,7 @@ function NotificationSettingsScreen() {
       return API_NETWORK_ERROR_MESSAGE;
     }
     if (error instanceof ApiError) {
-      return getApiErrorMessage(error.code);
+      return getApiErrorMessage(error.code, error.message);
     }
     return API_ERROR_DEFAULT_MESSAGE;
   };
@@ -140,8 +143,11 @@ function NotificationSettingsScreen() {
     try {
       const result = await supportService.updateNotificationSettings({ [key]: value });
       setSettings(result);
-    } catch {
+    } catch (error) {
       setSettings(previous);
+      setUpdateErrorMessage(
+        isNetworkError(error) ? API_NETWORK_ERROR_MESSAGE : NOTIFICATION_SETTINGS_UPDATE_ERROR,
+      );
       setUpdateErrorKey(key);
     }
   };
@@ -182,7 +188,7 @@ function NotificationSettingsScreen() {
                 <Text style={styles.rowLabel}>{row.label}</Text>
                 <Text style={styles.rowDescription}>{row.description}</Text>
                 {updateErrorKey === row.key && (
-                  <Text style={styles.rowError}>{NOTIFICATION_SETTINGS_UPDATE_ERROR}</Text>
+                  <Text style={styles.rowError}>{updateErrorMessage}</Text>
                 )}
               </View>
               <Switch
