@@ -25,3 +25,7 @@ export const DATE_RANGE_SHEET_CANCEL_LABEL = '취소';
 export const DATE_RANGE_SHEET_START_LABEL = '시작 날짜';
 export const DATE_RANGE_SHEET_END_LABEL = '종료 날짜';
 export const DATE_RANGE_SHEET_DATE_PLACEHOLDER = 'YY.MM.DD';
+export const SNACKBAR_LOAD_MORE_FAILED =
+  '목록을 더 불러오지 못했어요. 잠시 후 다시 시도해주세요.';
+export const SNACKBAR_LEDGER_OPTIONS_LOAD_FAILED =
+  '장부 목록을 불러오지 못했어요. 잠시 후 다시 시도해주세요.';

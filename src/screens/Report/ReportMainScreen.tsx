@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -24,6 +24,7 @@ import {
   NO_ACTIVE_GROUP_MESSAGE,
   getApiErrorMessage,
   isNetworkError,
+  toUserErrorMessage,
 } from '../../constants/apiErrorMessages';
 import {
   REPORT_MAIN_COUNT_SUFFIX,
@@ -38,6 +39,9 @@ import {
 } from '../../constants/reportScreenText';
 import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import {
+  SNACKBAR_LOAD_MORE_FAILED,
+} from '../../constants/commonText';
 
 const PLUS_ICON = require('../../assets/icons/action/Plus.png');
 const SNACKBAR_AUTO_HIDE_MS = 3000;
@@ -64,12 +68,19 @@ function ReportMainScreen() {
   const [createSheetVisible, setCreateSheetVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
+  const loadMoreFailedRef = useRef(false);
+
+  const showSnackbar = (message: string) => {
+    setSnackbarMessage(message);
+    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
+  };
+
   const toErrorMessage = (error: unknown): string => {
     if (isNetworkError(error)) {
       return API_NETWORK_ERROR_MESSAGE;
     }
     if (error instanceof ApiError) {
-      return getApiErrorMessage(error.code);
+      return getApiErrorMessage(error.code, error.message);
     }
     return API_ERROR_DEFAULT_MESSAGE;
   };
@@ -94,6 +105,7 @@ function ReportMainScreen() {
       setReports(firstPage.items);
       setPage(firstPage.page);
       setHasMore(!firstPage.last);
+      loadMoreFailedRef.current = false;
       setLoadState('ready');
     } catch (error) {
       setLoadErrorMessage(toErrorMessage(error));
@@ -102,7 +114,7 @@ function ReportMainScreen() {
   }, []);
 
   const loadMore = useCallback(async () => {
-    if (isLoadingMore || !hasMore) {
+    if (loadMoreFailedRef.current || isLoadingMore || !hasMore) {
       return;
     }
     const group = getActiveGroup();
@@ -118,7 +130,9 @@ function ReportMainScreen() {
       setReports(current => [...current, ...nextPage.items]);
       setPage(nextPage.page);
       setHasMore(!nextPage.last);
-    } catch {
+    } catch (error) {
+      loadMoreFailedRef.current = true;
+      showSnackbar(toUserErrorMessage(error, SNACKBAR_LOAD_MORE_FAILED));
     } finally {
       setIsLoadingMore(false);
     }

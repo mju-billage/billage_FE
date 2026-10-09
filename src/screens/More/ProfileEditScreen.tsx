@@ -31,6 +31,7 @@ import {
   API_NETWORK_ERROR_MESSAGE,
   getApiErrorMessage,
   isNetworkError,
+  toUserErrorMessage,
 } from '../../constants/apiErrorMessages';
 import {
   PROFILE_EDIT_LEAVE_CANCEL_LABEL,
@@ -158,7 +159,7 @@ function ProfileEditScreen() {
         const nameFieldError = error.fieldErrors.find(
           fieldError => fieldError.field === 'name',
         );
-        setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code));
+        setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code, error.message));
       } else {
         setNameError(API_ERROR_DEFAULT_MESSAGE);
       }
@@ -183,9 +184,9 @@ function ProfileEditScreen() {
       );
       setUploadedFileId(Number(uploaded.id));
       setImageAction('uploaded');
-    } catch {
+    } catch (error) {
       setPreviewUri(null);
-      showSnackbar(SNACKBAR_IMAGE_UPLOAD_FAILED);
+      showSnackbar(toUserErrorMessage(error, SNACKBAR_IMAGE_UPLOAD_FAILED));
     } finally {
       setIsUploadingImage(false);
     }

@@ -9,11 +9,7 @@ import Button from '../../components/Input/Button/Button';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { isValidEmail } from '../../utils/validators';
 import * as authService from '../../services/authService';
-import {
-  API_ERROR_DEFAULT_MESSAGE,
-  API_NETWORK_ERROR_MESSAGE,
-  isNetworkError,
-} from '../../constants/apiErrorMessages';
+import { toUserErrorMessage } from '../../constants/apiErrorMessages';
 import { TYPOGRAPHY } from '../../constants/typography';
 import {
   PASSWORD_RESET_TITLE,
@@ -43,7 +39,7 @@ function PasswordResetScreen() {
       await authService.requestPasswordReset(email);
       navigation.navigate('PasswordResetSent', { email });
     } catch (err) {
-      setError(isNetworkError(err) ? API_NETWORK_ERROR_MESSAGE : API_ERROR_DEFAULT_MESSAGE);
+      setError(toUserErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }

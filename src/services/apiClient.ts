@@ -1,5 +1,6 @@
 import { API_BASE_URL } from '../constants/api';
 import * as tokenStorage from './tokenStorage';
+import { isSessionExpiredError } from '../constants/apiErrorMessages';
 
 type ApiResponse<T> = {
   data: T;
@@ -48,7 +49,7 @@ type RequestOptions = RequestInit & {
   skipAuth?: boolean;
 };
 
-const REAUTHENTICATABLE_CODES = ['ACCESS_TOKEN_EXPIRED', 'UNAUTHORIZED'];
+const REAUTHENTICATABLE_CODES = ['TOKEN_EXPIRED', 'UNAUTHORIZED'];
 
 async function rawRequest<T>(
   path: string,
@@ -129,9 +130,12 @@ export async function request<T>(
 
     try {
       await refreshSession();
-    } catch {
-      await clearSession();
-      throw error;
+    } catch (refreshError) {
+      if (isSessionExpiredError(refreshError)) {
+        await clearSession();
+        throw error;
+      }
+      throw refreshError;
     }
 
     return rawRequest<T>(path, options);

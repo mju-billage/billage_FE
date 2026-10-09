@@ -94,7 +94,7 @@ function DashboardScreen() {
       return API_NETWORK_ERROR_MESSAGE;
     }
     if (error instanceof ApiError) {
-      return getApiErrorMessage(error.code);
+      return getApiErrorMessage(error.code, error.message);
     }
     return API_ERROR_DEFAULT_MESSAGE;
   };

@@ -20,6 +20,7 @@ import {
   NO_ACTIVE_GROUP_MESSAGE,
   getApiErrorMessage,
   isNetworkError,
+  toUserErrorMessage,
 } from '../../constants/apiErrorMessages';
 import { LEDGER_ENTRIES_LOADING_MORE, LEDGER_SEARCH_EMPTY } from '../../constants/ledgerScreenText';
 import {
@@ -30,6 +31,10 @@ import {
 import { formatDateHeader } from '../../utils/dateHeader';
 import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import {
+  SNACKBAR_LOAD_MORE_FAILED,
+} from '../../constants/commonText';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -49,6 +54,14 @@ function TransactionSearchScreen() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [searchState, setSearchState] = useState<SearchState>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+
+  const loadMoreFailedRef = useRef(false);
+
+  const showSnackbar = (message: string) => {
+    setSnackbarMessage(message);
+    setTimeout(() => setSnackbarMessage(null), 1600);
+  };
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const toErrorMessage = (error: unknown): string => {
@@ -56,7 +69,7 @@ function TransactionSearchScreen() {
       return API_NETWORK_ERROR_MESSAGE;
     }
     if (error instanceof ApiError) {
-      return getApiErrorMessage(error.code);
+      return getApiErrorMessage(error.code, error.message);
     }
     return API_ERROR_DEFAULT_MESSAGE;
   };
@@ -87,6 +100,7 @@ function TransactionSearchScreen() {
       setEntries(firstPage.items);
       setPage(firstPage.page);
       setHasMore(!firstPage.last);
+      loadMoreFailedRef.current = false;
       setSearchState('ready');
     } catch (error) {
       setErrorMessage(toErrorMessage(error));
@@ -110,7 +124,7 @@ function TransactionSearchScreen() {
 
   const loadMoreEntries = useCallback(async () => {
     const trimmed = query.trim();
-    if (isLoadingMore || !hasMore || !trimmed) {
+    if (loadMoreFailedRef.current || isLoadingMore || !hasMore || !trimmed) {
       return;
     }
     const group = getActiveGroup();
@@ -126,7 +140,9 @@ function TransactionSearchScreen() {
       setEntries(current => [...current, ...nextPage.items]);
       setPage(nextPage.page);
       setHasMore(!nextPage.last);
-    } catch {
+    } catch (error) {
+      loadMoreFailedRef.current = true;
+      showSnackbar(toUserErrorMessage(error, SNACKBAR_LOAD_MORE_FAILED));
     } finally {
       setIsLoadingMore(false);
     }
@@ -138,7 +154,10 @@ function TransactionSearchScreen() {
   }));
 
   return (
-    <ScreenContainer background="secondary">
+    <ScreenContainer
+      background="secondary"
+      snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
+    >
       <AppBar
         type="sub"
         title={TRANSACTIONS_TITLE}

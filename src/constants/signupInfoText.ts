@@ -7,7 +7,7 @@ export const SIGNUP_NAME_TOO_LONG_ERROR = '* 10자를 초과하여 입력했어�
 export const SIGNUP_EMAIL_LABEL = '이메일';
 export const SIGNUP_EMAIL_PLACEHOLDER = '이메일을 입력해주세요.';
 export const SIGNUP_EMAIL_FORMAT_ERROR = '이메일 형식이 올바르지 않아요.';
-export const SIGNUP_EMAIL_ALREADY_EXISTS_ERROR = '이미 가입된 이메일입니다.';
+export const SIGNUP_EMAIL_ALREADY_EXISTS_ERROR = '이미 가입된 이메일이에요. 로그인해주세요.';
 
 export const SIGNUP_PASSWORD_LABEL = '비밀번호';
 export const SIGNUP_PASSWORD_PLACEHOLDER = '비밀번호를 입력해주세요.';

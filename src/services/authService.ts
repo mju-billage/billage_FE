@@ -4,6 +4,7 @@ export class SocialAuthParseError extends Error {}
 import * as tokenStorage from './tokenStorage';
 import { SocialType } from '../types/social';
 import { clearCurrentUser, setCurrentUser } from '../types/session';
+import { isSessionExpiredError } from '../constants/apiErrorMessages';
 import type { LoginProvider } from '../types/session';
 
 export type SignupAgreements = {
@@ -206,15 +207,23 @@ export async function logout(): Promise<void> {
   }
 }
 
-export async function restoreSession(): Promise<AuthUserResponse | null> {
+export type RestoredSession = 'signedIn' | 'signedOut' | 'unknown';
+
+export async function restoreSession(): Promise<RestoredSession> {
   const refreshToken = await tokenStorage.getRefreshToken();
   if (!refreshToken) {
-    return null;
+    return 'signedOut';
   }
   try {
-    return await getCurrentUser();
-  } catch {
-    return null;
+    await getCurrentUser();
+    return 'signedIn';
+  } catch (error) {
+    if (isSessionExpiredError(error)) {
+      await clearSession();
+      clearCurrentUser();
+      return 'signedOut';
+    }
+    return 'unknown';
   }
 }
 
@@ -231,7 +240,7 @@ export type SocialLoginRequest = {
 
 export type SocialSignupRequest = SocialLoginRequest & {
   name: string;
-  termsAgreed: boolean;
+  agreements: SignupAgreements;
 };
 
 type SocialLoginResponse = {
@@ -272,7 +281,7 @@ export async function socialSignup(
       provider: SOCIAL_PROVIDER_API_VALUE[payload.provider],
       token: payload.providerToken,
       name: payload.name,
-      termsAgreed: payload.termsAgreed,
+      agreements: payload.agreements,
     }),
     skipAuth: true,
   });

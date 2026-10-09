@@ -113,7 +113,7 @@ function MyProfileScreen() {
         isNetworkError(error)
           ? API_NETWORK_ERROR_MESSAGE
           : error instanceof ApiError
-          ? getApiErrorMessage(error.code)
+          ? getApiErrorMessage(error.code, error.message)
           : API_ERROR_DEFAULT_MESSAGE,
       );
       setLoadState('error');

@@ -80,7 +80,7 @@ function MemberAddBulkScreen() {
       if (isNetworkError(error)) {
         setFormError(API_NETWORK_ERROR_MESSAGE);
       } else if (error instanceof ApiError) {
-        setFormError(getApiErrorMessage(error.code));
+        setFormError(getApiErrorMessage(error.code, error.message));
       } else {
         setFormError(API_ERROR_DEFAULT_MESSAGE);
       }

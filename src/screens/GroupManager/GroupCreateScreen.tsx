@@ -21,6 +21,7 @@ import {
   GROUP_CREATE_TITLE,
   GROUP_NAME_LABEL,
   GROUP_NAME_PLACEHOLDER,
+  GROUP_PROFILE_EDIT_NAME_MAX_LENGTH,
   SNACKBAR_GROUP_CREATED_SUFFIX,
 } from '../../constants/groupManagerScreenText';
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
@@ -65,7 +66,7 @@ function GroupCreateScreen() {
         const nameFieldError = error.fieldErrors.find(
           fieldError => fieldError.field === 'name',
         );
-        setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code));
+        setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code, error.message));
       } else {
         setNameError(API_ERROR_DEFAULT_MESSAGE);
       }
@@ -92,6 +93,7 @@ function GroupCreateScreen() {
             setNameError(undefined);
           }}
           placeholder={GROUP_NAME_PLACEHOLDER}
+          maxLength={GROUP_PROFILE_EDIT_NAME_MAX_LENGTH}
           error={nameError}
         />
       </View>

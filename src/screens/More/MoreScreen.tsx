@@ -20,6 +20,7 @@ import {
   API_NETWORK_ERROR_MESSAGE,
   getApiErrorMessage,
   isNetworkError,
+  toUserErrorMessage,
 } from '../../constants/apiErrorMessages';
 import { ApiError } from '../../services/apiClient';
 import {
@@ -36,6 +37,7 @@ import {
   MORE_RETRY_LABEL,
   SNACKBAR_GROUP_SWITCHED_PREFIX,
   SNACKBAR_GROUP_SWITCHED_SUFFIX,
+  MORE_ADMINS_LOAD_FAILED,
 } from '../../constants/groupManagerScreenText';
 import { SETTINGS_TITLE } from '../../constants/settingsScreenText';
 import { FOREGROUND_DISABLED, FOREGROUND_SECONDARY } from '../../constants/colors';
@@ -77,8 +79,12 @@ function MoreScreen() {
         setAdmins(
           activeGroup ? await groupMembershipService.getMemberships(activeGroup.id) : [],
         );
-      } catch {
+      } catch (adminError) {
         setAdmins([]);
+        setSwitchSnackbarMessage(
+          toUserErrorMessage(adminError, MORE_ADMINS_LOAD_FAILED),
+        );
+        setTimeout(() => setSwitchSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
       }
       setLoadState('ready');
     } catch (error) {
@@ -86,7 +92,7 @@ function MoreScreen() {
         isNetworkError(error)
           ? API_NETWORK_ERROR_MESSAGE
           : error instanceof ApiError
-          ? getApiErrorMessage(error.code)
+          ? getApiErrorMessage(error.code, error.message)
           : API_ERROR_DEFAULT_MESSAGE,
       );
       setLoadState('error');
