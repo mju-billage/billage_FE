@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   box: {
     width: BOX_SIZE,
     height: BOX_SIZE,
-    borderRadius: 8,
+    borderRadius: 12,
     backgroundColor: FILL_NEUTRAL_NORMAL,
     alignItems: 'center',
     justifyContent: 'center',
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     backgroundColor: BACKGROUND_PRIMARY,
   },
   boxActive: {
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: FOREGROUND_SECONDARY,
     backgroundColor: FILL_NEUTRAL_SUBTLE,
   },
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     backgroundColor: FILL_DISABLED,
   },
   boxError: {
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: FEEDBACK_NEGATIVE_BOLD,
   },
   errorText: {
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   digit: {
-    ...TYPOGRAPHY.h3,
+    ...TYPOGRAPHY.h1,
     color: FOREGROUND_SECONDARY,
   },
   digitDisabled: {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Keyboard, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -14,6 +14,7 @@ import * as authService from '../../services/authService';
 import { ApiError } from '../../services/apiClient';
 import { toUserErrorMessage } from '../../constants/apiErrorMessages';
 import {
+  FEEDBACK_NEGATIVE_BOLD,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
@@ -28,6 +29,7 @@ import {
   SNACKBAR_EMAIL_VERIFICATION_RESENT,
   SNACKBAR_SIGNUP_DONE_LOGIN_REQUIRED,
   EMAIL_VERIFICATION_SEND_FAILED_ERROR,
+  EMAIL_VERIFICATION_EXPIRED_MESSAGE,
 } from '../../constants/emailVerificationScreenText';
 import {
   SIGNUP_EMAIL_ALREADY_EXISTS_ERROR,
@@ -170,43 +172,59 @@ function EmailVerificationScreen() {
       background="secondary"
       edges={['bottom']}
       style={styles.container}
+      avoidKeyboard={false}
       snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
       snackbarOffset={76}
     >
-      <View style={styles.backRow}>
-        <BackButton onPress={() => navigation.goBack()} />
-      </View>
-      <Text style={styles.title}>{EMAIL_VERIFICATION_TITLE}</Text>
-      <Text style={styles.subtitle}>{EMAIL_VERIFICATION_SUBTITLE}</Text>
+      <Pressable style={styles.body} onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.backRow}>
+          <BackButton onPress={() => navigation.goBack()} />
+        </View>
+        <Text style={styles.title}>{EMAIL_VERIFICATION_TITLE}</Text>
+        <Text style={styles.subtitle}>{EMAIL_VERIFICATION_SUBTITLE}</Text>
 
-      <View style={styles.codeSection}>
-        <VerificationField
-          value={code}
-          onChangeText={text => {
-            setCode(text);
-            setCodeError(undefined);
-          }}
-          length={CODE_LENGTH}
-          error={codeError}
-        />
-        <Text style={styles.timerText}>
-          {EMAIL_VERIFICATION_TIMER_LABEL}{' '}
-          <Text style={styles.timerValue}>
-            {formatCountdown(secondsLeft)}
+        <View style={styles.codeSection}>
+          <VerificationField
+            value={code}
+            onChangeText={text => {
+              setCode(text);
+              setCodeError(undefined);
+            }}
+            length={CODE_LENGTH}
+            error={codeError}
+          />
+          {secondsLeft > 0 ? (
+            <Text style={styles.timerText}>
+              {EMAIL_VERIFICATION_TIMER_LABEL}{' '}
+              <Text
+                style={[
+                  styles.timerValue,
+                  secondsLeft <= 30 && styles.timerValueUrgent,
+                ]}
+              >
+                {formatCountdown(secondsLeft)}
+              </Text>
+            </Text>
+          ) : (
+            <Text style={styles.expiredText}>
+              {EMAIL_VERIFICATION_EXPIRED_MESSAGE}
+            </Text>
+          )}
+        </View>
+
+        <View style={styles.resendRow}>
+          <Text style={styles.resendLabel}>
+            {EMAIL_VERIFICATION_RESEND_PROMPT}
           </Text>
-        </Text>
-      </View>
-
-      <View style={styles.resendRow}>
-        <Text style={styles.resendLabel}>
-          {EMAIL_VERIFICATION_RESEND_PROMPT}
-        </Text>
-        <TextButton
-          label={EMAIL_VERIFICATION_RESEND_LINK_LABEL}
-          onPress={handleResend}
-          disabled={isSending}
-        />
-      </View>
+          <TextButton
+            label={EMAIL_VERIFICATION_RESEND_LINK_LABEL}
+            onPress={handleResend}
+            disabled={isSending}
+            hierarchy="tertiary"
+            underline
+          />
+        </View>
+      </Pressable>
 
       <View style={styles.footer}>
         <Button
@@ -226,17 +244,20 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingHorizontal: 20,
   },
+  body: {
+    flex: 1,
+  },
   backRow: {
-    marginBottom: 16,
+    marginBottom: 32,
   },
   title: {
     ...TYPOGRAPHY.h1,
     marginBottom: 8,
   },
   subtitle: {
-    ...TYPOGRAPHY.body2,
-    color: FOREGROUND_NEUTRAL_NORMAL,
-    marginBottom: 24,
+    ...TYPOGRAPHY.subtitle4,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+    marginBottom: 32,
   },
   codeSection: {
     marginBottom: 16,
@@ -249,6 +270,14 @@ const styles = StyleSheet.create({
   timerValue: {
     color: FOREGROUND_SECONDARY,
   },
+  timerValueUrgent: {
+    color: FEEDBACK_NEGATIVE_BOLD,
+  },
+  expiredText: {
+    marginTop: 8,
+    ...TYPOGRAPHY.body3,
+    color: FEEDBACK_NEGATIVE_BOLD,
+  },
   resendRow: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -259,7 +288,6 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_NORMAL,
   },
   footer: {
-    marginTop: 'auto',
     paddingBottom: 24,
   },
 });

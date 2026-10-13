@@ -9,3 +9,6 @@ export const EMAIL_VERIFICATION_SEND_FAILED_ERROR =
   '인증 코드 발송에 실패했어요. 잠시 후 다시 시도해주세요.';
 export const SNACKBAR_SIGNUP_DONE_LOGIN_REQUIRED =
   '가입이 완료되었어요. 로그인해주세요.';
+
+export const EMAIL_VERIFICATION_EXPIRED_MESSAGE =
+  '인증 시간이 만료되었어요. 다시 시도해 주세요.';

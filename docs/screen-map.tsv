@@ -19,7 +19,7 @@ DTB-4-MODAL-01-0		TransactionRegisterScreen	src/screens/Transactions/Transaction
 	DuesEdit	DuesEditScreen	src/screens/Dues/DuesEditScreen.tsx	ID 미상
 	DuesMemberEdit	DuesMemberEditScreen	src/screens/Dues/DuesMemberEditScreen.tsx	ID 미상
 	DuesRequest	DuesRequestScreen	src/screens/Dues/DuesRequestScreen.tsx	ID 미상
-	EmailVerification	EmailVerificationScreen	src/screens/Signup/EmailVerificationScreen.tsx	ID 미상
+COM-4-PAGE-01-0	EmailVerification	EmailVerificationScreen	src/screens/Signup/EmailVerificationScreen.tsx	ID 확정(QA-011)
 	Folder	FolderTabNavigator	src/screens/Folder/FolderTabNavigator.tsx	MainTab 탭. nested stack 네비게이터, 진입 시 FolderList로 즉시 이동. ID 미상
 	FolderBudgetList	FolderBudgetListScreen	src/screens/Folder/FolderBudgetListScreen.tsx	ID 미상
 	FolderList	FolderScreen	src/screens/Folder/FolderScreen.tsx	FolderTabNavigator 내부 스택 루트. ID 미상
