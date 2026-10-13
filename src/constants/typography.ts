@@ -87,7 +87,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.semibold,
     fontSize: 14,
     lineHeight: 20,
-    letterSpacing: 1.25,
+    letterSpacing: 0,
   },
   chips: {
     fontFamily: FONT_FAMILY,
@@ -101,7 +101,7 @@ export const TYPOGRAPHY = {
     fontWeight: FONT_WEIGHT.semibold,
     fontSize: 10,
     lineHeight: 16,
-    letterSpacing: 1.5,
+    letterSpacing: 0,
   },
   caption: {
     fontFamily: FONT_FAMILY,

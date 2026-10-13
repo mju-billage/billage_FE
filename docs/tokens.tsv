@@ -71,8 +71,8 @@ Subtitle/Subtitle4	typography	TYPOGRAPHY.subtitle4	size 14 / weight 500 / lineHe
 Body/Body1	typography	TYPOGRAPHY.body1	size 16 / weight 400 / lineHeight 24 / letterSpacing 0.5	src/constants/typography.ts
 Body/Body2	typography	TYPOGRAPHY.body2	size 14 / weight 400 / lineHeight 20 / letterSpacing 0.25	src/constants/typography.ts
 Body/Body3	typography	TYPOGRAPHY.body3	size 12 / weight 400 / lineHeight 16 / letterSpacing 0.25	src/constants/typography.ts
-Other/Button	typography	TYPOGRAPHY.button	size 14 / weight 600 / lineHeight 20 / letterSpacing 1.25	src/constants/typography.ts
+Other/Button	typography	TYPOGRAPHY.button	size 14 / weight 600 / lineHeight 20 / letterSpacing 0	src/constants/typography.ts
 Other/Chips	typography	TYPOGRAPHY.chips	size 12 / weight 500 / lineHeight 16 / letterSpacing 0.4	src/constants/typography.ts
-Other/Badge	typography	TYPOGRAPHY.badge	size 10 / weight 600 / lineHeight 16 / letterSpacing 1.5	src/constants/typography.ts
+Other/Badge	typography	TYPOGRAPHY.badge	size 10 / weight 600 / lineHeight 16 / letterSpacing 0	src/constants/typography.ts
 Other/Caption	typography	TYPOGRAPHY.caption	size 10 / weight 400 / lineHeight 16 / letterSpacing 0.4	src/constants/typography.ts
 Other/Overline	typography	TYPOGRAPHY.overline	size 10 / weight 400 / lineHeight 18 / letterSpacing 0.4	src/constants/typography.ts
