@@ -48,3 +48,14 @@
 현재 `__tests__/folderTree.test.ts` 하나뿐이다(6 테스트).
 `App.test.tsx` 는 네이티브 모듈 모킹 부담이 커서 2026-09-25 에 제거했다
 (커밋 `bc00ea5`). 필요해지면 그때 jest 모킹 세팅을 갖춰 되살린다.
+
+## 7. NAVY_800 을 배경색으로 직접 쓰는 컴포넌트
+
+Button.tsx 는 `0833cec` 에서 FILL_PRIMARY 로 고쳤지만, 아래 세 곳은
+아직 원시 상수 NAVY_800 을 배경색으로 직접 쓴다. 같은 유형일 수 있다.
+- `src/components/Input/Button/FAB.tsx:52, 107`
+- `src/components/Input/Button/AttachmentAddButton.tsx:84`
+- `src/components/Navigation/Bottom Navigation/BottomNavigation.tsx:81, 88`
+시안이 이 셋을 지적한 적은 없다. 해당 컴포넌트가 나오는 화면의
+QA 시트가 오면 그때 함께 확인한다. 글자색으로 쓰는 곳은
+FOREGROUND_PRIMARY 와 값이 같아 문제가 아니다.

@@ -70,7 +70,7 @@ COM-3-PAGE-01-02	PrivacyPolicy	PrivacyPolicyScreen	src/screens/Signup/PrivacyPol
 	ReportPeriodEntries	ReportPeriodEntriesScreen	src/screens/Report/ReportPeriodEntriesScreen.tsx	ID 미상
 	Settings	SettingsScreen	src/screens/More/SettingScreen.tsx	파일명은 SettingScreen(단수), 컴포넌트/라우트명은 Settings·SettingsScreen(복수). ID 미상
 	SignupComplete	SignupCompleteScreen	src/screens/Signup/SignupCompleteScreen.tsx	GroupOnboarding 라우트와 동일 컴포넌트 재사용. ID 미상
-	SignupInfo	SignupInfoScreen	src/screens/Signup/SignupInfoScreen.tsx	ID 미상
+COM-3-PAGE-03-0	SignupInfo	SignupInfoScreen	src/screens/Signup/SignupInfoScreen.tsx	ID 확정(QA-009)
 	SocialSignupInfo	SocialSignupInfoScreen	src/screens/Signup/SocialSignupInfoScreen.tsx	ID 미상
 	Statistics	StatisticsScreen	src/screens/Statistics/StatisticsScreen.tsx	ID 미상
 	TermDetail	TermDetailScreen	src/screens/More/TermDetailScreen.tsx	ID 미상

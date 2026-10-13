@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.subtitle2,
     marginBottom: 8,
   },
   labelDisabled: {
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   helperText: {
     ...TYPOGRAPHY.body3,
     marginTop: 6,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   errorText: {
     ...TYPOGRAPHY.body3,

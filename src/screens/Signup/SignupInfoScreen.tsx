@@ -117,6 +117,7 @@ function SignupInfoScreen() {
       background="secondary"
       edges={['bottom']}
       style={styles.container}
+      avoidKeyboard={false}
       snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
       snackbarOffset={76}
     >
@@ -125,6 +126,7 @@ function SignupInfoScreen() {
       </View>
       <ScrollView
         style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -133,17 +135,24 @@ function SignupInfoScreen() {
         <View style={styles.form}>
           <TextField
             label={SIGNUP_NAME_LABEL}
+            required
             value={name}
             onChangeText={setName}
+            onClear={() => setName('')}
             placeholder={SIGNUP_NAME_PLACEHOLDER}
             helperText={SIGNUP_NAME_HELPER}
             error={isNameTooLong ? SIGNUP_NAME_TOO_LONG_ERROR : undefined}
           />
           <TextField
             label={SIGNUP_EMAIL_LABEL}
+            required
             value={email}
             onChangeText={text => {
               setEmail(text);
+              setEmailServerError(undefined);
+            }}
+            onClear={() => {
+              setEmail('');
               setEmailServerError(undefined);
             }}
             placeholder={SIGNUP_EMAIL_PLACEHOLDER}
@@ -154,8 +163,10 @@ function SignupInfoScreen() {
           />
           <TextField
             label={SIGNUP_PASSWORD_LABEL}
+            required
             value={password}
             onChangeText={setPassword}
+            onClear={() => setPassword('')}
             placeholder={SIGNUP_PASSWORD_PLACEHOLDER}
             helperText={SIGNUP_PASSWORD_HELPER}
             error={passwordError}
@@ -164,8 +175,10 @@ function SignupInfoScreen() {
           />
           <TextField
             label={SIGNUP_PASSWORD_CONFIRM_LABEL}
+            required
             value={passwordConfirm}
             onChangeText={setPasswordConfirm}
+            onClear={() => setPasswordConfirm('')}
             placeholder={SIGNUP_PASSWORD_PLACEHOLDER}
             error={confirmError}
             onBlur={() => touch('confirm')}
@@ -195,12 +208,15 @@ const styles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
   backRow: {
-    marginBottom: 16,
+    marginBottom: 32,
   },
   title: {
     ...TYPOGRAPHY.h1,
-    marginBottom: 24,
+    marginBottom: 32,
   },
   form: {
     flex: 1,
