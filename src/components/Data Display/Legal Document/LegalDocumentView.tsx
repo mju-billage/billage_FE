@@ -1,7 +1,7 @@
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import ScreenContainer from '../../Layout/ScreenContainer';
 import AppBar from '../../Navigation/App bar/AppBar';
-import { FOREGROUND_NEUTRAL_NORMAL } from '../../../constants/colors';
+import { FOREGROUND_PRIMARY } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
 
 type LegalDocumentViewProps = {
@@ -16,7 +16,7 @@ function LegalDocumentView({
   onPressBack,
 }: LegalDocumentViewProps) {
   return (
-    <ScreenContainer background="primary">
+    <ScreenContainer background="secondary">
       <AppBar type="sub" title={title} onBackPress={onPressBack} />
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.body}>{bodyText}</Text>
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
   },
   body: {
     ...TYPOGRAPHY.body3,
-    color: FOREGROUND_NEUTRAL_NORMAL,
+    color: FOREGROUND_PRIMARY,
   },
 });
 

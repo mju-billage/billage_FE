@@ -37,7 +37,7 @@ DTB-4-MODAL-01-0		TransactionRegisterScreen	src/screens/Transactions/Transaction
 	LedgerSearch	LedgerSearchScreen	src/screens/Folder/LedgerSearchScreen.tsx	ID 미상
 COM-1-PAGE-01-0	Login	LoginScreen	src/screens/LoginScreen.tsx	ID 확정(QA-001)
 	Main	MainTabNavigator	src/navigation/MainTabNavigator.tsx	src/screens 밖(src/navigation). 탭 네비게이터 루트(Home/Transactions/Folder/Dues/More). ID 미상
-	MarketingConsent	MarketingConsentScreen	src/screens/Signup/MarketingConsentScreen.tsx	ID 미상
+COM-3-PAGE-01-03	MarketingConsent	MarketingConsentScreen	src/screens/Signup/MarketingConsentScreen.tsx	LegalDocumentView 공유 (3개 화면 동일 컴포넌트)
 	MemberAddBulk	MemberAddBulkScreen	src/screens/Member/MemberAddBulkScreen.tsx	ID 미상
 	MemberAddIndividual	MemberAddIndividualScreen	src/screens/Member/MemberAddIndividualScreen.tsx	ID 미상
 	MemberDetail	MemberDetailScreen	src/screens/Member/MemberDetailScreen.tsx	ID 미상
@@ -54,7 +54,7 @@ COM-1-PAGE-01-0	Login	LoginScreen	src/screens/LoginScreen.tsx	ID 확정(QA-001)
 	PasswordReset	PasswordResetScreen	src/screens/PasswordReset/PasswordResetScreen.tsx	ID 미상
 	PasswordResetSent	PasswordResetSentScreen	src/screens/PasswordReset/PasswordResetSentScreen.tsx	ID 미상
 	PostLogin	PostLoginScreen	src/screens/PostLoginScreen.tsx	ID 미상
-	PrivacyPolicy	PrivacyPolicyScreen	src/screens/Signup/PrivacyPolicyScreen.tsx	ID 미상
+COM-3-PAGE-01-02	PrivacyPolicy	PrivacyPolicyScreen	src/screens/Signup/PrivacyPolicyScreen.tsx	LegalDocumentView 공유 (3개 화면 동일 컴포넌트)
 	ProfileEdit	ProfileEditScreen	src/screens/More/ProfileEditScreen.tsx	ID 미상
 	ReceiptAlbum	ReceiptAlbumScreen	src/screens/Receipt/ReceiptAlbumScreen.tsx	ID 미상
 	ReceiptDetail	ReceiptDetailScreen	src/screens/Receipt/ReceiptDetailScreen.tsx	ID 미상
@@ -76,7 +76,7 @@ COM-1-PAGE-01-0	Login	LoginScreen	src/screens/LoginScreen.tsx	ID 확정(QA-001)
 	TermDetail	TermDetailScreen	src/screens/More/TermDetailScreen.tsx	ID 미상
 	Terms	TermsScreen	src/screens/More/TermsScreen.tsx	ID 미상
 COM-2-PAGE-01-0	TermsAgreement	TermsAgreementScreen	src/screens/Signup/TermsAgreementScreen.tsx	ID 확정(QA-007)
-	TermsOfService	TermsOfServiceScreen	src/screens/Signup/TermsOfServiceScreen.tsx	ID 미상
+COM-3-PAGE-01-01	TermsOfService	TermsOfServiceScreen	src/screens/Signup/TermsOfServiceScreen.tsx	LegalDocumentView 공유 (3개 화면 동일 컴포넌트)
 	TransactionDetail	TransactionDetailScreen	src/screens/Folder/TransactionDetailScreen.tsx	ID 미상
 	TransactionReceiptDetail	TransactionReceiptDetailScreen	src/screens/Folder/TransactionReceiptDetailScreen.tsx	ID 미상
 	TransactionRegister	TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	파일 내 @screen 주석 7개 존재(위 행들 참조). 라우트 자체 대표 ID는 미상

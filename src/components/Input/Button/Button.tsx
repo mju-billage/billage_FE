@@ -14,12 +14,12 @@ import {
   FEEDBACK_NEGATIVE_BOLD,
   FILL_DISABLED,
   FILL_NEUTRAL_NORMAL,
+  FILL_PRIMARY,
   FOREGROUND_DISABLED,
   FOREGROUND_INVERSE,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
-  NAVY_800,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
 
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     height: 52,
   },
   primary: {
-    backgroundColor: NAVY_800,
+    backgroundColor: FILL_PRIMARY,
   },
   secondary: {
     backgroundColor: BACKGROUND_PRIMARY,
