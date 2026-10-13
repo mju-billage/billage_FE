@@ -18,6 +18,8 @@
 | 키보드 동작 | `avoidKeyboard={false}`로 버튼이 키보드 뒤로 가려지게, 본문을 `Pressable`로 감싸 빈 공간 탭 시 `Keyboard.dismiss()` | 화면 | `f360d76` |
 | `footer.marginTop: 'auto'` 제거 | `body`가 `flex: 1`이 되면서 불필요해짐 | 화면 | `f360d76` |
 | 문구 상수 추가 | `EMAIL_VERIFICATION_EXPIRED_MESSAGE` | 화면 | `f360d76` |
+| 재전송 문구 세로 정렬 | `resendRow`에 `alignItems: 'center'` 추가(라벨 body3과 TextButton button+패딩의 줄 높이가 달라 어긋나던 것) | 화면 | `80a652f` |
+| 스낵바 close 버튼 연결 | `Snackbar`에 `onClose` 전달 | 화면 | `a9bb88e` |
 
 ### 처리 중 알게 된 것
 
