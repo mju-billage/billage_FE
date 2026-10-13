@@ -1,5 +1,12 @@
 import { useCallback, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Image,
+  ImageSourcePropType,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
@@ -9,16 +16,6 @@ import Button from '../components/Input/Button/Button';
 import TextButton from '../components/Input/Button/TextButton';
 import Snackbar from '../components/Feedback/Snackbar/Snackbar';
 import ScreenContainer from '../components/Layout/ScreenContainer';
-import {
-  BORDER_NEUTRAL_NORMAL,
-  FILL_NEUTRAL_SUBTLE,
-  FOREGROUND_INVERSE,
-  FOREGROUND_NEUTRAL_NORMAL,
-  SOCIAL_KAKAO_TEXT,
-  SOCIAL_KAKAO_YELLOW,
-  SOCIAL_NAVER_GREEN,
-} from '../constants/colors';
-import { TYPOGRAPHY } from '../constants/typography';
 import { SocialProfile, SocialType } from '../types/social';
 import { ApiError } from '../services/apiClient';
 import * as authService from '../services/authService';
@@ -52,28 +49,18 @@ type LoginRouteProp = RouteProp<RootStackParamList, 'Login'>;
 const LOGO_SYMBOL = require('../assets/images/Billage_simbol_big.png');
 const LOGO_WORDMARK = require('../assets/images/Billage_logo.png');
 
-const SOCIAL_CIRCLE_SIZE = 48;
+const SOCIAL_CIRCLE_SIZE = 40;
 
-const SOCIAL_STYLE_BY_TYPE: Record<SocialType, object> = {
-  Naver: { backgroundColor: SOCIAL_NAVER_GREEN },
-  Kakao: { backgroundColor: SOCIAL_KAKAO_YELLOW },
-  Google: {
-    backgroundColor: FILL_NEUTRAL_SUBTLE,
-    borderWidth: 1,
-    borderColor: BORDER_NEUTRAL_NORMAL,
-  },
+const SOCIAL_ICON_BY_TYPE: Record<SocialType, ImageSourcePropType> = {
+  Kakao: require('../assets/images/KaKao.png'),
+  Naver: require('../assets/images/Naver.png'),
+  Google: require('../assets/images/Google.png'),
 };
 
-const SOCIAL_LABEL_STYLE_BY_TYPE: Record<SocialType, object> = {
-  Naver: { color: FOREGROUND_INVERSE },
-  Kakao: { color: SOCIAL_KAKAO_TEXT },
-  Google: { color: FOREGROUND_NEUTRAL_NORMAL },
-};
-
-const SOCIAL_INITIAL_BY_TYPE: Record<SocialType, string> = {
-  Naver: 'N',
-  Kakao: 'K',
-  Google: 'G',
+const SOCIAL_ACCESSIBILITY_LABEL_BY_TYPE: Record<SocialType, string> = {
+  Kakao: '카카오로 로그인',
+  Naver: '네이버로 로그인',
+  Google: '구글로 로그인',
 };
 
 function SocialLoginBadge({
@@ -87,14 +74,17 @@ function SocialLoginBadge({
     <Pressable
       style={({ pressed }) => [
         socialBadgeStyles.circle,
-        SOCIAL_STYLE_BY_TYPE[type],
-        pressed && { opacity: 0.5 },
+        pressed && socialBadgeStyles.pressed,
       ]}
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={SOCIAL_ACCESSIBILITY_LABEL_BY_TYPE[type]}
     >
-      <Text style={[socialBadgeStyles.label, SOCIAL_LABEL_STYLE_BY_TYPE[type]]}>
-        {SOCIAL_INITIAL_BY_TYPE[type]}
-      </Text>
+      <Image
+        source={SOCIAL_ICON_BY_TYPE[type]}
+        style={socialBadgeStyles.icon}
+        resizeMode="contain"
+      />
     </Pressable>
   );
 }
@@ -103,12 +93,13 @@ const socialBadgeStyles = StyleSheet.create({
   circle: {
     width: SOCIAL_CIRCLE_SIZE,
     height: SOCIAL_CIRCLE_SIZE,
-    borderRadius: SOCIAL_CIRCLE_SIZE / 2,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  label: {
-    ...TYPOGRAPHY.h3,
+  icon: {
+    width: '100%',
+    height: '100%',
+  },
+  pressed: {
+    opacity: 0.5,
   },
 });
 
