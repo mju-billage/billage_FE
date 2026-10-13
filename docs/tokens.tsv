@@ -56,23 +56,23 @@ social/naver-green	color	SOCIAL_NAVER_GREEN	#03C75A	src/constants/colors.ts
 social/kakao-yellow	color	SOCIAL_KAKAO_YELLOW	#FEE500	src/constants/colors.ts
 social/kakao-text	color	SOCIAL_KAKAO_TEXT	#3C1E1E	src/constants/colors.ts
 font/family	typography	FONT_FAMILY	Pyeojin Gothic	src/constants/typography.ts
-	typography	FONT_WEIGHT.light	300	src/constants/typography.ts
-	typography	FONT_WEIGHT.regular	400	src/constants/typography.ts
-	typography	FONT_WEIGHT.medium	500	src/constants/typography.ts
-	typography	FONT_WEIGHT.semibold	600	src/constants/typography.ts
-	typography	FONT_WEIGHT.bold	700	src/constants/typography.ts
-	typography	TYPOGRAPHY.h1	size 24 / weight 700 / lineHeight 32	src/constants/typography.ts
-	typography	TYPOGRAPHY.h2	size 20 / weight 600 / lineHeight 28	src/constants/typography.ts
-	typography	TYPOGRAPHY.h3	size 18 / weight 600 / lineHeight 24	src/constants/typography.ts
-	typography	TYPOGRAPHY.subtitle1	size 16 / weight 600 / lineHeight 24	src/constants/typography.ts
-	typography	TYPOGRAPHY.subtitle2	size 16 / weight 500 / lineHeight 24	src/constants/typography.ts
-	typography	TYPOGRAPHY.subtitle3	size 14 / weight 600 / lineHeight 20	src/constants/typography.ts
-	typography	TYPOGRAPHY.subtitle4	size 14 / weight 500 / lineHeight 20	src/constants/typography.ts
-	typography	TYPOGRAPHY.body1	size 16 / weight 400 / lineHeight 24	src/constants/typography.ts
-	typography	TYPOGRAPHY.body2	size 14 / weight 400 / lineHeight 20	src/constants/typography.ts
-	typography	TYPOGRAPHY.body3	size 12 / weight 400 / lineHeight 16	src/constants/typography.ts
-	typography	TYPOGRAPHY.button	size 14 / weight 600 / lineHeight 20	src/constants/typography.ts
-	typography	TYPOGRAPHY.chips	size 12 / weight 500 / lineHeight 16	src/constants/typography.ts
-	typography	TYPOGRAPHY.badge	size 10 / weight 600 / lineHeight 16	src/constants/typography.ts
-	typography	TYPOGRAPHY.caption	size 8 / weight 400 / lineHeight 16	src/constants/typography.ts
-	typography	TYPOGRAPHY.overline	size 10 / weight 400 / lineHeight 18	src/constants/typography.ts
+weight/light	typography	FONT_WEIGHT.light	300	src/constants/typography.ts
+weight/regular	typography	FONT_WEIGHT.regular	400	src/constants/typography.ts
+weight/medium	typography	FONT_WEIGHT.medium	500	src/constants/typography.ts
+weight/semibold	typography	FONT_WEIGHT.semibold	600	src/constants/typography.ts
+weight/bold	typography	FONT_WEIGHT.bold	700	src/constants/typography.ts
+Heading/H1	typography	TYPOGRAPHY.h1	size 24 / weight 700 / lineHeight 32 / letterSpacing 0	src/constants/typography.ts
+Heading/H2	typography	TYPOGRAPHY.h2	size 20 / weight 600 / lineHeight 28 / letterSpacing 0.15	src/constants/typography.ts
+Heading/H3	typography	TYPOGRAPHY.h3	size 18 / weight 600 / lineHeight 24 / letterSpacing 0.15	src/constants/typography.ts
+Subtitle/Subtitle1	typography	TYPOGRAPHY.subtitle1	size 16 / weight 600 / lineHeight 24 / letterSpacing 0.15	src/constants/typography.ts
+Subtitle/Subtitle2	typography	TYPOGRAPHY.subtitle2	size 16 / weight 500 / lineHeight 24 / letterSpacing 0.15	src/constants/typography.ts
+Subtitle/Subtitle3	typography	TYPOGRAPHY.subtitle3	size 14 / weight 600 / lineHeight 20 / letterSpacing 0.1	src/constants/typography.ts
+Subtitle/Subtitle4	typography	TYPOGRAPHY.subtitle4	size 14 / weight 500 / lineHeight 20 / letterSpacing 0.1	src/constants/typography.ts
+Body/Body1	typography	TYPOGRAPHY.body1	size 16 / weight 400 / lineHeight 24 / letterSpacing 0.5	src/constants/typography.ts
+Body/Body2	typography	TYPOGRAPHY.body2	size 14 / weight 400 / lineHeight 20 / letterSpacing 0.25	src/constants/typography.ts
+Body/Body3	typography	TYPOGRAPHY.body3	size 12 / weight 400 / lineHeight 16 / letterSpacing 0.25	src/constants/typography.ts
+Other/Button	typography	TYPOGRAPHY.button	size 14 / weight 600 / lineHeight 20 / letterSpacing 1.25	src/constants/typography.ts
+Other/Chips	typography	TYPOGRAPHY.chips	size 12 / weight 500 / lineHeight 16 / letterSpacing 0.4	src/constants/typography.ts
+Other/Badge	typography	TYPOGRAPHY.badge	size 10 / weight 600 / lineHeight 16 / letterSpacing 1.5	src/constants/typography.ts
+Other/Caption	typography	TYPOGRAPHY.caption	size 10 / weight 400 / lineHeight 16 / letterSpacing 0.4	src/constants/typography.ts
+Other/Overline	typography	TYPOGRAPHY.overline	size 10 / weight 400 / lineHeight 18 / letterSpacing 0.4	src/constants/typography.ts

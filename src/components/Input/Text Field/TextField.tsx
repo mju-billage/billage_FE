@@ -105,8 +105,13 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           autoFocus={autoFocus}
           editable={!disabled}
         />
-        {onClear && value.length > 0 && !disabled && (
-          <Pressable onPress={onClear} hitSlop={8}>
+        {onClear && !disabled && (
+          <Pressable
+            onPress={onClear}
+            hitSlop={8}
+            pointerEvents={value.length > 0 ? 'auto' : 'none'}
+            style={value.length > 0 ? styles.clearShown : styles.clearHidden}
+          >
             <Image source={CLOSE_ICON} style={styles.clearIcon} />
           </Pressable>
         )}
@@ -115,7 +120,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
             {suffix}
           </Text>
         )}
-        {secureToggle && !disabled && (
+        {secureToggle && !disabled && isFocused && (
           <Pressable onPress={() => setIsSecure(!isSecure)}>
             <Image
               source={isSecure ? EYE_CLOSED_ICON : EYE_ICON}
@@ -160,6 +165,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomWidth: 1,
     paddingVertical: 8,
+    paddingLeft: 16,
+    paddingRight: 10,
   },
   input: {
     ...TYPOGRAPHY.body1,
@@ -181,6 +188,12 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
+  },
+  clearShown: {
+    opacity: 1,
+  },
+  clearHidden: {
+    opacity: 0,
   },
   clearIcon: {
     marginRight: 4,

@@ -35,7 +35,7 @@ DTB-4-MODAL-01-0		TransactionRegisterScreen	src/screens/Transactions/Transaction
 	LedgerCreate	LedgerCreateScreen	src/screens/Folder/LedgerCreateScreen.tsx	ID 미상
 	LedgerDetail	LedgerDetailScreen	src/screens/Folder/LedgerDetailScreen.tsx	ID 미상
 	LedgerSearch	LedgerSearchScreen	src/screens/Folder/LedgerSearchScreen.tsx	ID 미상
-	Login	LoginScreen	src/screens/LoginScreen.tsx	ID 미상
+COM-1-PAGE-01-0	Login	LoginScreen	src/screens/LoginScreen.tsx	ID 확정(QA-001)
 	Main	MainTabNavigator	src/navigation/MainTabNavigator.tsx	src/screens 밖(src/navigation). 탭 네비게이터 루트(Home/Transactions/Folder/Dues/More). ID 미상
 	MarketingConsent	MarketingConsentScreen	src/screens/Signup/MarketingConsentScreen.tsx	ID 미상
 	MemberAddBulk	MemberAddBulkScreen	src/screens/Member/MemberAddBulkScreen.tsx	ID 미상

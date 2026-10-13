@@ -106,7 +106,7 @@ export const TYPOGRAPHY = {
   caption: {
     fontFamily: FONT_FAMILY,
     fontWeight: FONT_WEIGHT.regular,
-    fontSize: 8,
+    fontSize: 10,
     lineHeight: 16,
     letterSpacing: 0.4,
   },
