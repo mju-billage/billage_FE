@@ -146,11 +146,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   backRow: {
-    marginBottom: 16,
+    marginBottom: 32,
   },
   title: {
     ...TYPOGRAPHY.h1,
-    marginBottom: 24,
+    marginBottom: 32,
   },
   list: {
     flex: 1,

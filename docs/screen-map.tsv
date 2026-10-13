@@ -75,7 +75,7 @@ COM-1-PAGE-01-0	Login	LoginScreen	src/screens/LoginScreen.tsx	ID 확정(QA-001)
 	Statistics	StatisticsScreen	src/screens/Statistics/StatisticsScreen.tsx	ID 미상
 	TermDetail	TermDetailScreen	src/screens/More/TermDetailScreen.tsx	ID 미상
 	Terms	TermsScreen	src/screens/More/TermsScreen.tsx	ID 미상
-	TermsAgreement	TermsAgreementScreen	src/screens/Signup/TermsAgreementScreen.tsx	ID 미상
+COM-2-PAGE-01-0	TermsAgreement	TermsAgreementScreen	src/screens/Signup/TermsAgreementScreen.tsx	ID 확정(QA-007)
 	TermsOfService	TermsOfServiceScreen	src/screens/Signup/TermsOfServiceScreen.tsx	ID 미상
 	TransactionDetail	TransactionDetailScreen	src/screens/Folder/TransactionDetailScreen.tsx	ID 미상
 	TransactionReceiptDetail	TransactionReceiptDetailScreen	src/screens/Folder/TransactionReceiptDetailScreen.tsx	ID 미상

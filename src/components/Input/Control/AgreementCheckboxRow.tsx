@@ -1,6 +1,6 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import CheckBox from './CheckBox';
-import { FOREGROUND_DISABLED, FOREGROUND_SECONDARY } from '../../../constants/colors';
+import { FOREGROUND_NEUTRAL_SUBTLE, FOREGROUND_SECONDARY } from '../../../constants/colors';
 import {
   AGREEMENT_TAG_REQUIRED,
   AGREEMENT_TAG_OPTIONAL,
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   chevron: {
     width: 16,
     height: 16,
-    tintColor: FOREGROUND_DISABLED,
+    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
     marginHorizontal: 4,
   },
 });

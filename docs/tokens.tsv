@@ -10,7 +10,7 @@ blue/50	color	BLUE_50	#F0F5FE	src/constants/colors.ts
 grey/800	color	GREY_800	#374151	src/constants/colors.ts
 grey/700	color	GREY_700	#374151	src/constants/colors.ts
 grey/600	color	GREY_600	#4B5563	src/constants/colors.ts
-grey/400	color	GREY_400	#9B9B9B	src/constants/colors.ts
+grey/400	color	GREY_400	#9CA3AF	src/constants/colors.ts
 grey/300	color	GREY_300	#C1C5CD	src/constants/colors.ts
 grey/200	color	GREY_200	#E5E7EB	src/constants/colors.ts
 grey/100	color	GREY_100	#F3F4F6	src/constants/colors.ts
@@ -23,7 +23,7 @@ red/50	color	RED_50	#FFEDEC	src/constants/colors.ts
 foreground/primary	color	FOREGROUND_PRIMARY → NAVY_800	#070A23	src/constants/colors.ts
 foreground/secondary	color	FOREGROUND_SECONDARY → BLUE_500	#4A7FE7	src/constants/colors.ts
 foreground/neutral-normal	color	FOREGROUND_NEUTRAL_NORMAL → GREY_600	#4B5563	src/constants/colors.ts
-foreground/neutral-subtle	color	FOREGROUND_NEUTRAL_SUBTLE → GREY_400	#9B9B9B	src/constants/colors.ts
+foreground/neutral-subtle	color	FOREGROUND_NEUTRAL_SUBTLE → GREY_400	#9CA3AF	src/constants/colors.ts
 foreground/inverse	color	FOREGROUND_INVERSE → BASIC_0	#FFFFFF	src/constants/colors.ts
 foreground/disabled	color	FOREGROUND_DISABLED → GREY_300	#C1C5CD	src/constants/colors.ts
 foreground/inactive	color	FOREGROUND_INACTIVE → NAVY_200	#A0A3BC	src/constants/colors.ts
@@ -37,7 +37,7 @@ fill/neutral-normal	color	FILL_NEUTRAL_NORMAL → GREY_100	#F3F4F6	src/constants
 fill/neutral-subtle	color	FILL_NEUTRAL_SUBTLE → BASIC_0	#FFFFFF	src/constants/colors.ts
 fill/inverse	color	FILL_INVERSE → GREY_800	#374151	src/constants/colors.ts
 fill/disabled	color	FILL_DISABLED → GREY_100	#F3F4F6	src/constants/colors.ts
-border/neutral-bold	color	BORDER_NEUTRAL_BOLD → GREY_400	#9B9B9B	src/constants/colors.ts
+border/neutral-bold	color	BORDER_NEUTRAL_BOLD → GREY_400	#9CA3AF	src/constants/colors.ts
 border/neutral-normal	color	BORDER_NEUTRAL_NORMAL → GREY_200	#E5E7EB	src/constants/colors.ts
 border/neutral-subtle	color	BORDER_NEUTRAL_SUBTLE → GREY_100	#F3F4F6	src/constants/colors.ts
 border/secondary-bold	color	BORDER_SECONDARY_BOLD → BLUE_500	#4A7FE7	src/constants/colors.ts
