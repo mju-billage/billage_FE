@@ -1,0 +1,87 @@
+screen_id	route_name	component	path	note
+		SplashScreen	src/screens/SplashScreen.tsx	Stack.Screen 아님. RootNavigator가 세션 복원 중 isLoading===true일 때 직접 렌더. ID 미상
+ADD-1-PAGE-01-0		TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	내역 추가. TransactionRegister 라우트 내부 상태(코드 주석 @screen 기준)
+ADD-2-MODAL-01-0		TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	이탈 방지 모달. DTB-4-MODAL-01-0과 동일 다이얼로그(IA ID 중복, 코드 주석 명시)
+ADD-2-SNACKBAR-01-0		TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	등록 완료 스낵바(SNACKBAR_TRANSACTION_ADDED[_PENDING])
+ADD-4-PAGE-01-0		TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	영수증 스캔 성공(handleScanComplete)
+ADD-5-MODAL-01-0		TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	스캔 내용 반영 확인 모달(scanApply 다이얼로그)
+DTB-3-PAGE-02-0		TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	상세 내역_수정(기존 transactionId로 진입 시)
+DTB-4-MODAL-01-0		TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	상세 내역_수정 이탈 안내(leave 다이얼로그)
+	AllGroups	AllGroupsScreen	src/screens/GroupManager/AllGroupsScreen.tsx	ID 미상
+	Archive	ArchiveListScreen	src/screens/Archive/ArchiveListScreen.tsx	ID 미상
+	ArchiveDetail	ArchiveDetailScreen	src/screens/Archive/ArchiveDetailScreen.tsx	ID 미상
+	ArchiveEntryDetail	ArchiveEntryDetailScreen	src/screens/Archive/ArchiveEntryDetailScreen.tsx	ID 미상
+	ArchiveLedgerEntries	ArchiveLedgerEntriesScreen	src/screens/Archive/ArchiveLedgerEntriesScreen.tsx	ID 미상
+	Calendar	CalendarScreen	src/screens/Calendar/CalendarScreen.tsx	ID 미상
+	Dues	DuesScreen	src/screens/Dues/DuesScreen.tsx	MainTab 탭. ID 미상
+	DuesCreate	DuesCreateScreen	src/screens/Dues/DuesCreateScreen.tsx	ID 미상
+	DuesDetail	DuesDetailScreen	src/screens/Dues/DuesDetailScreen.tsx	ID 미상
+	DuesEdit	DuesEditScreen	src/screens/Dues/DuesEditScreen.tsx	ID 미상
+	DuesMemberEdit	DuesMemberEditScreen	src/screens/Dues/DuesMemberEditScreen.tsx	ID 미상
+	DuesRequest	DuesRequestScreen	src/screens/Dues/DuesRequestScreen.tsx	ID 미상
+	EmailVerification	EmailVerificationScreen	src/screens/Signup/EmailVerificationScreen.tsx	ID 미상
+	Folder	FolderTabNavigator	src/screens/Folder/FolderTabNavigator.tsx	MainTab 탭. nested stack 네비게이터, 진입 시 FolderList로 즉시 이동. ID 미상
+	FolderBudgetList	FolderBudgetListScreen	src/screens/Folder/FolderBudgetListScreen.tsx	ID 미상
+	FolderList	FolderScreen	src/screens/Folder/FolderScreen.tsx	FolderTabNavigator 내부 스택 루트. ID 미상
+	FolderMoveDestination	FolderMoveDestinationScreen	src/screens/Folder/FolderMoveDestinationScreen.tsx	ID 미상
+	FolderSelectMove	FolderSelectMoveScreen	src/screens/Folder/FolderSelectMoveScreen.tsx	ID 미상
+	GroupCreate	GroupCreateScreen	src/screens/GroupManager/GroupCreateScreen.tsx	ID 미상
+	GroupManage	GroupManageScreen	src/screens/GroupManager/GroupManageScreen.tsx	ID 미상
+	GroupManager	GroupManagerScreen	src/screens/GroupManager/GroupManagerScreen.tsx	ID 미상
+	GroupOnboarding	SignupCompleteScreen	src/screens/Signup/SignupCompleteScreen.tsx	SignupComplete 라우트와 동일 컴포넌트 재사용. ID 미상
+	GroupProfileEdit	GroupProfileEditScreen	src/screens/GroupManager/GroupProfileEditScreen.tsx	ID 미상
+	Home	DashboardScreen	src/screens/Dashboard/DashboardScreen.tsx	MainTab 탭. ID 미상
+	Inquiry	InquiryScreen	src/screens/More/InquiryScreen.tsx	ID 미상
+	LedgerCreate	LedgerCreateScreen	src/screens/Folder/LedgerCreateScreen.tsx	ID 미상
+	LedgerDetail	LedgerDetailScreen	src/screens/Folder/LedgerDetailScreen.tsx	ID 미상
+	LedgerSearch	LedgerSearchScreen	src/screens/Folder/LedgerSearchScreen.tsx	ID 미상
+	Login	LoginScreen	src/screens/LoginScreen.tsx	ID 미상
+	Main	MainTabNavigator	src/navigation/MainTabNavigator.tsx	src/screens 밖(src/navigation). 탭 네비게이터 루트(Home/Transactions/Folder/Dues/More). ID 미상
+	MarketingConsent	MarketingConsentScreen	src/screens/Signup/MarketingConsentScreen.tsx	ID 미상
+	MemberAddBulk	MemberAddBulkScreen	src/screens/Member/MemberAddBulkScreen.tsx	ID 미상
+	MemberAddIndividual	MemberAddIndividualScreen	src/screens/Member/MemberAddIndividualScreen.tsx	ID 미상
+	MemberDetail	MemberDetailScreen	src/screens/Member/MemberDetailScreen.tsx	ID 미상
+	MemberEdit	MemberEditScreen	src/screens/Member/MemberEditScreen.tsx	ID 미상
+	MemberManage	MemberManageScreen	src/screens/Member/MemberManageScreen.tsx	ID 미상
+	MemberPaymentHistory	MemberPaymentHistoryScreen	src/screens/Member/MemberPaymentHistoryScreen.tsx	ID 미상
+	More	MoreScreen	src/screens/More/MoreScreen.tsx	MainTab 탭. ID 미상
+	MyProfile	MyProfileScreen	src/screens/More/MyProfileScreen.tsx	ID 미상
+	Notification	NotificationScreen	src/screens/Notification/NotificationScreen.tsx	ID 미상
+	NoticeDetail	NoticeDetailScreen	src/screens/More/NoticeDetailScreen.tsx	ID 미상
+	NoticeList	NoticeListScreen	src/screens/More/NoticeListScreen.tsx	ID 미상
+	NotificationSettings	NotificationSettingsScreen	src/screens/More/NotificationSettingsScreen.tsx	ID 미상
+	PasswordChange	PasswordChangeScreen	src/screens/More/PasswordChangeScreen.tsx	ID 미상
+	PasswordReset	PasswordResetScreen	src/screens/PasswordReset/PasswordResetScreen.tsx	ID 미상
+	PasswordResetSent	PasswordResetSentScreen	src/screens/PasswordReset/PasswordResetSentScreen.tsx	ID 미상
+	PostLogin	PostLoginScreen	src/screens/PostLoginScreen.tsx	ID 미상
+	PrivacyPolicy	PrivacyPolicyScreen	src/screens/Signup/PrivacyPolicyScreen.tsx	ID 미상
+	ProfileEdit	ProfileEditScreen	src/screens/More/ProfileEditScreen.tsx	ID 미상
+	ReceiptAlbum	ReceiptAlbumScreen	src/screens/Receipt/ReceiptAlbumScreen.tsx	ID 미상
+	ReceiptDetail	ReceiptDetailScreen	src/screens/Receipt/ReceiptDetailScreen.tsx	ID 미상
+	ReceiptSearch	ReceiptSearchScreen	src/screens/Receipt/ReceiptSearchScreen.tsx	ID 미상
+	ReportByLedgerDetail	ReportByLedgerDetailScreen	src/screens/Report/ReportByLedgerDetailScreen.tsx	ID 미상
+	ReportByPeriodDetail	ReportByPeriodDetailScreen	src/screens/Report/ReportByPeriodDetailScreen.tsx	ID 미상
+	ReportCreateByLedger	ReportCreateByLedgerScreen	src/screens/Report/ReportCreateByLedgerScreen.tsx	ID 미상
+	ReportCreateByPeriod	ReportCreateByPeriodScreen	src/screens/Report/ReportCreateByPeriodScreen.tsx	ID 미상
+	ReportEntryDetail	ReportEntryDetailScreen	src/screens/Report/ReportEntryDetailScreen.tsx	ID 미상
+	ReportLedgerEntries	ReportLedgerEntriesScreen	src/screens/Report/ReportLedgerEntriesScreen.tsx	ID 미상
+	ReportLedgerSelect	ReportLedgerSelectScreen	src/screens/Report/ReportLedgerSelectScreen.tsx	ID 미상
+	ReportMain	ReportMainScreen	src/screens/Report/ReportMainScreen.tsx	ID 미상
+	ReportPeriodEntries	ReportPeriodEntriesScreen	src/screens/Report/ReportPeriodEntriesScreen.tsx	ID 미상
+	Settings	SettingsScreen	src/screens/More/SettingScreen.tsx	파일명은 SettingScreen(단수), 컴포넌트/라우트명은 Settings·SettingsScreen(복수). ID 미상
+	SignupComplete	SignupCompleteScreen	src/screens/Signup/SignupCompleteScreen.tsx	GroupOnboarding 라우트와 동일 컴포넌트 재사용. ID 미상
+	SignupInfo	SignupInfoScreen	src/screens/Signup/SignupInfoScreen.tsx	ID 미상
+	SocialSignupInfo	SocialSignupInfoScreen	src/screens/Signup/SocialSignupInfoScreen.tsx	ID 미상
+	Statistics	StatisticsScreen	src/screens/Statistics/StatisticsScreen.tsx	ID 미상
+	TermDetail	TermDetailScreen	src/screens/More/TermDetailScreen.tsx	ID 미상
+	Terms	TermsScreen	src/screens/More/TermsScreen.tsx	ID 미상
+	TermsAgreement	TermsAgreementScreen	src/screens/Signup/TermsAgreementScreen.tsx	ID 미상
+	TermsOfService	TermsOfServiceScreen	src/screens/Signup/TermsOfServiceScreen.tsx	ID 미상
+	TransactionDetail	TransactionDetailScreen	src/screens/Folder/TransactionDetailScreen.tsx	ID 미상
+	TransactionReceiptDetail	TransactionReceiptDetailScreen	src/screens/Folder/TransactionReceiptDetailScreen.tsx	ID 미상
+	TransactionRegister	TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	파일 내 @screen 주석 7개 존재(위 행들 참조). 라우트 자체 대표 ID는 미상
+	TransactionSearch	TransactionSearchScreen	src/screens/Transactions/TransactionSearchScreen.tsx	ID 미상
+	Transactions	TransactionsScreen	src/screens/Transactions/TransactionsScreen.tsx	MainTab 탭. ID 미상
+	WithdrawGuide	WithdrawGuideScreen	src/screens/More/WithdrawGuideScreen.tsx	ID 미상
+	WithdrawOwnershipTransfer	WithdrawOwnershipTransferScreen	src/screens/More/WithdrawOwnershipTransferScreen.tsx	ID 미상
+	WithdrawReason	WithdrawReasonScreen	src/screens/More/WithdrawReasonScreen.tsx	ID 미상
