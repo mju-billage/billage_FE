@@ -16,6 +16,15 @@ React Native 0.86 + TypeScript. 동아리·소모임 회비와 지출을 관리�
 - `src/types/`, `src/utils/` 공유 타입·순수 함수
 - `scripts/` 개발용 스크립트
 
+## 참조
+- 화면 ID ↔ 파일 경로: `docs/screen-map.tsv`
+- 디자인 토큰 ↔ 코드 값: `docs/tokens.tsv`
+- 보류·대기 항목: `docs/pending/README.md`
+
+## 디자인 기준
+자간은 `Typography Style.pdf` 보다 피그마 텍스트 스타일이 우선이다.
+PDF 는 `Other/Button`, `Other/Badge` 에서 실제 값과 어긋나 있었다.
+
 ## 검증
 - `npx tsc --noEmit`
 - `npx eslint src App.tsx`

@@ -68,7 +68,7 @@ function AppBar({
     <View style={styles.container}>
       <View style={styles.leftRow}>
         {type !== 'titleOnly' && (
-          <BackButton onPress={onBackPress ?? (() => {})} size={34} />
+          <BackButton onPress={onBackPress ?? (() => {})} />
         )}
 
         {type === 'detailDownload' ? (

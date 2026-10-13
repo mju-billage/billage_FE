@@ -12,6 +12,7 @@ import {
   BORDER_NEUTRAL_NORMAL,
   FEEDBACK_NEGATIVE_BOLD,
   FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
@@ -68,6 +69,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
 ) {
   const [isFocused, setIsFocused] = useState(false);
   const [isSecure, setIsSecure] = useState(secureTextEntry || secureToggle);
+  const showIcon = isFocused || value.length > 0;
 
   const underlineColor = disabled
     ? BORDER_NEUTRAL_NORMAL
@@ -105,8 +107,13 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           autoFocus={autoFocus}
           editable={!disabled}
         />
-        {onClear && value.length > 0 && !disabled && (
-          <Pressable onPress={onClear} hitSlop={8}>
+        {onClear && !disabled && (
+          <Pressable
+            onPress={onClear}
+            hitSlop={8}
+            pointerEvents={value.length > 0 ? 'auto' : 'none'}
+            style={value.length > 0 ? styles.iconShown : styles.iconHidden}
+          >
             <Image source={CLOSE_ICON} style={styles.clearIcon} />
           </Pressable>
         )}
@@ -116,7 +123,11 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           </Text>
         )}
         {secureToggle && !disabled && (
-          <Pressable onPress={() => setIsSecure(!isSecure)}>
+          <Pressable
+            onPress={() => setIsSecure(!isSecure)}
+            pointerEvents={showIcon ? 'auto' : 'none'}
+            style={showIcon ? styles.iconShown : styles.iconHidden}
+          >
             <Image
               source={isSecure ? EYE_CLOSED_ICON : EYE_ICON}
               style={styles.toggleIcon}
@@ -160,12 +171,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomWidth: 1,
     paddingVertical: 8,
+    paddingLeft: 16,
+    paddingRight: 10,
   },
   input: {
     ...TYPOGRAPHY.body1,
     flex: 1,
     padding: 0,
-    color: FOREGROUND_PRIMARY,
+    color: FOREGROUND_NEUTRAL_NORMAL,
     outlineWidth: 0,
     ...({ outlineStyle: 'none' } as any),
   },
@@ -181,6 +194,12 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
+  },
+  iconShown: {
+    opacity: 1,
+  },
+  iconHidden: {
+    opacity: 0,
   },
   clearIcon: {
     marginRight: 4,

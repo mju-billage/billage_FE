@@ -1,0 +1,105 @@
+design_token	kind	code_name	value	path
+navy/800	color	NAVY_800	#070A23	src/constants/colors.ts
+navy/500	color	NAVY_500	#111957	src/constants/colors.ts
+navy/200	color	NAVY_200	#A0A3BC	src/constants/colors.ts
+blue/500	color	BLUE_500	#4A7FE7	src/constants/colors.ts
+blue/400	color	BLUE_400	#6CA1EE	src/constants/colors.ts
+blue/300	color	BLUE_300	#9BC1F5	src/constants/colors.ts
+blue/100	color	BLUE_100	#DCE8FB	src/constants/colors.ts
+blue/50	color	BLUE_50	#F0F5FE	src/constants/colors.ts
+grey/800	color	GREY_800	#374151	src/constants/colors.ts
+grey/700	color	GREY_700	#374151	src/constants/colors.ts
+grey/600	color	GREY_600	#4B5563	src/constants/colors.ts
+grey/400	color	GREY_400	#9CA3AF	src/constants/colors.ts
+grey/300	color	GREY_300	#C1C5CD	src/constants/colors.ts
+grey/200	color	GREY_200	#E5E7EB	src/constants/colors.ts
+grey/100	color	GREY_100	#F3F4F6	src/constants/colors.ts
+basic/0	color	BASIC_0	#FFFFFF	src/constants/colors.ts
+basic/100	color	BASIC_100	#000000	src/constants/colors.ts
+yellow/500	color	YELLOW_500	#FFBF2A	src/constants/colors.ts
+yellow/50	color	YELLOW_50	#FFF9EA	src/constants/colors.ts
+red/400	color	RED_400	#FB6E67	src/constants/colors.ts
+red/50	color	RED_50	#FFEDEC	src/constants/colors.ts
+foreground/primary	color	FOREGROUND_PRIMARY → NAVY_800	#070A23	src/constants/colors.ts
+foreground/secondary	color	FOREGROUND_SECONDARY → BLUE_500	#4A7FE7	src/constants/colors.ts
+foreground/neutral-normal	color	FOREGROUND_NEUTRAL_NORMAL → GREY_600	#4B5563	src/constants/colors.ts
+foreground/neutral-subtle	color	FOREGROUND_NEUTRAL_SUBTLE → GREY_400	#9CA3AF	src/constants/colors.ts
+foreground/inverse	color	FOREGROUND_INVERSE → BASIC_0	#FFFFFF	src/constants/colors.ts
+foreground/disabled	color	FOREGROUND_DISABLED → GREY_300	#C1C5CD	src/constants/colors.ts
+foreground/inactive	color	FOREGROUND_INACTIVE → NAVY_200	#A0A3BC	src/constants/colors.ts
+background/primary	color	BACKGROUND_PRIMARY → BLUE_50	#F0F5FE	src/constants/colors.ts
+background/secondary	color	BACKGROUND_SECONDARY → BASIC_0	#FFFFFF	src/constants/colors.ts
+fill/primary	color	FILL_PRIMARY → NAVY_500	#111957	src/constants/colors.ts
+fill/secondary-bold	color	FILL_SECONDARY_BOLD → BLUE_500	#4A7FE7	src/constants/colors.ts
+fill/secondary-subtle	color	FILL_SECONDARY_SUBTLE → BLUE_100	#DCE8FB	src/constants/colors.ts
+fill/secondary-subtler	color	FILL_SECONDARY_SUBTLER → BLUE_50	#F0F5FE	src/constants/colors.ts
+fill/neutral-normal	color	FILL_NEUTRAL_NORMAL → GREY_100	#F3F4F6	src/constants/colors.ts
+fill/neutral-subtle	color	FILL_NEUTRAL_SUBTLE → BASIC_0	#FFFFFF	src/constants/colors.ts
+fill/inverse	color	FILL_INVERSE → GREY_800	#374151	src/constants/colors.ts
+fill/disabled	color	FILL_DISABLED → GREY_100	#F3F4F6	src/constants/colors.ts
+border/neutral-bold	color	BORDER_NEUTRAL_BOLD → GREY_400	#9CA3AF	src/constants/colors.ts
+border/neutral-normal	color	BORDER_NEUTRAL_NORMAL → GREY_200	#E5E7EB	src/constants/colors.ts
+border/neutral-subtle	color	BORDER_NEUTRAL_SUBTLE → GREY_100	#F3F4F6	src/constants/colors.ts
+border/secondary-bold	color	BORDER_SECONDARY_BOLD → BLUE_500	#4A7FE7	src/constants/colors.ts
+border/secondary-subtle	color	BORDER_SECONDARY_SUBTLE → BLUE_100	#DCE8FB	src/constants/colors.ts
+feedback/positive-subtle	color	FEEDBACK_POSITIVE_SUBTLE → BLUE_100	#DCE8FB	src/constants/colors.ts
+feedback/positive-bold	color	FEEDBACK_POSITIVE_BOLD → BLUE_500	#4A7FE7	src/constants/colors.ts
+feedback/warning-subtle	color	FEEDBACK_WARNING_SUBTLE → YELLOW_50	#FFF9EA	src/constants/colors.ts
+feedback/warning-bold	color	FEEDBACK_WARNING_BOLD → YELLOW_500	#FFBF2A	src/constants/colors.ts
+feedback/negative-subtle	color	FEEDBACK_NEGATIVE_SUBTLE → RED_50	#FFEDEC	src/constants/colors.ts
+feedback/negative-bold	color	FEEDBACK_NEGATIVE_BOLD → RED_400	#FB6E67	src/constants/colors.ts
+folder/background	color	FOLDER_BACKGROUND → BLUE_400	#6CA1EE	src/constants/colors.ts
+folder/front	color	FOLDER_FRONT → BLUE_300	#9BC1F5	src/constants/colors.ts
+overlay/scrim	color	OVERLAY_SCRIM	rgba(0, 0, 0, 0.56)	src/constants/colors.ts
+overlay/menu-backdrop	color	OVERLAY_MENU_BACKDROP	rgba(0, 0, 0, 0)	src/constants/colors.ts
+social/naver-green	color	SOCIAL_NAVER_GREEN	#03C75A	src/constants/colors.ts
+social/kakao-yellow	color	SOCIAL_KAKAO_YELLOW	#FEE500	src/constants/colors.ts
+social/kakao-text	color	SOCIAL_KAKAO_TEXT	#3C1E1E	src/constants/colors.ts
+font/family	typography	FONT_FAMILY	Pyeojin Gothic	src/constants/typography.ts
+weight/light	typography	FONT_WEIGHT.light	300	src/constants/typography.ts
+weight/regular	typography	FONT_WEIGHT.regular	400	src/constants/typography.ts
+weight/medium	typography	FONT_WEIGHT.medium	500	src/constants/typography.ts
+weight/semibold	typography	FONT_WEIGHT.semibold	600	src/constants/typography.ts
+weight/bold	typography	FONT_WEIGHT.bold	700	src/constants/typography.ts
+Heading/H1	typography	TYPOGRAPHY.h1	size 24 / weight 700 / lineHeight 32 / letterSpacing 0	src/constants/typography.ts
+Heading/H2	typography	TYPOGRAPHY.h2	size 20 / weight 600 / lineHeight 28 / letterSpacing 0.15	src/constants/typography.ts
+Heading/H3	typography	TYPOGRAPHY.h3	size 18 / weight 600 / lineHeight 24 / letterSpacing 0.15	src/constants/typography.ts
+Subtitle/Subtitle1	typography	TYPOGRAPHY.subtitle1	size 16 / weight 600 / lineHeight 24 / letterSpacing 0.15	src/constants/typography.ts
+Subtitle/Subtitle2	typography	TYPOGRAPHY.subtitle2	size 16 / weight 500 / lineHeight 24 / letterSpacing 0.15	src/constants/typography.ts
+Subtitle/Subtitle3	typography	TYPOGRAPHY.subtitle3	size 14 / weight 600 / lineHeight 20 / letterSpacing 0.1	src/constants/typography.ts
+Subtitle/Subtitle4	typography	TYPOGRAPHY.subtitle4	size 14 / weight 500 / lineHeight 20 / letterSpacing 0.1	src/constants/typography.ts
+Body/Body1	typography	TYPOGRAPHY.body1	size 16 / weight 400 / lineHeight 24 / letterSpacing 0.5	src/constants/typography.ts
+Body/Body2	typography	TYPOGRAPHY.body2	size 14 / weight 400 / lineHeight 20 / letterSpacing 0.25	src/constants/typography.ts
+Body/Body3	typography	TYPOGRAPHY.body3	size 12 / weight 400 / lineHeight 16 / letterSpacing 0.25	src/constants/typography.ts
+Other/Button	typography	TYPOGRAPHY.button	size 14 / weight 600 / lineHeight 20 / letterSpacing 0	src/constants/typography.ts
+Other/Chips	typography	TYPOGRAPHY.chips	size 12 / weight 500 / lineHeight 16 / letterSpacing 0.4	src/constants/typography.ts
+Other/Badge	typography	TYPOGRAPHY.badge	size 10 / weight 600 / lineHeight 16 / letterSpacing 0	src/constants/typography.ts
+Other/Caption	typography	TYPOGRAPHY.caption	size 10 / weight 400 / lineHeight 16 / letterSpacing 0.4	src/constants/typography.ts
+Other/Overline	typography	TYPOGRAPHY.overline	size 10 / weight 400 / lineHeight 18 / letterSpacing 0.4	src/constants/typography.ts
+Font Size/250	primitive		10	
+Font Size/300	primitive		12	
+Font Size/350	primitive		14	
+Font Size/400	primitive		16	
+Font Size/450	primitive		18	
+Font Size/500	primitive		20	
+Font Size/600	primitive		24	
+Line Height/400	primitive		16	
+Line Height/450	primitive		18	
+Line Height/500	primitive		20	
+Line Height/600	primitive		24	
+Line Height/700	primitive		28	
+Line Height/800	primitive		32	
+letter spacing/none	primitive		0	
+letter spacing/xs	primitive		0.1	
+letter spacing/sm	primitive		0.15	
+letter spacing/md	primitive		0.2	
+letter spacing/lg	primitive		0.25	
+letter spacing/xl	primitive		0.4	
+letter spacing/2xl	primitive		0.5	
+letter spacing/3xl	primitive		1.25	
+letter spacing/4xl	primitive		1.5	
+Font Weight/Light	primitive	FONT_WEIGHT.light	300	src/constants/typography.ts
+Font Weight/Regular	primitive	FONT_WEIGHT.regular	400	src/constants/typography.ts
+Font Weight/Medium	primitive	FONT_WEIGHT.medium	500	src/constants/typography.ts
+Font Weight/SemiBold	primitive	FONT_WEIGHT.semibold	600	src/constants/typography.ts
+Font Weight/Bold	primitive	FONT_WEIGHT.bold	700	src/constants/typography.ts

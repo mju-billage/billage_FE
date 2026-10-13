@@ -1,7 +1,7 @@
 import { Image, Pressable, StyleSheet } from 'react-native';
 import {
   BORDER_NEUTRAL_BOLD,
-  FILL_DISABLED,
+  FOREGROUND_DISABLED,
   FOREGROUND_INVERSE,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
@@ -29,7 +29,7 @@ function CheckBox({
         styles.box,
         shape === 'circle' && styles.circle,
         checked && styles.checked,
-        disabled && styles.disabled,
+        disabled && (checked ? styles.disabledChecked : styles.disabledUnchecked),
       ]}
       onPress={onToggle}
       disabled={disabled}
@@ -40,14 +40,14 @@ function CheckBox({
   );
 }
 
-const SIZE = 22;
+const SIZE = 20;
 
 const styles = StyleSheet.create({
   box: {
     width: SIZE,
     height: SIZE,
-    borderRadius: 4,
-    borderWidth: 1,
+    borderRadius: 2,
+    borderWidth: 1.5,
     borderColor: BORDER_NEUTRAL_BOLD,
     alignItems: 'center',
     justifyContent: 'center',
@@ -59,13 +59,16 @@ const styles = StyleSheet.create({
     backgroundColor: FOREGROUND_SECONDARY,
     borderColor: FOREGROUND_SECONDARY,
   },
-  disabled: {
-    backgroundColor: FILL_DISABLED,
-    borderColor: FILL_DISABLED,
+  disabledUnchecked: {
+    borderColor: FOREGROUND_DISABLED,
+  },
+  disabledChecked: {
+    backgroundColor: FOREGROUND_DISABLED,
+    borderColor: FOREGROUND_DISABLED,
   },
   checkmark: {
-    width: 14,
-    height: 14,
+    width: 18,
+    height: 18,
     tintColor: FOREGROUND_INVERSE,
   },
 });
