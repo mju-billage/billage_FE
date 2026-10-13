@@ -76,3 +76,30 @@ Other/Chips	typography	TYPOGRAPHY.chips	size 12 / weight 500 / lineHeight 16 / l
 Other/Badge	typography	TYPOGRAPHY.badge	size 10 / weight 600 / lineHeight 16 / letterSpacing 0	src/constants/typography.ts
 Other/Caption	typography	TYPOGRAPHY.caption	size 10 / weight 400 / lineHeight 16 / letterSpacing 0.4	src/constants/typography.ts
 Other/Overline	typography	TYPOGRAPHY.overline	size 10 / weight 400 / lineHeight 18 / letterSpacing 0.4	src/constants/typography.ts
+Font Size/250	primitive		10	
+Font Size/300	primitive		12	
+Font Size/350	primitive		14	
+Font Size/400	primitive		16	
+Font Size/450	primitive		18	
+Font Size/500	primitive		20	
+Font Size/600	primitive		24	
+Line Height/400	primitive		16	
+Line Height/450	primitive		18	
+Line Height/500	primitive		20	
+Line Height/600	primitive		24	
+Line Height/700	primitive		28	
+Line Height/800	primitive		32	
+letter spacing/none	primitive		0	
+letter spacing/xs	primitive		0.1	
+letter spacing/sm	primitive		0.15	
+letter spacing/md	primitive		0.2	
+letter spacing/lg	primitive		0.25	
+letter spacing/xl	primitive		0.4	
+letter spacing/2xl	primitive		0.5	
+letter spacing/3xl	primitive		1.25	
+letter spacing/4xl	primitive		1.5	
+Font Weight/Light	primitive	FONT_WEIGHT.light	300	src/constants/typography.ts
+Font Weight/Regular	primitive	FONT_WEIGHT.regular	400	src/constants/typography.ts
+Font Weight/Medium	primitive	FONT_WEIGHT.medium	500	src/constants/typography.ts
+Font Weight/SemiBold	primitive	FONT_WEIGHT.semibold	600	src/constants/typography.ts
+Font Weight/Bold	primitive	FONT_WEIGHT.bold	700	src/constants/typography.ts

@@ -68,6 +68,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
 ) {
   const [isFocused, setIsFocused] = useState(false);
   const [isSecure, setIsSecure] = useState(secureTextEntry || secureToggle);
+  const showIcon = isFocused || value.length > 0;
 
   const underlineColor = disabled
     ? BORDER_NEUTRAL_NORMAL
@@ -110,7 +111,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
             onPress={onClear}
             hitSlop={8}
             pointerEvents={value.length > 0 ? 'auto' : 'none'}
-            style={value.length > 0 ? styles.clearShown : styles.clearHidden}
+            style={value.length > 0 ? styles.iconShown : styles.iconHidden}
           >
             <Image source={CLOSE_ICON} style={styles.clearIcon} />
           </Pressable>
@@ -120,8 +121,12 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
             {suffix}
           </Text>
         )}
-        {secureToggle && !disabled && isFocused && (
-          <Pressable onPress={() => setIsSecure(!isSecure)}>
+        {secureToggle && !disabled && (
+          <Pressable
+            onPress={() => setIsSecure(!isSecure)}
+            pointerEvents={showIcon ? 'auto' : 'none'}
+            style={showIcon ? styles.iconShown : styles.iconHidden}
+          >
             <Image
               source={isSecure ? EYE_CLOSED_ICON : EYE_ICON}
               style={styles.toggleIcon}
@@ -189,10 +194,10 @@ const styles = StyleSheet.create({
     height: 20,
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
-  clearShown: {
+  iconShown: {
     opacity: 1,
   },
-  clearHidden: {
+  iconHidden: {
     opacity: 0,
   },
   clearIcon: {

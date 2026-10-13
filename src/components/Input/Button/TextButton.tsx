@@ -11,7 +11,7 @@ import {
   FILL_NEUTRAL_NORMAL,
   FILL_SECONDARY_SUBTLE,
   FOREGROUND_DISABLED,
-  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     color: FOREGROUND_SECONDARY,
   },
   tertiaryLabel: {
-    color: FOREGROUND_NEUTRAL_SUBTLE,
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   negativeLabel: {
     color: FEEDBACK_NEGATIVE_BOLD,
