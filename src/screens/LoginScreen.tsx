@@ -236,6 +236,10 @@ function LoginScreen() {
               setEmail(text);
               setLoginError(undefined);
             }}
+            onClear={() => {
+              setEmail('');
+              setLoginError(undefined);
+            }}
             placeholder={LOGIN_EMAIL_PLACEHOLDER}
             autoCapitalize="none"
             keyboardType="email-address"
@@ -245,6 +249,10 @@ function LoginScreen() {
             value={password}
             onChangeText={text => {
               setPassword(text);
+              setLoginError(undefined);
+            }}
+            onClear={() => {
+              setPassword('');
               setLoginError(undefined);
             }}
             placeholder={LOGIN_PASSWORD_PLACEHOLDER}
