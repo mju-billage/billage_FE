@@ -82,10 +82,12 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
   return (
     <View style={styles.container}>
       {label && (
-        <Text style={[styles.label, disabled && styles.labelDisabled]}>
-          {label}
-          {required && <Text style={styles.requiredMark}> *</Text>}
-        </Text>
+        <View style={styles.labelRow}>
+          <Text style={[styles.label, disabled && styles.labelDisabled]}>
+            {label}
+          </Text>
+          {required && <Text style={styles.requiredMark}>*</Text>}
+        </View>
       )}
       <View style={[styles.inputRow, { borderBottomColor: underlineColor }]}>
         <TextInput
@@ -156,15 +158,23 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 20,
   },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
   label: {
     ...TYPOGRAPHY.subtitle2,
-    marginBottom: 8,
+    flexShrink: 1,
   },
   labelDisabled: {
     color: FOREGROUND_DISABLED,
   },
   requiredMark: {
     color: FOREGROUND_SECONDARY,
+    fontSize: 12,
+    lineHeight: 14,
+    marginLeft: 1,
   },
   inputRow: {
     flexDirection: 'row',
