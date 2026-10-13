@@ -59,3 +59,10 @@ Button.tsx 는 `0833cec` 에서 FILL_PRIMARY 로 고쳤지만, 아래 세 곳은
 시안이 이 셋을 지적한 적은 없다. 해당 컴포넌트가 나오는 화면의
 QA 시트가 오면 그때 함께 확인한다. 글자색으로 쓰는 곳은
 FOREGROUND_PRIMARY 와 값이 같아 문제가 아니다.
+
+## 8. 스낵바 close 버튼 미연결 화면
+
+Snackbar 는 onClose 를 받을 때만 close 버튼을 그린다.
+QA-013 에서 EmailVerificationScreen 만 연결했다.
+나머지 스낵바 사용 화면은 각 화면 QA 시트가 올 때 함께 연결한다.
+연결 방법은 onClose={() => setSnackbarMessage(null)} 한 줄이다.

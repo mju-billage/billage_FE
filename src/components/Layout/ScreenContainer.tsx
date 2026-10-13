@@ -47,7 +47,7 @@ function ScreenContainer({
   );
 }
 
-const SNACKBAR_SLOT_INSET = 24;
+const SNACKBAR_SLOT_INSET = 20;
 
 const styles = StyleSheet.create({
   container: {

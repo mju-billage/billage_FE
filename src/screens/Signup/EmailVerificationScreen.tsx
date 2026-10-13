@@ -173,7 +173,15 @@ function EmailVerificationScreen() {
       edges={['bottom']}
       style={styles.container}
       avoidKeyboard={false}
-      snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
+      snackbar={
+        snackbarMessage ? (
+          <Snackbar
+            visible
+            title={snackbarMessage}
+            onClose={() => setSnackbarMessage(null)}
+          />
+        ) : undefined
+      }
       snackbarOffset={76}
     >
       <Pressable style={styles.body} onPress={Keyboard.dismiss} accessible={false}>

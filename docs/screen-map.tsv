@@ -28,7 +28,7 @@ COM-4-PAGE-01-0	EmailVerification	EmailVerificationScreen	src/screens/Signup/Ema
 	GroupCreate	GroupCreateScreen	src/screens/GroupManager/GroupCreateScreen.tsx	ID 미상
 	GroupManage	GroupManageScreen	src/screens/GroupManager/GroupManageScreen.tsx	ID 미상
 	GroupManager	GroupManagerScreen	src/screens/GroupManager/GroupManagerScreen.tsx	ID 미상
-	GroupOnboarding	SignupCompleteScreen	src/screens/Signup/SignupCompleteScreen.tsx	SignupComplete 라우트와 동일 컴포넌트 재사용. ID 미상
+	GroupOnboarding	SignupCompleteScreen	src/screens/Signup/SignupCompleteScreen.tsx	SignupCompleteScreen 공유 (COM-5-PAGE-01-0 과 동일 컴포넌트)
 	GroupProfileEdit	GroupProfileEditScreen	src/screens/GroupManager/GroupProfileEditScreen.tsx	ID 미상
 	Home	DashboardScreen	src/screens/Dashboard/DashboardScreen.tsx	MainTab 탭. ID 미상
 	Inquiry	InquiryScreen	src/screens/More/InquiryScreen.tsx	ID 미상
@@ -69,7 +69,7 @@ COM-3-PAGE-01-02	PrivacyPolicy	PrivacyPolicyScreen	src/screens/Signup/PrivacyPol
 	ReportMain	ReportMainScreen	src/screens/Report/ReportMainScreen.tsx	ID 미상
 	ReportPeriodEntries	ReportPeriodEntriesScreen	src/screens/Report/ReportPeriodEntriesScreen.tsx	ID 미상
 	Settings	SettingsScreen	src/screens/More/SettingScreen.tsx	파일명은 SettingScreen(단수), 컴포넌트/라우트명은 Settings·SettingsScreen(복수). ID 미상
-	SignupComplete	SignupCompleteScreen	src/screens/Signup/SignupCompleteScreen.tsx	GroupOnboarding 라우트와 동일 컴포넌트 재사용. ID 미상
+COM-5-PAGE-01-0	SignupComplete	SignupCompleteScreen	src/screens/Signup/SignupCompleteScreen.tsx	GroupOnboarding 라우트와 동일 컴포넌트 재사용
 COM-3-PAGE-03-0	SignupInfo	SignupInfoScreen	src/screens/Signup/SignupInfoScreen.tsx	ID 확정(QA-009)
 	SocialSignupInfo	SocialSignupInfoScreen	src/screens/Signup/SocialSignupInfoScreen.tsx	ID 미상
 	Statistics	StatisticsScreen	src/screens/Statistics/StatisticsScreen.tsx	ID 미상
