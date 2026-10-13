@@ -67,8 +67,8 @@ const styles = StyleSheet.create({
     borderColor: FOREGROUND_DISABLED,
   },
   checkmark: {
-    width: 16,
-    height: 16,
+    width: 18,
+    height: 18,
     tintColor: FOREGROUND_INVERSE,
   },
 });
