@@ -12,4 +12,3 @@ export const LOGIN_SOCIAL_NETWORK_ERROR =
   '네트워크 연결을 확인한 뒤 다시 시도해주세요.';
 export const LOGIN_SOCIAL_PARSE_ERROR =
   '로그인 응답을 처리하지 못했습니다. 다시 시도해주세요.';
-export const LOGIN_MOCK_BUTTON_LABEL = '목 계정으로 로그인 (개발용)';
