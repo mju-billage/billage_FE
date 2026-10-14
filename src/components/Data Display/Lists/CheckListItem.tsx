@@ -44,9 +44,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
   },
   itemPressed: {
     backgroundColor: FILL_NEUTRAL_NORMAL,
@@ -55,7 +54,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   label: {
-    ...TYPOGRAPHY.body2,
+    ...TYPOGRAPHY.body1,
   },
   labelDisabled: {
     color: FOREGROUND_DISABLED,

@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
   },
   buttonFullWidth: {
     width: '100%',
-    height: 52,
+    height: 48,
   },
   primary: {
     backgroundColor: FILL_PRIMARY,

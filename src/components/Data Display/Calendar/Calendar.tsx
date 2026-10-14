@@ -35,7 +35,7 @@ type CalendarProps = {
   onChangeMonth?: (delta: number) => void;
   showDateFields?: boolean;
   largeDates?: boolean;
-  variant?: 'default' | 'ledger';
+  variant?: 'default' | 'ledger' | 'picker';
   amountsSplitByDate?: Record<number, { income: number; expense: number }>;
 };
 
@@ -131,20 +131,125 @@ function Calendar({
     );
   };
 
+  const renderPickerDayCell = (
+    cellIndex: number,
+    cell: { date: number } | null,
+  ) => {
+    if (!cell) {
+      return (
+        <View key={cellIndex} style={[styles.dayCell, styles.dayCellPicker]} />
+      );
+    }
+    const dateKey = formatDateKey(year, month, cell.date);
+    const isStart = dateKey === selectedStartDate;
+    const isEnd = dateKey === selectedEndDate;
+    const isSelected = isStart || isEnd;
+    const hasRange =
+      selectedStartDate != null &&
+      selectedEndDate != null &&
+      selectedStartDate !== selectedEndDate;
+    const isRangeStart = isStart && hasRange;
+    const isRangeEnd = isEnd && hasRange;
+    const isInRange =
+      selectedStartDate != null &&
+      selectedEndDate != null &&
+      dateKey > selectedStartDate &&
+      dateKey < selectedEndDate;
+    const isDisabled = disabledDates?.includes(dateKey) ?? false;
+    const isOutlined =
+      !isSelected &&
+      !isInRange &&
+      !isDisabled &&
+      (outlinedDates?.includes(dateKey) ?? false);
+
+    const backdropStyle = (pressed: boolean) => [
+      styles.pickerBackdrop,
+      isInRange && styles.pickerBackdropInRange,
+      isSelected && styles.pickerBackdropSelected,
+      isRangeStart && styles.pickerBackdropRangeStart,
+      isRangeStart && styles.pickerBackdropStartDim,
+      isRangeEnd && styles.pickerBackdropRangeEnd,
+      isOutlined && styles.pickerBackdropOutlined,
+      !isSelected &&
+        !isInRange &&
+        !isOutlined &&
+        !isDisabled &&
+        pressed &&
+        styles.pickerBackdropPressed,
+    ];
+
+    const textStyle = [
+      styles.pickerDateText,
+      cellIndex === 0 && styles.dateTextSunday,
+      isInRange && styles.pickerDateTextInRange,
+      isOutlined && styles.pickerDateTextOutlined,
+      isSelected && styles.pickerDateTextSelected,
+      isDisabled && styles.dateTextDisabled,
+    ];
+
+    const content = (pressed: boolean) => (
+      <>
+        <View style={backdropStyle(pressed)} />
+        <Text style={textStyle}>{cell.date}</Text>
+      </>
+    );
+
+    if (interactive) {
+      return (
+        <Pressable
+          key={cellIndex}
+          style={[styles.dayCell, styles.dayCellPicker]}
+          disabled={isDisabled}
+          onPress={() => onSelectDate?.(dateKey)}
+        >
+          {({ pressed }) => content(pressed)}
+        </Pressable>
+      );
+    }
+    return (
+      <View key={cellIndex} style={[styles.dayCell, styles.dayCellPicker]}>
+        {content(false)}
+      </View>
+    );
+  };
+
+  const pickerFieldDate = (dateKey?: string) =>
+    dateKey ? dateKey.slice(2) : undefined;
+
   return (
     <View>
       {showHeader && (
-        <View style={styles.header}>
-          <Pressable onPress={() => onChangeMonth?.(-1)} hitSlop={8}>
-            <Image source={CHEVRON_LEFT_ICON} style={styles.chevron} />
-          </Pressable>
-          <Text style={styles.monthLabel}>
-            {year}년 {month}월
-          </Text>
-          <Pressable onPress={() => onChangeMonth?.(1)} hitSlop={8}>
-            <Image source={CHEVRON_RIGHT_ICON} style={styles.chevron} />
-          </Pressable>
-        </View>
+        variant === 'picker' ? (
+          <View style={styles.headerPicker}>
+            <Pressable onPress={() => onChangeMonth?.(-1)} hitSlop={8}>
+              <Image
+                source={CHEVRON_LEFT_ICON}
+                style={[styles.chevron, styles.pickerChevron]}
+              />
+            </Pressable>
+            <Text style={styles.monthLabel}>
+              {year}년 {month}월
+            </Text>
+            <Pressable onPress={() => onChangeMonth?.(1)} hitSlop={8}>
+              <Image
+                source={CHEVRON_RIGHT_ICON}
+                style={[styles.chevron, styles.pickerChevron]}
+              />
+            </Pressable>
+          </View>
+        ) : (
+          <View style={styles.header}>
+            <Pressable onPress={() => onChangeMonth?.(-1)} hitSlop={8}>
+              <Image source={CHEVRON_LEFT_ICON} style={styles.chevron} />
+            </Pressable>
+            <Text style={styles.monthLabel}>
+              {year}년 {month}월
+            </Text>
+            <Pressable onPress={() => onChangeMonth?.(1)} hitSlop={8}>
+              <Image source={CHEVRON_RIGHT_ICON} style={styles.chevron} />
+            </Pressable>
+          </View>
+        )
       )}
 
       <View style={styles.weekdayRow}>
@@ -154,6 +259,7 @@ function Calendar({
             style={[
               styles.weekdayLabel,
               variant === 'ledger' && styles.weekdayLabelLedger,
+              variant === 'picker' && styles.weekdayLabelPicker,
             ]}
           >
             {label}
@@ -164,11 +270,18 @@ function Calendar({
       {weeks.map((week, weekIndex) => (
         <View
           key={weekIndex}
-          style={[styles.weekRow, variant === 'ledger' && styles.weekRowLedger]}
+          style={[
+            styles.weekRow,
+            variant === 'ledger' && styles.weekRowLedger,
+            variant === 'picker' && styles.weekRowPicker,
+          ]}
         >
           {week.map((cell, cellIndex) => {
             if (variant === 'ledger') {
               return renderLedgerDayCell(cellIndex, cell);
+            }
+            if (variant === 'picker') {
+              return renderPickerDayCell(cellIndex, cell);
             }
             if (!cell) {
               return <View key={cellIndex} style={styles.dayCell} />;
@@ -268,11 +381,20 @@ function Calendar({
 
       {showDateFields && (
         <View style={styles.dateFieldWrapper}>
-          <DateField
-            startDate={selectedStartDate}
-            endDate={selectedEndDate}
-            onPress={() => {}}
-          />
+          {variant === 'picker' ? (
+            <DateField
+              startDate={pickerFieldDate(selectedStartDate)}
+              endDate={pickerFieldDate(selectedEndDate)}
+              onPress={() => {}}
+              bleed={20}
+            />
+          ) : (
+            <DateField
+              startDate={selectedStartDate}
+              endDate={selectedEndDate}
+              onPress={() => {}}
+            />
+          )}
         </View>
       )}
     </View>
@@ -293,6 +415,16 @@ const styles = StyleSheet.create({
   monthLabel: {
     ...TYPOGRAPHY.subtitle1,
   },
+  headerPicker: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  pickerChevron: {
+    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
+  },
   weekdayRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -307,6 +439,9 @@ const styles = StyleSheet.create({
   weekdayLabelLedger: {
     flex: 1,
   },
+  weekdayLabelPicker: {
+    flex: 1,
+  },
   weekRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -315,11 +450,65 @@ const styles = StyleSheet.create({
   weekRowLedger: {
     marginBottom: 2,
   },
+  weekRowPicker: {
+    marginBottom: 4,
+  },
   dayCell: {
     width: 36,
     alignItems: 'center',
     gap: 2,
     position: 'relative',
+  },
+  dayCellPicker: {
+    flex: 1,
+    height: 44,
+    justifyContent: 'center',
+  },
+  pickerBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderRadius: 6,
+  },
+  pickerBackdropSelected: {
+    backgroundColor: FOREGROUND_SECONDARY,
+  },
+  pickerBackdropRangeStart: {
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  pickerBackdropStartDim: {
+    opacity: 0.6,
+  },
+  pickerBackdropRangeEnd: {
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+  },
+  pickerBackdropInRange: {
+    backgroundColor: FILL_SECONDARY_SUBTLER,
+    borderRadius: 0,
+  },
+  pickerBackdropOutlined: {
+    borderWidth: 1,
+    borderColor: FOREGROUND_SECONDARY,
+  },
+  pickerBackdropPressed: {
+    backgroundColor: FILL_NEUTRAL_NORMAL,
+  },
+  pickerDateText: {
+    ...TYPOGRAPHY.subtitle1,
+    color: FOREGROUND_NEUTRAL_NORMAL,
+  },
+  pickerDateTextInRange: {
+    color: FOREGROUND_SECONDARY,
+  },
+  pickerDateTextOutlined: {
+    color: FOREGROUND_SECONDARY,
+  },
+  pickerDateTextSelected: {
+    color: FOREGROUND_INVERSE,
   },
   dayCellLedger: {
     flex: 1,
