@@ -78,7 +78,7 @@ COM-3-PAGE-03-0	SignupInfo	SignupInfoScreen	src/screens/Signup/SignupInfoScreen.
 	Terms	TermsScreen	src/screens/More/TermsScreen.tsx	ID 미상
 COM-2-PAGE-01-0	TermsAgreement	TermsAgreementScreen	src/screens/Signup/TermsAgreementScreen.tsx	ID 확정(QA-007)
 COM-3-PAGE-01-01	TermsOfService	TermsOfServiceScreen	src/screens/Signup/TermsOfServiceScreen.tsx	LegalDocumentView 공유 (3개 화면 동일 컴포넌트)
-	TransactionDetail	TransactionDetailScreen	src/screens/Folder/TransactionDetailScreen.tsx	ID 미상
+DTB-2-PAGE-02-0	TransactionDetail	TransactionDetailScreen	src/screens/Folder/TransactionDetailScreen.tsx	ID 확정(QA-022)
 	TransactionReceiptDetail	TransactionReceiptDetailScreen	src/screens/Folder/TransactionReceiptDetailScreen.tsx	ID 미상
 	TransactionRegister	TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	파일 내 @screen 주석 7개 존재(위 행들 참조). 라우트 자체 대표 ID는 미상
 	TransactionSearch	TransactionSearchScreen	src/screens/Transactions/TransactionSearchScreen.tsx	ID 미상

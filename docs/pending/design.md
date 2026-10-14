@@ -74,3 +74,12 @@ QA 카드가 "컴포넌트 내 둘 간격 현재 0 (재확인 필요)" 로 적�
 (FAB 와 같은 간격). FAB 가 있는 내역 탭은 FAB 윗변에서 12 위다.
 디자이너 확인 필요. 값은 ScreenContainer 의 SNACKBAR_TAB_BAR_GAP,
 TransactionsScreen 의 SNACKBAR_FAB_GAP 이다.
+
+---
+
+## 7. 상세 내역의 수정·삭제 진입점
+
+QA 시트가 앱바 trailing 아이콘 전체 제거를 요구해 총무도 숨겼다
+(TransactionDetailScreen 의 SHOW_TRAILING_ACTIONS = false).
+지금 앱에는 총무가 내역을 수정·삭제할 다른 경로가 없다.
+총무용 진입점이 어디인지 디자이너 확인 필요.

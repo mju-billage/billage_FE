@@ -47,12 +47,16 @@ import {
   FEEDBACK_POSITIVE_BOLD,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_PRIMARY,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import Divider from '../../components/Data Display/Divider/Divider';
+import { formatFullDate } from '../../utils/dateHeader';
+import { TRANSACTION_REGISTER_RECEIPT_MAX } from '../../constants/transactionScreenText';
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const DELETE_ICON = require('../../assets/icons/action/Close.png');
+const SHOW_TRAILING_ACTIONS = false;
 
 type TransactionDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -190,7 +194,7 @@ function TransactionDetailScreen() {
         title={TRANSACTION_DETAIL_TITLE}
         onBackPress={() => navigation.goBack()}
         rightIcons={
-          canEditDelete
+          SHOW_TRAILING_ACTIONS && canEditDelete
             ? [
                 ...(canEdit
                   ? [
@@ -217,13 +221,13 @@ function TransactionDetailScreen() {
           <Badge label={TRANSACTION_APPROVAL_PENDING_BADGE} status="warning" />
         )}
         <Text style={[styles.amount, isIncome && styles.amountPositive]}>
-          {isIncome ? '+' : ''}
+          {isIncome ? '' : '-'}
           {amount.toLocaleString()}원
         </Text>
 
         <Field
           label={isIncome ? TRANSACTION_DATE_LABEL_INCOME : TRANSACTION_DATE_LABEL_EXPENSE}
-          value={dateValue}
+          value={formatFullDate(dateValue)}
         />
         <Field label={TRANSACTION_ITEM_NAME_LABEL} value={itemNameValue} />
         <Field label={TRANSACTION_MANAGER_LABEL} value={managerValue} />
@@ -236,9 +240,17 @@ function TransactionDetailScreen() {
           <Divider />
         </View>
 
-        {entry.receiptFiles.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>{TRANSACTION_RECEIPT_LABEL}</Text>
+        <View style={styles.section}>
+          <View style={styles.sectionLabelRow}>
+            <Text style={styles.receiptSectionLabel}>{TRANSACTION_RECEIPT_LABEL}</Text>
+            <Text style={styles.receiptCount}>
+              <Text style={styles.receiptCountCurrent}>
+                {entry.receiptFiles.length}
+              </Text>
+              /{TRANSACTION_REGISTER_RECEIPT_MAX}
+            </Text>
+          </View>
+          {entry.receiptFiles.length > 0 && (
             <View style={styles.thumbnailRow}>
               {entry.receiptFiles.map(file => {
                 const source = buildAuthenticatedImageSource(file.url);
@@ -249,13 +261,17 @@ function TransactionDetailScreen() {
                       navigation.navigate('TransactionReceiptDetail', { fileUrl: file.url })
                     }
                   >
-                    <Thumbnail imageUri={source.uri} imageHeaders={source.headers} />
+                    <Thumbnail
+                      size={68}
+                      imageUri={source.uri}
+                      imageHeaders={source.headers}
+                    />
                   </Pressable>
                 );
               })}
             </View>
-          </View>
-        )}
+          )}
+        </View>
 
         {isDuesLinked && (
           <View style={styles.section}>
@@ -362,6 +378,22 @@ const styles = StyleSheet.create({
   sectionLabel: {
     ...TYPOGRAPHY.subtitle3,
     marginBottom: 12,
+  },
+  sectionLabelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  receiptSectionLabel: {
+    ...TYPOGRAPHY.subtitle1,
+  },
+  receiptCount: {
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+  },
+  receiptCountCurrent: {
+    color: FOREGROUND_PRIMARY,
   },
   thumbnailRow: {
     flexDirection: 'row',
