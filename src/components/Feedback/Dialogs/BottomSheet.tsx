@@ -22,20 +22,26 @@ function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
       animationType="slide"
       onRequestClose={onClose}
     >
-      <Pressable style={styles.backdrop} onPress={onClose} />
-      <KeyboardStickyView style={styles.stickyWrapper}>
-        <View style={[styles.sheet, { paddingBottom: 32 + insets.bottom }]}>
-          <View style={styles.handle} />
-          {children}
-        </View>
-      </KeyboardStickyView>
+      <View style={styles.root}>
+        <Pressable style={styles.backdrop} onPress={onClose} />
+        <KeyboardStickyView style={styles.stickyWrapper}>
+          <View style={[styles.sheet, { paddingBottom: 32 + insets.bottom }]}>
+            <View style={styles.handle} />
+            {children}
+          </View>
+        </KeyboardStickyView>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
+  root: {
     flex: 1,
+    justifyContent: 'flex-end',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFill,
     backgroundColor: OVERLAY_SCRIM,
   },
   stickyWrapper: {

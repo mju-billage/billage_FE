@@ -58,6 +58,8 @@ function JoinGroupSheet({ visible, onClose, onJoined }: JoinGroupSheetProps) {
         } else {
           setError(getApiErrorMessage(fetchError.code, fetchError.message));
         }
+      } else {
+        setError(JOIN_GROUP_INVALID_CODE_ERROR);
       }
     } finally {
       setIsSubmitting(false);
