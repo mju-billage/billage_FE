@@ -66,3 +66,28 @@ Snackbar 는 onClose 를 받을 때만 close 버튼을 그린다.
 QA-013 에서 EmailVerificationScreen 만 연결했다.
 나머지 스낵바 사용 화면은 각 화면 QA 시트가 올 때 함께 연결한다.
 연결 방법은 onClose={() => setSnackbarMessage(null)} 한 줄이다.
+
+## 9. MOCK_DASHBOARD_SUMMARY 정리
+
+버그가 아니라 이름과 죽은 필드의 문제다.
+대시보드는 이미 실제 API 를 쓴다.
+GET /api/v1/groups/{groupId}/dashboard 와
+GET /api/v1/groups/{groupId}/calendar 를 화면 진입 시 함께 호출하고,
+미니 캘린더와 '다가오는 회비' 카드를 그 응답으로 그린다.
+로딩·오류·재시도 처리도 되어 있다.
+
+DashboardScreen 이 MOCK_DASHBOARD_SUMMARY 에서 실제로 쓰는 것은
+quickServices 하나뿐이다. 보고서 생성 / 통계·분석 / 증빙자료 앨범
+바로가기 3개의 아이콘·문구·이동 대상이고, 원래 고정값이라
+API 로 받을 데이터가 아니다.
+
+같은 객체의 나머지 필드(miniCalendar 의 금액, duesProgressList,
+userNickname)와 MINI_CALENDAR_AMOUNTS 는 어디에서도 쓰이지 않는다.
+
+할 일:
+- quickServices 를 상수 파일로 옮기고 이름에서 MOCK 을 뺀다
+- 쓰이지 않는 더미 필드와 MINI_CALENDAR_AMOUNTS 를 삭제한다
+- 관련 파일: src/screens/Dashboard/DashboardScreen.tsx,
+  src/types/dashboard.ts
+
+백엔드 대기 항목이 아니다.
