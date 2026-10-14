@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Animated,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
@@ -40,6 +47,13 @@ import {
   toUserErrorMessage,
 } from '../../constants/apiErrorMessages';
 import {
+  FILTER_PERIOD_1MONTH,
+  FILTER_PERIOD_3MONTH,
+  FILTER_PERIOD_6MONTH,
+  FILTER_PERIOD_CUSTOM,
+  FILTER_SORT_LATEST,
+  FILTER_SORT_OLDEST,
+  FILTER_TYPE_ALL,
   FILTER_TYPE_EXPENSE,
   FILTER_TYPE_INCOME,
   LEDGER_ENTRIES_LOADING_MORE,
@@ -96,11 +110,6 @@ function getFilterChips(
   ledgerOptions: LedgerOption[],
 ): FilterChipInfo[] {
   const chips: FilterChipInfo[] = [];
-  if (filter.type === 'income') {
-    chips.push({ key: 'type', label: FILTER_TYPE_INCOME });
-  } else if (filter.type === 'expense') {
-    chips.push({ key: 'type', label: FILTER_TYPE_EXPENSE });
-  }
   for (const id of filter.ledgerIds) {
     const option = ledgerOptions.find(item => item.id === id);
     if (option) {
@@ -108,6 +117,32 @@ function getFilterChips(
     }
   }
   return chips;
+}
+
+const FILTER_PERIOD_LABEL_BY_VALUE: Record<EntryListFilterValue['period'], string> = {
+  '1month': FILTER_PERIOD_1MONTH,
+  '3month': FILTER_PERIOD_3MONTH,
+  '6month': FILTER_PERIOD_6MONTH,
+  custom: FILTER_PERIOD_CUSTOM,
+};
+
+const FILTER_TYPE_LABEL_BY_VALUE: Record<EntryListFilterValue['type'], string> = {
+  all: FILTER_TYPE_ALL,
+  income: FILTER_TYPE_INCOME,
+  expense: FILTER_TYPE_EXPENSE,
+};
+
+const FILTER_SORT_LABEL_BY_VALUE: Record<EntryListFilterValue['sort'], string> = {
+  latest: FILTER_SORT_LATEST,
+  oldest: FILTER_SORT_OLDEST,
+};
+
+function getFilterSummary(filter: EntryListFilterValue): string {
+  return [
+    FILTER_PERIOD_LABEL_BY_VALUE[filter.period],
+    FILTER_TYPE_LABEL_BY_VALUE[filter.type],
+    FILTER_SORT_LABEL_BY_VALUE[filter.sort],
+  ].join(' · ');
 }
 
 function TransactionsScreen() {
@@ -257,6 +292,12 @@ function TransactionsScreen() {
   }));
 
   const filterChips = getFilterChips(filter, ledgerOptions);
+  const isFilterActive =
+    filter.period !== DEFAULT_ENTRY_LIST_FILTER.period ||
+    filter.type !== DEFAULT_ENTRY_LIST_FILTER.type ||
+    filter.sort !== DEFAULT_ENTRY_LIST_FILTER.sort ||
+    filter.ledgerIds.length > 0;
+  const filterSummary = getFilterSummary(filter);
 
   const showList = loadState === 'ready' && entries.length > 0;
   const listTopInset = cardBlockHeight + controlsHeight;
@@ -392,12 +433,21 @@ function TransactionsScreen() {
 
             <View style={styles.actionRow}>
               <View style={styles.iconRow}>
-                <IconButton
-                  icon={FILTER_ICON}
-                  iconSize={20}
-                  iconColor={FOREGROUND_NEUTRAL_NORMAL}
-                  onPress={() => setFilterSheetVisible(true)}
-                />
+                <View style={styles.filterGroup}>
+                  {isFilterActive && (
+                    <Pressable onPress={() => setFilterSheetVisible(true)}>
+                      <Text style={styles.filterSummaryText} numberOfLines={1}>
+                        {filterSummary}
+                      </Text>
+                    </Pressable>
+                  )}
+                  <IconButton
+                    icon={FILTER_ICON}
+                    iconSize={20}
+                    iconColor={FOREGROUND_NEUTRAL_NORMAL}
+                    onPress={() => setFilterSheetVisible(true)}
+                  />
+                </View>
                 <IconButton
                   icon={SEARCH_ICON}
                   iconSize={20}
@@ -491,8 +541,18 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     gap: 4,
     marginHorizontal: -8,
+  },
+  filterGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  filterSummaryText: {
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+    marginLeft: 8,
   },
   chipRow: {
     flexDirection: 'row',
