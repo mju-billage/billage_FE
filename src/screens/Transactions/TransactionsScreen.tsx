@@ -14,6 +14,7 @@ import Tabs from '../../components/Navigation/Tabs/Tabs';
 import type { TabItem } from '../../components/Navigation/Tabs/Tabs';
 import AmountCard from '../../components/Data Display/Card/AmountCard';
 import Chip from '../../components/Data Display/Chips/Chip';
+import Divider from '../../components/Data Display/Divider/Divider';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import FloatingActionButton, { FAB_SIZE } from '../../components/Input/Button/FAB';
 import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Navigation/BottomNavigation';
@@ -57,6 +58,7 @@ import {
   BACKGROUND_PRIMARY,
   BACKGROUND_SECONDARY,
   FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
@@ -324,7 +326,7 @@ function TransactionsScreen() {
           )}
 
           {loadState === 'ready' && entries.length === 0 && (
-            <View style={[styles.emptyState, { paddingTop: listTopInset + 80 }]}>
+            <View style={[styles.emptyState, { paddingTop: listTopInset + 60 }]}>
               <Text style={styles.emptyText}>{TRANSACTIONS_EMPTY}</Text>
             </View>
           )}
@@ -392,10 +394,14 @@ function TransactionsScreen() {
               <View style={styles.iconRow}>
                 <IconButton
                   icon={FILTER_ICON}
+                  iconSize={20}
+                  iconColor={FOREGROUND_NEUTRAL_NORMAL}
                   onPress={() => setFilterSheetVisible(true)}
                 />
                 <IconButton
                   icon={SEARCH_ICON}
+                  iconSize={20}
+                  iconColor={FOREGROUND_NEUTRAL_NORMAL}
                   onPress={() => navigation.navigate('TransactionSearch')}
                 />
               </View>
@@ -414,10 +420,15 @@ function TransactionsScreen() {
             )}
 
             {loadState === 'ready' && (
-              <Text style={styles.countText}>
-                {entries.length}
-                {TRANSACTIONS_COUNT_SUFFIX}
-              </Text>
+              <>
+                <Text style={styles.countText}>
+                  {entries.length}
+                  {TRANSACTIONS_COUNT_SUFFIX}
+                </Text>
+                <View style={styles.dividerBleed}>
+                  <Divider />
+                </View>
+              </>
             )}
           </View>
         </Animated.View>
@@ -474,13 +485,14 @@ const styles = StyleSheet.create({
   actionRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 8,
+    marginTop: 4,
   },
   iconRow: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 4,
+    marginHorizontal: -8,
   },
   chipRow: {
     flexDirection: 'row',
@@ -491,15 +503,18 @@ const styles = StyleSheet.create({
   countText: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
-    marginBottom: 8,
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  dividerBleed: {
+    marginHorizontal: -20,
   },
   listContent: {
     paddingBottom: BOTTOM_NAVIGATION_HEIGHT + 96,
   },
   sectionHeader: {
-    ...TYPOGRAPHY.body3,
-    fontWeight: 'bold',
-    color: FOREGROUND_NEUTRAL_SUBTLE,
+    ...TYPOGRAPHY.caption,
+    color: FOREGROUND_NEUTRAL_NORMAL,
     marginTop: 12,
     marginBottom: 6,
   },
@@ -517,10 +532,11 @@ const styles = StyleSheet.create({
   emptyState: {
     flex: 1,
     alignItems: 'center',
-    paddingTop: 80,
+    paddingTop: 60,
   },
   emptyText: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   loadingMoreRow: {
     flexDirection: 'row',

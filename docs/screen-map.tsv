@@ -82,7 +82,7 @@ DTB-2-PAGE-02-0	TransactionDetail	TransactionDetailScreen	src/screens/Folder/Tra
 	TransactionReceiptDetail	TransactionReceiptDetailScreen	src/screens/Folder/TransactionReceiptDetailScreen.tsx	ID 미상
 	TransactionRegister	TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	파일 내 @screen 주석 7개 존재(위 행들 참조). 라우트 자체 대표 ID는 미상
 	TransactionSearch	TransactionSearchScreen	src/screens/Transactions/TransactionSearchScreen.tsx	ID 미상
-	Transactions	TransactionsScreen	src/screens/Transactions/TransactionsScreen.tsx	MainTab 탭. ID 미상
+DTB-1-PAGE-01-0	Transactions	TransactionsScreen	src/screens/Transactions/TransactionsScreen.tsx	MainTab 탭
 	WithdrawGuide	WithdrawGuideScreen	src/screens/More/WithdrawGuideScreen.tsx	ID 미상
 	WithdrawOwnershipTransfer	WithdrawOwnershipTransferScreen	src/screens/More/WithdrawOwnershipTransferScreen.tsx	ID 미상
 	WithdrawReason	WithdrawReasonScreen	src/screens/More/WithdrawReasonScreen.tsx	ID 미상

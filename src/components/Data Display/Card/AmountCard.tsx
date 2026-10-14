@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import CardBase from './CardBase';
 import Divider from '../Divider/Divider';
-import { formatExpense, formatWon } from '../../../utils/currency';
+import { formatWon } from '../../../utils/currency';
 import { FEEDBACK_POSITIVE_BOLD, FOREGROUND_NEUTRAL_SUBTLE } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
 
@@ -53,7 +53,7 @@ function getRows(props: AmountCardProps) {
         { label: '수입', value: `${formatWon(props.income)}원`, positive: true },
         {
           label: '지출',
-          value: formatExpense(props.expense),
+          value: `-${formatWon(props.expense)}원`,
           positive: false,
         },
       ];
@@ -97,15 +97,14 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 6,
+    paddingVertical: 4,
   },
   label: {
-    ...TYPOGRAPHY.body3,
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   value: {
-    ...TYPOGRAPHY.body3,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle3,
   },
   valuePositive: {
     color: FEEDBACK_POSITIVE_BOLD,

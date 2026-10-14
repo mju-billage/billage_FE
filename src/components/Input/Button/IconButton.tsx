@@ -21,6 +21,8 @@ type IconButtonProps = {
   showPushBadge?: boolean;
   accessibilityLabel?: string;
   overlay?: boolean;
+  iconSize?: number;
+  iconColor?: string;
 };
 
 const ICON_SIZE = 24;
@@ -32,6 +34,8 @@ function IconButton({
   showPushBadge = false,
   accessibilityLabel,
   overlay = false,
+  iconSize = ICON_SIZE,
+  iconColor = FOREGROUND_PRIMARY,
 }: IconButtonProps) {
   return (
     <Pressable
@@ -49,6 +53,7 @@ function IconButton({
         source={icon}
         style={[
           styles.icon,
+          { width: iconSize, height: iconSize, tintColor: iconColor },
           overlay && styles.iconOverlay,
           disabled && styles.iconDisabled,
         ]}

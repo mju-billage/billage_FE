@@ -12,7 +12,6 @@ import {
 import { TYPOGRAPHY } from '../../../constants/typography';
 
 const RECEIPT_ICON = require('../../../assets/icons/content/Report.png');
-const DUES_ICON = require('../../../assets/icons/content/Bill.png');
 
 type TransactionListItemProps = {
   label?: string; 
@@ -49,12 +48,9 @@ function TransactionListItem({
         <View style={styles.statusSlot}>
           {isPendingApproval ? (
             <Badge label={CALENDAR_APPROVAL_BADGE_LABEL} status="warning" />
-          ) : (
-            <Image
-              source={hasReceipt ? RECEIPT_ICON : DUES_ICON}
-              style={styles.statusIcon}
-            />
-          )}
+          ) : hasReceipt ? (
+            <Image source={RECEIPT_ICON} style={styles.statusIcon} />
+          ) : null}
         </View>
       </View>
       <View style={styles.bottomRow}>
@@ -81,6 +77,7 @@ const styles = StyleSheet.create({
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    minHeight: 20,
   },
   groupName: {
     ...TYPOGRAPHY.caption,
@@ -90,8 +87,8 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
   },
   statusIcon: {
-    width: 18,
-    height: 18,
+    width: 16,
+    height: 16,
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
   bottomRow: {
@@ -101,15 +98,11 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   itemName: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.subtitle1,
     flex: 1,
-    fontFamily: TYPOGRAPHY.body3.fontFamily,
-    fontWeight: 'bold',
   },
   amount: {
-    ...TYPOGRAPHY.subtitle3,
-    fontFamily: TYPOGRAPHY.body3.fontFamily,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.subtitle1,
   },
   amountIncome: {
     color: FOREGROUND_SECONDARY,
