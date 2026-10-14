@@ -7,6 +7,7 @@ ADD-4-PAGE-01-0		TransactionRegisterScreen	src/screens/Transactions/TransactionR
 ADD-5-MODAL-01-0		TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	스캔 내용 반영 확인 모달(scanApply 다이얼로그)
 DTB-3-PAGE-02-0		TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	상세 내역_수정(기존 transactionId로 진입 시)
 DTB-4-MODAL-01-0		TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	상세 내역_수정 이탈 안내(leave 다이얼로그)
+ETC-4-SHEET-01-0		JoinGroupSheet	src/screens/GroupManager/JoinGroupSheet.tsx	바텀시트. AllGroupsScreen, SignupCompleteScreen(SignupComplete/GroupOnboarding 라우트)에서 연다
 	AllGroups	AllGroupsScreen	src/screens/GroupManager/AllGroupsScreen.tsx	ID 미상
 	Archive	ArchiveListScreen	src/screens/Archive/ArchiveListScreen.tsx	ID 미상
 	ArchiveDetail	ArchiveDetailScreen	src/screens/Archive/ArchiveDetailScreen.tsx	ID 미상
@@ -19,7 +20,7 @@ DTB-4-MODAL-01-0		TransactionRegisterScreen	src/screens/Transactions/Transaction
 	DuesEdit	DuesEditScreen	src/screens/Dues/DuesEditScreen.tsx	ID 미상
 	DuesMemberEdit	DuesMemberEditScreen	src/screens/Dues/DuesMemberEditScreen.tsx	ID 미상
 	DuesRequest	DuesRequestScreen	src/screens/Dues/DuesRequestScreen.tsx	ID 미상
-	EmailVerification	EmailVerificationScreen	src/screens/Signup/EmailVerificationScreen.tsx	ID 미상
+COM-4-PAGE-01-0	EmailVerification	EmailVerificationScreen	src/screens/Signup/EmailVerificationScreen.tsx	ID 확정(QA-011)
 	Folder	FolderTabNavigator	src/screens/Folder/FolderTabNavigator.tsx	MainTab 탭. nested stack 네비게이터, 진입 시 FolderList로 즉시 이동. ID 미상
 	FolderBudgetList	FolderBudgetListScreen	src/screens/Folder/FolderBudgetListScreen.tsx	ID 미상
 	FolderList	FolderScreen	src/screens/Folder/FolderScreen.tsx	FolderTabNavigator 내부 스택 루트. ID 미상
@@ -28,7 +29,7 @@ DTB-4-MODAL-01-0		TransactionRegisterScreen	src/screens/Transactions/Transaction
 	GroupCreate	GroupCreateScreen	src/screens/GroupManager/GroupCreateScreen.tsx	ID 미상
 	GroupManage	GroupManageScreen	src/screens/GroupManager/GroupManageScreen.tsx	ID 미상
 	GroupManager	GroupManagerScreen	src/screens/GroupManager/GroupManagerScreen.tsx	ID 미상
-	GroupOnboarding	SignupCompleteScreen	src/screens/Signup/SignupCompleteScreen.tsx	SignupComplete 라우트와 동일 컴포넌트 재사용. ID 미상
+	GroupOnboarding	SignupCompleteScreen	src/screens/Signup/SignupCompleteScreen.tsx	SignupCompleteScreen 공유 (COM-5-PAGE-01-0 과 동일 컴포넌트)
 	GroupProfileEdit	GroupProfileEditScreen	src/screens/GroupManager/GroupProfileEditScreen.tsx	ID 미상
 	Home	DashboardScreen	src/screens/Dashboard/DashboardScreen.tsx	MainTab 탭. ID 미상
 	Inquiry	InquiryScreen	src/screens/More/InquiryScreen.tsx	ID 미상
@@ -51,8 +52,8 @@ COM-3-PAGE-01-03	MarketingConsent	MarketingConsentScreen	src/screens/Signup/Mark
 	NoticeList	NoticeListScreen	src/screens/More/NoticeListScreen.tsx	ID 미상
 	NotificationSettings	NotificationSettingsScreen	src/screens/More/NotificationSettingsScreen.tsx	ID 미상
 	PasswordChange	PasswordChangeScreen	src/screens/More/PasswordChangeScreen.tsx	ID 미상
-	PasswordReset	PasswordResetScreen	src/screens/PasswordReset/PasswordResetScreen.tsx	ID 미상
-	PasswordResetSent	PasswordResetSentScreen	src/screens/PasswordReset/PasswordResetSentScreen.tsx	ID 미상
+COM-2-PAGE-02-0	PasswordReset	PasswordResetScreen	src/screens/PasswordReset/PasswordResetScreen.tsx	ID 확정(QA-017)
+COM-3-PAGE-04-0	PasswordResetSent	PasswordResetSentScreen	src/screens/PasswordReset/PasswordResetSentScreen.tsx	ID 확정(QA-017)
 	PostLogin	PostLoginScreen	src/screens/PostLoginScreen.tsx	ID 미상
 COM-3-PAGE-01-02	PrivacyPolicy	PrivacyPolicyScreen	src/screens/Signup/PrivacyPolicyScreen.tsx	LegalDocumentView 공유 (3개 화면 동일 컴포넌트)
 	ProfileEdit	ProfileEditScreen	src/screens/More/ProfileEditScreen.tsx	ID 미상
@@ -69,8 +70,8 @@ COM-3-PAGE-01-02	PrivacyPolicy	PrivacyPolicyScreen	src/screens/Signup/PrivacyPol
 	ReportMain	ReportMainScreen	src/screens/Report/ReportMainScreen.tsx	ID 미상
 	ReportPeriodEntries	ReportPeriodEntriesScreen	src/screens/Report/ReportPeriodEntriesScreen.tsx	ID 미상
 	Settings	SettingsScreen	src/screens/More/SettingScreen.tsx	파일명은 SettingScreen(단수), 컴포넌트/라우트명은 Settings·SettingsScreen(복수). ID 미상
-	SignupComplete	SignupCompleteScreen	src/screens/Signup/SignupCompleteScreen.tsx	GroupOnboarding 라우트와 동일 컴포넌트 재사용. ID 미상
-	SignupInfo	SignupInfoScreen	src/screens/Signup/SignupInfoScreen.tsx	ID 미상
+COM-5-PAGE-01-0	SignupComplete	SignupCompleteScreen	src/screens/Signup/SignupCompleteScreen.tsx	GroupOnboarding 라우트와 동일 컴포넌트 재사용
+COM-3-PAGE-03-0	SignupInfo	SignupInfoScreen	src/screens/Signup/SignupInfoScreen.tsx	ID 확정(QA-009)
 	SocialSignupInfo	SocialSignupInfoScreen	src/screens/Signup/SocialSignupInfoScreen.tsx	ID 미상
 	Statistics	StatisticsScreen	src/screens/Statistics/StatisticsScreen.tsx	ID 미상
 	TermDetail	TermDetailScreen	src/screens/More/TermDetailScreen.tsx	ID 미상

@@ -42,3 +42,18 @@ normal 0 / loose 0.2 / looser 0.4 / loosest 1 / expanded 1.5` 라는
 **영향** 지금 코드는 본문 표(none~4xl) 기준으로 맞춰져 있고,
 `Other/Button` 과 `Other/Badge` 는 피그마 실제 값을 확인해
 자간 0 으로 수정했다. 당장 깨지는 건 없다.
+
+---
+
+## 3. 재전송 버튼 색상
+
+QA 시트(인증번호 화면)는 재전송하기 버튼을
+{foreground/neutral-subtle} #9CA3AF 로 요구한다.
+그러나 피그마 TextButton 컴포넌트의 hierarchy 는
+Primary(#070A23) / Secondary(#4A7FE7) / Tertiary(#4B5563) /
+Negative(#FB6E67) 네 가지뿐이고 #9CA3AF 를 내는 variant 가 없다.
+우선 가장 가까운 Tertiary 로 적용해 뒀다.
+디자이너 확인 필요: 카드의 hex 가 오기인지, 아니면 컴포넌트에
+variant 를 추가할 것인지. 후자라면 피그마에도 함께 추가해야 한다.
+변경이 필요하면 EmailVerificationScreen 의 TextButton
+hierarchy 한 줄만 바꾸면 된다.

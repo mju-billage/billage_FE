@@ -12,6 +12,7 @@ import {
   BORDER_NEUTRAL_NORMAL,
   FEEDBACK_NEGATIVE_BOLD,
   FOREGROUND_DISABLED,
+  FOREGROUND_INVERSE,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_PRIMARY,
@@ -40,6 +41,7 @@ type TextFieldProps = {
   maxLength?: number;
   keyboardType?: KeyboardTypeOptions;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  autoCorrect?: boolean;
   autoFocus?: boolean;
   onBlur?: () => void;
 };
@@ -62,6 +64,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
     maxLength,
     keyboardType,
     autoCapitalize,
+    autoCorrect,
     autoFocus = false,
     onBlur,
   },
@@ -82,10 +85,12 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
   return (
     <View style={styles.container}>
       {label && (
-        <Text style={[styles.label, disabled && styles.labelDisabled]}>
-          {label}
-          {required && <Text style={styles.requiredMark}> *</Text>}
-        </Text>
+        <View style={styles.labelRow}>
+          <Text style={[styles.label, disabled && styles.labelDisabled]}>
+            {label}
+          </Text>
+          {required && <Text style={styles.requiredMark}>*</Text>}
+        </View>
       )}
       <View style={[styles.inputRow, { borderBottomColor: underlineColor }]}>
         <TextInput
@@ -104,6 +109,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           maxLength={maxLength}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
+          autoCorrect={autoCorrect}
           autoFocus={autoFocus}
           editable={!disabled}
         />
@@ -114,7 +120,9 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
             pointerEvents={value.length > 0 ? 'auto' : 'none'}
             style={value.length > 0 ? styles.iconShown : styles.iconHidden}
           >
-            <Image source={CLOSE_ICON} style={styles.clearIcon} />
+            <View style={styles.clearCircle}>
+              <Image source={CLOSE_ICON} style={styles.clearIcon} />
+            </View>
           </Pressable>
         )}
         {suffix && (
@@ -156,15 +164,23 @@ const styles = StyleSheet.create({
   container: {
     marginBottom: 20,
   },
-  label: {
-    ...TYPOGRAPHY.subtitle3,
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     marginBottom: 8,
+  },
+  label: {
+    ...TYPOGRAPHY.subtitle2,
+    flexShrink: 1,
   },
   labelDisabled: {
     color: FOREGROUND_DISABLED,
   },
   requiredMark: {
     color: FOREGROUND_SECONDARY,
+    fontSize: 12,
+    lineHeight: 14,
+    marginLeft: 1,
   },
   inputRow: {
     flexDirection: 'row',
@@ -201,16 +217,24 @@ const styles = StyleSheet.create({
   iconHidden: {
     opacity: 0,
   },
-  clearIcon: {
-    marginRight: 4,
+  clearCircle: {
     width: 16,
     height: 16,
-    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
+    borderRadius: 8,
+    backgroundColor: FOREGROUND_NEUTRAL_SUBTLE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 4,
+  },
+  clearIcon: {
+    width: 10,
+    height: 10,
+    tintColor: FOREGROUND_INVERSE,
   },
   helperText: {
     ...TYPOGRAPHY.body3,
     marginTop: 6,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   errorText: {
     ...TYPOGRAPHY.body3,

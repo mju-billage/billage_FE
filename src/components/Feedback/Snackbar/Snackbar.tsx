@@ -67,13 +67,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     gap: 12,
+    width: '100%',
+    maxWidth: 320,
+    alignSelf: 'center',
   },
   textColumn: {
     flex: 1,
     gap: 2,
   },
   title: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.subtitle4,
     color: FOREGROUND_INVERSE,
   },
   description: {

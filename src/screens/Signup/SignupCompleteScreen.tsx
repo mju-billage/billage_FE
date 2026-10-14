@@ -10,7 +10,7 @@ import TextButton from '../../components/Input/Button/TextButton';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import JoinGroupSheet from '../GroupManager/JoinGroupSheet';
 import * as authService from '../../services/authService';
-import { FOREGROUND_NEUTRAL_NORMAL } from '../../constants/colors';
+import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import {
   SIGNUP_COMPLETE_TITLE,
@@ -74,7 +74,7 @@ function SignupCompleteScreen() {
         <Button
           label={SIGNUP_COMPLETE_JOIN_WITH_CODE_LABEL}
           onPress={handleJoinWithCode}
-          hierarchy="secondary"
+          hierarchy="tertiary"
           fullWidth
         />
         {isOnboarding && (
@@ -107,15 +107,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   backRow: {
-    marginBottom: 16,
+    marginBottom: 32,
   },
   title: {
     ...TYPOGRAPHY.h1,
     marginBottom: 8,
   },
   subtitle: {
-    ...TYPOGRAPHY.body2,
-    color: FOREGROUND_NEUTRAL_NORMAL,
+    ...TYPOGRAPHY.subtitle4,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+    marginBottom: 32,
   },
   footer: {
     marginTop: 'auto',

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/Navigation/App bar/BackButton';
+import AppBar from '../../components/Navigation/App bar/AppBar';
 import TextField from '../../components/Input/Text Field/TextField';
 import Button from '../../components/Input/Button/Button';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -46,51 +46,46 @@ function PasswordResetScreen() {
   };
 
   return (
-    <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
-      <View style={styles.backRow}>
-        <BackButton onPress={() => navigation.goBack()} />
+    <ScreenContainer background="secondary">
+      <AppBar
+        type="sub"
+        title={PASSWORD_RESET_TITLE}
+        onBackPress={() => navigation.goBack()}
+      />
+      <View style={styles.body}>
+        <Text style={styles.subtitle}>{PASSWORD_RESET_SUBTITLE}</Text>
+
+        <TextField
+          value={email}
+          onChangeText={text => {
+            setEmail(text);
+            setError(undefined);
+          }}
+          placeholder={PASSWORD_RESET_EMAIL_PLACEHOLDER}
+          error={error}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+
+        <Button
+          label={PASSWORD_RESET_SUBMIT_LABEL}
+          onPress={handleSend}
+          fullWidth
+          disabled={!isValidEmail(email) || isSubmitting}
+        />
       </View>
-      <Text style={styles.title}>{PASSWORD_RESET_TITLE}</Text>
-      <Text style={styles.subtitle}>{PASSWORD_RESET_SUBTITLE}</Text>
-
-      <TextField
-        value={email}
-        onChangeText={text => {
-          setEmail(text);
-          setError(undefined);
-        }}
-        placeholder={PASSWORD_RESET_EMAIL_PLACEHOLDER}
-        error={error}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-
-      <Button
-        label={PASSWORD_RESET_SUBMIT_LABEL}
-        onPress={handleSend}
-        fullWidth
-        disabled={!isValidEmail(email) || isSubmitting}
-      />
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 60,
+  body: {
     paddingHorizontal: 20,
-  },
-  backRow: {
-    marginBottom: 16,
-  },
-  title: {
-    ...TYPOGRAPHY.h3,
-    marginBottom: 24,
+    paddingTop: 32,
   },
   subtitle: {
     ...TYPOGRAPHY.subtitle1,
-    marginBottom: 24,
+    marginBottom: 32,
   },
 });
 

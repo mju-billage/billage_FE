@@ -37,7 +37,6 @@ import {
   LOGIN_SOCIAL_SDK_ERROR,
   LOGIN_SOCIAL_NETWORK_ERROR,
   LOGIN_SOCIAL_PARSE_ERROR,
-  LOGIN_MOCK_BUTTON_LABEL,
 } from '../constants/loginScreenText';
 
 type LoginNavigationProp = NativeStackNavigationProp<
@@ -149,10 +148,6 @@ function LoginScreen() {
   };
 
   const handleLogin = () => performLogin({ email, password });
-
-  const handleMockLogin = () => {
-    navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
-  };
 
   const handleSocialLogin = async (provider: SocialType) => {
     setLoginError(undefined);
@@ -298,17 +293,6 @@ function LoginScreen() {
           />
         </View>
 
-        {__DEV__ && (
-          <View style={styles.mockLoginRow}>
-            <Button
-              label={LOGIN_MOCK_BUTTON_LABEL}
-              onPress={handleMockLogin}
-              disabled={isSubmitting}
-              hierarchy="secondary"
-              fullWidth
-            />
-          </View>
-        )}
       </ScrollView>
     </ScreenContainer>
   );
@@ -355,10 +339,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 16,
     marginTop: 40,
-  },
-  mockLoginRow: {
-    width: '100%',
-    marginTop: 24,
   },
 });
 

@@ -8,13 +8,13 @@ import {
   ViewStyle,
 } from 'react-native';
 import {
-  BACKGROUND_PRIMARY,
   BASIC_0,
   BORDER_NEUTRAL_NORMAL,
   FEEDBACK_NEGATIVE_BOLD,
   FILL_DISABLED,
   FILL_NEUTRAL_NORMAL,
   FILL_PRIMARY,
+  FILL_SECONDARY_SUBTLE,
   FOREGROUND_DISABLED,
   FOREGROUND_INVERSE,
   FOREGROUND_NEUTRAL_NORMAL,
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     backgroundColor: FILL_PRIMARY,
   },
   secondary: {
-    backgroundColor: BACKGROUND_PRIMARY,
+    backgroundColor: FILL_SECONDARY_SUBTLE,
   },
   tertiary: {
     backgroundColor: FILL_NEUTRAL_NORMAL,
