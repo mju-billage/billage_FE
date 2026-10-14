@@ -15,7 +15,7 @@ import type { TabItem } from '../../components/Navigation/Tabs/Tabs';
 import AmountCard from '../../components/Data Display/Card/AmountCard';
 import Chip from '../../components/Data Display/Chips/Chip';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
-import FloatingActionButton from '../../components/Input/Button/FAB';
+import FloatingActionButton, { FAB_SIZE } from '../../components/Input/Button/FAB';
 import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Navigation/BottomNavigation';
 import TransactionFilterSheet from './TransactionFilterSheet';
 import type { EntryGroupSummary, EntrySummary } from '../../types/entry';
@@ -68,6 +68,8 @@ import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 
 const FILTER_ICON = require('../../assets/icons/system/Filter.png');
 const SEARCH_ICON = require('../../assets/icons/system/Search.png');
+
+const SNACKBAR_FAB_GAP = 12;
 
 type TransactionsScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Transactions'>,
@@ -295,6 +297,8 @@ function TransactionsScreen() {
     <ScreenContainer
       background="primary"
       edges={['top']}
+      aboveTabBar
+      snackbarOffset={FAB_SIZE + SNACKBAR_FAB_GAP}
       snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
     >
       <AppBar type="titleOnly" title={TRANSACTIONS_TITLE} />

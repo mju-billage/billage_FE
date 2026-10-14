@@ -1,5 +1,11 @@
 import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
@@ -55,6 +61,9 @@ import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Nav
 
 const BELL_ICON = require('../../assets/icons/communication/Bell.png');
 
+const SCREEN_HORIZONTAL_PADDING = 20;
+const DUES_CARD_GAP = 8;
+
 type DashboardScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Home'>,
   NativeStackNavigationProp<RootStackParamList>
@@ -80,6 +89,8 @@ function toMiniCalendarData(
 
 function DashboardScreen() {
   const navigation = useNavigation<DashboardScreenNavigationProp>();
+  const { width: windowWidth } = useWindowDimensions();
+  const duesCardWidth = windowWidth - SCREEN_HORIZONTAL_PADDING * 2;
 
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [miniCalendar, setMiniCalendar] = useState<MiniCalendarData | null>(null);
@@ -202,26 +213,33 @@ function DashboardScreen() {
 
         {loadState === 'ready' && overview && (
           <>
-            <Text style={styles.sectionTitle}>{DASHBOARD_DUES_SECTION_TITLE}</Text>
+            <Text style={styles.duesSectionTitle}>{DASHBOARD_DUES_SECTION_TITLE}</Text>
             {overview.upcomingDues.length === 0 ? (
               <Text style={styles.duesEmptyText}>{DASHBOARD_DUES_EMPTY}</Text>
             ) : (
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                style={styles.duesCarouselScroll}
                 contentContainerStyle={styles.duesCarousel}
+                snapToInterval={duesCardWidth + DUES_CARD_GAP}
+                snapToAlignment="start"
+                decelerationRate="fast"
+                disableIntervalMomentum
               >
                 {overview.upcomingDues.map(dues => (
                   <DuesProgressCard
                     key={dues.duesId}
                     type="dashboard"
+                    width={duesCardWidth}
                     onPress={() => handlePressDues(dues.duesId)}
                     progress={{
                       id: dues.duesId,
                       groupName: dues.title,
                       dDayLabel: formatDDayLabel(dues.daysLeft),
                       description: DASHBOARD_DUES_CARD_DESCRIPTION,
-                      highlightDescription: `${dues.targetCount - dues.paidCount}${DASHBOARD_DUES_CARD_REMAINING_SUFFIX}`,
+                      highlightCount: dues.targetCount - dues.paidCount,
+                      highlightDescription: DASHBOARD_DUES_CARD_REMAINING_SUFFIX,
                       paidMemberCount: dues.paidCount,
                       totalMemberCount: dues.targetCount,
                       progressRatio:
@@ -237,7 +255,7 @@ function DashboardScreen() {
         <Text style={styles.quickServiceSubtitle}>
           {nickname} {DASHBOARD_QUICK_SERVICE_SUBTITLE_SUFFIX}
         </Text>
-        <Text style={styles.sectionTitle}>{DASHBOARD_QUICK_SERVICE_TITLE}</Text>
+        <Text style={styles.quickServiceTitle}>{DASHBOARD_QUICK_SERVICE_TITLE}</Text>
         <View style={styles.quickServiceRow}>
           {MOCK_DASHBOARD_SUMMARY.quickServices.map(item => (
             <QuickServiceCard
@@ -262,7 +280,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
     paddingTop: 16,
     paddingBottom: BOTTOM_NAVIGATION_HEIGHT+ 12,
   },
@@ -277,10 +295,10 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 8,
   },
-  sectionTitle: {
+  duesSectionTitle: {
     ...TYPOGRAPHY.subtitle1,
     marginTop: 12,
-    marginBottom: 0,
+    marginBottom: 10,
   },
   stateContainer: {
     alignItems: 'center',
@@ -295,10 +313,14 @@ const styles = StyleSheet.create({
   duesEmptyText: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
-    marginTop: 16,
+    marginTop: 6,
+  },
+  duesCarouselScroll: {
+    marginHorizontal: -SCREEN_HORIZONTAL_PADDING,
   },
   duesCarousel: {
-    gap: 12,
+    paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
+    gap: DUES_CARD_GAP,
   },
   duesCard: {
     backgroundColor: BASIC_0,
@@ -307,6 +329,9 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_NORMAL,
     marginTop: 32,
+  },
+  quickServiceTitle: {
+    ...TYPOGRAPHY.subtitle1,
   },
   quickServiceRow: {
     flexDirection: 'row',

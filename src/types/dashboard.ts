@@ -1,4 +1,8 @@
-import type { ImageSourcePropType } from 'react-native';
+import {
+  REPORT_GRAPHIC_XML,
+  STATISTICS_GRAPHIC_XML,
+  ALBUM_GRAPHIC_XML,
+} from '../assets/graphics/dashboardGraphics';
 
 export type MiniCalendarDay = {
   date: number;
@@ -18,6 +22,7 @@ export type DuesProgress = {
   dDayLabel: string;
   description: string;
   highlightDescription: string;
+  highlightCount?: number;
   paidMemberCount: number;
   totalMemberCount: number;
   progressRatio: number;
@@ -25,7 +30,7 @@ export type DuesProgress = {
 
 export type QuickServiceItem = {
   id: string;
-  icon: ImageSourcePropType;
+  graphic: string;
   label: string;
   title: string;
 };
@@ -80,19 +85,19 @@ export const MOCK_DASHBOARD_SUMMARY: DashboardSummary = {
   quickServices: [
     {
       id: 'report',
-      icon: require('../../src/assets/images/report-graphic.png'),
+      graphic: REPORT_GRAPHIC_XML,
       label: '손쉽게 공유하는',
       title: '보고서 생성',
     },
     {
       id: 'statistics',
-      icon: require('../../src/assets/images/statistics-graphic.png'),
+      graphic: STATISTICS_GRAPHIC_XML,
       label: '우리 모임 장부',
       title: '통계/분석',
     },
     {
       id: 'evidence-album',
-      icon: require('../../src/assets/images/album-graphic.png'),
+      graphic: ALBUM_GRAPHIC_XML,
       label: '모아보는',
       title: '증빙자료 앨범',
     },

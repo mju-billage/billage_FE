@@ -146,7 +146,7 @@ function EmailVerificationScreen() {
         });
         return;
       }
-      navigation.navigate('SignupComplete');
+      navigation.reset({ index: 0, routes: [{ name: 'SignupComplete' }] });
     } catch (error) {
       if (error instanceof ApiError && error.code === 'EMAIL_ALREADY_EXISTS') {
         navigation.reset({

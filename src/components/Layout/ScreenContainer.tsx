@@ -1,8 +1,13 @@
 import { ReactNode } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { Edge, SafeAreaView } from 'react-native-safe-area-context';
+import {
+  Edge,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { BACKGROUND_PRIMARY, BACKGROUND_SECONDARY } from '../../constants/colors';
+import { BOTTOM_NAVIGATION_HEIGHT } from '../Navigation/Bottom Navigation/BottomNavigation';
 
 type ScreenContainerProps = {
   background: 'primary' | 'secondary';
@@ -11,6 +16,7 @@ type ScreenContainerProps = {
   avoidKeyboard?: boolean;
   snackbar?: ReactNode;
   snackbarOffset?: number;
+  aboveTabBar?: boolean;
   children: React.ReactNode;
 };
 
@@ -21,8 +27,15 @@ function ScreenContainer({
   avoidKeyboard = true,
   snackbar,
   snackbarOffset = 0,
+  aboveTabBar = false,
   children,
 }: ScreenContainerProps) {
+  const insets = useSafeAreaInsets();
+  const bottomEdgeInset = edges.includes('bottom') ? insets.bottom : 0;
+  const snackbarBottom = aboveTabBar
+    ? BOTTOM_NAVIGATION_HEIGHT + SNACKBAR_TAB_BAR_GAP - bottomEdgeInset + snackbarOffset
+    : SNACKBAR_SLOT_BOTTOM + snackbarOffset;
+
   return (
     <SafeAreaView
       style={[
@@ -36,7 +49,7 @@ function ScreenContainer({
         {children}
         {snackbar != null && (
           <View
-            style={[styles.snackbarSlot, { bottom: SNACKBAR_SLOT_BOTTOM + snackbarOffset }]}
+            style={[styles.snackbarSlot, { bottom: snackbarBottom }]}
             pointerEvents="box-none"
           >
             {snackbar}
@@ -48,6 +61,7 @@ function ScreenContainer({
 }
 
 const SNACKBAR_SLOT_BOTTOM = 24;
+const SNACKBAR_TAB_BAR_GAP = 12;
 
 const styles = StyleSheet.create({
   container: {

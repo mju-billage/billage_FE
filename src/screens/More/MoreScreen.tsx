@@ -154,6 +154,7 @@ function MoreScreen() {
       background="primary"
       edges={['top']}
       avoidKeyboard={false}
+      aboveTabBar
       snackbar={
         switchSnackbarMessage ? (
           <Snackbar visible title={switchSnackbarMessage} />

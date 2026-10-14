@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
+import { BackHandler, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -39,10 +39,26 @@ function SignupCompleteScreen() {
   const isOnboarding = route.name === 'GroupOnboarding';
   const [joinSheetVisible, setJoinSheetVisible] = useState(false);
 
-  const handleLogout = async () => {
+  const handleLogout = useCallback(async () => {
     await authService.logout().catch(() => undefined);
     navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-  };
+  }, [navigation]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (isOnboarding) {
+        return undefined;
+      }
+      const subscription = BackHandler.addEventListener(
+        'hardwareBackPress',
+        () => {
+          handleLogout();
+          return true;
+        },
+      );
+      return () => subscription.remove();
+    }, [isOnboarding, handleLogout]),
+  );
 
   const handleCreateGroup = () => {
     navigation.navigate('GroupCreate');
@@ -55,7 +71,7 @@ function SignupCompleteScreen() {
   return (
     <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
       <View style={styles.backRow}>
-        {!isOnboarding && <BackButton onPress={() => navigation.goBack()} />}
+        {!isOnboarding && <BackButton onPress={handleLogout} />}
       </View>
       <Text style={styles.title}>
         {isOnboarding ? GROUP_ONBOARDING_TITLE : SIGNUP_COMPLETE_TITLE}

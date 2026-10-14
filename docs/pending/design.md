@@ -57,3 +57,38 @@ Negative(#FB6E67) 네 가지뿐이고 #9CA3AF 를 내는 variant 가 없다.
 variant 를 추가할 것인지. 후자라면 피그마에도 함께 추가해야 한다.
 변경이 필요하면 EmailVerificationScreen 의 TextButton
 hierarchy 한 줄만 바꾸면 된다.
+
+---
+
+## 5. 대시보드 회비 카드의 회비 현황↔진행바 간격
+
+QA 카드가 "컴포넌트 내 둘 간격 현재 0 (재확인 필요)" 로 적혀 있어
+0 으로 적용했다(DuesProgressCard highlightDescription.marginBottom).
+디자이너 확인 필요.
+
+---
+
+## 6. 탭 화면 스낵바 위치
+
+시안에 탭 화면 위 스낵바 위치가 없어서, 하단 네비게이션 윗변에서 12 위로 잡았다
+(FAB 와 같은 간격). FAB 가 있는 내역 탭은 FAB 윗변에서 12 위다.
+디자이너 확인 필요. 값은 ScreenContainer 의 SNACKBAR_TAB_BAR_GAP,
+TransactionsScreen 의 SNACKBAR_FAB_GAP 이다.
+
+---
+
+## 7. 상세 내역의 수정·삭제 진입점
+
+QA 시트가 앱바 trailing 아이콘 전체 제거를 요구해 총무도 숨겼다
+(TransactionDetailScreen 의 SHOW_TRAILING_ACTIONS = false).
+지금 앱에는 총무가 내역을 수정·삭제할 다른 경로가 없다.
+총무용 진입점이 어디인지 디자이너 확인 필요.
+
+---
+
+## 8. 캘린더 금액 9자리 이상 넘침
+
+캘린더 전체보기(DSH-2-PAGE-03-0) 날짜 칸 폭(360dp 기준 약 45dp)에
+7px 금액이 8자리 정도까지만 들어가고 9자리부터 잘린다.
+표기 방식(만·억 축약 / 자동 축소 / 상한 표기) 디자이너 확인 필요.
+코드 위치: Calendar.tsx ledger 변형 금액 영역.

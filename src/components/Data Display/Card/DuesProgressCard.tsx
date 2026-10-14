@@ -8,6 +8,8 @@ import {
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_PRIMARY,
+  FOREGROUND_SECONDARY,
   BASIC_0,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
@@ -20,7 +22,7 @@ type DuesProgressCardState = 'active' | 'upcoming' | 'ended';
 type DateBadgeStatus = 'positive' | 'warning' | 'destructive' | 'neutral';
 
 type DuesProgressCardProps = (
-  | { type: 'dashboard'; progress: DuesProgress }
+  | { type: 'dashboard'; progress: DuesProgress; width?: number }
   | {
       type: 'paymentManagement';
       title: string;
@@ -44,7 +46,7 @@ function DuesProgressCard(props: DuesProgressCardProps) {
     props.type === 'paymentManagement' ? (
       <PaymentManagementCard {...props} state={state} />
     ) : (
-      <DashboardCard progress={props.progress} state={state} />
+      <DashboardCard progress={props.progress} state={state} width={props.width} />
     );
 
   if (!props.onPress) {
@@ -73,13 +75,22 @@ function DateBadge({
 function DashboardCard({
   progress,
   state,
+  width,
 }: {
   progress: DuesProgress;
   state: DuesProgressCardState;
+  width?: number;
 }) {
   const ended = state === 'ended';
   return (
-    <View style={[styles.card, ended && styles.cardEnded]}>
+    <View
+      style={[
+        styles.card,
+        styles.cardDashboard,
+        width != null && { width },
+        ended && styles.cardEnded,
+      ]}
+    >
       <View style={styles.badgeRowStart}>
         <DateBadge label={progress.dDayLabel} state={state} activeStatus="destructive" />
         <Text style={[styles.groupName, ended && styles.textEnded]}>
@@ -90,6 +101,11 @@ function DashboardCard({
         {progress.description}
       </Text>
       <Text style={[styles.highlightDescription, ended && styles.textEnded]}>
+        {progress.highlightCount != null && (
+          <Text style={ended ? undefined : styles.highlightCount}>
+            {progress.highlightCount}
+          </Text>
+        )}
         {progress.highlightDescription}
       </Text>
       <View style={styles.progressFooter}>
@@ -98,7 +114,10 @@ function DashboardCard({
           style={[styles.memberIcon, ended && styles.iconEnded]}
         />
         <Text style={[styles.memberCountText, ended && styles.textEnded]}>
-          {progress.paidMemberCount}/{progress.totalMemberCount}
+          <Text style={ended ? undefined : styles.memberCountPaid}>
+            {progress.paidMemberCount}
+          </Text>
+          /{progress.totalMemberCount}
         </Text>
       </View>
       <ProgressBar
@@ -162,6 +181,10 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     padding: 16,
   },
+  cardDashboard: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
   cardFullWidth: {
     width: '100%',
   },
@@ -197,13 +220,16 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.subtitle3,
   },
   description: {
-    ...TYPOGRAPHY.body3,
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   highlightDescription: {
     ...TYPOGRAPHY.h2,
-    marginTop: 4,
-    marginBottom: 12,
+    marginTop: 2,
+    marginBottom: 0,
+  },
+  highlightCount: {
+    color: FOREGROUND_SECONDARY,
   },
   progressFooter: {
     flexDirection: 'row',
@@ -220,6 +246,9 @@ const styles = StyleSheet.create({
   memberCountText: {
     ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
+  },
+  memberCountPaid: {
+    color: FOREGROUND_PRIMARY,
   },
   paymentSummaryRow: {
     flexDirection: 'row',

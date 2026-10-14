@@ -13,7 +13,7 @@ ETC-4-SHEET-01-0		JoinGroupSheet	src/screens/GroupManager/JoinGroupSheet.tsx	바
 	ArchiveDetail	ArchiveDetailScreen	src/screens/Archive/ArchiveDetailScreen.tsx	ID 미상
 	ArchiveEntryDetail	ArchiveEntryDetailScreen	src/screens/Archive/ArchiveEntryDetailScreen.tsx	ID 미상
 	ArchiveLedgerEntries	ArchiveLedgerEntriesScreen	src/screens/Archive/ArchiveLedgerEntriesScreen.tsx	ID 미상
-	Calendar	CalendarScreen	src/screens/Calendar/CalendarScreen.tsx	ID 미상
+DSH-2-PAGE-03-0	Calendar	CalendarScreen	src/screens/Calendar/CalendarScreen.tsx	ID 확정(QA-021)
 	Dues	DuesScreen	src/screens/Dues/DuesScreen.tsx	MainTab 탭. ID 미상
 	DuesCreate	DuesCreateScreen	src/screens/Dues/DuesCreateScreen.tsx	ID 미상
 	DuesDetail	DuesDetailScreen	src/screens/Dues/DuesDetailScreen.tsx	ID 미상
@@ -31,7 +31,7 @@ COM-4-PAGE-01-0	EmailVerification	EmailVerificationScreen	src/screens/Signup/Ema
 	GroupManager	GroupManagerScreen	src/screens/GroupManager/GroupManagerScreen.tsx	ID 미상
 	GroupOnboarding	SignupCompleteScreen	src/screens/Signup/SignupCompleteScreen.tsx	SignupCompleteScreen 공유 (COM-5-PAGE-01-0 과 동일 컴포넌트)
 	GroupProfileEdit	GroupProfileEditScreen	src/screens/GroupManager/GroupProfileEditScreen.tsx	ID 미상
-	Home	DashboardScreen	src/screens/Dashboard/DashboardScreen.tsx	MainTab 탭. ID 미상
+DSH-1-PAGE-01-0	Home	DashboardScreen	src/screens/Dashboard/DashboardScreen.tsx	MainTab 탭
 	Inquiry	InquiryScreen	src/screens/More/InquiryScreen.tsx	ID 미상
 	LedgerCreate	LedgerCreateScreen	src/screens/Folder/LedgerCreateScreen.tsx	ID 미상
 	LedgerDetail	LedgerDetailScreen	src/screens/Folder/LedgerDetailScreen.tsx	ID 미상
@@ -78,7 +78,7 @@ COM-3-PAGE-03-0	SignupInfo	SignupInfoScreen	src/screens/Signup/SignupInfoScreen.
 	Terms	TermsScreen	src/screens/More/TermsScreen.tsx	ID 미상
 COM-2-PAGE-01-0	TermsAgreement	TermsAgreementScreen	src/screens/Signup/TermsAgreementScreen.tsx	ID 확정(QA-007)
 COM-3-PAGE-01-01	TermsOfService	TermsOfServiceScreen	src/screens/Signup/TermsOfServiceScreen.tsx	LegalDocumentView 공유 (3개 화면 동일 컴포넌트)
-	TransactionDetail	TransactionDetailScreen	src/screens/Folder/TransactionDetailScreen.tsx	ID 미상
+DTB-2-PAGE-02-0	TransactionDetail	TransactionDetailScreen	src/screens/Folder/TransactionDetailScreen.tsx	ID 확정(QA-022)
 	TransactionReceiptDetail	TransactionReceiptDetailScreen	src/screens/Folder/TransactionReceiptDetailScreen.tsx	ID 미상
 	TransactionRegister	TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	파일 내 @screen 주석 7개 존재(위 행들 참조). 라우트 자체 대표 ID는 미상
 	TransactionSearch	TransactionSearchScreen	src/screens/Transactions/TransactionSearchScreen.tsx	ID 미상

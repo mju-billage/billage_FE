@@ -1,5 +1,6 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { FOREGROUND_INVERSE, NAVY_800 } from '../../../constants/colors';
+import { FILL_PRIMARY, FOREGROUND_INVERSE, NAVY_800 } from '../../../constants/colors';
+import { SHADOW_FAB } from '../../../constants/shadows';
 import { TYPOGRAPHY } from '../../../constants/typography';
 import { BOTTOM_NAVIGATION_HEIGHT } from '../../Navigation/Bottom Navigation/BottomNavigation';
 
@@ -9,7 +10,7 @@ type FloatingActionButtonProps = {
   label?: string;
 };
 
-const SIZE = 46;
+export const FAB_SIZE = 46;
 const DocumentAddIconImage = require('../../../assets/icons/content/DocumentAdd.png');
 
 function DocumentAddIcon() {
@@ -48,20 +49,21 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 24,
     bottom: BOTTOM_NAVIGATION_HEIGHT + 12,
-    height: SIZE,
-    backgroundColor: NAVY_800,
+    height: FAB_SIZE,
+    backgroundColor: FILL_PRIMARY,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    boxShadow: SHADOW_FAB,
   },
   buttonCircle: {
-    width: SIZE,
-    borderRadius: SIZE / 2,
+    width: FAB_SIZE,
+    borderRadius: FAB_SIZE / 2,
   },
   buttonExtended: {
     gap: 8,
     paddingHorizontal: 20,
-    borderRadius: SIZE / 2,
+    borderRadius: FAB_SIZE / 2,
   },
   pressed: {
     opacity: 0.85,

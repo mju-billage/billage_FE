@@ -37,7 +37,7 @@ function PasswordResetScreen() {
     setIsSubmitting(true);
     try {
       await authService.requestPasswordReset(email);
-      navigation.navigate('PasswordResetSent', { email });
+      navigation.replace('PasswordResetSent', { email });
     } catch (err) {
       setError(toUserErrorMessage(err));
     } finally {
