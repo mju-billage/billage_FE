@@ -11,6 +11,7 @@ import {
   FOREGROUND_INACTIVE,
   NAVY_800,
 } from '../../../constants/colors';
+import { SHADOW_GNB } from '../../../constants/shadows';
 import { TYPOGRAPHY } from '../../../constants/typography';
 
 export type BottomNavigationItem = {
@@ -61,16 +62,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 8,
     paddingBottom: 24,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 4,
+    boxShadow: SHADOW_GNB,
   },
   item: {
     flex: 1,
     alignItems: 'center',
-    gap: 4,
+    gap: 2,
   },
   icon: {
     width: 22,

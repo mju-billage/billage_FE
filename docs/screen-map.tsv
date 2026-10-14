@@ -31,7 +31,7 @@ COM-4-PAGE-01-0	EmailVerification	EmailVerificationScreen	src/screens/Signup/Ema
 	GroupManager	GroupManagerScreen	src/screens/GroupManager/GroupManagerScreen.tsx	ID 미상
 	GroupOnboarding	SignupCompleteScreen	src/screens/Signup/SignupCompleteScreen.tsx	SignupCompleteScreen 공유 (COM-5-PAGE-01-0 과 동일 컴포넌트)
 	GroupProfileEdit	GroupProfileEditScreen	src/screens/GroupManager/GroupProfileEditScreen.tsx	ID 미상
-	Home	DashboardScreen	src/screens/Dashboard/DashboardScreen.tsx	MainTab 탭. ID 미상
+DSH-1-PAGE-01-0	Home	DashboardScreen	src/screens/Dashboard/DashboardScreen.tsx	MainTab 탭
 	Inquiry	InquiryScreen	src/screens/More/InquiryScreen.tsx	ID 미상
 	LedgerCreate	LedgerCreateScreen	src/screens/Folder/LedgerCreateScreen.tsx	ID 미상
 	LedgerDetail	LedgerDetailScreen	src/screens/Folder/LedgerDetailScreen.tsx	ID 미상

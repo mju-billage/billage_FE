@@ -202,7 +202,7 @@ function DashboardScreen() {
 
         {loadState === 'ready' && overview && (
           <>
-            <Text style={styles.sectionTitle}>{DASHBOARD_DUES_SECTION_TITLE}</Text>
+            <Text style={styles.duesSectionTitle}>{DASHBOARD_DUES_SECTION_TITLE}</Text>
             {overview.upcomingDues.length === 0 ? (
               <Text style={styles.duesEmptyText}>{DASHBOARD_DUES_EMPTY}</Text>
             ) : (
@@ -221,7 +221,8 @@ function DashboardScreen() {
                       groupName: dues.title,
                       dDayLabel: formatDDayLabel(dues.daysLeft),
                       description: DASHBOARD_DUES_CARD_DESCRIPTION,
-                      highlightDescription: `${dues.targetCount - dues.paidCount}${DASHBOARD_DUES_CARD_REMAINING_SUFFIX}`,
+                      highlightCount: dues.targetCount - dues.paidCount,
+                      highlightDescription: DASHBOARD_DUES_CARD_REMAINING_SUFFIX,
                       paidMemberCount: dues.paidCount,
                       totalMemberCount: dues.targetCount,
                       progressRatio:
@@ -237,7 +238,7 @@ function DashboardScreen() {
         <Text style={styles.quickServiceSubtitle}>
           {nickname} {DASHBOARD_QUICK_SERVICE_SUBTITLE_SUFFIX}
         </Text>
-        <Text style={styles.sectionTitle}>{DASHBOARD_QUICK_SERVICE_TITLE}</Text>
+        <Text style={styles.quickServiceTitle}>{DASHBOARD_QUICK_SERVICE_TITLE}</Text>
         <View style={styles.quickServiceRow}>
           {MOCK_DASHBOARD_SUMMARY.quickServices.map(item => (
             <QuickServiceCard
@@ -277,10 +278,10 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 8,
   },
-  sectionTitle: {
+  duesSectionTitle: {
     ...TYPOGRAPHY.subtitle1,
     marginTop: 12,
-    marginBottom: 0,
+    marginBottom: 10,
   },
   stateContainer: {
     alignItems: 'center',
@@ -295,7 +296,7 @@ const styles = StyleSheet.create({
   duesEmptyText: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
-    marginTop: 16,
+    marginTop: 6,
   },
   duesCarousel: {
     gap: 12,
@@ -307,6 +308,9 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_NORMAL,
     marginTop: 32,
+  },
+  quickServiceTitle: {
+    ...TYPOGRAPHY.subtitle1,
   },
   quickServiceRow: {
     flexDirection: 'row',

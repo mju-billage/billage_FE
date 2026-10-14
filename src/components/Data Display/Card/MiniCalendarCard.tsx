@@ -4,7 +4,10 @@ import Divider from '../Divider/Divider';
 import Calendar from '../Calendar/Calendar';
 import FolderTabShape from './FolderTabShape';
 import type { MiniCalendarData } from '../../../types/dashboard';
-import { FILL_NEUTRAL_SUBTLE } from '../../../constants/colors';
+import {
+  FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
 
 const CHEVRON_RIGHT_ICON = require('../../../assets/icons/nav/Chevron Right.png');
@@ -38,6 +41,7 @@ function MiniCalendarCard({ data, onPress }: MiniCalendarCardProps) {
         showDateFields={false}
         interactive={false}
         amountsByDate={amountsByDate}
+        largeDates
       />
     </CardBase>
   );
@@ -55,6 +59,7 @@ const styles = StyleSheet.create({
   chevronIcon: {
     width: 20,
     height: 20,
+    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
   dividerWrapper: {
     marginVertical: 12,

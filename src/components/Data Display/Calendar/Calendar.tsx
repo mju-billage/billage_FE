@@ -32,6 +32,7 @@ type CalendarProps = {
   onSelectDate?: (date: string) => void;
   onChangeMonth?: (delta: number) => void;
   showDateFields?: boolean;
+  largeDates?: boolean;
 };
 
 function Calendar({
@@ -48,6 +49,7 @@ function Calendar({
   onSelectDate,
   onChangeMonth,
   showDateFields = true,
+  largeDates = false,
 }: CalendarProps) {
   const allWeeks = getMonthGridWeeks(year, month);
   const weeks =
@@ -123,6 +125,7 @@ function Calendar({
                 <Text
                   style={[
                     styles.dateText,
+                    largeDates && styles.dateTextLarge,
                     cellIndex === 0 && styles.dateTextSunday,
                     isInRange && styles.dateTextInRange,
                     isOutlined && styles.dateTextOutlined,
@@ -281,6 +284,9 @@ const styles = StyleSheet.create({
   },
   dateText: {
     ...TYPOGRAPHY.body3,
+  },
+  dateTextLarge: {
+    ...TYPOGRAPHY.subtitle1,
   },
   dateTextSunday: {
     color: FEEDBACK_NEGATIVE_BOLD,

@@ -57,3 +57,11 @@ Negative(#FB6E67) 네 가지뿐이고 #9CA3AF 를 내는 variant 가 없다.
 variant 를 추가할 것인지. 후자라면 피그마에도 함께 추가해야 한다.
 변경이 필요하면 EmailVerificationScreen 의 TextButton
 hierarchy 한 줄만 바꾸면 된다.
+
+---
+
+## 5. 대시보드 회비 카드의 회비 현황↔진행바 간격
+
+QA 카드가 "컴포넌트 내 둘 간격 현재 0 (재확인 필요)" 로 적혀 있어
+0 으로 적용했다(DuesProgressCard highlightDescription.marginBottom).
+디자이너 확인 필요.

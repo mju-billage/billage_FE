@@ -51,9 +51,9 @@
 
 ## 7. NAVY_800 을 배경색으로 직접 쓰는 컴포넌트
 
-Button.tsx 는 `0833cec` 에서 FILL_PRIMARY 로 고쳤지만, 아래 세 곳은
-아직 원시 상수 NAVY_800 을 배경색으로 직접 쓴다. 같은 유형일 수 있다.
-- `src/components/Input/Button/FAB.tsx:52, 107`
+Button.tsx 는 `0833cec` 에서 FILL_PRIMARY 로 고쳤고, FAB.tsx 는
+QA-018 에서 같은 방식으로 해결했다. 아래 두 곳은 아직 원시 상수
+NAVY_800 을 배경색으로 직접 쓴다. 같은 유형일 수 있다.
 - `src/components/Input/Button/AttachmentAddButton.tsx:84`
 - `src/components/Navigation/Bottom Navigation/BottomNavigation.tsx:81, 88`
 시안이 이 셋을 지적한 적은 없다. 해당 컴포넌트가 나오는 화면의

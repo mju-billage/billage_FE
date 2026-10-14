@@ -8,6 +8,7 @@ import {
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_SECONDARY,
   BASIC_0,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
@@ -90,6 +91,11 @@ function DashboardCard({
         {progress.description}
       </Text>
       <Text style={[styles.highlightDescription, ended && styles.textEnded]}>
+        {progress.highlightCount != null && (
+          <Text style={ended ? undefined : styles.highlightCount}>
+            {progress.highlightCount}
+          </Text>
+        )}
         {progress.highlightDescription}
       </Text>
       <View style={styles.progressFooter}>
@@ -197,13 +203,16 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.subtitle3,
   },
   description: {
-    ...TYPOGRAPHY.body3,
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   highlightDescription: {
     ...TYPOGRAPHY.h2,
-    marginTop: 4,
-    marginBottom: 12,
+    marginTop: 2,
+    marginBottom: 0,
+  },
+  highlightCount: {
+    color: FOREGROUND_SECONDARY,
   },
   progressFooter: {
     flexDirection: 'row',

@@ -1,5 +1,6 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { FOREGROUND_INVERSE, NAVY_800 } from '../../../constants/colors';
+import { FILL_PRIMARY, FOREGROUND_INVERSE, NAVY_800 } from '../../../constants/colors';
+import { SHADOW_FAB } from '../../../constants/shadows';
 import { TYPOGRAPHY } from '../../../constants/typography';
 import { BOTTOM_NAVIGATION_HEIGHT } from '../../Navigation/Bottom Navigation/BottomNavigation';
 
@@ -49,10 +50,11 @@ const styles = StyleSheet.create({
     right: 24,
     bottom: BOTTOM_NAVIGATION_HEIGHT + 12,
     height: SIZE,
-    backgroundColor: NAVY_800,
+    backgroundColor: FILL_PRIMARY,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    boxShadow: SHADOW_FAB,
   },
   buttonCircle: {
     width: SIZE,
