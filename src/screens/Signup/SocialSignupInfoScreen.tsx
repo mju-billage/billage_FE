@@ -67,7 +67,7 @@ function SocialSignupInfoScreen() {
         navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
         return;
       }
-      navigation.navigate('SignupComplete');
+      navigation.reset({ index: 0, routes: [{ name: 'SignupComplete' }] });
     } catch (error) {
       if (error instanceof ApiError && error.code === 'EMAIL_ALREADY_EXISTS') {
         setSignupError(SIGNUP_EMAIL_ALREADY_EXISTS_ERROR);
