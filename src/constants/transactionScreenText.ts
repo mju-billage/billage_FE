@@ -11,6 +11,7 @@ export const TRANSACTION_SEARCH_PLACEHOLDER = '내역명, 장부명을 입력해
 export const FILTER_LEDGER_LABEL = '장부';
 export const FILTER_LEDGER_ADD_LABEL = '선택하기';
 export const FILTER_PERIOD_CUSTOM_ICON_LABEL = '기간 선택';
+export const FILTER_PERIOD_SHEET_TITLE = '기간 선택';
 
 export const LEDGER_SELECT_SHEET_TITLE = '장부 선택';
 export const LEDGER_SELECT_EMPTY_GUIDE = '새로운 장부를 생성해주세요.';
