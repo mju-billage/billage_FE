@@ -52,8 +52,8 @@ COM-3-PAGE-01-03	MarketingConsent	MarketingConsentScreen	src/screens/Signup/Mark
 	NoticeList	NoticeListScreen	src/screens/More/NoticeListScreen.tsx	ID 미상
 	NotificationSettings	NotificationSettingsScreen	src/screens/More/NotificationSettingsScreen.tsx	ID 미상
 	PasswordChange	PasswordChangeScreen	src/screens/More/PasswordChangeScreen.tsx	ID 미상
-	PasswordReset	PasswordResetScreen	src/screens/PasswordReset/PasswordResetScreen.tsx	ID 미상
-	PasswordResetSent	PasswordResetSentScreen	src/screens/PasswordReset/PasswordResetSentScreen.tsx	ID 미상
+COM-2-PAGE-02-0	PasswordReset	PasswordResetScreen	src/screens/PasswordReset/PasswordResetScreen.tsx	ID 확정(QA-017)
+COM-3-PAGE-04-0	PasswordResetSent	PasswordResetSentScreen	src/screens/PasswordReset/PasswordResetSentScreen.tsx	ID 확정(QA-017)
 	PostLogin	PostLoginScreen	src/screens/PostLoginScreen.tsx	ID 미상
 COM-3-PAGE-01-02	PrivacyPolicy	PrivacyPolicyScreen	src/screens/Signup/PrivacyPolicyScreen.tsx	LegalDocumentView 공유 (3개 화면 동일 컴포넌트)
 	ProfileEdit	ProfileEditScreen	src/screens/More/ProfileEditScreen.tsx	ID 미상

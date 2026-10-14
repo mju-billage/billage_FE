@@ -3,8 +3,9 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RouteProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import BackButton from '../../components/Navigation/App bar/BackButton';
+import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { TYPOGRAPHY } from '../../constants/typography';
 import {
   PASSWORD_RESET_TITLE,
@@ -30,41 +31,35 @@ function PasswordResetSentScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.backRow}>
-        <BackButton onPress={() => navigation.goBack()} />
-      </View>
-      <Text style={styles.title}>{PASSWORD_RESET_TITLE}</Text>
-      <Text style={styles.message}>
-        {params.email}
-        {PASSWORD_RESET_SENT_MESSAGE_SUFFIX}
-      </Text>
-
-      <Button
-        label={PASSWORD_RESET_BACK_TO_LOGIN_LABEL}
-        onPress={handleBackToLogin}
-        fullWidth
+    <ScreenContainer background="secondary">
+      <AppBar
+        type="sub"
+        title={PASSWORD_RESET_TITLE}
+        onBackPress={() => navigation.goBack()}
       />
-    </View>
+      <View style={styles.body}>
+        <Text style={styles.message}>
+          {params.email}
+          {PASSWORD_RESET_SENT_MESSAGE_SUFFIX}
+        </Text>
+        <Button
+          label={PASSWORD_RESET_BACK_TO_LOGIN_LABEL}
+          onPress={handleBackToLogin}
+          fullWidth
+        />
+      </View>
+    </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 60,
+  body: {
     paddingHorizontal: 20,
-  },
-  backRow: {
-    marginBottom: 16,
-  },
-  title: {
-    ...TYPOGRAPHY.h3,
-    marginBottom: 24,
+    paddingTop: 32,
   },
   message: {
-    ...TYPOGRAPHY.body1,
-    marginBottom: 24,
+    ...TYPOGRAPHY.subtitle1,
+    marginBottom: 32,
   },
 });
 
