@@ -1,5 +1,11 @@
 import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { CompositeNavigationProp } from '@react-navigation/native';
@@ -55,6 +61,9 @@ import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Nav
 
 const BELL_ICON = require('../../assets/icons/communication/Bell.png');
 
+const SCREEN_HORIZONTAL_PADDING = 20;
+const DUES_CARD_GAP = 8;
+
 type DashboardScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Home'>,
   NativeStackNavigationProp<RootStackParamList>
@@ -80,6 +89,8 @@ function toMiniCalendarData(
 
 function DashboardScreen() {
   const navigation = useNavigation<DashboardScreenNavigationProp>();
+  const { width: windowWidth } = useWindowDimensions();
+  const duesCardWidth = windowWidth - SCREEN_HORIZONTAL_PADDING * 2;
 
   const [overview, setOverview] = useState<DashboardOverview | null>(null);
   const [miniCalendar, setMiniCalendar] = useState<MiniCalendarData | null>(null);
@@ -209,12 +220,18 @@ function DashboardScreen() {
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                style={styles.duesCarouselScroll}
                 contentContainerStyle={styles.duesCarousel}
+                snapToInterval={duesCardWidth + DUES_CARD_GAP}
+                snapToAlignment="start"
+                decelerationRate="fast"
+                disableIntervalMomentum
               >
                 {overview.upcomingDues.map(dues => (
                   <DuesProgressCard
                     key={dues.duesId}
                     type="dashboard"
+                    width={duesCardWidth}
                     onPress={() => handlePressDues(dues.duesId)}
                     progress={{
                       id: dues.duesId,
@@ -263,7 +280,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
     paddingTop: 16,
     paddingBottom: BOTTOM_NAVIGATION_HEIGHT+ 12,
   },
@@ -298,8 +315,12 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
     marginTop: 6,
   },
+  duesCarouselScroll: {
+    marginHorizontal: -SCREEN_HORIZONTAL_PADDING,
+  },
   duesCarousel: {
-    gap: 12,
+    paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
+    gap: DUES_CARD_GAP,
   },
   duesCard: {
     backgroundColor: BASIC_0,
