@@ -65,3 +65,12 @@ hierarchy 한 줄만 바꾸면 된다.
 QA 카드가 "컴포넌트 내 둘 간격 현재 0 (재확인 필요)" 로 적혀 있어
 0 으로 적용했다(DuesProgressCard highlightDescription.marginBottom).
 디자이너 확인 필요.
+
+---
+
+## 6. 탭 화면 스낵바 위치
+
+시안에 탭 화면 위 스낵바 위치가 없어서, 하단 네비게이션 윗변에서 12 위로 잡았다
+(FAB 와 같은 간격). FAB 가 있는 내역 탭은 FAB 윗변에서 12 위다.
+디자이너 확인 필요. 값은 ScreenContainer 의 SNACKBAR_TAB_BAR_GAP,
+TransactionsScreen 의 SNACKBAR_FAB_GAP 이다.

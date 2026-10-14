@@ -353,6 +353,7 @@ function FolderScreen() {
     <ScreenContainer
       background="primary"
       avoidKeyboard={false}
+      aboveTabBar
       snackbar={
         snackbar ? (
           <Snackbar

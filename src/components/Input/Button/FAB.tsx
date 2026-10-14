@@ -10,7 +10,7 @@ type FloatingActionButtonProps = {
   label?: string;
 };
 
-const SIZE = 46;
+export const FAB_SIZE = 46;
 const DocumentAddIconImage = require('../../../assets/icons/content/DocumentAdd.png');
 
 function DocumentAddIcon() {
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 24,
     bottom: BOTTOM_NAVIGATION_HEIGHT + 12,
-    height: SIZE,
+    height: FAB_SIZE,
     backgroundColor: FILL_PRIMARY,
     flexDirection: 'row',
     alignItems: 'center',
@@ -57,13 +57,13 @@ const styles = StyleSheet.create({
     boxShadow: SHADOW_FAB,
   },
   buttonCircle: {
-    width: SIZE,
-    borderRadius: SIZE / 2,
+    width: FAB_SIZE,
+    borderRadius: FAB_SIZE / 2,
   },
   buttonExtended: {
     gap: 8,
     paddingHorizontal: 20,
-    borderRadius: SIZE / 2,
+    borderRadius: FAB_SIZE / 2,
   },
   pressed: {
     opacity: 0.85,

@@ -163,6 +163,7 @@ function DuesScreen() {
     <ScreenContainer
       background="primary"
       avoidKeyboard={false}
+      aboveTabBar
       snackbar={
         snackbarMessage ? (
           <Snackbar visible title={snackbarMessage} />
