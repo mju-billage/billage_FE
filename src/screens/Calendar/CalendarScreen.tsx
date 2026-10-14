@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Image,
   Pressable,
@@ -11,6 +11,7 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
+import ScreenContainer from '../../components/Layout/ScreenContainer';
 import Calendar from '../../components/Data Display/Calendar/Calendar';
 import Button from '../../components/Input/Button/Button';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
@@ -27,12 +28,18 @@ import {
   getApiErrorMessage,
   isNetworkError,
 } from '../../constants/apiErrorMessages';
-import { shiftMonth } from '../../utils/calendarGrid';
+import { formatDateKey, shiftMonth } from '../../utils/calendarGrid';
 import {
   CALENDAR_SCREEN_TITLE,
   CALENDAR_WEEKDAY_LABELS,
 } from '../../constants/calendarScreenText';
-import { BACKGROUND_PRIMARY, BACKGROUND_SECONDARY, FOREGROUND_DISABLED } from '../../constants/colors';
+import {
+  BACKGROUND_PRIMARY,
+  BACKGROUND_SECONDARY,
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const CHEVRON_LEFT_ICON = require('../../assets/icons/nav/Chevron Left.png');
@@ -41,7 +48,7 @@ const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/Chevron Right.png');
 const CALENDAR_LOADING = '캘린더를 불러오는 중이에요.';
 const CALENDAR_RETRY_LABEL = '다시 시도';
 const DAILY_LOADING = '내역을 불러오는 중이에요.';
-const DAILY_EMPTY = '이 날의 내역이 없어요.';
+const DAILY_EMPTY = '해당 날짜의 내역이 없어요.';
 const DAILY_RETRY_LABEL = '다시 시도';
 
 type CalendarScreenNavigationProp = NativeStackNavigationProp<
@@ -61,7 +68,7 @@ function CalendarScreen() {
   const now = new Date();
   const [viewedYear, setViewedYear] = useState(now.getFullYear());
   const [viewedMonth, setViewedMonth] = useState(now.getMonth() + 1);
-  const [selectedDate, setSelectedDate] = useState<number | null>(null);
+  const [selectedDate, setSelectedDate] = useState<number | null>(now.getDate());
 
   const [monthLoadState, setMonthLoadState] = useState<MonthLoadState>('loading');
   const [monthErrorMessage, setMonthErrorMessage] = useState('');
@@ -132,10 +139,32 @@ function CalendarScreen() {
     [],
   );
 
-  const amountsByDate: Record<number, number> = {};
+  useEffect(() => {
+    loadDay(now.getFullYear(), now.getMonth() + 1, now.getDate());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const amountsSplitByDate: Record<number, { income: number; expense: number }> = {};
   for (const day of monthDays) {
     const dayNumber = Number(day.date.split('-')[2]);
-    amountsByDate[dayNumber] = day.income - day.expense;
+    amountsSplitByDate[dayNumber] = { income: day.income, expense: day.expense };
+  }
+
+  const nowYear = now.getFullYear();
+  const nowMonth = now.getMonth() + 1;
+  const isCurrentMonth = viewedYear === nowYear && viewedMonth === nowMonth;
+  const isFutureMonth =
+    viewedYear > nowYear || (viewedYear === nowYear && viewedMonth > nowMonth);
+  const daysInViewedMonth = new Date(viewedYear, viewedMonth, 0).getDate();
+  const disabledDates: string[] = [];
+  if (isCurrentMonth) {
+    for (let date = now.getDate() + 1; date <= daysInViewedMonth; date++) {
+      disabledDates.push(formatDateKey(viewedYear, viewedMonth, date));
+    }
+  } else if (isFutureMonth) {
+    for (let date = 1; date <= daysInViewedMonth; date++) {
+      disabledDates.push(formatDateKey(viewedYear, viewedMonth, date));
+    }
   }
 
   const selectedDateKey =
@@ -144,13 +173,6 @@ function CalendarScreen() {
           selectedDate,
         ).padStart(2, '0')}`
       : undefined;
-  const todayDateKey =
-    viewedYear === now.getFullYear() && viewedMonth === now.getMonth() + 1
-      ? `${viewedYear}.${String(viewedMonth).padStart(2, '0')}.${String(
-          now.getDate(),
-        ).padStart(2, '0')}`
-      : undefined;
-
   const handleChangeMonth = (delta: number) => {
     const next = shiftMonth(viewedYear, viewedMonth, delta);
     setViewedYear(next.year);
@@ -175,7 +197,7 @@ function CalendarScreen() {
       : null;
 
   return (
-    <View style={{backgroundColor: BACKGROUND_SECONDARY, height: '100%'}}>
+    <ScreenContainer background="secondary" edges={['top', 'bottom']} avoidKeyboard={false}>
       <AppBar
         title={CALENDAR_SCREEN_TITLE}
         onBackPress={() => navigation.goBack()}
@@ -187,7 +209,7 @@ function CalendarScreen() {
               <Image source={CHEVRON_LEFT_ICON} style={styles.chevronIcon} />
             </Pressable>
             <Text style={styles.monthLabel}>
-              {viewedYear}.{String(viewedMonth).padStart(2, '0')}
+              {viewedYear}년 {viewedMonth}월
             </Text>
             <Pressable onPress={() => handleChangeMonth(1)} hitSlop={8}>
               <Image source={CHEVRON_RIGHT_ICON} style={styles.chevronIcon} />
@@ -215,12 +237,13 @@ function CalendarScreen() {
 
         {monthLoadState === 'ready' && (
           <Calendar
+            variant="ledger"
             year={viewedYear}
             month={viewedMonth}
             selectedStartDate={selectedDateKey}
             selectedEndDate={selectedDateKey}
-            outlinedDates={todayDateKey ? [todayDateKey] : []}
-            amountsByDate={amountsByDate}
+            disabledDates={disabledDates}
+            amountsSplitByDate={amountsSplitByDate}
             onSelectDate={handleSelectDate}
             onChangeMonth={handleChangeMonth}
             showHeader={false}
@@ -232,7 +255,9 @@ function CalendarScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {selectedDateLabel && (
           <>
-            <Text style={styles.selectedDateLabel}>{selectedDateLabel}</Text>
+            {!(dayLoadState === 'ready' && dayEntries.length === 0) && (
+              <Text style={styles.selectedDateLabel}>{selectedDateLabel}</Text>
+            )}
 
             {dayLoadState === 'loading' && (
               <Text style={styles.stateText}>{DAILY_LOADING}</Text>
@@ -251,7 +276,9 @@ function CalendarScreen() {
             )}
 
             {dayLoadState === 'ready' && dayEntries.length === 0 && (
-              <Text style={styles.stateText}>{DAILY_EMPTY}</Text>
+              <View style={styles.dailyEmptyContainer}>
+                <Text style={styles.stateText}>{DAILY_EMPTY}</Text>
+              </View>
             )}
 
             {dayLoadState === 'ready' &&
@@ -273,7 +300,7 @@ function CalendarScreen() {
           </>
         )}
       </ScrollView>
-    </View>
+    </ScreenContainer>
   );
 }
 
@@ -298,6 +325,7 @@ const styles = StyleSheet.create({
   chevronIcon: {
     width: 20,
     height: 20,
+    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
   monthLabel: {
     ...TYPOGRAPHY.h3,
@@ -308,9 +336,14 @@ const styles = StyleSheet.create({
     backgroundColor: BACKGROUND_PRIMARY,
   },
   selectedDateLabel: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_NORMAL,
     marginTop: 16,
     marginBottom: 12,
+  },
+  dailyEmptyContainer: {
+    alignItems: 'center',
+    paddingTop: 56,
   },
   dividerWrapper: {
     marginBottom: 8,

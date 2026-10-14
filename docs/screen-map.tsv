@@ -13,7 +13,7 @@ ETC-4-SHEET-01-0		JoinGroupSheet	src/screens/GroupManager/JoinGroupSheet.tsx	바
 	ArchiveDetail	ArchiveDetailScreen	src/screens/Archive/ArchiveDetailScreen.tsx	ID 미상
 	ArchiveEntryDetail	ArchiveEntryDetailScreen	src/screens/Archive/ArchiveEntryDetailScreen.tsx	ID 미상
 	ArchiveLedgerEntries	ArchiveLedgerEntriesScreen	src/screens/Archive/ArchiveLedgerEntriesScreen.tsx	ID 미상
-	Calendar	CalendarScreen	src/screens/Calendar/CalendarScreen.tsx	ID 미상
+DSH-2-PAGE-03-0	Calendar	CalendarScreen	src/screens/Calendar/CalendarScreen.tsx	ID 확정(QA-021)
 	Dues	DuesScreen	src/screens/Dues/DuesScreen.tsx	MainTab 탭. ID 미상
 	DuesCreate	DuesCreateScreen	src/screens/Dues/DuesCreateScreen.tsx	ID 미상
 	DuesDetail	DuesDetailScreen	src/screens/Dues/DuesDetailScreen.tsx	ID 미상

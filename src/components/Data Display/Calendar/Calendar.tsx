@@ -3,15 +3,17 @@ import DateField from '../../Input/Date Field/DateField';
 import { formatWon } from '../../../utils/currency';
 import { formatDateKey, getMonthGridWeeks } from '../../../utils/calendarGrid';
 import { CALENDAR_WEEKDAY_LABELS } from '../../../constants/calendarScreenText';
-import { TYPOGRAPHY } from '../../../constants/typography';
+import { FONT_FAMILY, FONT_WEIGHT, TYPOGRAPHY } from '../../../constants/typography';
 import {
   FEEDBACK_NEGATIVE_BOLD,
   FILL_NEUTRAL_NORMAL,
   FILL_SECONDARY_SUBTLE,
+  FILL_SECONDARY_SUBTLER,
   FOREGROUND_DISABLED,
   FOREGROUND_INVERSE,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
 
@@ -33,6 +35,8 @@ type CalendarProps = {
   onChangeMonth?: (delta: number) => void;
   showDateFields?: boolean;
   largeDates?: boolean;
+  variant?: 'default' | 'ledger';
+  amountsSplitByDate?: Record<number, { income: number; expense: number }>;
 };
 
 function Calendar({
@@ -50,10 +54,82 @@ function Calendar({
   onChangeMonth,
   showDateFields = true,
   largeDates = false,
+  variant = 'default',
+  amountsSplitByDate,
 }: CalendarProps) {
   const allWeeks = getMonthGridWeeks(year, month);
   const weeks =
     weeksToShow != null ? allWeeks.slice(0, weeksToShow) : allWeeks;
+
+  const renderLedgerDayCell = (
+    cellIndex: number,
+    cell: { date: number } | null,
+  ) => {
+    if (!cell) {
+      return (
+        <View key={cellIndex} style={[styles.dayCell, styles.dayCellLedger]} />
+      );
+    }
+    const dateKey = formatDateKey(year, month, cell.date);
+    const isSelected = dateKey === selectedStartDate || dateKey === selectedEndDate;
+    const isDisabled = disabledDates?.includes(dateKey) ?? false;
+    const split = amountsSplitByDate?.[cell.date];
+    const income = split?.income ?? 0;
+    const expense = split?.expense ?? 0;
+
+    const cellStyle = (pressed: boolean) => [
+      styles.dayCell,
+      styles.dayCellLedger,
+      isSelected && styles.dayCellLedgerSelected,
+      !isSelected && !isDisabled && pressed && styles.dayCellLedgerPressed,
+    ];
+
+    const content = (
+      <>
+        <View style={styles.ledgerDateWrap}>
+          <Text
+            style={[
+              styles.ledgerDateText,
+              isSelected && styles.ledgerDateTextSelected,
+              isDisabled && styles.dateTextDisabled,
+            ]}
+          >
+            {cell.date}
+          </Text>
+        </View>
+        <View style={styles.ledgerAmountWrap}>
+          {!isDisabled && income > 0 && (
+            <Text style={styles.ledgerAmountIncome} numberOfLines={1}>
+              +{formatWon(income)}
+            </Text>
+          )}
+          {!isDisabled && expense > 0 && (
+            <Text style={styles.ledgerAmountExpense} numberOfLines={1}>
+              -{formatWon(expense)}
+            </Text>
+          )}
+        </View>
+      </>
+    );
+
+    if (interactive) {
+      return (
+        <Pressable
+          key={cellIndex}
+          style={({ pressed }) => cellStyle(pressed)}
+          disabled={isDisabled}
+          onPress={() => onSelectDate?.(dateKey)}
+        >
+          {content}
+        </Pressable>
+      );
+    }
+    return (
+      <View key={cellIndex} style={cellStyle(false)}>
+        {content}
+      </View>
+    );
+  };
 
   return (
     <View>
@@ -73,15 +149,27 @@ function Calendar({
 
       <View style={styles.weekdayRow}>
         {CALENDAR_WEEKDAY_LABELS.map(label => (
-          <Text key={label} style={styles.weekdayLabel}>
+          <Text
+            key={label}
+            style={[
+              styles.weekdayLabel,
+              variant === 'ledger' && styles.weekdayLabelLedger,
+            ]}
+          >
             {label}
           </Text>
         ))}
       </View>
 
       {weeks.map((week, weekIndex) => (
-        <View key={weekIndex} style={styles.weekRow}>
+        <View
+          key={weekIndex}
+          style={[styles.weekRow, variant === 'ledger' && styles.weekRowLedger]}
+        >
           {week.map((cell, cellIndex) => {
+            if (variant === 'ledger') {
+              return renderLedgerDayCell(cellIndex, cell);
+            }
             if (!cell) {
               return <View key={cellIndex} style={styles.dayCell} />;
             }
@@ -216,16 +304,63 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
+  weekdayLabelLedger: {
+    flex: 1,
+  },
   weekRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 8,
+  },
+  weekRowLedger: {
+    marginBottom: 2,
   },
   dayCell: {
     width: 36,
     alignItems: 'center',
     gap: 2,
     position: 'relative',
+  },
+  dayCellLedger: {
+    flex: 1,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  dayCellLedgerSelected: {
+    backgroundColor: FILL_SECONDARY_SUBTLER,
+  },
+  dayCellLedgerPressed: {
+    backgroundColor: FILL_NEUTRAL_NORMAL,
+  },
+  ledgerDateWrap: {
+    height: 24,
+    justifyContent: 'center',
+  },
+  ledgerDateText: {
+    ...TYPOGRAPHY.subtitle1,
+    color: FOREGROUND_NEUTRAL_NORMAL,
+  },
+  ledgerDateTextSelected: {
+    color: FOREGROUND_PRIMARY,
+  },
+  ledgerAmountWrap: {
+    height: 18,
+  },
+  ledgerAmountIncome: {
+    fontFamily: FONT_FAMILY,
+    fontWeight: FONT_WEIGHT.medium,
+    fontSize: 7,
+    lineHeight: 9,
+    letterSpacing: 0.4,
+    color: FOREGROUND_SECONDARY,
+  },
+  ledgerAmountExpense: {
+    fontFamily: FONT_FAMILY,
+    fontWeight: FONT_WEIGHT.medium,
+    fontSize: 7,
+    lineHeight: 9,
+    letterSpacing: 0.4,
+    color: FOREGROUND_PRIMARY,
   },
   rangeBand: {
     position: 'absolute',
