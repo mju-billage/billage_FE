@@ -7,6 +7,7 @@ ADD-4-PAGE-01-0		TransactionRegisterScreen	src/screens/Transactions/TransactionR
 ADD-5-MODAL-01-0		TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	스캔 내용 반영 확인 모달(scanApply 다이얼로그)
 DTB-3-PAGE-02-0		TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	상세 내역_수정(기존 transactionId로 진입 시)
 DTB-4-MODAL-01-0		TransactionRegisterScreen	src/screens/Transactions/TransactionRegisterScreen.tsx	상세 내역_수정 이탈 안내(leave 다이얼로그)
+ETC-4-SHEET-01-0		JoinGroupSheet	src/screens/GroupManager/JoinGroupSheet.tsx	바텀시트. AllGroupsScreen, SignupCompleteScreen(SignupComplete/GroupOnboarding 라우트)에서 연다
 	AllGroups	AllGroupsScreen	src/screens/GroupManager/AllGroupsScreen.tsx	ID 미상
 	Archive	ArchiveListScreen	src/screens/Archive/ArchiveListScreen.tsx	ID 미상
 	ArchiveDetail	ArchiveDetailScreen	src/screens/Archive/ArchiveDetailScreen.tsx	ID 미상

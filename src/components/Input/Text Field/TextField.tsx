@@ -12,6 +12,7 @@ import {
   BORDER_NEUTRAL_NORMAL,
   FEEDBACK_NEGATIVE_BOLD,
   FOREGROUND_DISABLED,
+  FOREGROUND_INVERSE,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_PRIMARY,
@@ -40,6 +41,7 @@ type TextFieldProps = {
   maxLength?: number;
   keyboardType?: KeyboardTypeOptions;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
+  autoCorrect?: boolean;
   autoFocus?: boolean;
   onBlur?: () => void;
 };
@@ -62,6 +64,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
     maxLength,
     keyboardType,
     autoCapitalize,
+    autoCorrect,
     autoFocus = false,
     onBlur,
   },
@@ -106,6 +109,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           maxLength={maxLength}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
+          autoCorrect={autoCorrect}
           autoFocus={autoFocus}
           editable={!disabled}
         />
@@ -116,7 +120,9 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
             pointerEvents={value.length > 0 ? 'auto' : 'none'}
             style={value.length > 0 ? styles.iconShown : styles.iconHidden}
           >
-            <Image source={CLOSE_ICON} style={styles.clearIcon} />
+            <View style={styles.clearCircle}>
+              <Image source={CLOSE_ICON} style={styles.clearIcon} />
+            </View>
           </Pressable>
         )}
         {suffix && (
@@ -211,11 +217,19 @@ const styles = StyleSheet.create({
   iconHidden: {
     opacity: 0,
   },
-  clearIcon: {
-    marginRight: 4,
+  clearCircle: {
     width: 16,
     height: 16,
-    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
+    borderRadius: 8,
+    backgroundColor: FOREGROUND_NEUTRAL_SUBTLE,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 4,
+  },
+  clearIcon: {
+    width: 10,
+    height: 10,
+    tintColor: FOREGROUND_INVERSE,
   },
   helperText: {
     ...TYPOGRAPHY.body3,

@@ -50,9 +50,14 @@ function JoinGroupSheet({ visible, onClose, onJoined }: JoinGroupSheetProps) {
       if (isNetworkError(fetchError)) {
         setError(API_NETWORK_ERROR_MESSAGE);
       } else if (fetchError instanceof ApiError) {
-        setError(getApiErrorMessage(fetchError.code, fetchError.message));
-      } else {
-        setError(JOIN_GROUP_INVALID_CODE_ERROR);
+        if (
+          fetchError.code === 'INVALID_INVITATION_CODE' ||
+          fetchError.code === 'INVITATION_NOT_FOUND'
+        ) {
+          setError(JOIN_GROUP_INVALID_CODE_ERROR);
+        } else {
+          setError(getApiErrorMessage(fetchError.code, fetchError.message));
+        }
       }
     } finally {
       setIsSubmitting(false);
@@ -72,6 +77,7 @@ function JoinGroupSheet({ visible, onClose, onJoined }: JoinGroupSheetProps) {
         error={error}
         onClear={() => setCode('')}
         autoCapitalize="none"
+        autoCorrect={false}
       />
       <Button
         label={JOIN_GROUP_SUBMIT_LABEL}
@@ -85,7 +91,7 @@ function JoinGroupSheet({ visible, onClose, onJoined }: JoinGroupSheetProps) {
 
 const styles = StyleSheet.create({
   title: {
-    ...TYPOGRAPHY.subtitle1,
+    ...TYPOGRAPHY.h3,
     marginBottom: 16,
   },
 });
