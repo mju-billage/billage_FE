@@ -76,11 +76,11 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   title: {
-    ...TYPOGRAPHY.subtitle1,
+    ...TYPOGRAPHY.subtitle4,
     color: FOREGROUND_INVERSE,
   },
   description: {
-    ...TYPOGRAPHY.body2,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_INACTIVE,
   },
   actions: {

@@ -36,7 +36,7 @@ function ScreenContainer({
         {children}
         {snackbar != null && (
           <View
-            style={[styles.snackbarSlot, { bottom: SNACKBAR_SLOT_INSET + snackbarOffset }]}
+            style={[styles.snackbarSlot, { bottom: SNACKBAR_SLOT_BOTTOM + snackbarOffset }]}
             pointerEvents="box-none"
           >
             {snackbar}
@@ -47,7 +47,7 @@ function ScreenContainer({
   );
 }
 
-const SNACKBAR_SLOT_INSET = 20;
+const SNACKBAR_SLOT_BOTTOM = 24;
 
 const styles = StyleSheet.create({
   container: {
@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
   },
   snackbarSlot: {
     position: 'absolute',
-    left: SNACKBAR_SLOT_INSET,
-    right: SNACKBAR_SLOT_INSET,
+    left: 0,
+    right: 0,
   },
   primary: {
     backgroundColor: BACKGROUND_PRIMARY,
