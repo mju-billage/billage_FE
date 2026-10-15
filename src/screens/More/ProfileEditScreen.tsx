@@ -23,6 +23,7 @@ import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import GroupImagePickerScreen from '../GroupManager/GroupImagePickerScreen';
 import { captureWithFeedback, type PickedImage } from '../../utils/imagePicker';
 import * as fileService from '../../services/fileService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { getCurrentUser } from '../../types/session';
 import * as authService from '../../services/authService';
 import { ApiError } from '../../services/apiClient';
@@ -79,13 +80,13 @@ function ProfileEditScreen() {
   const user = getCurrentUser();
   const [name, setName] = useState(user?.name ?? '');
   const [nameError, setNameError] = useState<string | undefined>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run: runSubmit } = useSubmitLock();
   const [stage, setStage] = useState<Stage>('form');
   const [imageMenuVisible, setImageMenuVisible] = useState(false);
   const [imageAction, setImageAction] = useState<ImageAction>('none');
   const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [uploadedFileId, setUploadedFileId] = useState<number | null>(null);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const { isLocked: isUploadingImage, run: runUpload } = useSubmitLock();
   const [leaveDialogVisible, setLeaveDialogVisible] = useState(false);
   const [permissionDialogKind, setPermissionDialogKind] =
     useState<PermissionDialogKind>(null);
@@ -130,42 +131,43 @@ function ProfileEditScreen() {
     }, [stage, hasChanges]),
   );
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!canSubmit) {
       return;
     }
     setNameError(undefined);
-    setIsSubmitting(true);
-    try {
-      const payload: authService.UpdateProfileInput = {};
-      if (trimmedName !== (user?.name ?? '')) {
-        payload.name = trimmedName;
+    runSubmit(async () => {
+      try {
+        const payload: authService.UpdateProfileInput = {};
+        if (trimmedName !== (user?.name ?? '')) {
+          payload.name = trimmedName;
+        }
+        if (imageAction === 'reset') {
+          payload.profileImageFileId = null;
+        } else if (imageAction === 'uploaded' && uploadedFileId !== null) {
+          payload.profileImageFileId = uploadedFileId;
+        }
+        if (Object.keys(payload).length > 0) {
+          await authService.updateMyProfile(payload);
+        }
+        navigation.navigate('MyProfile', {
+          snackbarMessage: SNACKBAR_PROFILE_UPDATED,
+        });
+        return true;
+      } catch (error) {
+        if (isNetworkError(error)) {
+          setNameError(API_NETWORK_ERROR_MESSAGE);
+        } else if (error instanceof ApiError) {
+          const nameFieldError = error.fieldErrors.find(
+            fieldError => fieldError.field === 'name',
+          );
+          setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code, error.message));
+        } else {
+          setNameError(API_ERROR_DEFAULT_MESSAGE);
+        }
+        return false;
       }
-      if (imageAction === 'reset') {
-        payload.profileImageFileId = null;
-      } else if (imageAction === 'uploaded' && uploadedFileId !== null) {
-        payload.profileImageFileId = uploadedFileId;
-      }
-      if (Object.keys(payload).length > 0) {
-        await authService.updateMyProfile(payload);
-      }
-      navigation.navigate('MyProfile', {
-        snackbarMessage: SNACKBAR_PROFILE_UPDATED,
-      });
-    } catch (error) {
-      if (isNetworkError(error)) {
-        setNameError(API_NETWORK_ERROR_MESSAGE);
-      } else if (error instanceof ApiError) {
-        const nameFieldError = error.fieldErrors.find(
-          fieldError => fieldError.field === 'name',
-        );
-        setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code, error.message));
-      } else {
-        setNameError(API_ERROR_DEFAULT_MESSAGE);
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, { keepLockedOnSuccess: true });
   };
 
   const handleImagePicked = async (image: PickedImage) => {
@@ -174,22 +176,23 @@ function ProfileEditScreen() {
       return;
     }
     setPreviewUri(image.uri);
-    setIsUploadingImage(true);
-    try {
-      const uploaded = await fileService.uploadFile(
-        image.uri,
-        image.fileName,
-        image.type,
-        'PROFILE_IMAGE',
-      );
-      setUploadedFileId(Number(uploaded.id));
-      setImageAction('uploaded');
-    } catch (error) {
-      setPreviewUri(null);
-      showSnackbar(toUserErrorMessage(error, SNACKBAR_IMAGE_UPLOAD_FAILED));
-    } finally {
-      setIsUploadingImage(false);
-    }
+    runUpload(async () => {
+      try {
+        const uploaded = await fileService.uploadFile(
+          image.uri,
+          image.fileName,
+          image.type,
+          'PROFILE_IMAGE',
+        );
+        setUploadedFileId(Number(uploaded.id));
+        setImageAction('uploaded');
+        return true;
+      } catch (error) {
+        setPreviewUri(null);
+        showSnackbar(toUserErrorMessage(error, SNACKBAR_IMAGE_UPLOAD_FAILED));
+        return false;
+      }
+    });
   };
 
   const handleTakePhoto = async () => {

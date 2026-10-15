@@ -17,6 +17,7 @@ import { captureWithFeedback, type PickedImage } from '../../utils/imagePicker';
 import * as fileService from '../../services/fileService';
 import { getActiveGroup } from '../../types/group';
 import * as groupService from '../../services/groupService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { ApiError } from '../../services/apiClient';
 import {
   API_ERROR_DEFAULT_MESSAGE,
@@ -65,13 +66,13 @@ function GroupProfileEditScreen() {
   const group = getActiveGroup();
   const [name, setName] = useState(group?.name ?? '');
   const [nameError, setNameError] = useState<string | undefined>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run: runSubmit } = useSubmitLock();
   const [stage, setStage] = useState<Stage>('form');
   const [imageMenuVisible, setImageMenuVisible] = useState(false);
   const [imageAction, setImageAction] = useState<ImageAction>('none');
   const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [uploadedFileId, setUploadedFileId] = useState<number | null>(null);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const { isLocked: isUploadingImage, run: runUpload } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [permissionDialogKind, setPermissionDialogKind] =
     useState<PermissionDialogKind>(null);
@@ -90,22 +91,23 @@ function GroupProfileEditScreen() {
       return;
     }
     setPreviewUri(image.uri);
-    setIsUploadingImage(true);
-    try {
-      const uploaded = await fileService.uploadFile(
-        image.uri,
-        image.fileName,
-        image.type,
-        'GROUP_IMAGE',
-      );
-      setUploadedFileId(Number(uploaded.id));
-      setImageAction('uploaded');
-    } catch (error) {
-      setPreviewUri(null);
-      showSnackbar(toUserErrorMessage(error, SNACKBAR_IMAGE_UPLOAD_FAILED));
-    } finally {
-      setIsUploadingImage(false);
-    }
+    runUpload(async () => {
+      try {
+        const uploaded = await fileService.uploadFile(
+          image.uri,
+          image.fileName,
+          image.type,
+          'GROUP_IMAGE',
+        );
+        setUploadedFileId(Number(uploaded.id));
+        setImageAction('uploaded');
+        return true;
+      } catch (error) {
+        setPreviewUri(null);
+        showSnackbar(toUserErrorMessage(error, SNACKBAR_IMAGE_UPLOAD_FAILED));
+        return false;
+      }
+    });
   };
 
   const handleTakePhoto = async () => {
@@ -117,38 +119,39 @@ function GroupProfileEditScreen() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!canSubmit || !group) {
       return;
     }
     setNameError(undefined);
-    setIsSubmitting(true);
-    try {
-      const payload: groupService.UpdateGroupInput = {};
-      if (trimmedName !== group.name) {
-        payload.name = trimmedName;
+    runSubmit(async () => {
+      try {
+        const payload: groupService.UpdateGroupInput = {};
+        if (trimmedName !== group.name) {
+          payload.name = trimmedName;
+        }
+        if (imageAction === 'uploaded' && uploadedFileId !== null) {
+          payload.groupImageFileId = uploadedFileId;
+        }
+        if (Object.keys(payload).length > 0) {
+          await groupService.updateGroup(group.id, payload);
+        }
+        navigation.goBack();
+        return true;
+      } catch (error) {
+        if (isNetworkError(error)) {
+          setNameError(API_NETWORK_ERROR_MESSAGE);
+        } else if (error instanceof ApiError) {
+          const nameFieldError = error.fieldErrors.find(
+            fieldError => fieldError.field === 'name',
+          );
+          setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code, error.message));
+        } else {
+          setNameError(API_ERROR_DEFAULT_MESSAGE);
+        }
+        return false;
       }
-      if (imageAction === 'uploaded' && uploadedFileId !== null) {
-        payload.groupImageFileId = uploadedFileId;
-      }
-      if (Object.keys(payload).length > 0) {
-        await groupService.updateGroup(group.id, payload);
-      }
-      navigation.goBack();
-    } catch (error) {
-      if (isNetworkError(error)) {
-        setNameError(API_NETWORK_ERROR_MESSAGE);
-      } else if (error instanceof ApiError) {
-        const nameFieldError = error.fieldErrors.find(
-          fieldError => fieldError.field === 'name',
-        );
-        setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code, error.message));
-      } else {
-        setNameError(API_ERROR_DEFAULT_MESSAGE);
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, { keepLockedOnSuccess: true });
   };
 
   if (stage === 'imagePicker') {

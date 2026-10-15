@@ -10,6 +10,7 @@ import TextButton from '../../components/Input/Button/TextButton';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import JoinGroupSheet from '../GroupManager/JoinGroupSheet';
 import * as authService from '../../services/authService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import {
@@ -38,11 +39,15 @@ function SignupCompleteScreen() {
   const route = useRoute<SignupCompleteRouteProp>();
   const isOnboarding = route.name === 'GroupOnboarding';
   const [joinSheetVisible, setJoinSheetVisible] = useState(false);
+  const { isLocked: isLoggingOut, run: runLogout } = useSubmitLock();
 
-  const handleLogout = useCallback(async () => {
-    await authService.logout().catch(() => undefined);
-    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-  }, [navigation]);
+  const handleLogout = useCallback(() => {
+    runLogout(async () => {
+      await authService.logout().catch(() => undefined);
+      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+      return true;
+    }, { keepLockedOnSuccess: true });
+  }, [navigation, runLogout]);
 
   useFocusEffect(
     useCallback(() => {
@@ -99,6 +104,7 @@ function SignupCompleteScreen() {
               label={POST_LOGIN_LOGOUT_LABEL}
               hierarchy="tertiary"
               onPress={handleLogout}
+              disabled={isLoggingOut}
             />
           </View>
         )}

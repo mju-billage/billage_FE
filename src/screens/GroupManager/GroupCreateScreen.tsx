@@ -8,6 +8,7 @@ import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import * as groupService from '../../services/groupService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { ApiError } from '../../services/apiClient';
 import {
   API_ERROR_DEFAULT_MESSAGE,
@@ -36,43 +37,44 @@ function GroupCreateScreen() {
   const navigation = useNavigation<GroupCreateNavigationProp>();
   const [name, setName] = useState('');
   const [nameError, setNameError] = useState<string | undefined>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run } = useSubmitLock();
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const trimmedName = name.trim();
-    if (!trimmedName || isSubmitting) {
+    if (!trimmedName) {
       return;
     }
     setNameError(undefined);
-    setIsSubmitting(true);
-    try {
-      await groupService.createGroup({ name: trimmedName });
-      navigation.reset({
-        index: 1,
-        routes: [
-          { name: 'Main', params: { screen: 'More' } },
-          {
-            name: 'AllGroups',
-            params: {
-              snackbarMessage: `'${trimmedName}'${SNACKBAR_GROUP_CREATED_SUFFIX}`,
+    run(async () => {
+      try {
+        await groupService.createGroup({ name: trimmedName });
+        navigation.reset({
+          index: 1,
+          routes: [
+            { name: 'Main', params: { screen: 'More' } },
+            {
+              name: 'AllGroups',
+              params: {
+                snackbarMessage: `'${trimmedName}'${SNACKBAR_GROUP_CREATED_SUFFIX}`,
+              },
             },
-          },
-        ],
-      });
-    } catch (error) {
-      if (isNetworkError(error)) {
-        setNameError(API_NETWORK_ERROR_MESSAGE);
-      } else if (error instanceof ApiError) {
-        const nameFieldError = error.fieldErrors.find(
-          fieldError => fieldError.field === 'name',
-        );
-        setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code, error.message));
-      } else {
-        setNameError(API_ERROR_DEFAULT_MESSAGE);
+          ],
+        });
+        return true;
+      } catch (error) {
+        if (isNetworkError(error)) {
+          setNameError(API_NETWORK_ERROR_MESSAGE);
+        } else if (error instanceof ApiError) {
+          const nameFieldError = error.fieldErrors.find(
+            fieldError => fieldError.field === 'name',
+          );
+          setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code, error.message));
+        } else {
+          setNameError(API_ERROR_DEFAULT_MESSAGE);
+        }
+        return false;
       }
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, { keepLockedOnSuccess: true });
   };
 
   return (

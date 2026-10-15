@@ -9,6 +9,7 @@ import Button from '../../components/Input/Button/Button';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { isValidEmail } from '../../utils/validators';
 import * as authService from '../../services/authService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { toUserErrorMessage } from '../../constants/apiErrorMessages';
 import { TYPOGRAPHY } from '../../constants/typography';
 import {
@@ -27,22 +28,23 @@ function PasswordResetScreen() {
   const navigation = useNavigation<PasswordResetNavigationProp>();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | undefined>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run } = useSubmitLock();
 
-  const handleSend = async () => {
-    if (!isValidEmail(email) || isSubmitting) {
+  const handleSend = () => {
+    if (!isValidEmail(email)) {
       return;
     }
     setError(undefined);
-    setIsSubmitting(true);
-    try {
-      await authService.requestPasswordReset(email);
-      navigation.replace('PasswordResetSent', { email });
-    } catch (err) {
-      setError(toUserErrorMessage(err));
-    } finally {
-      setIsSubmitting(false);
-    }
+    run(async () => {
+      try {
+        await authService.requestPasswordReset(email);
+        navigation.replace('PasswordResetSent', { email });
+        return true;
+      } catch (err) {
+        setError(toUserErrorMessage(err));
+        return false;
+      }
+    }, { keepLockedOnSuccess: true });
   };
 
   return (

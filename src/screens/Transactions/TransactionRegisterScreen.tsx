@@ -41,6 +41,7 @@ import {
   View,
 } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -266,7 +267,7 @@ function TransactionRegisterScreen() {
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>('none');
   const [activeDialog, setActiveDialog] = useState<ActiveDialog>('none');
   const [pendingScanResult, setPendingScanResult] = useState<ScanApplyValues | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked, run } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
   const toErrorMessage = (error: unknown): string => {
@@ -377,65 +378,65 @@ function TransactionRegisterScreen() {
     }, [stage]),
   );
 
-  const handleSubmit = async () => {
-    if (!canSubmit || isSubmitting) {
+  const handleSubmit = () => {
+    if (!canSubmit) {
       return;
     }
-
-    setIsSubmitting(true);
-    try {
-      const uploadedReceiptFileIds = receiptItems
-        .filter((item): item is ReceiptItem & { fileId: number } => item.fileId !== undefined)
-        .map(item => item.fileId);
-      if (mode === 'createReal') {
-        const created = await entryService.createEntry(ledgerId, {
-          type: transactionKind === 'income' ? 'INCOME' : 'EXPENSE',
-          title: itemName.trim(),
-          amount,
-          occurredOn: toIsoDate(date),
-          memo: memo.trim() || undefined,
-          managerUserId,
-          receiptFileIds: uploadedReceiptFileIds,
-        });
-        showSnackbar(
-          created.approvalStatus === 'PENDING'
-            ? SNACKBAR_TRANSACTION_ADDED_PENDING
-            : SNACKBAR_TRANSACTION_ADDED,
-        );
-      } else {
-        const updates: entryService.UpdateEntryInput = {};
-        const trimmedTitle = itemName.trim();
-        const trimmedMemo = memo.trim();
-        const isoDate = toIsoDate(date);
-        if (initialSnapshot) {
-          if (trimmedTitle !== initialSnapshot.title) {
-            updates.title = trimmedTitle;
+    run(async () => {
+      try {
+        const uploadedReceiptFileIds = receiptItems
+          .filter((item): item is ReceiptItem & { fileId: number } => item.fileId !== undefined)
+          .map(item => item.fileId);
+        if (mode === 'createReal') {
+          const created = await entryService.createEntry(ledgerId, {
+            type: transactionKind === 'income' ? 'INCOME' : 'EXPENSE',
+            title: itemName.trim(),
+            amount,
+            occurredOn: toIsoDate(date),
+            memo: memo.trim() || undefined,
+            managerUserId,
+            receiptFileIds: uploadedReceiptFileIds,
+          });
+          showSnackbar(
+            created.approvalStatus === 'PENDING'
+              ? SNACKBAR_TRANSACTION_ADDED_PENDING
+              : SNACKBAR_TRANSACTION_ADDED,
+          );
+        } else {
+          const updates: entryService.UpdateEntryInput = {};
+          const trimmedTitle = itemName.trim();
+          const trimmedMemo = memo.trim();
+          const isoDate = toIsoDate(date);
+          if (initialSnapshot) {
+            if (trimmedTitle !== initialSnapshot.title) {
+              updates.title = trimmedTitle;
+            }
+            if (amount !== initialSnapshot.amount) {
+              updates.amount = amount;
+            }
+            if (isoDate !== initialSnapshot.occurredOn) {
+              updates.occurredOn = isoDate;
+            }
+            if (trimmedMemo !== initialSnapshot.memo) {
+              updates.memo = trimmedMemo;
+            }
+            if (managerUserId && managerUserId !== initialSnapshot.managerUserId) {
+              updates.managerUserId = managerUserId;
+            }
+            if (!sameNumberSet(uploadedReceiptFileIds, initialSnapshot.receiptFileIds)) {
+              updates.receiptFileIds = uploadedReceiptFileIds;
+            }
           }
-          if (amount !== initialSnapshot.amount) {
-            updates.amount = amount;
-          }
-          if (isoDate !== initialSnapshot.occurredOn) {
-            updates.occurredOn = isoDate;
-          }
-          if (trimmedMemo !== initialSnapshot.memo) {
-            updates.memo = trimmedMemo;
-          }
-          if (managerUserId && managerUserId !== initialSnapshot.managerUserId) {
-            updates.managerUserId = managerUserId;
-          }
-          if (!sameNumberSet(uploadedReceiptFileIds, initialSnapshot.receiptFileIds)) {
-            updates.receiptFileIds = uploadedReceiptFileIds;
-          }
+          await entryService.updateEntry(transactionId!, updates);
+          showSnackbar(SNACKBAR_TRANSACTION_UPDATED);
         }
-        await entryService.updateEntry(transactionId!, updates);
-        showSnackbar(SNACKBAR_TRANSACTION_UPDATED);
+        setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
+        return true;
+      } catch (error) {
+        showSnackbar(toErrorMessage(error));
+        return false;
       }
-      setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
-    } catch (error) {
-      showSnackbar(toErrorMessage(error));
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, { keepLockedOnSuccess: true });
   };
 
   const handleSelectLedger = (key: string) => {
@@ -784,7 +785,7 @@ function TransactionRegisterScreen() {
         <Button
           label={TRANSACTION_REGISTER_SUBMIT_LABEL}
           onPress={handleSubmit}
-          disabled={!canSubmit || isSubmitting}
+          disabled={!canSubmit || isLocked}
           fullWidth
         />
       </View>

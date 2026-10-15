@@ -10,6 +10,7 @@ import Button from '../../components/Input/Button/Button';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import { getActiveGroup } from '../../types/group';
 import * as memberService from '../../services/memberService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { ApiError } from '../../services/apiClient';
 import { parseMemberNames } from '../../utils/memberNames';
 import {
@@ -43,13 +44,13 @@ function MemberAddBulkScreen() {
   const navigation = useNavigation<MemberAddBulkNavigationProp>();
   const [text, setText] = useState('');
   const [formError, setFormError] = useState<string | undefined>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run } = useSubmitLock();
   const [snackbarInfo, setSnackbarInfo] = useState<{ count: number } | null>(null);
 
   const parsedNames = parseMemberNames(text);
   const canSubmit = parsedNames.length > 0 && !isSubmitting;
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!canSubmit) {
       return;
     }
@@ -69,13 +70,14 @@ function MemberAddBulkScreen() {
       return;
     }
 
-    setIsSubmitting(true);
+    run(async () => {
     try {
       const created = await memberService.createMembersBulk(group.id, text.trim());
       setSnackbarInfo({ count: created.length });
       setTimeout(() => {
         navigation.goBack();
       }, SNACKBAR_AUTO_HIDE_MS);
+      return true;
     } catch (error) {
       if (isNetworkError(error)) {
         setFormError(API_NETWORK_ERROR_MESSAGE);
@@ -84,9 +86,9 @@ function MemberAddBulkScreen() {
       } else {
         setFormError(API_ERROR_DEFAULT_MESSAGE);
       }
-    } finally {
-      setIsSubmitting(false);
+      return false;
     }
+    }, { keepLockedOnSuccess: true });
   };
 
   return (

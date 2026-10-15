@@ -9,6 +9,7 @@ import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import * as authService from '../../services/authService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { ApiError } from '../../services/apiClient';
 import { isValidPassword } from '../../utils/validators';
 import {
@@ -48,7 +49,7 @@ function PasswordChangeScreen() {
   const [currentPasswordError, setCurrentPasswordError] = useState<string | undefined>();
   const [newPasswordError, setNewPasswordError] = useState<string | undefined>();
   const [confirmError, setConfirmError] = useState<string | undefined>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run } = useSubmitLock();
   const [leaveDialogVisible, setLeaveDialogVisible] = useState(false);
 
   const hasInput =
@@ -80,7 +81,7 @@ function PasswordChangeScreen() {
     }, [hasInput]),
   );
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!canSubmit) {
       return;
     }
@@ -97,25 +98,26 @@ function PasswordChangeScreen() {
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      await authService.changePassword({ currentPassword, newPassword });
-      navigation.navigate('MyProfile', {
-        snackbarMessage: SNACKBAR_PASSWORD_CHANGED,
-      });
-    } catch (error) {
-      if (isNetworkError(error)) {
-        setCurrentPasswordError(API_NETWORK_ERROR_MESSAGE);
-      } else if (error instanceof ApiError && error.code === 'INVALID_CREDENTIALS') {
-        setCurrentPasswordError(PASSWORD_CHANGE_CURRENT_MISMATCH_ERROR);
-      } else if (error instanceof ApiError) {
-        setCurrentPasswordError(getApiErrorMessage(error.code, error.message));
-      } else {
-        setCurrentPasswordError(API_ERROR_DEFAULT_MESSAGE);
+    run(async () => {
+      try {
+        await authService.changePassword({ currentPassword, newPassword });
+        navigation.navigate('MyProfile', {
+          snackbarMessage: SNACKBAR_PASSWORD_CHANGED,
+        });
+        return true;
+      } catch (error) {
+        if (isNetworkError(error)) {
+          setCurrentPasswordError(API_NETWORK_ERROR_MESSAGE);
+        } else if (error instanceof ApiError && error.code === 'INVALID_CREDENTIALS') {
+          setCurrentPasswordError(PASSWORD_CHANGE_CURRENT_MISMATCH_ERROR);
+        } else if (error instanceof ApiError) {
+          setCurrentPasswordError(getApiErrorMessage(error.code, error.message));
+        } else {
+          setCurrentPasswordError(API_ERROR_DEFAULT_MESSAGE);
+        }
+        return false;
       }
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, { keepLockedOnSuccess: true });
   };
 
   return (

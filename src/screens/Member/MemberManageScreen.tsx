@@ -17,6 +17,7 @@ import MemberAddSheet from './MemberAddSheet';
 import { getActiveGroup } from '../../types/group';
 import type { Member } from '../../types/member';
 import * as memberService from '../../services/memberService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import * as groupService from '../../services/groupService';
 import { ApiError } from '../../services/apiClient';
 import {
@@ -68,7 +69,7 @@ function MemberManageScreen() {
   const [mode, setMode] = useState<Mode>('view');
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { isLocked: isDeleting, run } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -178,26 +179,27 @@ function MemberManageScreen() {
     setSelectedMemberIds(allSelected ? [] : members.map(member => member.memberId));
   };
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = () => {
     const group = getActiveGroup();
-    if (!group || isDeleting) {
+    if (!group) {
       return;
     }
-    setIsDeleting(true);
-    try {
-      await memberService.deleteMembersBulk(group.id, selectedMemberIds);
-      const count = selectedMemberIds.length;
-      setDeleteDialogVisible(false);
-      setMode('view');
-      setSelectedMemberIds([]);
-      showSnackbar(`${count}${SNACKBAR_MEMBER_DELETED_SUFFIX}`);
-      load(keyword);
-    } catch (error) {
-      setDeleteDialogVisible(false);
-      showSnackbar(toErrorMessage(error));
-    } finally {
-      setIsDeleting(false);
-    }
+    run(async () => {
+      try {
+        await memberService.deleteMembersBulk(group.id, selectedMemberIds);
+        const count = selectedMemberIds.length;
+        setDeleteDialogVisible(false);
+        setMode('view');
+        setSelectedMemberIds([]);
+        showSnackbar(`${count}${SNACKBAR_MEMBER_DELETED_SUFFIX}`);
+        load(keyword);
+        return true;
+      } catch (error) {
+        setDeleteDialogVisible(false);
+        showSnackbar(toErrorMessage(error));
+        return false;
+      }
+    });
   };
 
   return (

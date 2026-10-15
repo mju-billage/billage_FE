@@ -26,6 +26,7 @@ import TransactionSingleSelectSheet from '../Transactions/TransactionSingleSelec
 import { getActiveGroup } from '../../types/group';
 import type { Member } from '../../types/member';
 import * as duesService from '../../services/duesService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import * as ledgerService from '../../services/ledgerService';
 import * as memberService from '../../services/memberService';
 import { ApiError } from '../../services/apiClient';
@@ -112,7 +113,7 @@ function DuesCreateScreen() {
   const [memberLoadError, setMemberLoadError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
   const toErrorMessage = (error: unknown): string => {
@@ -271,12 +272,12 @@ function DuesCreateScreen() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const group = getActiveGroup();
-    if (!group || selectedMemberIds.length === 0 || isSubmitting) {
+    if (!group || selectedMemberIds.length === 0) {
       return;
     }
-    setIsSubmitting(true);
+    run(async () => {
     try {
       const created = await duesService.createDues(group.id, {
         title: title.trim(),
@@ -300,6 +301,7 @@ function DuesCreateScreen() {
           },
         ],
       });
+      return true;
     } catch (error) {
       if (error instanceof ApiError) {
         const periodFieldError = error.fieldErrors.find(
@@ -308,13 +310,13 @@ function DuesCreateScreen() {
         if (periodFieldError) {
           setPeriodError(periodFieldError.reason);
           setStep('basic');
-          return;
+          return false;
         }
       }
       showSnackbar(toErrorMessage(error));
-    } finally {
-      setIsSubmitting(false);
+      return false;
     }
+    }, { keepLockedOnSuccess: true });
   };
 
   if (step === 'members') {

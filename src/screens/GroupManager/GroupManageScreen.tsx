@@ -15,6 +15,7 @@ import { getActiveGroup, getCachedGroups } from '../../types/group';
 import type { GroupSummary } from '../../types/group';
 import * as groupService from '../../services/groupService';
 import * as groupMembershipService from '../../services/groupMembershipService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { getGroupMemberships } from '../../types/groupMembership';
 import { ApiError } from '../../services/apiClient';
 import {
@@ -77,7 +78,7 @@ function GroupManageScreen() {
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [confirmKind, setConfirmKind] = useState<ConfirmKind>('none');
   const [deleteInput, setDeleteInput] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
   const showSnackbar = (message: string) => {
@@ -141,24 +142,25 @@ function GroupManageScreen() {
     setConfirmKind(isOnlyTreasurer ? 'leave-blocked' : 'leave');
   };
 
-  const handleLeave = async () => {
-    if (!group || isSubmitting) {
+  const handleLeave = () => {
+    if (!group) {
       return;
     }
-    setIsSubmitting(true);
-    try {
-      await groupMembershipService.leaveGroup(group.id);
-      setConfirmKind('none');
-      if (getCachedGroups().length === 0) {
-        navigation.reset({ index: 0, routes: [{ name: 'PostLogin' }] });
-        return;
+    run(async () => {
+      try {
+        await groupMembershipService.leaveGroup(group.id);
+        setConfirmKind('none');
+        if (getCachedGroups().length === 0) {
+          navigation.reset({ index: 0, routes: [{ name: 'PostLogin' }] });
+          return true;
+        }
+        navigation.goBack();
+        return true;
+      } catch (error) {
+        handleApiError(error);
+        return false;
       }
-      navigation.goBack();
-    } catch (error) {
-      handleApiError(error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, { keepLockedOnSuccess: true });
   };
 
   const isDeleteNameMatched = deleteInput === group?.name;
@@ -168,35 +170,36 @@ function GroupManageScreen() {
     setConfirmKind('delete');
   };
 
-  const handleDelete = async () => {
-    if (!group || !isDeleteNameMatched || isSubmitting) {
+  const handleDelete = () => {
+    if (!group || !isDeleteNameMatched) {
       return;
     }
-    setIsSubmitting(true);
-    try {
-      await groupService.deleteGroup(group.id, deleteInput);
-      setConfirmKind('none');
-      if (getCachedGroups().length === 0) {
-        navigation.reset({ index: 0, routes: [{ name: 'PostLogin' }] });
-        return;
-      }
-      navigation.reset({
-        index: 1,
-        routes: [
-          { name: 'Main', params: { screen: 'More' } },
-          {
-            name: 'AllGroups',
-            params: {
-              snackbarMessage: `${SNACKBAR_GROUP_DELETED_PREFIX}${group.name}${SNACKBAR_GROUP_DELETED_SUFFIX}`,
+    run(async () => {
+      try {
+        await groupService.deleteGroup(group.id, deleteInput);
+        setConfirmKind('none');
+        if (getCachedGroups().length === 0) {
+          navigation.reset({ index: 0, routes: [{ name: 'PostLogin' }] });
+          return true;
+        }
+        navigation.reset({
+          index: 1,
+          routes: [
+            { name: 'Main', params: { screen: 'More' } },
+            {
+              name: 'AllGroups',
+              params: {
+                snackbarMessage: `${SNACKBAR_GROUP_DELETED_PREFIX}${group.name}${SNACKBAR_GROUP_DELETED_SUFFIX}`,
+              },
             },
-          },
-        ],
-      });
-    } catch (error) {
-      handleApiError(error);
-    } finally {
-      setIsSubmitting(false);
-    }
+          ],
+        });
+        return true;
+      } catch (error) {
+        handleApiError(error);
+        return false;
+      }
+    }, { keepLockedOnSuccess: true });
   };
 
   return (

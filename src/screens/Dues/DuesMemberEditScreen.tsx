@@ -14,6 +14,7 @@ import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import type { Member } from '../../types/member';
 import * as duesService from '../../services/duesService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import * as memberService from '../../services/memberService';
 import { ApiError } from '../../services/apiClient';
 import {
@@ -68,7 +69,7 @@ function DuesMemberEditScreen() {
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [leaveDialogVisible, setLeaveDialogVisible] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
   const toErrorMessage = (error: unknown): string => {
@@ -162,26 +163,27 @@ function DuesMemberEditScreen() {
     }
   };
 
-  const handleSubmit = async () => {
-    if (selectedMemberIds.length === 0 || isSubmitting) {
+  const handleSubmit = () => {
+    if (selectedMemberIds.length === 0) {
       return;
     }
     if (!hasChanges) {
       navigation.goBack();
       return;
     }
-    setIsSubmitting(true);
-    try {
-      await duesService.updateDues(duesId, {
-        targetMemberIds: selectedMemberIds.map(Number),
-      });
-      showSnackbar(SNACKBAR_DUES_MEMBERS_UPDATED);
-      setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
-    } catch (error) {
-      showSnackbar(toErrorMessage(error));
-    } finally {
-      setIsSubmitting(false);
-    }
+    run(async () => {
+      try {
+        await duesService.updateDues(duesId, {
+          targetMemberIds: selectedMemberIds.map(Number),
+        });
+        showSnackbar(SNACKBAR_DUES_MEMBERS_UPDATED);
+        setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
+        return true;
+      } catch (error) {
+        showSnackbar(toErrorMessage(error));
+        return false;
+      }
+    }, { keepLockedOnSuccess: true });
   };
 
   if (loadState === 'loading' || loadState === 'error') {

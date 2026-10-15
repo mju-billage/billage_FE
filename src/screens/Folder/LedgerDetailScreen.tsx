@@ -40,6 +40,7 @@ import type { LedgerDetail } from '../../types/ledger';
 import { groupEntriesByDate, type EntrySummary } from '../../types/entry';
 import { formatDateHeader } from '../../utils/dateHeader';
 import * as ledgerService from '../../services/ledgerService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import * as entryService from '../../services/entryService';
 import { ApiError } from '../../services/apiClient';
 import {
@@ -122,7 +123,7 @@ function LedgerDetailScreen() {
   const [activeDialog, setActiveDialog] = useState<ActiveDialog>(null);
   const [dialogInputValue, setDialogInputValue] = useState('');
   const [dialogError, setDialogError] = useState<string | undefined>();
-  const [isSubmittingDialog, setIsSubmittingDialog] = useState(false);
+  const { isLocked: isSubmittingDialog, run } = useSubmitLock();
   const [snackbar, setSnackbar] = useState<string | null>(null);
   const [filter, setFilter] = useState<LedgerFilterValue>(DEFAULT_LEDGER_FILTER);
   const filterRef = useRef<LedgerFilterValue>(DEFAULT_LEDGER_FILTER);
@@ -249,8 +250,8 @@ function LedgerDetailScreen() {
     }
   };
 
-  const handleConfirmDialog = async () => {
-    if (isSubmittingDialog || !ledger) {
+  const handleConfirmDialog = () => {
+    if (!ledger) {
       return;
     }
     if (activeDialog === 'rename') {
@@ -258,49 +259,52 @@ function LedgerDetailScreen() {
       if (!trimmed) {
         return;
       }
-      setIsSubmittingDialog(true);
-      try {
-        await ledgerService.updateLedger(ledgerId, { name: trimmed });
-        closeDialog();
-        showSnackbar(
-          `${SNACKBAR_LEDGER_RENAMED_PREFIX}${trimmed}${SNACKBAR_LEDGER_RENAMED_SUFFIX}`,
-        );
-        load();
-      } catch (error) {
-        setDialogError(fieldOrGeneralError(error, 'name'));
-      } finally {
-        setIsSubmittingDialog(false);
-      }
+      run(async () => {
+        try {
+          await ledgerService.updateLedger(ledgerId, { name: trimmed });
+          closeDialog();
+          showSnackbar(
+            `${SNACKBAR_LEDGER_RENAMED_PREFIX}${trimmed}${SNACKBAR_LEDGER_RENAMED_SUFFIX}`,
+          );
+          load();
+          return true;
+        } catch (error) {
+          setDialogError(fieldOrGeneralError(error, 'name'));
+          return false;
+        }
+      });
     } else if (activeDialog === 'budget') {
       const parsed = Number(dialogInputValue.trim());
       if (!dialogInputValue.trim() || Number.isNaN(parsed)) {
         return;
       }
-      setIsSubmittingDialog(true);
-      try {
-        await ledgerService.updateLedgerBudget(ledgerId, parsed);
-        closeDialog();
-        showSnackbar(SNACKBAR_BUDGET_SAVED);
-        load();
-      } catch (error) {
-        setDialogError(fieldOrGeneralError(error, 'budget'));
-      } finally {
-        setIsSubmittingDialog(false);
-      }
+      run(async () => {
+        try {
+          await ledgerService.updateLedgerBudget(ledgerId, parsed);
+          closeDialog();
+          showSnackbar(SNACKBAR_BUDGET_SAVED);
+          load();
+          return true;
+        } catch (error) {
+          setDialogError(fieldOrGeneralError(error, 'budget'));
+          return false;
+        }
+      });
     } else if (activeDialog === 'delete') {
       const name = ledger.name;
-      setIsSubmittingDialog(true);
-      try {
-        await ledgerService.deleteLedger(ledgerId);
-        closeDialog();
-        showSnackbar(`'${name}'${SNACKBAR_LEDGER_DELETED_SUFFIX}`);
-        setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
-      } catch (error) {
-        closeDialog();
-        showSnackbar(toErrorMessage(error));
-      } finally {
-        setIsSubmittingDialog(false);
-      }
+      run(async () => {
+        try {
+          await ledgerService.deleteLedger(ledgerId);
+          closeDialog();
+          showSnackbar(`'${name}'${SNACKBAR_LEDGER_DELETED_SUFFIX}`);
+          setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
+          return true;
+        } catch (error) {
+          closeDialog();
+          showSnackbar(toErrorMessage(error));
+          return false;
+        }
+      }, { keepLockedOnSuccess: true });
     }
   };
 

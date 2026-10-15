@@ -13,6 +13,7 @@ import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import type { EntryDetail } from '../../types/entry';
 import * as entryService from '../../services/entryService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { getActiveGroup } from '../../types/group';
 import { ApiError } from '../../services/apiClient';
 import { buildAuthenticatedImageSource } from '../../utils/authenticatedImage';
@@ -78,8 +79,8 @@ function TransactionDetailScreen() {
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-  const [isApproving, setIsApproving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { isLocked: isApproving, run: runApprove } = useSubmitLock();
+  const { isLocked: isDeleting, run: runDelete } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
   const toErrorMessage = (error: unknown): string => {
@@ -117,37 +118,39 @@ function TransactionDetailScreen() {
 
   const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
 
-  const handleConfirmDelete = async () => {
-    if (!entry || isDeleting) {
+  const handleConfirmDelete = () => {
+    if (!entry) {
       return;
     }
-    setIsDeleting(true);
-    try {
-      await entryService.deleteEntry(entry.id);
-      setDeleteDialogVisible(false);
-      navigation.goBack();
-    } catch (error) {
-      setDeleteDialogVisible(false);
-      showSnackbar(toErrorMessage(error));
-    } finally {
-      setIsDeleting(false);
-    }
+    runDelete(async () => {
+      try {
+        await entryService.deleteEntry(entry.id);
+        setDeleteDialogVisible(false);
+        navigation.goBack();
+        return true;
+      } catch (error) {
+        setDeleteDialogVisible(false);
+        showSnackbar(toErrorMessage(error));
+        return false;
+      }
+    }, { keepLockedOnSuccess: true });
   };
 
-  const handleApprove = async () => {
-    if (!entry || isApproving) {
+  const handleApprove = () => {
+    if (!entry) {
       return;
     }
-    setIsApproving(true);
-    try {
-      await entryService.approveEntry(entry.id);
-      showSnackbar(SNACKBAR_ENTRY_APPROVED);
-      load();
-    } catch (error) {
-      showSnackbar(toErrorMessage(error));
-    } finally {
-      setIsApproving(false);
-    }
+    runApprove(async () => {
+      try {
+        await entryService.approveEntry(entry.id);
+        showSnackbar(SNACKBAR_ENTRY_APPROVED);
+        load();
+        return true;
+      } catch (error) {
+        showSnackbar(toErrorMessage(error));
+        return false;
+      }
+    });
   };
 
   if (loadState === 'loading' || loadState === 'error') {

@@ -39,6 +39,7 @@ import {
 } from '../../constants/archiveScreenText';
 import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const CLOSE_ICON = require('../../assets/icons/action/Close.png');
@@ -60,7 +61,7 @@ function ArchiveListScreen() {
   const [targetArchive, setTargetArchive] = useState<ArchiveSummary | null>(null);
   const [dialogInputValue, setDialogInputValue] = useState('');
   const [dialogError, setDialogError] = useState<string | undefined>();
-  const [isSubmittingDialog, setIsSubmittingDialog] = useState(false);
+  const { isLocked, run } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
   const toErrorMessage = (error: unknown): string => {
@@ -128,8 +129,8 @@ function ArchiveListScreen() {
     setSnackbarMessage(null);
   };
 
-  const handleConfirmDialog = async () => {
-    if (isSubmittingDialog || !targetArchive) {
+  const handleConfirmDialog = () => {
+    if (!targetArchive) {
       return;
     }
     if (activeDialog === 'rename') {
@@ -137,35 +138,37 @@ function ArchiveListScreen() {
       if (!trimmed) {
         return;
       }
-      setIsSubmittingDialog(true);
-      try {
-        await archiveService.updateArchiveTitle(targetArchive.archiveId, trimmed);
-        closeDialog();
-        showSnackbar(SNACKBAR_ARCHIVE_RENAMED);
-        loadArchives();
-      } catch (error) {
-        if (error instanceof ApiError) {
-          const fieldError = error.fieldErrors.find(fe => fe.field === 'title');
-          setDialogError(fieldError?.reason ?? getApiErrorMessage(error.code, error.message));
-        } else {
-          setDialogError(toErrorMessage(error));
+      run(async () => {
+        try {
+          await archiveService.updateArchiveTitle(targetArchive.archiveId, trimmed);
+          closeDialog();
+          showSnackbar(SNACKBAR_ARCHIVE_RENAMED);
+          loadArchives();
+          return true;
+        } catch (error) {
+          if (error instanceof ApiError) {
+            const fieldError = error.fieldErrors.find(fe => fe.field === 'title');
+            setDialogError(fieldError?.reason ?? getApiErrorMessage(error.code, error.message));
+          } else {
+            setDialogError(toErrorMessage(error));
+          }
+          return false;
         }
-      } finally {
-        setIsSubmittingDialog(false);
-      }
+      });
     } else if (activeDialog === 'delete') {
-      setIsSubmittingDialog(true);
-      try {
-        await archiveService.deleteArchive(targetArchive.archiveId);
-        closeDialog();
-        showSnackbar(SNACKBAR_ARCHIVE_DELETED);
-        loadArchives();
-      } catch (error) {
-        closeDialog();
-        showSnackbar(toErrorMessage(error));
-      } finally {
-        setIsSubmittingDialog(false);
-      }
+      run(async () => {
+        try {
+          await archiveService.deleteArchive(targetArchive.archiveId);
+          closeDialog();
+          showSnackbar(SNACKBAR_ARCHIVE_DELETED);
+          loadArchives();
+          return true;
+        } catch (error) {
+          closeDialog();
+          showSnackbar(toErrorMessage(error));
+          return false;
+        }
+      });
     }
   };
 
@@ -273,7 +276,7 @@ function ArchiveListScreen() {
         autoFocusTextField
         confirmLabel={ARCHIVE_RENAME_CONFIRM_LABEL}
         confirmDisabled={
-          isSubmittingDialog ||
+          isLocked ||
           !dialogInputValue.trim() ||
           dialogInputValue.trim() === targetArchive?.title
         }
@@ -287,7 +290,7 @@ function ArchiveListScreen() {
         description={ARCHIVE_DELETE_DIALOG_DESCRIPTION}
         confirmLabel={ARCHIVE_DELETE_CONFIRM_LABEL}
         destructive
-        confirmDisabled={isSubmittingDialog}
+        confirmDisabled={isLocked}
         onCancel={closeDialog}
         onConfirm={handleConfirmDialog}
       />
