@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import TextField from '../../components/Input/Text Field/TextField';
@@ -29,7 +29,13 @@ type JoinGroupSheetProps = {
 function JoinGroupSheet({ visible, onClose, onJoined }: JoinGroupSheetProps) {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | undefined>();
-  const { isLocked: isSubmitting, run } = useSubmitLock();
+  const { isLocked: isSubmitting, run, release } = useSubmitLock();
+
+  useEffect(() => {
+    if (visible) {
+      release();
+    }
+  }, [visible, release]);
 
   const handleClose = () => {
     setCode('');

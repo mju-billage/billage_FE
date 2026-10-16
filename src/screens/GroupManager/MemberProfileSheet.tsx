@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
@@ -73,7 +73,13 @@ function MemberProfileSheet({
   onLeftGroup,
 }: MemberProfileSheetProps) {
   const [confirmKind, setConfirmKind] = useState<ConfirmKind>('none');
-  const { isLocked: isSubmitting, run } = useSubmitLock();
+  const { isLocked: isSubmitting, run, release } = useSubmitLock();
+
+  useEffect(() => {
+    if (visible) {
+      release();
+    }
+  }, [visible, release]);
 
   if (!member) {
     return null;
