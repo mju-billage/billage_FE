@@ -156,6 +156,7 @@ function TransactionsScreen() {
   const [entries, setEntries] = useState<EntrySummary[]>([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  const [totalElements, setTotalElements] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
@@ -224,6 +225,7 @@ function TransactionsScreen() {
       setEntries(firstPage.items);
       setPage(firstPage.page);
       setHasMore(!firstPage.last);
+      setTotalElements(firstPage.totalElements);
       loadMoreFailedRef.current = false;
       setLoadState('ready');
     } catch (error) {
@@ -472,7 +474,7 @@ function TransactionsScreen() {
             {loadState === 'ready' && (
               <>
                 <Text style={styles.countText}>
-                  {entries.length}
+                  {totalElements}
                   {TRANSACTIONS_COUNT_SUFFIX}
                 </Text>
                 <View style={styles.dividerBleed}>
@@ -561,8 +563,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   countText: {
-    ...TYPOGRAPHY.body2,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_NORMAL,
     marginTop: 4,
     marginBottom: 12,
   },
