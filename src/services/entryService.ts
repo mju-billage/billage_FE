@@ -210,6 +210,7 @@ export type GroupEntryPage = {
   items: EntrySummary[];
   page: number;
   totalPages: number;
+  totalElements: number;
   last: boolean;
 };
 
@@ -251,6 +252,7 @@ export async function getGroupEntries(
     items: response.entries.content.map(toEntrySummary),
     page: response.entries.page,
     totalPages: response.entries.totalPages,
+    totalElements: response.entries.totalElements,
     last: response.entries.last,
   };
 }
