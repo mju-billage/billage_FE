@@ -47,3 +47,21 @@ export function todayKey(): string {
   const now = new Date();
   return formatDateKey(now.getFullYear(), now.getMonth() + 1, now.getDate());
 }
+
+export function nextRangeSelection(
+  current: { start?: string; end?: string },
+  date: string,
+): { start: string; end: string } {
+  const { start, end } = current;
+  if (!start) {
+    return { start: date, end: date };
+  }
+  const isSingle = !end || end === start;
+  if (!isSingle) {
+    return { start: date, end: date };
+  }
+  if (date === start) {
+    return { start, end: start };
+  }
+  return date < start ? { start: date, end: start } : { start, end: date };
+}

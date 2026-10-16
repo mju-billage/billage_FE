@@ -11,7 +11,7 @@ import {
   DEFAULT_ENTRY_LIST_FILTER,
   type EntryListFilterValue,
 } from '../../types/entry';
-import { formatDateKey } from '../../utils/calendarGrid';
+import { formatDateKey, nextRangeSelection } from '../../utils/calendarGrid';
 import {
   FILTER_APPLY_LABEL,
   FILTER_PERIOD_1MONTH,
@@ -124,13 +124,7 @@ function TransactionFilterSheet({
   };
 
   const handleSelectPeriodDate = (date: string) => {
-    if (!periodDraft.start || (periodDraft.start && periodDraft.end)) {
-      setPeriodDraft({ start: date, end: undefined });
-    } else if (date < periodDraft.start) {
-      setPeriodDraft({ start: date, end: periodDraft.start });
-    } else {
-      setPeriodDraft({ ...periodDraft, end: date });
-    }
+    setPeriodDraft(nextRangeSelection(periodDraft, date));
   };
 
   const confirmPeriod = () => {
@@ -295,7 +289,7 @@ function TransactionFilterSheet({
         <>
           <Text style={styles.title}>{FILTER_PERIOD_SHEET_TITLE}</Text>
           <Calendar
-            variant="picker"
+            variant="default"
             showHeader
             year={calendarYear}
             month={calendarMonth}

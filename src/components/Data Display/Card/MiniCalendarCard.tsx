@@ -42,6 +42,7 @@ function MiniCalendarCard({ data, onPress }: MiniCalendarCardProps) {
         interactive={false}
         amountsByDate={amountsByDate}
         largeDates
+        variant="mini"
       />
     </CardBase>
   );
