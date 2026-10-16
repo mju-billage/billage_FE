@@ -178,14 +178,20 @@ function DuesEditScreen() {
     setActiveSheet('ledger');
   };
 
-  const loadLedgerOptions = async () => {
+  const loadLedgerOptions = useCallback(async () => {
     try {
       const ledgers = await ledgerService.getAllLedgersInGroup(groupId);
       setLedgerOptions(ledgers.map(l => ({ id: l.id, name: l.name })));
     } catch (error) {
       showSnackbar(toUserErrorMessage(error, SNACKBAR_LEDGER_OPTIONS_LOAD_FAILED));
     }
-  };
+  }, [groupId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadLedgerOptions();
+    }, [loadLedgerOptions]),
+  );
 
   const handleSelectLedger = (key: string) => {
     const option = ledgerOptions.find(item => item.id === key);
@@ -309,6 +315,10 @@ function DuesEditScreen() {
         selectedKey={ledgerId || undefined}
         onClose={() => setActiveSheet('none')}
         onSelect={handleSelectLedger}
+        onPressEmptyStateCreate={() => {
+          setActiveSheet('none');
+          navigation.navigate('LedgerCreate', { parentId: null });
+        }}
       />
       <DuesDateRangeSheet
         visible={activeSheet === 'period'}

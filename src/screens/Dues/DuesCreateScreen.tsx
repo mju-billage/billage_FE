@@ -209,6 +209,12 @@ function DuesCreateScreen() {
     }
   }, []);
 
+  useFocusEffect(
+    useCallback(() => {
+      loadLedgerOptions();
+    }, [loadLedgerOptions]),
+  );
+
   const loadMembers = useCallback(async () => {
     const group = getActiveGroup();
     if (!group) {
@@ -490,6 +496,10 @@ function DuesCreateScreen() {
         selectedKey={ledgerId || undefined}
         onClose={() => setActiveSheet('none')}
         onSelect={handleSelectLedger}
+        onPressEmptyStateCreate={() => {
+          setActiveSheet('none');
+          navigation.navigate('LedgerCreate', { parentId: null });
+        }}
       />
       <DuesDateRangeSheet
         visible={activeSheet === 'period'}

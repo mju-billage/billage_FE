@@ -336,6 +336,23 @@ function TransactionRegisterScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const loadLedgerOptions = useCallback(async () => {
+    const group = getActiveGroup();
+    if (!group) {
+      return;
+    }
+    const ledgers = await ledgerService.getAllLedgersInGroup(group.id);
+    setLedgerOptions(ledgers.map(l => ({ id: l.id, name: l.name })));
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (mode === 'createReal') {
+        loadLedgerOptions();
+      }
+    }, [mode, loadLedgerOptions]),
+  );
+
   const canChangeLedger = mode !== 'editReal';
   const isUploadingReceipt = receiptItems.some(item => item.uploading);
   const hasScanReceipt = receiptItems.some(item => item.fromScan);
@@ -843,6 +860,10 @@ function TransactionRegisterScreen() {
         selectedKey={ledgerId || undefined}
         onClose={() => setActiveSheet('none')}
         onSelect={handleSelectLedger}
+        onPressEmptyStateCreate={() => {
+          setActiveSheet('none');
+          navigation.navigate('LedgerCreate', { parentId: null });
+        }}
       />
       <TransactionAttachMenuSheet
         visible={activeSheet === 'attachMenu'}

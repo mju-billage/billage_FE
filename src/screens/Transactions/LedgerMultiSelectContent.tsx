@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Button from '../../components/Input/Button/Button';
-import TextButton from '../../components/Input/Button/TextButton';
 import CheckListItem from '../../components/Data Display/Lists/CheckListItem';
 import Chip from '../../components/Data Display/Chips/Chip';
 import {
@@ -11,7 +10,7 @@ import {
   LEDGER_SELECT_PREVIOUS_LABEL,
   LEDGER_SELECT_SHEET_TITLE,
 } from '../../constants/transactionScreenText';
-import { FOREGROUND_SECONDARY } from '../../constants/colors';
+import { FOREGROUND_NEUTRAL_SUBTLE, FOREGROUND_SECONDARY } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 type LedgerOption = { id: string; name: string };
@@ -46,13 +45,18 @@ function LedgerMultiSelectContent({
       <Text style={styles.title}>{LEDGER_SELECT_SHEET_TITLE}</Text>
 
       {options.length === 0 ? (
-        <>
+        <View style={styles.emptyState}>
           <Text style={styles.emptyGuide}>{LEDGER_SELECT_EMPTY_GUIDE}</Text>
-          <TextButton
-            label={LEDGER_SELECT_CREATE_NEW_LABEL}
+          <Pressable
             onPress={onPressCreateNewLedger}
-          />
-        </>
+            hitSlop={8}
+            style={styles.emptyCreateLink}
+          >
+            <Text style={styles.emptyCreateLabel}>
+              {LEDGER_SELECT_CREATE_NEW_LABEL}
+            </Text>
+          </Pressable>
+        </View>
       ) : (
         <>
           {draftIds.length > 0 && (
@@ -110,10 +114,23 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.h3,
     marginBottom: 16,
   },
+  emptyState: {
+    alignItems: 'center',
+    paddingTop: 48,
+    paddingBottom: 60,
+  },
   emptyGuide: {
-    ...TYPOGRAPHY.body2,
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+    textAlign: 'center',
+  },
+  emptyCreateLink: {
+    marginTop: 12,
+  },
+  emptyCreateLabel: {
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_SECONDARY,
-    marginBottom: 12,
+    textDecorationLine: 'underline',
   },
   chipRow: {
     flexDirection: 'row',
