@@ -189,23 +189,19 @@ function Calendar({
       return null;
     };
 
-    const textColorStyle =
+    const textColor =
       isSingleSelected || isRangeStart || isRangeEnd
-        ? styles.dateTextOnFill
+        ? FOREGROUND_INVERSE
         : isInRange || isOutlined
-        ? styles.dateTextSecondary
+        ? FOREGROUND_SECONDARY
         : isDisabled
-        ? styles.dateTextDisabled
-        : null;
+        ? FOREGROUND_DISABLED
+        : cellIndex === 0
+        ? FEEDBACK_NEGATIVE_BOLD
+        : FOREGROUND_NEUTRAL_NORMAL;
 
     const content = (
-      <Text
-        style={[
-          styles.dateTextDefault,
-          cellIndex === 0 && styles.dateTextSunday,
-          textColorStyle,
-        ]}
-      >
+      <Text style={[styles.dateTextDefault, { color: textColor }]}>
         {cell.date}
       </Text>
     );
@@ -487,9 +483,18 @@ const styles = StyleSheet.create({
     height: 44,
     justifyContent: 'center',
     overflow: 'hidden',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'transparent',
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
   },
   dayCellSelected: {
     backgroundColor: FOREGROUND_SECONDARY,
+    borderWidth: 1,
+    borderColor: 'transparent',
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
     borderBottomLeftRadius: 6,
@@ -497,6 +502,8 @@ const styles = StyleSheet.create({
   },
   dayCellRangeStart: {
     backgroundColor: RANGE_START_FILL,
+    borderWidth: 1,
+    borderColor: 'transparent',
     borderTopLeftRadius: 6,
     borderBottomLeftRadius: 6,
     borderTopRightRadius: 0,
@@ -504,6 +511,8 @@ const styles = StyleSheet.create({
   },
   dayCellRangeEnd: {
     backgroundColor: FOREGROUND_SECONDARY,
+    borderWidth: 1,
+    borderColor: 'transparent',
     borderTopRightRadius: 6,
     borderBottomRightRadius: 6,
     borderTopLeftRadius: 0,
@@ -511,12 +520,15 @@ const styles = StyleSheet.create({
   },
   dayCellInRange: {
     backgroundColor: FILL_SECONDARY_SUBTLER,
+    borderWidth: 1,
+    borderColor: 'transparent',
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
   },
   dayCellOutlined: {
+    backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: FOREGROUND_SECONDARY,
     borderTopLeftRadius: 6,
@@ -526,6 +538,8 @@ const styles = StyleSheet.create({
   },
   dayCellPressed: {
     backgroundColor: FILL_NEUTRAL_NORMAL,
+    borderWidth: 1,
+    borderColor: 'transparent',
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
     borderBottomLeftRadius: 6,
@@ -534,12 +548,6 @@ const styles = StyleSheet.create({
   dateTextDefault: {
     ...TYPOGRAPHY.subtitle1,
     color: FOREGROUND_NEUTRAL_NORMAL,
-  },
-  dateTextOnFill: {
-    color: FOREGROUND_INVERSE,
-  },
-  dateTextSecondary: {
-    color: FOREGROUND_SECONDARY,
   },
   dayCellLedger: {
     flex: 1,
