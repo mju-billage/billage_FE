@@ -201,9 +201,12 @@ function Calendar({
         : FOREGROUND_NEUTRAL_NORMAL;
 
     const content = (
-      <Text style={[styles.dateTextDefault, { color: textColor }]}>
-        {cell.date}
-      </Text>
+      <>
+        {isOutlined && <View pointerEvents="none" style={styles.todayOutline} />}
+        <Text style={[styles.dateTextDefault, { color: textColor }]}>
+          {cell.date}
+        </Text>
+      </>
     );
 
     if (interactive) {
@@ -484,8 +487,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
     backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: 'transparent',
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     borderBottomLeftRadius: 0,
@@ -493,8 +494,6 @@ const styles = StyleSheet.create({
   },
   dayCellSelected: {
     backgroundColor: FOREGROUND_SECONDARY,
-    borderWidth: 1,
-    borderColor: 'transparent',
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
     borderBottomLeftRadius: 6,
@@ -502,8 +501,6 @@ const styles = StyleSheet.create({
   },
   dayCellRangeStart: {
     backgroundColor: RANGE_START_FILL,
-    borderWidth: 1,
-    borderColor: 'transparent',
     borderTopLeftRadius: 6,
     borderBottomLeftRadius: 6,
     borderTopRightRadius: 0,
@@ -511,8 +508,6 @@ const styles = StyleSheet.create({
   },
   dayCellRangeEnd: {
     backgroundColor: FOREGROUND_SECONDARY,
-    borderWidth: 1,
-    borderColor: 'transparent',
     borderTopRightRadius: 6,
     borderBottomRightRadius: 6,
     borderTopLeftRadius: 0,
@@ -520,8 +515,6 @@ const styles = StyleSheet.create({
   },
   dayCellInRange: {
     backgroundColor: FILL_SECONDARY_SUBTLER,
-    borderWidth: 1,
-    borderColor: 'transparent',
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     borderBottomLeftRadius: 0,
@@ -529,8 +522,6 @@ const styles = StyleSheet.create({
   },
   dayCellOutlined: {
     backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: FOREGROUND_SECONDARY,
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
     borderBottomLeftRadius: 6,
@@ -538,12 +529,20 @@ const styles = StyleSheet.create({
   },
   dayCellPressed: {
     backgroundColor: FILL_NEUTRAL_NORMAL,
-    borderWidth: 1,
-    borderColor: 'transparent',
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
     borderBottomLeftRadius: 6,
     borderBottomRightRadius: 6,
+  },
+  todayOutline: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderWidth: 1,
+    borderColor: FOREGROUND_SECONDARY,
+    borderRadius: 6,
   },
   dateTextDefault: {
     ...TYPOGRAPHY.subtitle1,
