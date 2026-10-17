@@ -8,6 +8,7 @@ import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import SearchField from '../../components/Input/Search/SearchField';
 import Divider from '../../components/Data Display/Divider/Divider';
+import CountRow from '../../components/Data Display/Lists/CountRow';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import type { EntrySummary } from '../../types/entry';
 import { groupEntriesByDate } from '../../types/entry';
@@ -190,11 +191,8 @@ function TransactionSearchScreen() {
 
         {searchState === 'ready' && (
           <>
-            <View style={styles.countRow}>
-              <Text style={styles.countText}>
-                {totalElements}
-                {TRANSACTIONS_COUNT_SUFFIX}
-              </Text>
+            <View style={styles.countRowWrapper}>
+              <CountRow text={`${totalElements}${TRANSACTIONS_COUNT_SUFFIX}`} />
             </View>
             <View style={styles.dividerBleed}>
               <Divider />
@@ -269,14 +267,9 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingHorizontal: 20,
   },
-  countRow: {
-    height: 39,
-    justifyContent: 'center',
+  countRowWrapper: {
     marginTop: 16,
-  },
-  countText: {
-    ...TYPOGRAPHY.body3,
-    color: FOREGROUND_NEUTRAL_NORMAL,
+    marginHorizontal: -20,
   },
   dividerBleed: {
     marginHorizontal: -20,

@@ -22,6 +22,7 @@ import type { TabItem } from '../../components/Navigation/Tabs/Tabs';
 import AmountCard from '../../components/Data Display/Card/AmountCard';
 import Chip from '../../components/Data Display/Chips/Chip';
 import Divider from '../../components/Data Display/Divider/Divider';
+import CountRow from '../../components/Data Display/Lists/CountRow';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import FloatingActionButton, { FAB_SIZE } from '../../components/Input/Button/FAB';
 import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Navigation/BottomNavigation';
@@ -429,57 +430,52 @@ function TransactionsScreen() {
             style={styles.controls}
             onLayout={event => setControlsHeight(event.nativeEvent.layout.height)}
           >
-            <View style={styles.tabsBleed}>
-              <Tabs items={TABS} value={tab} onChange={setTab} showIcon={false} fullWidth />
-            </View>
+            <Tabs items={TABS} value={tab} onChange={setTab} showIcon={false} fullWidth />
 
-            <View style={styles.actionRow}>
-              <View style={styles.iconRow}>
-                <View style={styles.filterGroup}>
-                  {isFilterActive && (
-                    <Pressable onPress={() => setFilterSheetVisible(true)}>
-                      <Text style={styles.filterSummaryText} numberOfLines={1}>
-                        {filterSummary}
-                      </Text>
-                    </Pressable>
-                  )}
+            <View style={styles.filterSection}>
+              <View style={styles.actionRow}>
+                <View style={styles.iconRow}>
+                  <View style={styles.filterGroup}>
+                    {isFilterActive && (
+                      <Pressable onPress={() => setFilterSheetVisible(true)}>
+                        <Text style={styles.filterSummaryText} numberOfLines={1}>
+                          {filterSummary}
+                        </Text>
+                      </Pressable>
+                    )}
+                    <IconButton
+                      icon={FILTER_ICON}
+                      iconSize={20}
+                      iconColor={FOREGROUND_NEUTRAL_NORMAL}
+                      onPress={() => setFilterSheetVisible(true)}
+                    />
+                  </View>
                   <IconButton
-                    icon={FILTER_ICON}
+                    icon={SEARCH_ICON}
                     iconSize={20}
                     iconColor={FOREGROUND_NEUTRAL_NORMAL}
-                    onPress={() => setFilterSheetVisible(true)}
+                    onPress={() => navigation.navigate('TransactionSearch')}
                   />
                 </View>
-                <IconButton
-                  icon={SEARCH_ICON}
-                  iconSize={20}
-                  iconColor={FOREGROUND_NEUTRAL_NORMAL}
-                  onPress={() => navigation.navigate('TransactionSearch')}
-                />
               </View>
-            </View>
 
-            {filterChips.length > 0 && (
-              <View style={styles.chipRow}>
-                {filterChips.map(chip => (
-                  <Chip
-                    key={chip.key}
-                    label={chip.label}
-                    onRemove={() => removeFilterChip(chip.key)}
-                  />
-                ))}
-              </View>
-            )}
+              {filterChips.length > 0 && (
+                <View style={styles.chipRow}>
+                  {filterChips.map(chip => (
+                    <Chip
+                      key={chip.key}
+                      label={chip.label}
+                      onRemove={() => removeFilterChip(chip.key)}
+                    />
+                  ))}
+                </View>
+              )}
+            </View>
 
             {loadState === 'ready' && (
               <>
-                <Text style={styles.countText}>
-                  {totalElements}
-                  {TRANSACTIONS_COUNT_SUFFIX}
-                </Text>
-                <View style={styles.dividerBleed}>
-                  <Divider />
-                </View>
+                <CountRow text={`${totalElements}${TRANSACTIONS_COUNT_SUFFIX}`} />
+                <Divider />
               </>
             )}
           </View>
@@ -528,16 +524,17 @@ const styles = StyleSheet.create({
     backgroundColor: BACKGROUND_PRIMARY,
   },
   controls: {
-    paddingHorizontal: 20,
     backgroundColor: BACKGROUND_SECONDARY,
   },
-  tabsBleed: {
-    marginHorizontal: -20,
+  filterSection: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    gap: 12,
   },
   actionRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 4,
+    marginVertical: -8,
   },
   iconRow: {
     flex: 1,
@@ -560,16 +557,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginBottom: 8,
-  },
-  countText: {
-    ...TYPOGRAPHY.body3,
-    color: FOREGROUND_NEUTRAL_NORMAL,
-    marginTop: 4,
-    marginBottom: 12,
-  },
-  dividerBleed: {
-    marginHorizontal: -20,
   },
   listContent: {
     paddingBottom: BOTTOM_NAVIGATION_HEIGHT + 96,
