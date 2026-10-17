@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     backgroundColor: FILL_NEUTRAL_NORMAL,
     borderRadius: 4,
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    height: 22,
   },
   label: {
     ...TYPOGRAPHY.chips,
