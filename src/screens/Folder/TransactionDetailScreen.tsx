@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -7,11 +7,21 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Thumbnail from '../../components/Data Display/Image Placeholder/Thumbnail';
+import AttachmentAddButton from '../../components/Input/Button/AttachmentAddButton';
 import Button from '../../components/Input/Button/Button';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
+import TransactionDateSheet from '../Transactions/TransactionDateSheet';
+import TransactionTextInputSheet from '../Transactions/TransactionTextInputSheet';
+import TransactionSingleSelectSheet from '../Transactions/TransactionSingleSelectSheet';
+import {
+  useReceiptAttachments,
+  type ScanApplyValues,
+} from '../../hooks/useReceiptAttachments';
 import type { EntryDetail } from '../../types/entry';
 import * as entryService from '../../services/entryService';
+import * as groupMembershipService from '../../services/groupMembershipService';
+import * as fileService from '../../services/fileService';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { getActiveGroup } from '../../types/group';
 import { ApiError } from '../../services/apiClient';
@@ -43,6 +53,24 @@ import {
   TRANSACTION_RECEIPT_LABEL,
 } from '../../constants/ledgerScreenText';
 import {
+  DATE_SHEET_TITLE_EXPENSE,
+  DATE_SHEET_TITLE_INCOME,
+  ITEM_NAME_MAX_LENGTH,
+  ITEM_NAME_SHEET_PLACEHOLDER,
+  ITEM_NAME_SHEET_TITLE,
+  MANAGER_SELECT_SHEET_TITLE,
+  MEMO_MAX_LENGTH,
+  MEMO_SHEET_PLACEHOLDER,
+  MEMO_SHEET_TITLE,
+  SCAN_APPLY_CANCEL_LABEL,
+  SCAN_APPLY_CONFIRM_DESCRIPTION,
+  SCAN_APPLY_CONFIRM_LABEL,
+  SCAN_APPLY_CONFIRM_TITLE,
+  SNACKBAR_TRANSACTION_UPDATED,
+  TRANSACTION_REGISTER_LEDGER_LOCKED_HINT,
+  TRANSACTION_REGISTER_RECEIPT_MAX,
+} from '../../constants/transactionScreenText';
+import {
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_PRIMARY,
@@ -50,10 +78,10 @@ import {
 import { TYPOGRAPHY } from '../../constants/typography';
 import Divider from '../../components/Data Display/Divider/Divider';
 import { formatFullDate } from '../../utils/dateHeader';
-import { TRANSACTION_REGISTER_RECEIPT_MAX } from '../../constants/transactionScreenText';
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const DELETE_ICON = require('../../assets/icons/action/Delete.png');
+const CHEVRON_ICON = require('../../assets/icons/nav/Chevron Right.png');
 
 type TransactionDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -65,6 +93,20 @@ type TransactionDetailRouteProp = RouteProp<
 >;
 
 type LoadState = 'loading' | 'error' | 'ready';
+type ActiveSheet = 'none' | 'date' | 'itemName' | 'manager' | 'memo';
+type ActiveDialog = 'none' | 'scanApply';
+
+function toDotDate(isoDate: string): string {
+  return isoDate.replace(/-/g, '.');
+}
+
+function toIsoDate(dotDate: string): string {
+  return dotDate.replace(/\./g, '-');
+}
+
+function idsKey(ids: number[]): string {
+  return [...ids].sort((a, b) => a - b).join(',');
+}
 
 function TransactionDetailScreen() {
   const navigation = useNavigation<TransactionDetailNavigationProp>();
@@ -76,9 +118,22 @@ function TransactionDetailScreen() {
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [activeSheet, setActiveSheet] = useState<ActiveSheet>('none');
+  const [activeDialog, setActiveDialog] = useState<ActiveDialog>('none');
+  const [managerOptions, setManagerOptions] = useState<{ key: string; label: string }[]>([]);
+  const [pendingScanValues, setPendingScanValues] = useState<ScanApplyValues | null>(null);
   const { isLocked: isApproving, run: runApprove } = useSubmitLock();
   const { isLocked: isDeleting, run: runDelete } = useSubmitLock();
+  const { isLocked: isPatching, run: runPatch } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+
+  /** 증빙 PATCH 때 "뭐가 새로 추가/삭제됐는지" 비교할 기준점 — 서버에서 불러올 때마다 갱신. */
+  const lastSyncedReceiptIdsRef = useRef<number[]>([]);
+
+  const showSnackbar = (message: string) => {
+    setSnackbarMessage(message);
+    setTimeout(() => setSnackbarMessage(null), 1600);
+  };
 
   const toErrorMessage = (error: unknown): string => {
     if (isNetworkError(error)) {
@@ -90,16 +145,54 @@ function TransactionDetailScreen() {
     return API_ERROR_DEFAULT_MESSAGE;
   };
 
+  /**
+   * 스캔 인식 성공 시 호출된다(QA-039). 금액은 무시하고, 날짜·상호 중 현재 값과
+   * 다른 게 있을 때만 scanApply 다이얼로그를 띄운다. 증빙 자체는 훅이 이미 붙였고,
+   * 그 PATCH 는 아래 items-settle 이펙트가 알아서 보낸다 — 여기서는 필드만 다룬다.
+   */
+  const handleScanRecognized = (values: ScanApplyValues) => {
+    if (!entry) {
+      return;
+    }
+    const dateChanged = values.date !== null && toIsoDate(values.date) !== entry.occurredOn;
+    const nameChanged = values.merchantName !== null && values.merchantName !== entry.title;
+    if (dateChanged || nameChanged) {
+      setPendingScanValues(values);
+      setActiveDialog('scanApply');
+    }
+  };
+
+  const attachments = useReceiptAttachments({
+    showSnackbar,
+    onScanRecognized: handleScanRecognized,
+  });
+
   const load = useCallback(async () => {
     setLoadState('loading');
     try {
       const detail = await entryService.getEntryDetail(transactionId);
       setEntry(detail);
+      const ids = detail.receiptFiles.map(f => Number(f.id));
+      lastSyncedReceiptIdsRef.current = ids;
+      attachments.setItems(
+        detail.receiptFiles.map(f => {
+          const source = buildAuthenticatedImageSource(f.url);
+          return {
+            key: f.id,
+            previewUri: source.uri,
+            previewHeaders: source.headers,
+            fileId: Number(f.id),
+            sourceUrl: f.url,
+            uploading: false,
+          };
+        }),
+      );
       setLoadState('ready');
     } catch (error) {
       setLoadErrorMessage(toErrorMessage(error));
       setLoadState('error');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transactionId]);
 
   useFocusEffect(
@@ -107,11 +200,6 @@ function TransactionDetailScreen() {
       load();
     }, [load]),
   );
-
-  const showSnackbar = (message: string) => {
-    setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), 1600);
-  };
 
   const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
 
@@ -150,6 +238,172 @@ function TransactionDetailScreen() {
     });
   };
 
+  /** 행별 즉시 수정(QA-039). 값이 안 바뀌면 호출하지 않는다 — 호출부에서 그 비교를 한다. */
+  const patchEntry = (updates: entryService.UpdateEntryInput) => {
+    if (!entry) {
+      return;
+    }
+    runPatch(async () => {
+      try {
+        await entryService.updateEntry(entry.id, updates);
+        await load();
+        showSnackbar(SNACKBAR_TRANSACTION_UPDATED);
+        return true;
+      } catch (error) {
+        showSnackbar(toErrorMessage(error));
+        await load();
+        return false;
+      }
+    });
+  };
+
+  const handleSaveDate = (nextDotDate: string) => {
+    if (!entry) {
+      return;
+    }
+    const nextIso = toIsoDate(nextDotDate);
+    if (nextIso === entry.occurredOn) {
+      return;
+    }
+    patchEntry({ occurredOn: nextIso });
+  };
+
+  const handleSaveItemName = (next: string) => {
+    if (!entry) {
+      return;
+    }
+    const trimmed = next.trim();
+    if (trimmed === entry.title) {
+      return;
+    }
+    patchEntry({ title: trimmed });
+  };
+
+  const handleSaveMemo = (next: string) => {
+    if (!entry) {
+      return;
+    }
+    const trimmed = next.trim();
+    if (trimmed === (entry.memo ?? '')) {
+      return;
+    }
+    patchEntry({ memo: trimmed });
+  };
+
+  const handleSelectManager = (key: string) => {
+    if (!entry || key === entry.manager.userId) {
+      return;
+    }
+    patchEntry({ managerUserId: key });
+  };
+
+  const loadManagerOptions = async () => {
+    const group = getActiveGroup();
+    if (!group) {
+      return;
+    }
+    try {
+      const memberships = await groupMembershipService.getMemberships(group.id);
+      setManagerOptions(memberships.map(m => ({ key: m.userId, label: m.name })));
+    } catch (error) {
+      showSnackbar(toErrorMessage(error));
+    }
+  };
+
+  const handlePressManager = () => {
+    if (managerOptions.length === 0) {
+      loadManagerOptions();
+    }
+    setActiveSheet('manager');
+  };
+
+  const handleConfirmScanApply = () => {
+    if (pendingScanValues && entry) {
+      const updates: entryService.UpdateEntryInput = {};
+      if (pendingScanValues.date !== null) {
+        const iso = toIsoDate(pendingScanValues.date);
+        if (iso !== entry.occurredOn) {
+          updates.occurredOn = iso;
+        }
+      }
+      if (
+        pendingScanValues.merchantName !== null &&
+        pendingScanValues.merchantName !== entry.title
+      ) {
+        updates.title = pendingScanValues.merchantName;
+      }
+      patchEntry(updates);
+    }
+    setPendingScanValues(null);
+    setActiveDialog('none');
+  };
+
+  const handleCancelScanApply = () => {
+    setPendingScanValues(null);
+    setActiveDialog('none');
+  };
+
+  const handleRemoveReceipt = (key: string) => {
+    if (!entry) {
+      return;
+    }
+    const nextIds = attachments.items
+      .filter(item => item.key !== key)
+      .filter((item): item is typeof item & { fileId: number } => item.fileId !== undefined)
+      .map(item => item.fileId);
+    attachments.removeItem(key);
+    runPatch(async () => {
+      try {
+        await entryService.updateEntry(entry.id, { receiptFileIds: nextIds });
+        lastSyncedReceiptIdsRef.current = nextIds;
+        showSnackbar(SNACKBAR_TRANSACTION_UPDATED);
+        return true;
+      } catch (error) {
+        showSnackbar(toErrorMessage(error));
+        await load();
+        return false;
+      }
+    });
+  };
+
+  const isPending = entry?.approvalStatus === 'PENDING';
+  const editable = isPending && viewerIsOwner;
+
+  /**
+   * 증빙 추가가 끝나(업로드 완료, fileId 확정) 목록이 정착하면 조용히 PATCH 한다
+   * (QA-039 — 성공 스낵바는 훅이 추가 시점에 이미 보여준 SNACKBAR_RECEIPT_ADDED 뿐,
+   * 여기서 또 띄우지 않는다). X 삭제는 handleRemoveReceipt 가 즉시, 별도로 처리한다.
+   */
+  useEffect(() => {
+    if (!editable || !entry || attachments.isUploading) {
+      return;
+    }
+    const currentIds = attachments.items
+      .filter((item): item is typeof item & { fileId: number } => item.fileId !== undefined)
+      .map(item => item.fileId);
+    if (idsKey(currentIds) === idsKey(lastSyncedReceiptIdsRef.current)) {
+      return;
+    }
+    const newlyAddedIds = currentIds.filter(
+      id => !lastSyncedReceiptIdsRef.current.includes(id),
+    );
+    runPatch(async () => {
+      try {
+        await entryService.updateEntry(entry.id, { receiptFileIds: currentIds });
+        lastSyncedReceiptIdsRef.current = currentIds;
+        return true;
+      } catch (error) {
+        showSnackbar(toErrorMessage(error));
+        for (const id of newlyAddedIds) {
+          fileService.deleteFile(String(id)).catch(() => {});
+        }
+        await load();
+        return false;
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [attachments.items, attachments.isUploading, editable]);
+
   if (loadState === 'loading' || loadState === 'error') {
     return (
       <ScreenContainer background="secondary">
@@ -178,7 +432,6 @@ function TransactionDetailScreen() {
   const memoValue = entry.memo ?? '';
   const managerValue = entry.manager.name;
   const canEditDelete = viewerIsOwner;
-  const isPending = entry.approvalStatus === 'PENDING';
   const isDuesLinked = entry.duesExists;
   const canEdit = canEditDelete && !isDuesLinked && !isPending;
   const duesId = entry.duesId;
@@ -225,13 +478,32 @@ function TransactionDetailScreen() {
         <Field
           label={isIncome ? TRANSACTION_DATE_LABEL_INCOME : TRANSACTION_DATE_LABEL_EXPENSE}
           value={formatFullDate(dateValue)}
+          onPress={editable ? () => setActiveSheet('date') : undefined}
         />
-        <Field label={TRANSACTION_ITEM_NAME_LABEL} value={itemNameValue} />
-        <Field label={TRANSACTION_MANAGER_LABEL} value={managerValue} />
-        <Field label={TRANSACTION_LEDGER_LABEL} value={ledgerNameValue} />
+        <Field
+          label={TRANSACTION_ITEM_NAME_LABEL}
+          value={itemNameValue}
+          onPress={editable ? () => setActiveSheet('itemName') : undefined}
+        />
+        <Field
+          label={TRANSACTION_MANAGER_LABEL}
+          value={managerValue}
+          onPress={editable ? handlePressManager : undefined}
+        />
+        <Field
+          label={TRANSACTION_LEDGER_LABEL}
+          value={ledgerNameValue}
+          disabled={editable}
+        />
+        {editable && (
+          <Text style={styles.ledgerLockedHint}>
+            {TRANSACTION_REGISTER_LEDGER_LOCKED_HINT}
+          </Text>
+        )}
         <Field
           label={TRANSACTION_MEMO_LABEL}
           value={memoValue || TRANSACTION_MEMO_EMPTY_PLACEHOLDER}
+          onPress={editable ? () => setActiveSheet('memo') : undefined}
         />
         <View style={{marginTop: 12}}>
           <Divider />
@@ -242,31 +514,58 @@ function TransactionDetailScreen() {
             <Text style={styles.receiptSectionLabel}>{TRANSACTION_RECEIPT_LABEL}</Text>
             <Text style={styles.receiptCount}>
               <Text style={styles.receiptCountCurrent}>
-                {entry.receiptFiles.length}
+                {editable ? attachments.items.length : entry.receiptFiles.length}
               </Text>
-              /{TRANSACTION_REGISTER_RECEIPT_MAX}
+              /{editable ? attachments.maxCount : TRANSACTION_REGISTER_RECEIPT_MAX}
             </Text>
           </View>
-          {entry.receiptFiles.length > 0 && (
+          {editable ? (
             <View style={styles.thumbnailRow}>
-              {entry.receiptFiles.map(file => {
-                const source = buildAuthenticatedImageSource(file.url);
-                return (
-                  <Pressable
-                    key={file.id}
-                    onPress={() =>
-                      navigation.navigate('TransactionReceiptDetail', { fileUrl: file.url })
-                    }
-                  >
-                    <Thumbnail
-                      size={68}
-                      imageUri={source.uri}
-                      imageHeaders={source.headers}
-                    />
-                  </Pressable>
-                );
-              })}
+              <AttachmentAddButton
+                onPress={attachments.openAttachMenu}
+                disabled={attachments.items.length >= attachments.maxCount}
+              />
+              {attachments.items.map(item => (
+                <Pressable
+                  key={item.key}
+                  disabled={!item.sourceUrl}
+                  onPress={() =>
+                    item.sourceUrl &&
+                    navigation.navigate('TransactionReceiptDetail', { fileUrl: item.sourceUrl })
+                  }
+                >
+                  <Thumbnail
+                    size={68}
+                    imageUri={item.previewUri || undefined}
+                    imageHeaders={item.previewHeaders}
+                    uploading={item.uploading}
+                    onRemove={() => handleRemoveReceipt(item.key)}
+                  />
+                </Pressable>
+              ))}
             </View>
+          ) : (
+            entry.receiptFiles.length > 0 && (
+              <View style={styles.thumbnailRow}>
+                {entry.receiptFiles.map(file => {
+                  const source = buildAuthenticatedImageSource(file.url);
+                  return (
+                    <Pressable
+                      key={file.id}
+                      onPress={() =>
+                        navigation.navigate('TransactionReceiptDetail', { fileUrl: file.url })
+                      }
+                    >
+                      <Thumbnail
+                        size={68}
+                        imageUri={source.uri}
+                        imageHeaders={source.headers}
+                      />
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )
           )}
         </View>
 
@@ -292,7 +591,7 @@ function TransactionDetailScreen() {
           <Button
             label={TRANSACTION_APPROVE_LABEL}
             onPress={handleApprove}
-            disabled={isApproving}
+            disabled={isApproving || attachments.isUploading || isPatching}
             fullWidth
           />
         </View>
@@ -306,6 +605,56 @@ function TransactionDetailScreen() {
             fullWidth
           />
         </View>
+      )}
+
+      {editable && (
+        <>
+          <TransactionDateSheet
+            visible={activeSheet === 'date'}
+            title={
+              isIncome ? DATE_SHEET_TITLE_INCOME : DATE_SHEET_TITLE_EXPENSE
+            }
+            value={toDotDate(entry.occurredOn)}
+            onClose={() => setActiveSheet('none')}
+            onSave={handleSaveDate}
+          />
+          <TransactionTextInputSheet
+            visible={activeSheet === 'itemName'}
+            title={ITEM_NAME_SHEET_TITLE}
+            placeholder={ITEM_NAME_SHEET_PLACEHOLDER}
+            maxLength={ITEM_NAME_MAX_LENGTH}
+            value={itemNameValue}
+            onClose={() => setActiveSheet('none')}
+            onSave={handleSaveItemName}
+          />
+          <TransactionTextInputSheet
+            visible={activeSheet === 'memo'}
+            title={MEMO_SHEET_TITLE}
+            placeholder={MEMO_SHEET_PLACEHOLDER}
+            maxLength={MEMO_MAX_LENGTH}
+            value={memoValue}
+            onClose={() => setActiveSheet('none')}
+            onSave={handleSaveMemo}
+          />
+          <TransactionSingleSelectSheet
+            visible={activeSheet === 'manager'}
+            title={MANAGER_SELECT_SHEET_TITLE}
+            options={managerOptions}
+            selectedKey={entry.manager.userId}
+            onClose={() => setActiveSheet('none')}
+            onSelect={handleSelectManager}
+          />
+          {attachments.sheetsAndDialogs}
+          <Dialog
+            visible={activeDialog === 'scanApply'}
+            title={SCAN_APPLY_CONFIRM_TITLE}
+            description={SCAN_APPLY_CONFIRM_DESCRIPTION}
+            cancelLabel={SCAN_APPLY_CANCEL_LABEL}
+            confirmLabel={SCAN_APPLY_CONFIRM_LABEL}
+            onCancel={handleCancelScanApply}
+            onConfirm={handleConfirmScanApply}
+          />
+        </>
       )}
 
       <Dialog
@@ -322,9 +671,30 @@ function TransactionDetailScreen() {
   );
 }
 
-function Field({ label, value }: { label: string; value: string }) {
+function Field({
+  label,
+  value,
+  onPress,
+  disabled,
+}: {
+  label: string;
+  value: string;
+  onPress?: () => void;
+  disabled?: boolean;
+}) {
+  if (onPress) {
+    return (
+      <Pressable style={styles.fieldRow} onPress={onPress}>
+        <Text style={styles.fieldLabel}>{label}</Text>
+        <View style={styles.fieldValueRow}>
+          <Text style={styles.fieldValue}>{value}</Text>
+          <Image source={CHEVRON_ICON} style={styles.fieldChevron} />
+        </View>
+      </Pressable>
+    );
+  }
   return (
-    <View style={styles.fieldRow}>
+    <View style={[styles.fieldRow, disabled && styles.fieldRowDisabled]}>
       <Text style={styles.fieldLabel}>{label}</Text>
       <Text style={styles.fieldValue}>{value}</Text>
     </View>
@@ -357,17 +727,38 @@ const styles = StyleSheet.create({
   fieldRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 12,
+  },
+  fieldRowDisabled: {
+    opacity: 0.5,
   },
   fieldLabel: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
+  },
+  fieldValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flexShrink: 1,
   },
   fieldValue: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_PRIMARY,
     flexShrink: 1,
     textAlign: 'right',
+  },
+  fieldChevron: {
+    width: 14,
+    height: 14,
+    tintColor: FOREGROUND_DISABLED,
+  },
+  ledgerLockedHint: {
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+    marginTop: -8,
+    marginBottom: 4,
   },
   section: {
     marginTop: 24,
