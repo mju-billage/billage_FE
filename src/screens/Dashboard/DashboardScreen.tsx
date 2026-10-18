@@ -82,7 +82,8 @@ function toMiniCalendarData(
     monthLabel: `${month}월`,
     days: days.map(day => ({
       date: Number(day.date.split('-')[2]),
-      amount: day.income - day.expense,
+      income: day.income,
+      expense: day.expense,
     })),
   };
 }
@@ -332,6 +333,7 @@ const styles = StyleSheet.create({
   },
   quickServiceTitle: {
     ...TYPOGRAPHY.subtitle1,
+    marginBottom: 10
   },
   quickServiceRow: {
     flexDirection: 'row',

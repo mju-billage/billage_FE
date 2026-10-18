@@ -1,7 +1,11 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import DateField from '../../Input/Date Field/DateField';
-import { formatWon } from '../../../utils/currency';
-import { formatDateKey, getMonthGridWeeks } from '../../../utils/calendarGrid';
+import { formatWon, truncateDigits } from '../../../utils/currency';
+import {
+  formatDateKey,
+  getMonthGridWeeks,
+  getRecentDaysWeeks,
+} from '../../../utils/calendarGrid';
 import { CALENDAR_WEEKDAY_LABELS } from '../../../constants/calendarScreenText';
 import { FONT_FAMILY, FONT_WEIGHT, TYPOGRAPHY } from '../../../constants/typography';
 import {
@@ -31,7 +35,6 @@ type CalendarProps = {
   selectedEndDate?: string;
   disabledDates?: string[];
   outlinedDates?: string[];
-  amountsByDate?: Record<number, number | null | undefined>;
   weeksToShow?: number;
   showHeader?: boolean;
   interactive?: boolean;
@@ -41,6 +44,7 @@ type CalendarProps = {
   largeDates?: boolean;
   variant?: 'default' | 'mini' | 'ledger';
   amountsSplitByDate?: Record<number, { income: number; expense: number }>;
+  todayDate?: number;
 };
 
 function Calendar({
@@ -50,7 +54,6 @@ function Calendar({
   selectedEndDate,
   disabledDates,
   outlinedDates,
-  amountsByDate,
   weeksToShow,
   showHeader = true,
   interactive = true,
@@ -60,10 +63,15 @@ function Calendar({
   largeDates = false,
   variant = 'default',
   amountsSplitByDate,
+  todayDate,
 }: CalendarProps) {
   const allWeeks = getMonthGridWeeks(year, month);
   const weeks =
-    weeksToShow != null ? allWeeks.slice(0, weeksToShow) : allWeeks;
+    variant === 'mini' && todayDate != null
+      ? getRecentDaysWeeks(year, month, todayDate)
+      : weeksToShow != null
+      ? allWeeks.slice(0, weeksToShow)
+      : allWeeks;
 
   const renderLedgerDayCell = (
     cellIndex: number,
@@ -328,7 +336,7 @@ function Calendar({
               !isSelected &&
               !isDisabled &&
               (outlinedDates?.includes(dateKey) ?? false);
-            const amount = amountsByDate?.[cell.date];
+            const split = amountsSplitByDate?.[cell.date];
 
             const renderCircle = (pressed: boolean) => (
               <View
@@ -384,16 +392,19 @@ function Calendar({
                 ) : (
                   renderCircle(false)
                 )}
-                {amount != null && (
-                  <Text
-                    style={[
-                      styles.amountText,
-                      amount > 0 && styles.amountTextPositive,
-                    ]}
-                  >
-                    {amount > 0 ? '+' : ''}
-                    {formatWon(amount)}
-                  </Text>
+                {split && (split.income > 0 || split.expense > 0) && (
+                  <View style={styles.amountWrap}>
+                    {split.income > 0 && (
+                      <Text style={styles.amountTextIncome} numberOfLines={1}>
+                        +{truncateDigits(formatWon(split.income), 8)}
+                      </Text>
+                    )}
+                    {split.expense > 0 && (
+                      <Text style={styles.amountTextExpense} numberOfLines={1}>
+                        -{truncateDigits(formatWon(split.expense), 8)}
+                      </Text>
+                    )}
+                  </View>
                 )}
               </View>
             );
@@ -572,6 +583,7 @@ const styles = StyleSheet.create({
   },
   ledgerAmountWrap: {
     height: 18,
+    alignItems: 'center',
   },
   ledgerAmountIncome: {
     fontFamily: FONT_FAMILY,
@@ -667,12 +679,24 @@ const styles = StyleSheet.create({
   dateTextDisabled: {
     color: FOREGROUND_DISABLED,
   },
-  amountText: {
-    ...TYPOGRAPHY.caption,
-    color: FOREGROUND_NEUTRAL_NORMAL,
+  amountWrap: {
+    alignItems: 'center',
   },
-  amountTextPositive: {
+  amountTextIncome: {
+    fontFamily: FONT_FAMILY,
+    fontWeight: FONT_WEIGHT.medium,
+    fontSize: 7,
+    lineHeight: 9,
+    letterSpacing: 0.4,
     color: FOREGROUND_SECONDARY,
+  },
+  amountTextExpense: {
+    fontFamily: FONT_FAMILY,
+    fontWeight: FONT_WEIGHT.medium,
+    fontSize: 7,
+    lineHeight: 9,
+    letterSpacing: 0.4,
+    color: FOREGROUND_PRIMARY,
   },
   dateFieldWrapper: {
     marginTop: 16,

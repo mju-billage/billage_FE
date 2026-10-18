@@ -25,6 +25,27 @@ export function getMonthGridWeeks(
   return weeks;
 }
 
+export function getRecentDaysRange(today: number): { start: number; end: number } {
+  if (today >= 14) {
+    return { start: today - 13, end: today };
+  }
+  return { start: 1, end: 14 };
+}
+
+export function getRecentDaysWeeks(
+  year: number,
+  month: number,
+  today: number,
+): CalendarGridCell[][] {
+  const { start, end } = getRecentDaysRange(today);
+  const allWeeks = getMonthGridWeeks(year, month);
+  const inRange = (cell: CalendarGridCell) =>
+    cell != null && cell.date >= start && cell.date <= end;
+  return allWeeks
+    .filter(week => week.some(inRange))
+    .map(week => week.map(cell => (inRange(cell) ? cell : null)));
+}
+
 export function shiftMonth(
   year: number,
   month: number,

@@ -28,7 +28,7 @@ import {
   getApiErrorMessage,
   isNetworkError,
 } from '../../constants/apiErrorMessages';
-import { formatDateKey, shiftMonth } from '../../utils/calendarGrid';
+import { shiftMonth } from '../../utils/calendarGrid';
 import {
   CALENDAR_SCREEN_TITLE,
   CALENDAR_WEEKDAY_LABELS,
@@ -150,22 +150,7 @@ function CalendarScreen() {
     amountsSplitByDate[dayNumber] = { income: day.income, expense: day.expense };
   }
 
-  const nowYear = now.getFullYear();
-  const nowMonth = now.getMonth() + 1;
-  const isCurrentMonth = viewedYear === nowYear && viewedMonth === nowMonth;
-  const isFutureMonth =
-    viewedYear > nowYear || (viewedYear === nowYear && viewedMonth > nowMonth);
-  const daysInViewedMonth = new Date(viewedYear, viewedMonth, 0).getDate();
   const disabledDates: string[] = [];
-  if (isCurrentMonth) {
-    for (let date = now.getDate() + 1; date <= daysInViewedMonth; date++) {
-      disabledDates.push(formatDateKey(viewedYear, viewedMonth, date));
-    }
-  } else if (isFutureMonth) {
-    for (let date = 1; date <= daysInViewedMonth; date++) {
-      disabledDates.push(formatDateKey(viewedYear, viewedMonth, date));
-    }
-  }
 
   const selectedDateKey =
     selectedDate != null

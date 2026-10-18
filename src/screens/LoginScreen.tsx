@@ -174,6 +174,7 @@ function LoginScreen() {
         goToMain();
         return true;
       } catch (error) {
+        console.warn('[SocialLogin][API] socialLogin 실패', provider, error);
         if (error instanceof ApiError && error.code === 'SOCIAL_MEMBER_NOT_FOUND') {
           navigation.navigate('TermsAgreement', { socialProfile: profile });
           return true;
