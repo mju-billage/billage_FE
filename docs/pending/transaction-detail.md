@@ -31,6 +31,7 @@
 | 증빙 삭제 확인 모달 | `useReceiptAttachments` 에 `requestRemove`/삭제 Dialog 추가(생성·수정·승인 대기 공통) | 전역 | `00c093b` |
 | 수정 저장 후 상세로 즉시 복귀 | `navigation.popTo('TransactionDetail', {...}, {merge:true})` + 내역 탭과 같은 방식으로 스낵바 표시 | 화면 | `00c093b` |
 | 증빙 자료 상세 배경 | `FILL_INVERSE`(검정) → `BACKGROUND_SECONDARY`(흰색), 닫기 아이콘 `FOREGROUND_PRIMARY` | 화면(TransactionReceiptDetailScreen) | `00c093b` |
+| 바텀시트·모달 하단 72dp 공백 | 모달 창의 시스템 바 높이 이중 차감(ModalAttachedWatcher 관여 추정) → Modal에 statusBarTranslucent+navigationBarTranslucent, BottomSheet는 모달 내부에 SafeAreaProvider(initialWindowMetrics 시드) 중첩해 insets 확보 | 전역(BottomSheet, Dialog) | (이 커밋, QA-046) |
 
 ---
 

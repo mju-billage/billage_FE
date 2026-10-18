@@ -656,6 +656,7 @@ function TransactionRegisterScreen() {
               {attachments.items.map(item => (
                 <Thumbnail
                   key={item.key}
+                  size={ATTACHMENT_SIZE}
                   imageUri={item.previewUri || undefined}
                   imageUrl={item.previewUri ? undefined : item.sourceUrl}
                   uploading={item.uploading}

@@ -63,6 +63,8 @@ function Dialog({
       visible={visible}
       transparent
       animationType="fade"
+      statusBarTranslucent
+      navigationBarTranslucent
       onRequestClose={onCancel ?? onConfirm}
     >
       <View style={[styles.overlay, isKeyboardVisible && styles.overlayDocked]}>
