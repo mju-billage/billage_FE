@@ -7,7 +7,6 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Thumbnail from '../../components/Data Display/Image Placeholder/Thumbnail';
-import Badge from '../../components/Data Display/Badge/Badge';
 import Button from '../../components/Input/Button/Button';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
@@ -25,7 +24,6 @@ import {
 } from '../../constants/apiErrorMessages';
 import {
   SNACKBAR_ENTRY_APPROVED,
-  TRANSACTION_APPROVAL_PENDING_BADGE,
   TRANSACTION_APPROVE_LABEL,
   TRANSACTION_DATE_LABEL_EXPENSE,
   TRANSACTION_DATE_LABEL_INCOME,
@@ -45,7 +43,6 @@ import {
   TRANSACTION_RECEIPT_LABEL,
 } from '../../constants/ledgerScreenText';
 import {
-  FEEDBACK_POSITIVE_BOLD,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_PRIMARY,
@@ -56,8 +53,7 @@ import { formatFullDate } from '../../utils/dateHeader';
 import { TRANSACTION_REGISTER_RECEIPT_MAX } from '../../constants/transactionScreenText';
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
-const DELETE_ICON = require('../../assets/icons/action/Close.png');
-const SHOW_TRAILING_ACTIONS = false;
+const DELETE_ICON = require('../../assets/icons/action/Delete.png');
 
 type TransactionDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -74,6 +70,7 @@ function TransactionDetailScreen() {
   const navigation = useNavigation<TransactionDetailNavigationProp>();
   const route = useRoute<TransactionDetailRouteProp>();
   const transactionId = route.params.transactionId;
+  const hideActions = route.params.hideActions ?? false;
 
   const [entry, setEntry] = useState<EntryDetail | null>(null);
   const [loadState, setLoadState] = useState<LoadState>('loading');
@@ -183,7 +180,7 @@ function TransactionDetailScreen() {
   const canEditDelete = viewerIsOwner;
   const isPending = entry.approvalStatus === 'PENDING';
   const isDuesLinked = entry.duesExists;
-  const canEdit = canEditDelete && !isDuesLinked;
+  const canEdit = canEditDelete && !isDuesLinked && !isPending;
   const duesId = entry.duesId;
 
   return (
@@ -197,7 +194,7 @@ function TransactionDetailScreen() {
         title={TRANSACTION_DETAIL_TITLE}
         onBackPress={() => navigation.goBack()}
         rightIcons={
-          SHOW_TRAILING_ACTIONS && canEditDelete
+          canEditDelete && !hideActions
             ? [
                 ...(canEdit
                   ? [
@@ -220,10 +217,7 @@ function TransactionDetailScreen() {
       />
 
       <ScrollView contentContainerStyle={styles.content}>
-        {isPending && (
-          <Badge label={TRANSACTION_APPROVAL_PENDING_BADGE} status="warning" />
-        )}
-        <Text style={[styles.amount, isIncome && styles.amountPositive]}>
+        <Text style={styles.amount}>
           {isIncome ? '' : '-'}
           {amount.toLocaleString()}원
         </Text>
@@ -291,17 +285,18 @@ function TransactionDetailScreen() {
           </View>
         )}
 
-        {isPending && viewerIsOwner && (
-          <View style={styles.approveButtonWrapper}>
-            <Button
-              label={TRANSACTION_APPROVE_LABEL}
-              onPress={handleApprove}
-              disabled={isApproving}
-              fullWidth
-            />
-          </View>
-        )}
       </ScrollView>
+
+      {isPending && viewerIsOwner && (
+        <View style={styles.footer}>
+          <Button
+            label={TRANSACTION_APPROVE_LABEL}
+            onPress={handleApprove}
+            disabled={isApproving}
+            fullWidth
+          />
+        </View>
+      )}
 
       {isDuesLinked && duesId && (
         <View style={styles.footer}>
@@ -355,11 +350,9 @@ const styles = StyleSheet.create({
   },
   amount: {
     ...TYPOGRAPHY.h1,
+    color: FOREGROUND_PRIMARY,
     marginTop: 8,
     marginBottom: 24,
-  },
-  amountPositive: {
-    color: FEEDBACK_POSITIVE_BOLD,
   },
   fieldRow: {
     flexDirection: 'row',
@@ -371,7 +364,8 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   fieldValue: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.body2,
+    color: FOREGROUND_PRIMARY,
     flexShrink: 1,
     textAlign: 'right',
   },
@@ -402,9 +396,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-  },
-  approveButtonWrapper: {
-    marginTop: 24,
   },
   payerRow: {
     flexDirection: 'row',

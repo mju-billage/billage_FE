@@ -93,5 +93,4 @@ export const TRANSACTION_DELETE_CONFIRM_LABEL = '삭제';
 export const TRANSACTION_DETAIL_LOADING = '내역을 불러오는 중이에요.';
 export const TRANSACTION_DETAIL_RETRY_LABEL = '다시 시도';
 export const TRANSACTION_APPROVE_LABEL = '승인하기';
-export const TRANSACTION_APPROVAL_PENDING_BADGE = '승인 대기';
 export const SNACKBAR_ENTRY_APPROVED = '내역을 승인했어요.';

@@ -293,6 +293,7 @@ function CalendarScreen() {
                   onPress={() =>
                     navigation.navigate('TransactionDetail', {
                       transactionId: entry.id,
+                      hideActions: true,
                     })
                   }
                 />
