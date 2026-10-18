@@ -25,7 +25,6 @@ import * as fileService from '../../services/fileService';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { getActiveGroup } from '../../types/group';
 import { ApiError } from '../../services/apiClient';
-import { buildAuthenticatedImageSource } from '../../utils/authenticatedImage';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
@@ -175,17 +174,13 @@ function TransactionDetailScreen() {
       const ids = detail.receiptFiles.map(f => Number(f.id));
       lastSyncedReceiptIdsRef.current = ids;
       attachments.setItems(
-        detail.receiptFiles.map(f => {
-          const source = buildAuthenticatedImageSource(f.url);
-          return {
-            key: f.id,
-            previewUri: source.uri,
-            previewHeaders: source.headers,
-            fileId: Number(f.id),
-            sourceUrl: f.url,
-            uploading: false,
-          };
-        }),
+        detail.receiptFiles.map(f => ({
+          key: f.id,
+          previewUri: '',
+          sourceUrl: f.url,
+          fileId: Number(f.id),
+          uploading: false,
+        })),
       );
       setLoadState('ready');
     } catch (error) {
@@ -539,7 +534,7 @@ function TransactionDetailScreen() {
                   <Thumbnail
                     size={68}
                     imageUri={item.previewUri || undefined}
-                    imageHeaders={item.previewHeaders}
+                    imageUrl={item.previewUri ? undefined : item.sourceUrl}
                     uploading={item.uploading}
                     onRemove={() => handleRemoveReceipt(item.key)}
                   />
@@ -549,23 +544,16 @@ function TransactionDetailScreen() {
           ) : (
             entry.receiptFiles.length > 0 && (
               <View style={styles.thumbnailRow}>
-                {entry.receiptFiles.map(file => {
-                  const source = buildAuthenticatedImageSource(file.url);
-                  return (
-                    <Pressable
-                      key={file.id}
-                      onPress={() =>
-                        navigation.navigate('TransactionReceiptDetail', { fileUrl: file.url })
-                      }
-                    >
-                      <Thumbnail
-                        size={68}
-                        imageUri={source.uri}
-                        imageHeaders={source.headers}
-                      />
-                    </Pressable>
-                  );
-                })}
+                {entry.receiptFiles.map(file => (
+                  <Pressable
+                    key={file.id}
+                    onPress={() =>
+                      navigation.navigate('TransactionReceiptDetail', { fileUrl: file.url })
+                    }
+                  >
+                    <Thumbnail size={68} imageUrl={file.url} />
+                  </Pressable>
+                ))}
               </View>
             )
           )}

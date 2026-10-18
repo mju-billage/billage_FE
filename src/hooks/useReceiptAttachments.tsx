@@ -41,8 +41,8 @@ import {
 
 export type ReceiptItem = {
   key: string;
+  /** 로컬 미리보기(촬영·갤러리·스캔 직후). 서버에서 불러온 증빙은 비워두고 sourceUrl 을 쓴다. */
   previewUri: string;
-  previewHeaders?: Record<string, string>;
   fileId?: number;
   uploading: boolean;
   fromScan?: boolean;

@@ -6,7 +6,6 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import Thumbnail from '../../components/Data Display/Image Placeholder/Thumbnail';
-import { buildAuthenticatedImageSource } from '../../utils/authenticatedImage';
 import { formatWon } from '../../utils/currency';
 import { formatDateDot } from '../../utils/dueDate';
 import {
@@ -75,19 +74,16 @@ function ArchiveEntryDetailScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>{ARCHIVE_ENTRY_DETAIL_RECEIPT_LABEL}</Text>
             <View style={styles.thumbnailRow}>
-              {entry.receiptFiles.map(file => {
-                const source = buildAuthenticatedImageSource(file.fileUrl);
-                return (
-                  <Pressable
-                    key={file.fileId}
-                    onPress={() =>
-                      navigation.navigate('TransactionReceiptDetail', { fileUrl: file.fileUrl })
-                    }
-                  >
-                    <Thumbnail imageUri={source.uri} imageHeaders={source.headers} />
-                  </Pressable>
-                );
-              })}
+              {entry.receiptFiles.map(file => (
+                <Pressable
+                  key={file.fileId}
+                  onPress={() =>
+                    navigation.navigate('TransactionReceiptDetail', { fileUrl: file.fileUrl })
+                  }
+                >
+                  <Thumbnail imageUrl={file.fileUrl} />
+                </Pressable>
+              ))}
             </View>
           </View>
         )}

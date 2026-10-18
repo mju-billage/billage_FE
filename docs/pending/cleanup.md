@@ -85,12 +85,3 @@ userNickname)와 MINI_CALENDAR_AMOUNTS 는 어디에서도 쓰이지 않는다.
 
 백엔드 대기 항목이 아니다.
 
-## 10. 증빙 썸네일 미표시 — 재현 대기
-
-- 상세 내역·증빙자료 앨범 썸네일이 비고, 큰 화면에서는 보이는 현상이 한 번 있었다.
-- QA-028 진단 때는 재현되지 않았다.
-- 다시 생기면 그 자리에서:
-  1. Thumbnail 에 [THUMB] onLoad/onError/getSizeWithHeaders 임시 로그를 넣는다
-  2. adb logcat -c 후 화면을 연다
-  3. adb logcat -d 로 [THUMB] 와 Canvas/Bitmap/Fresco/decode 줄을 수집한다
-- 가설: 원본 크기 사진 + Image borderRadius 조합으로 안드로이드 그리기 실패

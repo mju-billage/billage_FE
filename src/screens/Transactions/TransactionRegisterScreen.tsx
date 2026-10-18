@@ -67,7 +67,6 @@ import * as ledgerService from '../../services/ledgerService';
 import * as entryService from '../../services/entryService';
 import * as groupMembershipService from '../../services/groupMembershipService';
 import { ApiError } from '../../services/apiClient';
-import { buildAuthenticatedImageSource } from '../../utils/authenticatedImage';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
@@ -286,16 +285,13 @@ function TransactionRegisterScreen() {
         setLedgerName(detail.ledgerName);
         const realIds = detail.receiptFiles.map(f => f.id);
         attachments.setItems(
-          detail.receiptFiles.map(f => {
-            const source = buildAuthenticatedImageSource(f.url);
-            return {
-              key: f.id,
-              previewUri: source.uri,
-              previewHeaders: source.headers,
-              fileId: Number(f.id),
-              uploading: false,
-            };
-          }),
+          detail.receiptFiles.map(f => ({
+            key: f.id,
+            previewUri: '',
+            sourceUrl: f.url,
+            fileId: Number(f.id),
+            uploading: false,
+          })),
         );
         setInitialSnapshot({
           title: detail.title,
@@ -567,7 +563,7 @@ function TransactionRegisterScreen() {
               <Thumbnail
                 key={item.key}
                 imageUri={item.previewUri || undefined}
-                imageHeaders={item.previewHeaders}
+                imageUrl={item.previewUri ? undefined : item.sourceUrl}
                 uploading={item.uploading}
                 onRemove={() => attachments.removeItem(item.key)}
               />

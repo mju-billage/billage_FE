@@ -1,6 +1,7 @@
 import { API_BASE_URL } from '../constants/api';
 import * as tokenStorage from './tokenStorage';
 import { isSessionExpiredError } from '../constants/apiErrorMessages';
+import { resolveImageUrl } from '../utils/authenticatedImage';
 
 type ApiResponse<T> = {
   data: T;
@@ -43,6 +44,7 @@ export async function storeTokens(tokens: TokenPair): Promise<void> {
 
 export async function clearSession(): Promise<void> {
   await tokenStorage.clearTokens();
+  dataUriCache.clear();
 }
 
 type RequestOptions = RequestInit & {
@@ -89,7 +91,7 @@ async function rawRequest<T>(
 
 let refreshPromise: Promise<void> | null = null;
 
-function refreshSession(): Promise<void> {
+export function refreshSession(): Promise<void> {
   if (!refreshPromise) {
     refreshPromise = (async () => {
       const refreshToken = await tokenStorage.getRefreshToken();
@@ -140,4 +142,73 @@ export async function request<T>(
 
     return rawRequest<T>(path, options);
   }
+}
+
+const MAX_DATA_URI_CACHE_ENTRIES = 30;
+const dataUriCache = new Map<string, Promise<string>>();
+
+function evictOldestDataUriEntries(): void {
+  while (dataUriCache.size > MAX_DATA_URI_CACHE_ENTRIES) {
+    const oldestKey = dataUriCache.keys().next().value;
+    if (oldestKey === undefined) {
+      break;
+    }
+    dataUriCache.delete(oldestKey);
+  }
+}
+
+function blobToDataUri(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error ?? new Error('FileReader error'));
+    reader.readAsDataURL(blob);
+  });
+}
+
+function authFetchHeaders(): Record<string, string> | undefined {
+  const accessToken = tokenStorage.getAccessToken();
+  return accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined;
+}
+
+async function fetchImageOnce(resolvedUrl: string): Promise<Response> {
+  return fetch(resolvedUrl, { headers: authFetchHeaders() });
+}
+
+async function loadAuthenticatedDataUri(resolvedUrl: string): Promise<string> {
+  let response = await fetchImageOnce(resolvedUrl);
+  if (response.status === 401) {
+    await refreshSession();
+    response = await fetchImageOnce(resolvedUrl);
+  }
+  if (!response.ok) {
+    throw new ApiError(
+      'IMAGE_FETCH_FAILED',
+      `이미지를 불러오지 못했습니다. (${response.status})`,
+    );
+  }
+  const blob = await response.blob();
+  return blobToDataUri(blob);
+}
+
+/**
+ * 인증이 필요한 이미지를 JS fetch 로 받아 data URI 로 돌려준다(QA-042).
+ * `<Image source={{ uri, headers }}>` 로 직접 그리면 안드로이드에서 401 로 실패해
+ * (원인 미확정 — 헤더 누락 또는 Fresco 캐시) 우회한 것. 같은 url 로의 동시 호출은
+ * 진행 중인 Promise 를 공유하고, 캐시는 최대 `MAX_DATA_URI_CACHE_ENTRIES`개까지만
+ * 들고 오래된 것부터 지운다. 실패한 호출은 캐시에 남기지 않는다.
+ */
+export function fetchAuthenticatedDataUri(url: string): Promise<string> {
+  const resolvedUrl = resolveImageUrl(url);
+  const cached = dataUriCache.get(resolvedUrl);
+  if (cached) {
+    return cached;
+  }
+  const promise = loadAuthenticatedDataUri(resolvedUrl).catch(error => {
+    dataUriCache.delete(resolvedUrl);
+    throw error;
+  });
+  dataUriCache.set(resolvedUrl, promise);
+  evictOldestDataUriEntries();
+  return promise;
 }
