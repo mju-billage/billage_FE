@@ -64,12 +64,13 @@ function AttachmentAddButton({
   );
 }
 
-const SIZE = 88;
+export const ATTACHMENT_SIZE = 70;
 
 const styles = StyleSheet.create({
   card: {
-    width: SIZE,
-    height: SIZE,
+    width: ATTACHMENT_SIZE,
+    height: ATTACHMENT_SIZE,
+    padding: 12,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',

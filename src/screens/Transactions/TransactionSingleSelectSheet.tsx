@@ -77,10 +77,10 @@ function TransactionSingleSelectSheet({
       )}
 
       <View style={styles.footerRow}>
-        <View style={styles.footerButton}>
+        <View style={styles.cancelButton}>
           <Button
             label={LEDGER_SELECT_CANCEL_LABEL}
-            hierarchy="secondary"
+            hierarchy="tertiary"
             onPress={onClose}
             fullWidth
           />
@@ -100,7 +100,7 @@ function TransactionSingleSelectSheet({
 
 const styles = StyleSheet.create({
   title: {
-    ...TYPOGRAPHY.subtitle1,
+    ...TYPOGRAPHY.h3,
     marginBottom: 16,
   },
   emptyState: {
@@ -122,12 +122,16 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   list: {
+    marginHorizontal: -20,
     gap: 4,
   },
   footerRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 16,
+    gap: 8,
+    marginTop: 24,
+  },
+  cancelButton: {
+    width: 74,
   },
   footerButton: {
     flex: 1,

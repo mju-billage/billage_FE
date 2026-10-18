@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     backgroundColor: FILL_NEUTRAL_SUBTLE,
-    borderRadius: 16,
+    borderRadius: 4,
     padding: 20,
   },
   title: {
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   },
   description: {
     ...TYPOGRAPHY.body2,
-    marginTop: 8,
+    marginTop: 4,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   textFieldWrapper: {

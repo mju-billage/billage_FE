@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
+import DetailFieldRow from '../../components/Data Display/Lists/DetailFieldRow';
 import Thumbnail from '../../components/Data Display/Image Placeholder/Thumbnail';
 import AttachmentAddButton from '../../components/Input/Button/AttachmentAddButton';
 import Button from '../../components/Input/Button/Button';
@@ -80,7 +81,6 @@ import { formatFullDate } from '../../utils/dateHeader';
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const DELETE_ICON = require('../../assets/icons/action/Delete.png');
-const CHEVRON_ICON = require('../../assets/icons/nav/Chevron Right.png');
 
 type TransactionDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -472,22 +472,22 @@ function TransactionDetailScreen() {
           {amount.toLocaleString()}원
         </Text>
 
-        <Field
+        <DetailFieldRow
           label={isIncome ? TRANSACTION_DATE_LABEL_INCOME : TRANSACTION_DATE_LABEL_EXPENSE}
           value={formatFullDate(dateValue)}
           onPress={editable ? () => setActiveSheet('date') : undefined}
         />
-        <Field
+        <DetailFieldRow
           label={TRANSACTION_ITEM_NAME_LABEL}
           value={itemNameValue}
           onPress={editable ? () => setActiveSheet('itemName') : undefined}
         />
-        <Field
+        <DetailFieldRow
           label={TRANSACTION_MANAGER_LABEL}
           value={managerValue}
           onPress={editable ? handlePressManager : undefined}
         />
-        <Field
+        <DetailFieldRow
           label={TRANSACTION_LEDGER_LABEL}
           value={ledgerNameValue}
           disabled={editable}
@@ -497,9 +497,10 @@ function TransactionDetailScreen() {
             {TRANSACTION_REGISTER_LEDGER_LOCKED_HINT}
           </Text>
         )}
-        <Field
+        <DetailFieldRow
           label={TRANSACTION_MEMO_LABEL}
-          value={memoValue || TRANSACTION_MEMO_EMPTY_PLACEHOLDER}
+          value={memoValue}
+          valuePlaceholder={TRANSACTION_MEMO_EMPTY_PLACEHOLDER}
           onPress={editable ? () => setActiveSheet('memo') : undefined}
         />
         <View style={{marginTop: 12}}>
@@ -661,36 +662,6 @@ function TransactionDetailScreen() {
   );
 }
 
-function Field({
-  label,
-  value,
-  onPress,
-  disabled,
-}: {
-  label: string;
-  value: string;
-  onPress?: () => void;
-  disabled?: boolean;
-}) {
-  if (onPress) {
-    return (
-      <Pressable style={styles.fieldRow} onPress={onPress}>
-        <Text style={styles.fieldLabel}>{label}</Text>
-        <View style={styles.fieldValueRow}>
-          <Text style={styles.fieldValue}>{value}</Text>
-          <Image source={CHEVRON_ICON} style={styles.fieldChevron} />
-        </View>
-      </Pressable>
-    );
-  }
-  return (
-    <View style={[styles.fieldRow, disabled && styles.fieldRowDisabled]}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      <Text style={styles.fieldValue}>{value}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   content: {
     paddingTop: 16,
@@ -713,36 +684,6 @@ const styles = StyleSheet.create({
     color: FOREGROUND_PRIMARY,
     marginTop: 8,
     marginBottom: 24,
-  },
-  fieldRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  fieldRowDisabled: {
-    opacity: 0.5,
-  },
-  fieldLabel: {
-    ...TYPOGRAPHY.body2,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  fieldValueRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    flexShrink: 1,
-  },
-  fieldValue: {
-    ...TYPOGRAPHY.body2,
-    color: FOREGROUND_PRIMARY,
-    flexShrink: 1,
-    textAlign: 'right',
-  },
-  fieldChevron: {
-    width: 14,
-    height: 14,
-    tintColor: FOREGROUND_DISABLED,
   },
   ledgerLockedHint: {
     ...TYPOGRAPHY.body3,
