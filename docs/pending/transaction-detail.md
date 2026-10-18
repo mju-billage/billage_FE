@@ -23,7 +23,7 @@
 | 승인 완료 후 흐름 | 현재 화면 스낵바 대신 내역 탭으로 이동 + "내역이 승인되었어요." | 화면 | `f3b57a1` |
 | 상세 내역 수정·삭제 진입점 디자이너 확인 (`design.md` 7번 이관) | QA-038 로 해결됨(위 "수정·삭제 진입점 없음" 행과 동일 커밋) | 화면 | `da7836b` |
 | 스캔 첨부 사진 상세 안 열림 | `ScanOutcome`에 `sourceUrl` 추가, `uploadFile` 응답의 url을 인식 성공/실패 양쪽에 실어 보냄 | 전역(ReceiptScanningView, useReceiptAttachments) | `a6c1017` |
-| 증빙 썸네일 미표시(`cleanup.md` 10번 이관) | `<Image source={{uri,headers}}>` 가 안드로이드에서 401 → JS fetch 로 data URI 받아 그리는 `fetchAuthenticatedDataUri`/`useAuthenticatedImage` 로 우회 | 전역(apiClient, Thumbnail, ZoomableImage 사용 화면 전부) | 이 커밋(QA-042) |
+| 증빙 썸네일 미표시(`cleanup.md` 10번 이관) | `<Image source={{uri,headers}}>` 가 안드로이드에서 401 → JS fetch 로 data URI 받아 그리는 `fetchAuthenticatedDataUri`/`useAuthenticatedImage` 로 우회 | 전역(apiClient, Thumbnail, ZoomableImage 사용 화면 전부) | `5e6cb08` |
 
 ---
 
