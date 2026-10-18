@@ -33,6 +33,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
   BackHandler,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -49,7 +50,9 @@ import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import SegmentedControl from '../../components/Input/Control/SegmentedControl';
 import SelectionListItem from '../../components/Data Display/Lists/SelectionListItem';
-import AttachmentAddButton from '../../components/Input/Button/AttachmentAddButton';
+import DetailFieldRow from '../../components/Data Display/Lists/DetailFieldRow';
+import Divider from '../../components/Data Display/Divider/Divider';
+import AttachmentAddButton, { ATTACHMENT_SIZE } from '../../components/Input/Button/AttachmentAddButton';
 import Thumbnail from '../../components/Data Display/Image Placeholder/Thumbnail';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
@@ -57,11 +60,13 @@ import TransactionAmountSheet from './TransactionAmountSheet';
 import TransactionDateSheet from './TransactionDateSheet';
 import TransactionSingleSelectSheet from './TransactionSingleSelectSheet';
 import TransactionTextInputSheet from './TransactionTextInputSheet';
+import { transactionDetailLayoutStyles as layoutStyles } from './transactionDetailLayout';
 import {
   useReceiptAttachments,
   type ScanApplyValues,
 } from '../../hooks/useReceiptAttachments';
 import { todayKey } from '../../utils/calendarGrid';
+import { formatFullDate } from '../../utils/dateHeader';
 import { getActiveGroup } from '../../types/group';
 import * as ledgerService from '../../services/ledgerService';
 import * as entryService from '../../services/entryService';
@@ -78,11 +83,13 @@ import {
   FILTER_TYPE_INCOME,
   TRANSACTION_DATE_LABEL_EXPENSE,
   TRANSACTION_DATE_LABEL_INCOME,
+  TRANSACTION_DETAIL_TITLE,
   TRANSACTION_ITEM_NAME_LABEL,
   TRANSACTION_LEDGER_LABEL,
   TRANSACTION_MANAGER_LABEL,
   TRANSACTION_MEMO_LABEL,
   TRANSACTION_MEMO_PLACEHOLDER,
+  TRANSACTION_RECEIPT_LABEL,
 } from '../../constants/ledgerScreenText';
 import {
   DATE_SHEET_TITLE_EXPENSE,
@@ -102,6 +109,9 @@ import {
   SNACKBAR_TRANSACTION_ADDED,
   SNACKBAR_TRANSACTION_ADDED_PENDING,
   SNACKBAR_TRANSACTION_UPDATED,
+  TEXT_INPUT_SHEET_EDIT_LABEL,
+  TRANSACTION_EDIT_LEAVE_DESCRIPTION,
+  TRANSACTION_EDIT_LEAVE_TITLE,
   TRANSACTION_REGISTER_AMOUNT_PLACEHOLDER,
   TRANSACTION_REGISTER_ITEM_NAME_PLACEHOLDER,
   TRANSACTION_REGISTER_LEAVE_CANCEL_LABEL,
@@ -114,11 +124,14 @@ import {
   TRANSACTION_REGISTER_MANAGER_PLACEHOLDER,
   TRANSACTION_REGISTER_RETRY_LABEL,
   TRANSACTION_REGISTER_RECEIPT_LABEL,
+  TRANSACTION_REGISTER_SAVE_LABEL,
   TRANSACTION_REGISTER_SUBMIT_LABEL,
   TRANSACTION_REGISTER_TITLE,
 } from '../../constants/transactionScreenText';
 import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+
+const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 
 type TransactionKind = 'income' | 'expense';
 type RegisterMode = 'createReal' | 'editReal';
@@ -418,7 +431,12 @@ function TransactionRegisterScreen() {
             }
           }
           await entryService.updateEntry(transactionId!, updates);
-          showSnackbar(SNACKBAR_TRANSACTION_UPDATED);
+          navigation.popTo(
+            'TransactionDetail',
+            { transactionId: transactionId!, snackbarMessage: SNACKBAR_TRANSACTION_UPDATED },
+            { merge: true },
+          );
+          return true;
         }
         setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
         return true;
@@ -478,103 +496,180 @@ function TransactionRegisterScreen() {
     >
       <AppBar
         type="sub"
-        title={TRANSACTION_REGISTER_TITLE}
+        title={mode === 'editReal' ? TRANSACTION_DETAIL_TITLE : TRANSACTION_REGISTER_TITLE}
         onBackPress={handleBack}
       />
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.segmentWrapper}>
-          <SegmentedControl
-            options={[
-              { label: FILTER_TYPE_INCOME, value: 'income' },
-              { label: FILTER_TYPE_EXPENSE, value: 'expense' },
-            ]}
-            value={transactionKind}
-            onChange={setTransactionKind}
-          />
-        </View>
-
-        <Pressable onPress={() => setActiveSheet('amount')}>
-          {amount === 0 ? (
-            <Text style={styles.amountPlaceholder}>
-              {TRANSACTION_REGISTER_AMOUNT_PLACEHOLDER}
-            </Text>
-          ) : (
-            <Text style={styles.amountValue}>
+      {mode === 'editReal' ? (
+        <ScrollView contentContainerStyle={layoutStyles.content}>
+          <Pressable style={editStyles.amountRow} onPress={() => setActiveSheet('amount')}>
+            <Text style={layoutStyles.amountText}>
+              {transactionKind === 'income' ? '' : '-'}
               {amount.toLocaleString()}원
             </Text>
-          )}
-        </Pressable>
+            <Image source={EDIT_ICON} style={editStyles.amountEditIcon} />
+          </Pressable>
 
-        <SelectionListItem
-          type="picker"
-          title={
-            transactionKind === 'income'
-              ? TRANSACTION_DATE_LABEL_INCOME
-              : TRANSACTION_DATE_LABEL_EXPENSE
-          }
-          value={date}
-          onPress={() => setActiveSheet('date')}
-        />
-        <SelectionListItem
-          type="picker"
-          title={TRANSACTION_ITEM_NAME_LABEL}
-          required
-          value={itemName || TRANSACTION_REGISTER_ITEM_NAME_PLACEHOLDER}
-          onPress={() => setActiveSheet('itemName')}
-        />
-        <SelectionListItem
-          type="picker"
-          title={TRANSACTION_MANAGER_LABEL}
-          value={managerName || TRANSACTION_REGISTER_MANAGER_PLACEHOLDER}
-          onPress={() => setActiveSheet('manager')}
-        />
-        <SelectionListItem
-          type="picker"
-          title={TRANSACTION_LEDGER_LABEL}
-          required
-          value={ledgerName || TRANSACTION_REGISTER_LEDGER_PLACEHOLDER}
-          disabled={!canChangeLedger}
-          onPress={() => setActiveSheet('ledger')}
-        />
-        {!canChangeLedger && (
-          <Text style={styles.ledgerLockedHint}>
+          <DetailFieldRow
+            label={
+              transactionKind === 'income'
+                ? TRANSACTION_DATE_LABEL_INCOME
+                : TRANSACTION_DATE_LABEL_EXPENSE
+            }
+            value={formatFullDate(toIsoDate(date))}
+            onPress={() => setActiveSheet('date')}
+          />
+          <DetailFieldRow
+            label={TRANSACTION_ITEM_NAME_LABEL}
+            value={itemName}
+            onPress={() => setActiveSheet('itemName')}
+          />
+          <DetailFieldRow
+            label={TRANSACTION_MANAGER_LABEL}
+            value={managerName}
+            onPress={() => setActiveSheet('manager')}
+          />
+          <DetailFieldRow
+            label={TRANSACTION_LEDGER_LABEL}
+            value={ledgerName}
+            disabled
+          />
+          <Text style={layoutStyles.ledgerLockedHint}>
             {TRANSACTION_REGISTER_LEDGER_LOCKED_HINT}
           </Text>
-        )}
-        <SelectionListItem
-          type="picker"
-          title={TRANSACTION_MEMO_LABEL}
-          value={memo || TRANSACTION_MEMO_PLACEHOLDER}
-          onPress={() => setActiveSheet('memo')}
-        />
-
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>
-            {TRANSACTION_REGISTER_RECEIPT_LABEL}
-            {` ${attachments.items.length}/${attachments.maxCount}`}
-          </Text>
-          <View style={styles.thumbnailRow}>
-            <AttachmentAddButton
-              onPress={attachments.openAttachMenu}
-              disabled={attachments.items.length >= attachments.maxCount}
-            />
-            {attachments.items.map(item => (
-              <Thumbnail
-                key={item.key}
-                imageUri={item.previewUri || undefined}
-                imageUrl={item.previewUri ? undefined : item.sourceUrl}
-                uploading={item.uploading}
-                onRemove={() => attachments.removeItem(item.key)}
-              />
-            ))}
+          <DetailFieldRow
+            label={TRANSACTION_MEMO_LABEL}
+            value={memo}
+            valuePlaceholder={TRANSACTION_MEMO_PLACEHOLDER}
+            onPress={() => setActiveSheet('memo')}
+          />
+          <View style={layoutStyles.dividerWrapper}>
+            <Divider />
           </View>
-        </View>
-      </ScrollView>
+
+          <View style={layoutStyles.section}>
+            <View style={layoutStyles.sectionLabelRow}>
+              <Text style={layoutStyles.receiptSectionLabel}>{TRANSACTION_RECEIPT_LABEL}</Text>
+              <Text style={layoutStyles.receiptCount}>
+                <Text style={layoutStyles.receiptCountCurrent}>
+                  {attachments.items.length}
+                </Text>
+                /{attachments.maxCount}
+              </Text>
+            </View>
+            <View style={layoutStyles.thumbnailRow}>
+              <AttachmentAddButton
+                onPress={attachments.openAttachMenu}
+                disabled={attachments.items.length >= attachments.maxCount}
+              />
+              {attachments.items.map(item => (
+                <Thumbnail
+                  key={item.key}
+                  size={ATTACHMENT_SIZE}
+                  imageUri={item.previewUri || undefined}
+                  imageUrl={item.previewUri ? undefined : item.sourceUrl}
+                  uploading={item.uploading}
+                  onRemove={() => attachments.requestRemove(item.key)}
+                />
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+      ) : (
+        <ScrollView contentContainerStyle={styles.content}>
+          <View style={styles.segmentWrapper}>
+            <SegmentedControl
+              options={[
+                { label: FILTER_TYPE_INCOME, value: 'income' },
+                { label: FILTER_TYPE_EXPENSE, value: 'expense' },
+              ]}
+              value={transactionKind}
+              onChange={setTransactionKind}
+            />
+          </View>
+
+          <Pressable onPress={() => setActiveSheet('amount')}>
+            {amount === 0 ? (
+              <Text style={styles.amountPlaceholder}>
+                {TRANSACTION_REGISTER_AMOUNT_PLACEHOLDER}
+              </Text>
+            ) : (
+              <Text style={styles.amountValue}>
+                {amount.toLocaleString()}원
+              </Text>
+            )}
+          </Pressable>
+
+          <SelectionListItem
+            type="picker"
+            title={
+              transactionKind === 'income'
+                ? TRANSACTION_DATE_LABEL_INCOME
+                : TRANSACTION_DATE_LABEL_EXPENSE
+            }
+            value={date}
+            onPress={() => setActiveSheet('date')}
+          />
+          <SelectionListItem
+            type="picker"
+            title={TRANSACTION_ITEM_NAME_LABEL}
+            required
+            value={itemName || TRANSACTION_REGISTER_ITEM_NAME_PLACEHOLDER}
+            onPress={() => setActiveSheet('itemName')}
+          />
+          <SelectionListItem
+            type="picker"
+            title={TRANSACTION_MANAGER_LABEL}
+            value={managerName || TRANSACTION_REGISTER_MANAGER_PLACEHOLDER}
+            onPress={() => setActiveSheet('manager')}
+          />
+          <SelectionListItem
+            type="picker"
+            title={TRANSACTION_LEDGER_LABEL}
+            required
+            value={ledgerName || TRANSACTION_REGISTER_LEDGER_PLACEHOLDER}
+            disabled={!canChangeLedger}
+            onPress={() => setActiveSheet('ledger')}
+          />
+          {!canChangeLedger && (
+            <Text style={styles.ledgerLockedHint}>
+              {TRANSACTION_REGISTER_LEDGER_LOCKED_HINT}
+            </Text>
+          )}
+          <SelectionListItem
+            type="picker"
+            title={TRANSACTION_MEMO_LABEL}
+            value={memo || TRANSACTION_MEMO_PLACEHOLDER}
+            onPress={() => setActiveSheet('memo')}
+          />
+
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>
+              {TRANSACTION_REGISTER_RECEIPT_LABEL}
+              {` ${attachments.items.length}/${attachments.maxCount}`}
+            </Text>
+            <View style={styles.thumbnailRow}>
+              <AttachmentAddButton
+                onPress={attachments.openAttachMenu}
+                disabled={attachments.items.length >= attachments.maxCount}
+              />
+              {attachments.items.map(item => (
+                <Thumbnail
+                  key={item.key}
+                  imageUri={item.previewUri || undefined}
+                  imageUrl={item.previewUri ? undefined : item.sourceUrl}
+                  uploading={item.uploading}
+                  onRemove={() => attachments.requestRemove(item.key)}
+                />
+              ))}
+            </View>
+          </View>
+        </ScrollView>
+      )}
 
       <View style={styles.footer}>
         <Button
-          label={TRANSACTION_REGISTER_SUBMIT_LABEL}
+          label={mode === 'editReal' ? TRANSACTION_REGISTER_SAVE_LABEL : TRANSACTION_REGISTER_SUBMIT_LABEL}
           onPress={handleSubmit}
           disabled={!canSubmit || isLocked}
           fullWidth
@@ -586,6 +681,7 @@ function TransactionRegisterScreen() {
         value={amount}
         onClose={() => setActiveSheet('none')}
         onSave={setAmount}
+        confirmLabel={mode === 'editReal' ? TEXT_INPUT_SHEET_EDIT_LABEL : undefined}
       />
       <TransactionDateSheet
         visible={activeSheet === 'date'}
@@ -606,6 +702,7 @@ function TransactionRegisterScreen() {
         value={itemName}
         onClose={() => setActiveSheet('none')}
         onSave={setItemName}
+        confirmLabel={mode === 'editReal' ? TEXT_INPUT_SHEET_EDIT_LABEL : undefined}
       />
       <TransactionTextInputSheet
         visible={activeSheet === 'memo'}
@@ -615,6 +712,7 @@ function TransactionRegisterScreen() {
         value={memo}
         onClose={() => setActiveSheet('none')}
         onSave={setMemo}
+        confirmLabel={mode === 'editReal' ? TEXT_INPUT_SHEET_EDIT_LABEL : undefined}
       />
       <TransactionSingleSelectSheet
         visible={activeSheet === 'manager'}
@@ -643,10 +741,13 @@ function TransactionRegisterScreen() {
 
       <Dialog
         visible={activeDialog === 'leave'}
-        title={TRANSACTION_REGISTER_LEAVE_TITLE}
-        description={TRANSACTION_REGISTER_LEAVE_DESCRIPTION}
+        title={mode === 'editReal' ? TRANSACTION_EDIT_LEAVE_TITLE : TRANSACTION_REGISTER_LEAVE_TITLE}
+        description={
+          mode === 'editReal' ? TRANSACTION_EDIT_LEAVE_DESCRIPTION : TRANSACTION_REGISTER_LEAVE_DESCRIPTION
+        }
         cancelLabel={TRANSACTION_REGISTER_LEAVE_CANCEL_LABEL}
         confirmLabel={TRANSACTION_REGISTER_LEAVE_CONFIRM_LABEL}
+        destructive
         onCancel={() => setActiveDialog('none')}
         onConfirm={handleConfirmLeave}
       />
@@ -712,6 +813,21 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 20,
     paddingBottom: 16,
+  },
+});
+
+const editStyles = StyleSheet.create({
+  amountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  amountEditIcon: {
+    width: 24,
+    height: 24,
+    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
 });
 

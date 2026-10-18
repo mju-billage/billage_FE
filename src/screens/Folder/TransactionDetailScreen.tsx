@@ -8,7 +8,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import DetailFieldRow from '../../components/Data Display/Lists/DetailFieldRow';
 import Thumbnail from '../../components/Data Display/Image Placeholder/Thumbnail';
-import AttachmentAddButton from '../../components/Input/Button/AttachmentAddButton';
+import AttachmentAddButton, { ATTACHMENT_SIZE } from '../../components/Input/Button/AttachmentAddButton';
 import Button from '../../components/Input/Button/Button';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
@@ -67,17 +67,15 @@ import {
   SCAN_APPLY_CONFIRM_LABEL,
   SCAN_APPLY_CONFIRM_TITLE,
   SNACKBAR_TRANSACTION_UPDATED,
+  TEXT_INPUT_SHEET_EDIT_LABEL,
   TRANSACTION_REGISTER_LEDGER_LOCKED_HINT,
   TRANSACTION_REGISTER_RECEIPT_MAX,
 } from '../../constants/transactionScreenText';
-import {
-  FOREGROUND_DISABLED,
-  FOREGROUND_NEUTRAL_SUBTLE,
-  FOREGROUND_PRIMARY,
-} from '../../constants/colors';
+import { FOREGROUND_DISABLED } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import Divider from '../../components/Data Display/Divider/Divider';
 import { formatFullDate } from '../../utils/dateHeader';
+import { transactionDetailLayoutStyles as layoutStyles } from '../Transactions/transactionDetailLayout';
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const DELETE_ICON = require('../../assets/icons/action/Delete.png');
@@ -134,6 +132,14 @@ function TransactionDetailScreen() {
     setTimeout(() => setSnackbarMessage(null), 1600);
   };
 
+  useEffect(() => {
+    if (route.params.snackbarMessage) {
+      showSnackbar(route.params.snackbarMessage);
+      navigation.setParams({ snackbarMessage: undefined });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params.snackbarMessage, navigation]);
+
   const toErrorMessage = (error: unknown): string => {
     if (isNetworkError(error)) {
       return API_NETWORK_ERROR_MESSAGE;
@@ -161,9 +167,29 @@ function TransactionDetailScreen() {
     }
   };
 
+  /** 증빙 삭제 모달에서 확정된 뒤 호출된다(QA-044) — 남은 id 는 훅이 계산해 건네준다. */
+  const handleReceiptRemoved = (remainingIds: number[]) => {
+    if (!entry) {
+      return;
+    }
+    runPatch(async () => {
+      try {
+        await entryService.updateEntry(entry.id, { receiptFileIds: remainingIds });
+        lastSyncedReceiptIdsRef.current = remainingIds;
+        showSnackbar(SNACKBAR_TRANSACTION_UPDATED);
+        return true;
+      } catch (error) {
+        showSnackbar(toErrorMessage(error));
+        await load();
+        return false;
+      }
+    });
+  };
+
   const attachments = useReceiptAttachments({
     showSnackbar,
     onScanRecognized: handleScanRecognized,
+    onConfirmRemove: handleReceiptRemoved,
   });
 
   const load = useCallback(async () => {
@@ -340,36 +366,14 @@ function TransactionDetailScreen() {
     setActiveDialog('none');
   };
 
-  const handleRemoveReceipt = (key: string) => {
-    if (!entry) {
-      return;
-    }
-    const nextIds = attachments.items
-      .filter(item => item.key !== key)
-      .filter((item): item is typeof item & { fileId: number } => item.fileId !== undefined)
-      .map(item => item.fileId);
-    attachments.removeItem(key);
-    runPatch(async () => {
-      try {
-        await entryService.updateEntry(entry.id, { receiptFileIds: nextIds });
-        lastSyncedReceiptIdsRef.current = nextIds;
-        showSnackbar(SNACKBAR_TRANSACTION_UPDATED);
-        return true;
-      } catch (error) {
-        showSnackbar(toErrorMessage(error));
-        await load();
-        return false;
-      }
-    });
-  };
-
   const isPending = entry?.approvalStatus === 'PENDING';
   const editable = isPending && viewerIsOwner;
 
   /**
    * 증빙 추가가 끝나(업로드 완료, fileId 확정) 목록이 정착하면 조용히 PATCH 한다
    * (QA-039 — 성공 스낵바는 훅이 추가 시점에 이미 보여준 SNACKBAR_RECEIPT_ADDED 뿐,
-   * 여기서 또 띄우지 않는다). X 삭제는 handleRemoveReceipt 가 즉시, 별도로 처리한다.
+   * 여기서 또 띄우지 않는다). X 삭제는 삭제 확인 모달 뒤 handleReceiptRemoved 가
+   * 즉시, 별도로 처리한다(QA-044).
    */
   useEffect(() => {
     if (!editable || !entry || attachments.isUploading) {
@@ -466,8 +470,8 @@ function TransactionDetailScreen() {
         }
       />
 
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.amount}>
+      <ScrollView contentContainerStyle={layoutStyles.content}>
+        <Text style={[layoutStyles.amountText, layoutStyles.amountSpacing]}>
           {isIncome ? '' : '-'}
           {amount.toLocaleString()}원
         </Text>
@@ -493,7 +497,7 @@ function TransactionDetailScreen() {
           disabled={editable}
         />
         {editable && (
-          <Text style={styles.ledgerLockedHint}>
+          <Text style={layoutStyles.ledgerLockedHint}>
             {TRANSACTION_REGISTER_LEDGER_LOCKED_HINT}
           </Text>
         )}
@@ -503,22 +507,22 @@ function TransactionDetailScreen() {
           valuePlaceholder={TRANSACTION_MEMO_EMPTY_PLACEHOLDER}
           onPress={editable ? () => setActiveSheet('memo') : undefined}
         />
-        <View style={{marginTop: 12}}>
+        <View style={layoutStyles.dividerWrapper}>
           <Divider />
         </View>
 
-        <View style={styles.section}>
-          <View style={styles.sectionLabelRow}>
-            <Text style={styles.receiptSectionLabel}>{TRANSACTION_RECEIPT_LABEL}</Text>
-            <Text style={styles.receiptCount}>
-              <Text style={styles.receiptCountCurrent}>
+        <View style={layoutStyles.section}>
+          <View style={layoutStyles.sectionLabelRow}>
+            <Text style={layoutStyles.receiptSectionLabel}>{TRANSACTION_RECEIPT_LABEL}</Text>
+            <Text style={layoutStyles.receiptCount}>
+              <Text style={layoutStyles.receiptCountCurrent}>
                 {editable ? attachments.items.length : entry.receiptFiles.length}
               </Text>
               /{editable ? attachments.maxCount : TRANSACTION_REGISTER_RECEIPT_MAX}
             </Text>
           </View>
           {editable ? (
-            <View style={styles.thumbnailRow}>
+            <View style={layoutStyles.thumbnailRow}>
               <AttachmentAddButton
                 onPress={attachments.openAttachMenu}
                 disabled={attachments.items.length >= attachments.maxCount}
@@ -533,18 +537,18 @@ function TransactionDetailScreen() {
                   }
                 >
                   <Thumbnail
-                    size={68}
+                    size={ATTACHMENT_SIZE}
                     imageUri={item.previewUri || undefined}
                     imageUrl={item.previewUri ? undefined : item.sourceUrl}
                     uploading={item.uploading}
-                    onRemove={() => handleRemoveReceipt(item.key)}
+                    onRemove={() => attachments.requestRemove(item.key)}
                   />
                 </Pressable>
               ))}
             </View>
           ) : (
             entry.receiptFiles.length > 0 && (
-              <View style={styles.thumbnailRow}>
+              <View style={layoutStyles.thumbnailRow}>
                 {entry.receiptFiles.map(file => (
                   <Pressable
                     key={file.id}
@@ -552,7 +556,7 @@ function TransactionDetailScreen() {
                       navigation.navigate('TransactionReceiptDetail', { fileUrl: file.url })
                     }
                   >
-                    <Thumbnail size={68} imageUrl={file.url} />
+                    <Thumbnail size={ATTACHMENT_SIZE} imageUrl={file.url} />
                   </Pressable>
                 ))}
               </View>
@@ -617,6 +621,7 @@ function TransactionDetailScreen() {
             value={itemNameValue}
             onClose={() => setActiveSheet('none')}
             onSave={handleSaveItemName}
+            confirmLabel={TEXT_INPUT_SHEET_EDIT_LABEL}
           />
           <TransactionTextInputSheet
             visible={activeSheet === 'memo'}
@@ -626,6 +631,7 @@ function TransactionDetailScreen() {
             value={memoValue}
             onClose={() => setActiveSheet('none')}
             onSave={handleSaveMemo}
+            confirmLabel={TEXT_INPUT_SHEET_EDIT_LABEL}
           />
           <TransactionSingleSelectSheet
             visible={activeSheet === 'manager'}
@@ -663,12 +669,6 @@ function TransactionDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  content: {
-    paddingTop: 16,
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-    gap: 0,
-  },
   stateContainer: {
     flex: 1,
     alignItems: 'center',
@@ -679,45 +679,12 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_DISABLED,
   },
-  amount: {
-    ...TYPOGRAPHY.h1,
-    color: FOREGROUND_PRIMARY,
-    marginTop: 8,
-    marginBottom: 24,
-  },
-  ledgerLockedHint: {
-    ...TYPOGRAPHY.body3,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
-    marginTop: -8,
-    marginBottom: 4,
-  },
   section: {
     marginTop: 24,
   },
   sectionLabel: {
     ...TYPOGRAPHY.subtitle3,
     marginBottom: 12,
-  },
-  sectionLabelRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  receiptSectionLabel: {
-    ...TYPOGRAPHY.subtitle1,
-  },
-  receiptCount: {
-    ...TYPOGRAPHY.body3,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  receiptCountCurrent: {
-    color: FOREGROUND_PRIMARY,
-  },
-  thumbnailRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
   },
   payerRow: {
     flexDirection: 'row',

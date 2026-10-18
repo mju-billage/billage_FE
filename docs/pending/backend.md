@@ -96,3 +96,19 @@ Swagger 의 요청 형식과 같다(src/services/authService.ts socialLogin).
 **앱 수정이 필요한 경우** 답이 'id_token 을 보내 달라'이면
 socialAuthService.loginWithKakao 에서 id_token 을 받아 보내도록 바꿔야 한다.
 카카오 디벨로퍼스에서 OpenID Connect 활성화도 필요하다.
+
+---
+
+## 4. 내역 수정에서 장부 변경 필요
+
+시안(ADD-2-SHEET-03-0)은 수정 화면에서 장부를 다른 장부로 바꿀 수 있는
+것처럼 그려져 있다. 그러나 `PATCH /entries/{id}` 요청 바디에 `ledgerId`
+가 없어서(QA-039 때부터 확인) 수정 화면은 장부 행을 비활성으로 두고
+안내 문구만 보여준다(QA-044).
+
+`PATCH /entries/{id}` 에 `ledgerId` 지원이 추가되면 프론트에서 할 일:
+- `TransactionRegisterScreen` 의 `canChangeLedger = mode !== 'editReal'`
+  조건을 지우고 수정 모드에서도 장부 선택 시트를 쓸 수 있게 한다.
+- `handleSubmit` 의 editReal 분기에 `ledgerId` 변경 비교·PATCH 필드 추가.
+- `TRANSACTION_REGISTER_LEDGER_LOCKED_HINT` 문구·DetailFieldRow 의
+  disabled 처리를 제거한다.

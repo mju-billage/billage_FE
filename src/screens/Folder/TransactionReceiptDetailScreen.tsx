@@ -6,7 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import ZoomableImage from '../../components/Data Display/Zoomable Image/ZoomableImage';
 import { useAuthenticatedImage } from '../../hooks/useAuthenticatedImage';
-import { FILL_INVERSE, FOREGROUND_INVERSE } from '../../constants/colors';
+import { BACKGROUND_SECONDARY, FOREGROUND_PRIMARY } from '../../constants/colors';
 
 const CLOSE_ICON = require('../../assets/icons/action/Close.png');
 
@@ -35,7 +35,7 @@ function TransactionReceiptDetailScreen() {
         <ZoomableImage uri={uri} />
       ) : (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator color={FOREGROUND_INVERSE} />
+          <ActivityIndicator color={FOREGROUND_PRIMARY} />
         </View>
       )}
     </SafeAreaView>
@@ -45,7 +45,7 @@ function TransactionReceiptDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: FILL_INVERSE,
+    backgroundColor: BACKGROUND_SECONDARY,
   },
   header: {
     flexDirection: 'row',
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   closeIcon: {
     width: 20,
     height: 20,
-    tintColor: FOREGROUND_INVERSE,
+    tintColor: FOREGROUND_PRIMARY,
   },
   loadingContainer: {
     flex: 1,

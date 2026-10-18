@@ -18,6 +18,10 @@ import { captureWithFeedback, type PickedImage } from '../utils/imagePicker';
 import * as fileService from '../services/fileService';
 import { toUserErrorMessage } from '../constants/apiErrorMessages';
 import {
+  RECEIPT_DELETE_CANCEL_LABEL,
+  RECEIPT_DELETE_CONFIRM_DESCRIPTION,
+  RECEIPT_DELETE_CONFIRM_LABEL,
+  RECEIPT_DELETE_CONFIRM_TITLE,
   SCAN_RESCAN_CANCEL_LABEL,
   SCAN_RESCAN_CONFIRM_DESCRIPTION,
   SCAN_RESCAN_CONFIRM_LABEL,
@@ -69,7 +73,7 @@ type AttachStage =
   | { kind: 'scanFailed' }
   | { kind: 'gallery' };
 
-type AttachDialog = 'none' | 'scanRescan' | 'cameraPermission' | 'galleryPermission';
+type AttachDialog = 'none' | 'scanRescan' | 'cameraPermission' | 'galleryPermission' | 'removeConfirm';
 
 type UseReceiptAttachmentsOptions = {
   showSnackbar: (message: string) => void;
@@ -80,12 +84,20 @@ type UseReceiptAttachmentsOptions = {
    */
   onScanRecognized?: (values: ScanApplyValues, meta: { attached: boolean }) => void;
   maxCount?: number;
+  /**
+   * 증빙 삭제 모달에서 "삭제하기"를 눌러 실제로 목록에서 빠진 직후 호출된다(QA-044).
+   * `remainingFileIds` 는 지운 뒤 남는 항목의 fileId 전체(업로드 안 끝난 항목 제외) —
+   * 화면이 서버에 반영해야 할 때(PATCH 등) 여기서 처리한다. 등록 화면처럼 제출
+   * 시점에만 반영하면 되는 곳은 안 넘겨도 된다.
+   */
+  onConfirmRemove?: (remainingFileIds: number[], removedKey: string) => void;
 };
 
 export function useReceiptAttachments({
   showSnackbar,
   onScanRecognized,
   maxCount = TRANSACTION_REGISTER_RECEIPT_MAX,
+  onConfirmRemove,
 }: UseReceiptAttachmentsOptions) {
   const [items, setItems] = useState<ReceiptItem[]>([]);
   /**
@@ -100,6 +112,7 @@ export function useReceiptAttachments({
   const [stage, setStage] = useState<AttachStage>({ kind: 'form' });
   const [attachMenuVisible, setAttachMenuVisible] = useState(false);
   const [dialog, setDialog] = useState<AttachDialog>('none');
+  const [pendingRemoveKey, setPendingRemoveKey] = useState<string | null>(null);
 
   const hasScanReceipt = items.some(item => item.fromScan);
   const isUploading = items.some(item => item.uploading);
@@ -108,6 +121,30 @@ export function useReceiptAttachments({
 
   const removeItem = (key: string) => {
     setItems(current => current.filter(item => item.key !== key));
+  };
+
+  /** X 버튼이 호출하는 진입점. 바로 지우지 않고 확인 모달부터 띄운다(QA-044). */
+  const requestRemove = (key: string) => {
+    setPendingRemoveKey(key);
+    setDialog('removeConfirm');
+  };
+
+  const confirmRemove = () => {
+    if (pendingRemoveKey) {
+      const remainingFileIds = itemsRef.current
+        .filter(item => item.key !== pendingRemoveKey)
+        .filter((item): item is ReceiptItem & { fileId: number } => item.fileId !== undefined)
+        .map(item => item.fileId);
+      removeItem(pendingRemoveKey);
+      onConfirmRemove?.(remainingFileIds, pendingRemoveKey);
+    }
+    setPendingRemoveKey(null);
+    setDialog('none');
+  };
+
+  const cancelRemove = () => {
+    setPendingRemoveKey(null);
+    setDialog('none');
   };
 
   const uploadReceiptImage = async (key: string, image: PickedImage) => {
@@ -308,8 +345,19 @@ export function useReceiptAttachments({
         description={SCAN_RESCAN_CONFIRM_DESCRIPTION}
         cancelLabel={SCAN_RESCAN_CANCEL_LABEL}
         confirmLabel={SCAN_RESCAN_CONFIRM_LABEL}
+        destructive
         onCancel={() => setDialog('none')}
         onConfirm={handleConfirmRescan}
+      />
+      <Dialog
+        visible={dialog === 'removeConfirm'}
+        title={RECEIPT_DELETE_CONFIRM_TITLE}
+        description={RECEIPT_DELETE_CONFIRM_DESCRIPTION}
+        cancelLabel={RECEIPT_DELETE_CANCEL_LABEL}
+        confirmLabel={RECEIPT_DELETE_CONFIRM_LABEL}
+        destructive
+        onCancel={cancelRemove}
+        onConfirm={confirmRemove}
       />
       <Dialog
         visible={dialog === 'cameraPermission'}
@@ -342,6 +390,7 @@ export function useReceiptAttachments({
     items,
     setItems,
     removeItem,
+    requestRemove,
     openAttachMenu,
     isUploading,
     hasScanReceipt,

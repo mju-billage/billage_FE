@@ -1,5 +1,6 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import {
+  FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_PRIMARY,
@@ -24,14 +25,16 @@ function DetailFieldRow({
   onPress,
   disabled,
 }: DetailFieldRowProps) {
+  const isPlaceholder = !value && !!valuePlaceholder;
   const displayValue = value || valuePlaceholder || value;
+  const valueStyle = [styles.value, isPlaceholder && styles.valuePlaceholder];
 
   if (onPress) {
     return (
       <Pressable style={styles.row} onPress={onPress}>
         <Text style={styles.label}>{label}</Text>
         <View style={styles.valueRow}>
-          <Text style={styles.value}>{displayValue}</Text>
+          <Text style={valueStyle}>{displayValue}</Text>
           <Image source={CHEVRON_ICON} style={styles.chevron} />
         </View>
       </Pressable>
@@ -40,7 +43,7 @@ function DetailFieldRow({
   return (
     <View style={[styles.row, disabled && styles.rowDisabled]}>
       <Text style={styles.label}>{label}</Text>
-      <Text style={styles.value}>{displayValue}</Text>
+      <Text style={valueStyle}>{displayValue}</Text>
     </View>
   );
 }
@@ -70,6 +73,9 @@ const styles = StyleSheet.create({
     color: FOREGROUND_PRIMARY,
     flexShrink: 1,
     textAlign: 'right',
+  },
+  valuePlaceholder: {
+    color: FOREGROUND_DISABLED,
   },
   chevron: {
     width: 14,
