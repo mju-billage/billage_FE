@@ -19,7 +19,9 @@ React Native 0.86 + TypeScript. 동아리·소모임 회비와 지출을 관리�
 ## 참조
 - 화면 ID ↔ 파일 경로: `docs/screen-map.tsv`
 - 디자인 토큰 ↔ 코드 값: `docs/tokens.tsv`
-- 보류·대기 항목: `docs/pending/README.md`
+- 보류 항목: `docs/pending/backend.md`(백엔드) · `planning.md`(기획) · `design.md`(디자인)
+  - 규칙: 해결된 항목은 그 자리에서 삭제한다("해결됨" 표기로 남기지 않는다).
+    번호는 다시 매기지 않아도 된다.
 
 ## 디자인 기준
 자간은 `Typography Style.pdf` 보다 피그마 텍스트 스타일이 우선이다.

@@ -1,26 +1,25 @@
-# 백엔드 요청 대기
+# 백엔드 확인 대기
 
-서버 응답이 바뀌어야 프론트에서 처리할 수 있는 것들.
-디자인·기능 QA가 한 바퀴 돈 뒤에 모아서 전달하기로 했다. (2026-10-13 결정)
+서버 응답이 바뀌거나 백엔드가 답해야 풀리는 것들. 디자인·기능 QA가 한 바퀴 돈 뒤에 모아서 전달하기로 했다. (2026-10-13 결정)
 
 ---
 
 ## 1. 로그인 실패 원인 구분
 
-**출처** QA 시트 "아이디/비밀번호 오류" — Help message (★★)
+**현상/생긴 경위**
 
-**현상** 아이디가 틀렸든 비밀번호가 틀렸든 같은 메시지가 뜬다.
+출처: QA 시트 "아이디/비밀번호 오류" — Help message (★★)
 
-**시안 기대** 틀린 칸 아래에 각각 다른 안내가 뜬다.
+아이디가 틀렸든 비밀번호가 틀렸든 같은 메시지가 뜬다. 시안 기대는 틀린 칸 아래에
+각각 다른 안내가 뜨는 것이다.
 
 - 아이디 오류 → 이메일 칸 아래 "아이디가 올바르지 않습니다. 정확한 정보를 다시 확인해주세요."
 - 비밀번호 오류 → 비밀번호 칸 아래 "비밀번호가 올바르지 않습니다. 정확한 정보를 다시 확인해주세요."
 
-**왜 막혔나** `POST /api/v1/auth/login` 이 실패할 때 `code` 가
-`INVALID_CREDENTIALS` 하나로만 온다. 둘을 구분할 수단이 응답에 없다.
-프론트 단독으로는 불가능하다.
+`POST /api/v1/auth/login` 이 실패할 때 `code` 가 `INVALID_CREDENTIALS` 하나로만
+온다. 둘을 구분할 수단이 응답에 없다. 프론트 단독으로는 불가능하다.
 
-**요청 내용**
+**물어볼 것**
 
 ```
 POST /api/v1/auth/login 실패 응답의 code 를 둘로 분리
@@ -31,23 +30,14 @@ POST /api/v1/auth/login 실패 응답의 code 를 둘로 분리
 응답 형식은 기존과 동일 ({ code, message, fieldErrors[] }).
 ```
 
-**받은 뒤 프론트에서 할 일**
+다만 결정 전에 알아야 할 것이 있다: 로그인 실패 원인을 구분해 보여주면 아무나
+이메일을 넣어보고 그 이메일이 이 서비스에 가입돼 있는지 알아낼 수 있다. 표적
+피싱이나 비밀번호 대입 공격의 사전 조사에 쓰인다. 보안 가이드라인들이 로그인
+실패 메시지를 뭉뚱그리라고 하는 이유다.
 
-- `src/constants/apiErrorMessages.ts` 에 두 코드의 문구 추가
-- `src/screens/LoginScreen.tsx` 에 `emailError` state 추가,
-  이메일 TextField 에 `error` prop 연결 (현재 비밀번호 칸에만 연결돼 있다)
-- `performLogin` 의 catch 에서 코드별로 어느 state 에 넣을지 분기
-
-**결정하기 전에 알아야 할 것**
-
-로그인 실패 원인을 구분해 보여주면 아무나 이메일을 넣어보고 그 이메일이
-이 서비스에 가입돼 있는지 알아낼 수 있다. 표적 피싱이나 비밀번호 대입
-공격의 사전 조사에 쓰인다. 보안 가이드라인들이 로그인 실패 메시지를
-뭉뚱그리라고 하는 이유다.
-
-다만 이 앱은 이미 회원가입에서 같은 정보가 샌다. `EMAIL_ALREADY_EXISTS`
-→ "이미 가입된 이메일이에요. 로그인해주세요." 가입 화면에 이메일을 넣으면
-똑같이 알 수 있다. 그래서 로그인만 뭉뚱그려봐야 실질적인 방어가 되지 않는다.
+다만 이 앱은 이미 회원가입에서 같은 정보가 샌다. `EMAIL_ALREADY_EXISTS` →
+"이미 가입된 이메일이에요. 로그인해주세요." 가입 화면에 이메일을 넣으면 똑같이
+알 수 있다. 그래서 로그인만 뭉뚱그려봐야 실질적인 방어가 되지 않는다.
 
 선택지는 둘 중 하나다.
 
@@ -57,58 +47,91 @@ POST /api/v1/auth/login 실패 응답의 code 를 둘로 분리
 
 "로그인만 분리"는 보안상 얻는 게 없다. 어느 쪽이든 팀 결정 사항이다.
 
+**답이 오면 할 일**
+
+- `src/constants/apiErrorMessages.ts` 에 두 코드의 문구 추가
+- `src/screens/LoginScreen.tsx` 에 `emailError` state 추가,
+  이메일 TextField 에 `error` prop 연결 (현재 비밀번호 칸에만 연결돼 있다)
+- `performLogin` 의 catch 에서 코드별로 어느 state 에 넣을지 분기
+- 이메일 형식 검증은 서버에 묻지 않고도 가능하므로 함께 넣을 수 있다
+
 ---
 
 ## 2. 내역 상세에 OCR 품목 데이터 필요
 
-상세 내역 시안(DTB-2-PAGE-02-0) 썸네일 아래에 '증빙 자료 세부 내역' 펼침 영역이 있다.
-문구 상수(상품명/수량/금액/합계)는 이미 ledgerScreenText.ts 에 있다.
-그러나 GET /api/v1/entries/{entryId} 응답에 OCR 품목이 없어 그릴 수 없다.
-Entry 명세는 'OCR 품목 데이터는 내역당 1건 유지'라고만 적혀 있고 조회 경로가 없다.
-응답에 품목 배열을 추가해 줄 수 있는지 확인 필요.
+**현상/생긴 경위**
 
-QA-038(2026-10-18) 때도 같은 이유로 지출 시안의 '증빙 자료 세부 내역'
-아코디언을 구현하지 않았다. OCR 결과 저장 자체가 미확정이라는 점도
-그때 다시 확인됨 — 저장 여부가 먼저 정해져야 조회 경로를 설계할 수 있다.
+상세 내역 시안(DTB-2-PAGE-02-0) 썸네일 아래에 '증빙 자료 세부 내역' 펼침 영역이
+있다. 문구 상수(상품명/수량/금액/합계)는 이미 `ledgerScreenText.ts` 에 있다.
+그러나 `GET /api/v1/entries/{entryId}` 응답에 OCR 품목이 없어 그릴 수 없다.
+Entry 명세는 'OCR 품목 데이터는 내역당 1건 유지'라고만 적혀 있고 조회 경로가
+없다.
+
+QA-038(2026-10-18) 때도 같은 이유로 지출 시안의 '증빙 자료 세부 내역' 아코디언을
+구현하지 않았다. OCR 결과 저장 자체가 미확정이라는 점도 그때 다시 확인됨 —
+저장 여부가 먼저 정해져야 조회 경로를 설계할 수 있다.
+
+**물어볼 것**
+
+`GET /api/v1/entries/{entryId}` 응답에 품목 배열을 추가해 줄 수 있는지. OCR
+결과 저장 여부가 아직 미확정이면 그것부터 확인 필요.
+
+**답이 오면 할 일**
+
+- 응답에 품목 배열이 오면 `TransactionDetailScreen.tsx` 에 '증빙 자료 세부
+  내역' 아코디언 구현(문구 상수는 `ledgerScreenText.ts` 에 이미 있음)
 
 ---
 
 ## 3. 카카오 소셜 로그인 SOCIAL_TOKEN_INVALID
 
-**현상** 개발 서버(https://220-66-233-75.nip.io)에서 카카오 소셜 로그인 시
+**현상/생긴 경위**
+
+개발 서버(https://220-66-233-75.nip.io)에서 카카오 소셜 로그인 시
 `POST /api/v1/auth/social/login` 요청이 `SOCIAL_TOKEN_INVALID` 로 거절된다.
 앱 쪽 카카오 SDK 로그인(키 해시 검증 포함)은 성공한다. 2026-10-16 확인.
 
-**앱이 보내는 값** `{ provider: "KAKAO", token: <카카오 SDK access token> }`
-Swagger 의 요청 형식과 같다(src/services/authService.ts socialLogin).
+앱이 보내는 값: `{ provider: "KAKAO", token: <카카오 SDK access token> }`
+Swagger 의 요청 형식과 같다(`src/services/authService.ts` socialLogin).
 
-**가능한 원인(서버 쪽)**
-1. 서버가 검증에 쓰는 카카오 앱(앱 ID / REST API 키)과
-   앱의 KAKAO_NATIVE_APP_KEY 가 속한 카카오 앱이 다르다. 토큰은 발급 앱에 묶인다.
+가능한 원인(서버 쪽):
+1. 서버가 검증에 쓰는 카카오 앱(앱 ID / REST API 키)과 앱의
+   `KAKAO_NATIVE_APP_KEY` 가 속한 카카오 앱이 다르다. 토큰은 발급 앱에 묶인다.
 2. 서버가 access token 이 아니라 id_token(OIDC)을 기대한다.
-3. 개발 서버의 카카오 설정 누락 또는 카카오 API 호출 실패가 같은 코드로 묶여 나온다.
+3. 개발 서버의 카카오 설정 누락 또는 카카오 API 호출 실패가 같은 코드로 묶여
+   나온다.
 
 **물어볼 것**
+
 - 서버가 쓰는 카카오 앱 ID / REST API 키
 - 기대하는 토큰 종류(access token / id_token)
 - 2026-10-16 17:56 전후 서버 로그의 카카오 API 응답(에러 코드·메시지)
 
-**앱 수정이 필요한 경우** 답이 'id_token 을 보내 달라'이면
-socialAuthService.loginWithKakao 에서 id_token 을 받아 보내도록 바꿔야 한다.
-카카오 디벨로퍼스에서 OpenID Connect 활성화도 필요하다.
+**답이 오면 할 일**
+
+답이 'id_token 을 보내 달라'이면 `socialAuthService.loginWithKakao` 에서
+id_token 을 받아 보내도록 바꿔야 한다. 카카오 디벨로퍼스에서 OpenID Connect
+활성화도 필요하다.
 
 ---
 
 ## 4. 내역 수정에서 장부 변경 필요
 
-시안(ADD-2-SHEET-03-0)은 수정 화면에서 장부를 다른 장부로 바꿀 수 있는
-것처럼 그려져 있다. 그러나 `PATCH /entries/{id}` 요청 바디에 `ledgerId`
-가 없어서(QA-039 때부터 확인) 수정 화면은 장부 행을 비활성으로 두고
-안내 문구만 보여준다(QA-044).
+**현상/생긴 경위**
 
-`PATCH /entries/{id}` 에 `ledgerId` 지원이 추가되면 프론트에서 할 일:
+시안(ADD-2-SHEET-03-0)은 수정 화면에서 장부를 다른 장부로 바꿀 수 있는 것처럼
+그려져 있다. 그러나 `PATCH /entries/{id}` 요청 바디에 `ledgerId` 가 없어서
+(QA-039 때부터 확인) 수정 화면은 장부 행을 비활성으로 두고 안내 문구만
+보여준다(QA-044).
+
+**물어볼 것**
+
+`PATCH /entries/{id}` 에 `ledgerId` 지원을 추가해 줄 수 있는지.
+
+**답이 오면 할 일**
+
 - `TransactionRegisterScreen` 의 `canChangeLedger = mode !== 'editReal'`
   조건을 지우고 수정 모드에서도 장부 선택 시트를 쓸 수 있게 한다.
 - `handleSubmit` 의 editReal 분기에 `ledgerId` 변경 비교·PATCH 필드 추가.
-- `TRANSACTION_REGISTER_LEDGER_LOCKED_HINT` 문구·DetailFieldRow 의
-  disabled 처리를 제거한다.
+- `TRANSACTION_REGISTER_LEDGER_LOCKED_HINT` 문구·DetailFieldRow 의 disabled
+  처리를 제거한다.
