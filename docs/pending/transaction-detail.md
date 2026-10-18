@@ -21,7 +21,7 @@
 | 스낵바 X 버튼 없음 | Snackbar 컴포넌트에 X 상시 노출 추가(`cleanup.md` 8번 이관) | 전역 | `f3b57a1` |
 | 승인 완료 후 흐름 | 현재 화면 스낵바 대신 내역 탭으로 이동 + "내역이 승인되었어요." | 화면 | `f3b57a1` |
 | 상세 내역 수정·삭제 진입점 디자이너 확인 (`design.md` 7번 이관) | QA-038 로 해결됨(위 "수정·삭제 진입점 없음" 행과 동일 커밋) | 화면 | `da7836b` |
-| 스캔 첨부 사진 상세 안 열림 | `ScanOutcome`에 `sourceUrl` 추가, `uploadFile` 응답의 url을 인식 성공/실패 양쪽에 실어 보냄 | 전역(ReceiptScanningView, useReceiptAttachments) | 이 커밋(QA-041) |
+| 스캔 첨부 사진 상세 안 열림 | `ScanOutcome`에 `sourceUrl` 추가, `uploadFile` 응답의 url을 인식 성공/실패 양쪽에 실어 보냄 | 전역(ReceiptScanningView, useReceiptAttachments) | `a6c1017` |
 
 ---
 
