@@ -77,19 +77,6 @@ TransactionsScreen 의 SNACKBAR_FAB_GAP 이다.
 
 ---
 
-## 7. 상세 내역의 수정·삭제 진입점
-
-QA 시트가 앱바 trailing 아이콘 전체 제거를 요구해 총무도 숨겼다
-(TransactionDetailScreen 의 SHOW_TRAILING_ACTIONS = false).
-지금 앱에는 총무가 내역을 수정·삭제할 다른 경로가 없다.
-총무용 진입점이 어디인지 디자이너 확인 필요.
-
-QA-038 에서 SHOW_TRAILING_ACTIONS 를 지우고 OWNER(총무)에게는
-앱바 아이콘을 보이게 했다(viewerIsOwner && !hideActions). 이 항목이
-막던 "진입점 없음" 문제는 해결됐지만, 9번 항목(권한)이 남아 있다.
-
----
-
 ## 8. 캘린더 금액 9자리 이상 넘침
 
 캘린더 전체보기(DSH-2-PAGE-03-0) 날짜 칸 폭(360dp 기준 약 45dp)에

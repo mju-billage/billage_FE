@@ -60,13 +60,6 @@ NAVY_800 을 배경색으로 직접 쓴다. 같은 유형일 수 있다.
 QA 시트가 오면 그때 함께 확인한다. 글자색으로 쓰는 곳은
 FOREGROUND_PRIMARY 와 값이 같아 문제가 아니다.
 
-## 8. 스낵바 close 버튼 미연결 화면 — QA-040 으로 해결
-
-QA-040 에서 Snackbar 컴포넌트 자체를 바꿔 X 버튼이 항상 뜨게 했다.
-onClose 를 안 넘긴 화면(33개 전부)은 X 를 누르면 컴포넌트 내부 상태로
-즉시 숨기고, onClose 를 넘긴 EmailVerificationScreen 만 그 콜백을 쓴다.
-더 이상 화면마다 연결할 필요 없다.
-
 ## 9. MOCK_DASHBOARD_SUMMARY 정리
 
 버그가 아니라 이름과 죽은 필드의 문제다.

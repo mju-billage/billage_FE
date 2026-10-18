@@ -47,10 +47,8 @@ export type ReceiptItem = {
   uploading: boolean;
   fromScan?: boolean;
   /**
-   * 업로드된 파일의 원본 서버 url(인증 전). 서버에서 이미 저장된 증빙을 불러왔거나
-   * 이번 세션에 촬영·갤러리로 올린 경우엔 채워진다. 스캔으로 붙은 항목은 업로드 응답의
-   * url 을 돌려주지 않는 ReceiptScanningView 구조상 비어 있다 — 그 항목은 탭해도
-   * 전체화면으로 안 열린다(보고 항목에 기록).
+   * 업로드된 파일의 원본 서버 url(인증 전). 서버에서 불러온 증빙, 촬영·갤러리·스캔으로
+   * 이번 세션에 올린 모든 경우에 채워진다(QA-041).
    */
   sourceUrl?: string;
 };
@@ -192,7 +190,11 @@ export function useReceiptAttachments({
    * 스캔한 영수증을 증빙 목록에 넣는다. 인식에 실패해도 파일은 올라가 있으므로
    * 똑같이 붙인다 — 사용자가 "인식은 안 됐지만 증빙으로는 남기기"를 할 수 있어야 한다.
    */
-  const attachScannedReceipt = (fileId: number, previewUri: string): boolean => {
+  const attachScannedReceipt = (
+    fileId: number,
+    previewUri: string,
+    sourceUrl: string,
+  ): boolean => {
     if (itemsRef.current.length >= maxCount) {
       // 인식하는 동안 다른 경로로 증빙이 다 찼다. 그냥 버리면 올린 파일이 어디에도 연결되지
       // 않은 채 서버에 남는데, 그건 업로더 본인만 지울 수 있어 사실상 아무도 손대지 못한다.
@@ -203,7 +205,14 @@ export function useReceiptAttachments({
     }
     setItems(current => [
       ...current,
-      { key: `scan-${Date.now()}`, previewUri, uploading: false, fileId, fromScan: true },
+      {
+        key: `scan-${Date.now()}`,
+        previewUri,
+        uploading: false,
+        fileId,
+        sourceUrl,
+        fromScan: true,
+      },
     ]);
     return true;
   };
@@ -222,7 +231,7 @@ export function useReceiptAttachments({
       return;
     }
 
-    const attached = attachScannedReceipt(outcome.fileId, outcome.previewUri);
+    const attached = attachScannedReceipt(outcome.fileId, outcome.previewUri, outcome.sourceUrl);
     if (!attached) {
       // 인식값은 여전히 쓸모가 있으므로 화면에는 반영하되, 증빙이 안 붙은 것은 분명히 알린다.
       setStage({ kind: 'form' });
