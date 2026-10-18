@@ -20,7 +20,7 @@ import {
 
 export type MainTabParamList = {
   Home: undefined;
-  Transactions: undefined;
+  Transactions: { snackbarMessage?: string } | undefined;
   Folder: undefined;
   Dues: { snackbarMessage?: string } | undefined;
   More: undefined;

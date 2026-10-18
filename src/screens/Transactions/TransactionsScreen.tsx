@@ -8,8 +8,8 @@ import {
   View,
 } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import type { CompositeNavigationProp } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import type { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { MainTabParamList } from '../../navigation/MainTabNavigator';
@@ -92,6 +92,7 @@ type TransactionsScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Transactions'>,
   NativeStackNavigationProp<RootStackParamList>
 >;
+type TransactionsScreenRouteProp = RouteProp<MainTabParamList, 'Transactions'>;
 
 const EMPTY_SUMMARY: EntryGroupSummary = { totalIncome: 0, totalExpense: 0, balance: 0 };
 
@@ -148,6 +149,7 @@ function getFilterSummary(filter: EntryListFilterValue): string {
 
 function TransactionsScreen() {
   const navigation = useNavigation<TransactionsScreenNavigationProp>();
+  const route = useRoute<TransactionsScreenRouteProp>();
   const [tab, setTab] = useState<TransactionsTab>('all');
   const [filter, setFilter] = useState<EntryListFilterValue>(
     DEFAULT_ENTRY_LIST_FILTER,
@@ -168,6 +170,14 @@ function TransactionsScreen() {
     setSnackbarMessage(message);
     setTimeout(() => setSnackbarMessage(null), 1600);
   };
+
+  useEffect(() => {
+    if (route.params?.snackbarMessage) {
+      showSnackbar(route.params.snackbarMessage);
+      navigation.setParams({ snackbarMessage: undefined });
+    }
+  }, [route.params?.snackbarMessage, navigation]);
+
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const [cardBlockHeight, setCardBlockHeight] = useState(0);

@@ -228,14 +228,16 @@ function TransactionDetailScreen() {
     runApprove(async () => {
       try {
         await entryService.approveEntry(entry.id);
-        showSnackbar(SNACKBAR_ENTRY_APPROVED);
-        load();
+        navigation.navigate('Main', {
+          screen: 'Transactions',
+          params: { snackbarMessage: SNACKBAR_ENTRY_APPROVED },
+        });
         return true;
       } catch (error) {
         showSnackbar(toErrorMessage(error));
         return false;
       }
-    });
+    }, { keepLockedOnSuccess: true });
   };
 
   /** 행별 즉시 수정(QA-039). 값이 안 바뀌면 호출하지 않는다 — 호출부에서 그 비교를 한다. */
