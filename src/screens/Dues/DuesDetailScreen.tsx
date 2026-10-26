@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -163,6 +163,14 @@ function DuesDetailScreen() {
     setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
+  useEffect(() => {
+    if (route.params?.snackbarMessage) {
+      showSnackbar(route.params.snackbarMessage);
+      navigation.setParams({ snackbarMessage: undefined });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params?.snackbarMessage]);
+
   const toggleMemberSelection = (memberId: string) => {
     setSelectedMemberIds(current =>
       current.includes(memberId)
@@ -289,7 +297,14 @@ function DuesDetailScreen() {
 
   if (loadState === 'loading' || loadState === 'error') {
     return (
-      <ScreenContainer background="primary">
+      <ScreenContainer
+        background="primary"
+        snackbar={
+          snackbarMessage ? (
+            <Snackbar visible title={snackbarMessage} />
+          ) : undefined
+        }
+      >
         <AppBar title="" onBackPress={() => navigation.goBack()} />
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>

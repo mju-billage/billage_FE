@@ -70,7 +70,10 @@ function MemberManageScreen() {
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const { isLocked: isDeleting, run } = useSubmitLock();
-  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+  const [snackbar, setSnackbar] = useState<{
+    title: string;
+    description?: string;
+  } | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
@@ -85,9 +88,9 @@ function MemberManageScreen() {
     return API_ERROR_DEFAULT_MESSAGE;
   };
 
-  const showSnackbar = (message: string) => {
-    setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), DELETE_SNACKBAR_AUTO_HIDE_MS);
+  const showSnackbar = (title: string, description?: string) => {
+    setSnackbar({ title, description });
+    setTimeout(() => setSnackbar(null), DELETE_SNACKBAR_AUTO_HIDE_MS);
   };
 
   const load = useCallback(async (searchKeyword: string) => {
@@ -124,8 +127,8 @@ function MemberManageScreen() {
 
   useEffect(() => {
     if (route.params?.snackbarMessage) {
-      showSnackbar(route.params.snackbarMessage);
-      navigation.setParams({ snackbarMessage: undefined });
+      showSnackbar(route.params.snackbarMessage, route.params.snackbarDescription);
+      navigation.setParams({ snackbarMessage: undefined, snackbarDescription: undefined });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route.params?.snackbarMessage]);
@@ -206,11 +209,12 @@ function MemberManageScreen() {
     <ScreenContainer
       background="secondary"
       snackbar={
-        snackbarMessage ? (
+        snackbar ? (
           <Snackbar
             visible
-            title={snackbarMessage}
-            onClose={() => setSnackbarMessage(null)}
+            title={snackbar.title}
+            description={snackbar.description}
+            onClose={() => setSnackbar(null)}
           />
         ) : undefined
       }

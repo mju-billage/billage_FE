@@ -8,6 +8,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
+import { setPendingSnackbar } from '../../utils/pendingSnackbar';
 import FolderItem from '../../components/Data Display/Folder/FolderItem';
 import { getActiveGroup } from '../../types/group';
 import { getCachedFolderTree } from '../../types/folderTree';
@@ -25,12 +26,11 @@ import {
   MOVE_DESTINATION_MOVING_LABEL,
   MOVE_DESTINATION_NO_SUBFOLDER,
   MOVE_DESTINATION_ROOT_TITLE,
-  SNACKBAR_FOLDER_MOVED,
+  SNACKBAR_FOLDER_MOVED_PREFIX,
+  SNACKBAR_FOLDER_MOVED_SUFFIX,
 } from '../../constants/folderScreenText';
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
-
-const SNACKBAR_AUTO_HIDE_MS = 1600;
 
 type FolderMoveDestinationNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -93,10 +93,10 @@ function FolderMoveDestinationScreen() {
         ledgerIds: items.filter(item => item.kind === 'ledger').map(item => item.id),
         targetFolderId: destinationFolderId,
       });
-      setSnackbarMessage(SNACKBAR_FOLDER_MOVED);
-      setTimeout(() => {
-        navigation.popToTop();
-      }, SNACKBAR_AUTO_HIDE_MS);
+      setPendingSnackbar(
+        `${SNACKBAR_FOLDER_MOVED_PREFIX}${title}${SNACKBAR_FOLDER_MOVED_SUFFIX}`,
+      );
+      navigation.popToTop();
     } catch (error) {
       setSnackbarMessage(toErrorMessage(error));
     } finally {

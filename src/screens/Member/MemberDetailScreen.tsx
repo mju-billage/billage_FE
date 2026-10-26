@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
@@ -44,6 +44,8 @@ import {
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+
+const SNACKBAR_AUTO_HIDE_MS = 1600;
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const DELETE_ICON = require('../../assets/icons/action/Delete.png');
@@ -102,6 +104,22 @@ function MemberDetailScreen() {
     }, [load]),
   );
 
+  useEffect(() => {
+    if (route.params?.snackbarMessage) {
+      setSnackbarMessage(route.params.snackbarMessage);
+      navigation.setParams({ snackbarMessage: undefined });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params?.snackbarMessage]);
+
+  useEffect(() => {
+    if (!snackbarMessage) {
+      return;
+    }
+    const timer = setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
+    return () => clearTimeout(timer);
+  }, [snackbarMessage]);
+
   const handleConfirmDelete = () => {
     const group = getActiveGroup();
     if (!group) {
@@ -124,7 +142,18 @@ function MemberDetailScreen() {
 
   if (loadState === 'loading' || loadState === 'error' || !member) {
     return (
-      <ScreenContainer background="primary">
+      <ScreenContainer
+        background="primary"
+        snackbar={
+          snackbarMessage ? (
+            <Snackbar
+              visible
+              title={snackbarMessage}
+              onClose={() => setSnackbarMessage(null)}
+            />
+          ) : undefined
+        }
+      >
         <AppBar type="sub" title="" onBackPress={() => navigation.goBack()} />
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>

@@ -26,7 +26,7 @@ import {
 import {
   DUES_CREATE_LEAVE_CANCEL_LABEL,
   DUES_CREATE_LEAVE_CONFIRM_LABEL,
-  DUES_CREATE_LEAVE_DESCRIPTION,
+  DUES_EDIT_LEAVE_DESCRIPTION,
   DUES_DETAIL_RETRY_LABEL,
   DUES_MEMBER_EDIT_LEAVE_TITLE,
   DUES_MEMBER_EDIT_SUBMIT_LABEL,
@@ -176,8 +176,11 @@ function DuesMemberEditScreen() {
         await duesService.updateDues(duesId, {
           targetMemberIds: selectedMemberIds.map(Number),
         });
-        showSnackbar(SNACKBAR_DUES_MEMBERS_UPDATED);
-        setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
+        navigation.popTo(
+          'DuesDetail',
+          { duesId, snackbarMessage: SNACKBAR_DUES_MEMBERS_UPDATED },
+          { merge: true },
+        );
         return true;
       } catch (error) {
         showSnackbar(toErrorMessage(error));
@@ -266,9 +269,10 @@ function DuesMemberEditScreen() {
       <Dialog
         visible={leaveDialogVisible}
         title={DUES_MEMBER_EDIT_LEAVE_TITLE}
-        description={DUES_CREATE_LEAVE_DESCRIPTION}
+        description={DUES_EDIT_LEAVE_DESCRIPTION}
         cancelLabel={DUES_CREATE_LEAVE_CANCEL_LABEL}
         confirmLabel={DUES_CREATE_LEAVE_CONFIRM_LABEL}
+        destructive
         onCancel={() => setLeaveDialogVisible(false)}
         onConfirm={() => {
           setLeaveDialogVisible(false);

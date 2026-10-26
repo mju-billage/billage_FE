@@ -61,7 +61,7 @@ function ScreenContainer({
 }
 
 const SNACKBAR_SLOT_BOTTOM = 24;
-const SNACKBAR_TAB_BAR_GAP = 12;
+const SNACKBAR_TAB_BAR_GAP = 20;
 
 const styles = StyleSheet.create({
   container: {

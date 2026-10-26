@@ -12,6 +12,7 @@ import {
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
+import { takePendingSnackbar } from '../../utils/pendingSnackbar';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
@@ -146,6 +147,15 @@ function DuesCreateScreen() {
       navigation.goBack();
     }
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      const pending = takePendingSnackbar();
+      if (pending) {
+        showSnackbar(pending.title);
+      }
+    }, []),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -414,6 +424,7 @@ function DuesCreateScreen() {
           description={DUES_CREATE_LEAVE_DESCRIPTION}
           cancelLabel={DUES_CREATE_LEAVE_CANCEL_LABEL}
           confirmLabel={DUES_CREATE_LEAVE_CONFIRM_LABEL}
+          destructive
           onCancel={() => setLeaveDialogVisible(false)}
           onConfirm={() => {
             setLeaveDialogVisible(false);
@@ -520,6 +531,7 @@ function DuesCreateScreen() {
         description={DUES_CREATE_LEAVE_DESCRIPTION}
         cancelLabel={DUES_CREATE_LEAVE_CANCEL_LABEL}
         confirmLabel={DUES_CREATE_LEAVE_CONFIRM_LABEL}
+        destructive
         onCancel={() => setLeaveDialogVisible(false)}
         onConfirm={() => {
           setLeaveDialogVisible(false);

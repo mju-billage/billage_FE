@@ -4,6 +4,7 @@ import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
+import { takePendingSnackbar } from '../../utils/pendingSnackbar';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import IconButton from '../../components/Input/Button/IconButton';
@@ -187,6 +188,10 @@ function ReceiptAlbumScreen() {
   useFocusEffect(
     useCallback(() => {
       load();
+      const pending = takePendingSnackbar();
+      if (pending) {
+        showSnackbar(pending.title);
+      }
     }, [load]),
   );
 

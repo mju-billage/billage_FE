@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   buttonAuto: {
     alignSelf: 'flex-start',

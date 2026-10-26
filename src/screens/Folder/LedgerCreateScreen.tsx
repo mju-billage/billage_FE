@@ -8,10 +8,10 @@ import BackButton from '../../components/Navigation/App bar/BackButton';
 import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
-import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
 import * as ledgerService from '../../services/ledgerService';
+import { setPendingSnackbar } from '../../utils/pendingSnackbar';
 import { getActiveGroup } from '../../types/group';
 import { ApiError } from '../../services/apiClient';
 import {
@@ -40,8 +40,6 @@ import { SNACKBAR_LEDGER_CREATED_SUFFIX } from '../../constants/folderScreenText
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
-
 type LedgerCreateNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'LedgerCreate'
@@ -58,7 +56,6 @@ function LedgerCreateScreen() {
   const [nameError, setNameError] = useState<string | undefined>();
   const { isLocked, run } = useSubmitLock();
   const [leaveConfirmVisible, setLeaveConfirmVisible] = useState(false);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   const hasInput = name.trim().length > 0 || budget.trim().length > 0;
 
@@ -109,10 +106,8 @@ function LedgerCreateScreen() {
             folderId: null,
           });
         }
-        setSnackbarVisible(true);
-        setTimeout(() => {
-          navigation.goBack();
-        }, SNACKBAR_AUTO_HIDE_MS);
+        setPendingSnackbar(`'${trimmedName}'${SNACKBAR_LEDGER_CREATED_SUFFIX}`);
+        navigation.goBack();
         return true;
       } catch (error) {
         if (isNetworkError(error)) {
@@ -133,12 +128,6 @@ function LedgerCreateScreen() {
       background="secondary"
       edges={['bottom']}
       style={styles.container}
-      snackbar={
-        snackbarVisible ? (
-          <Snackbar visible title={`'${name.trim()}'${SNACKBAR_LEDGER_CREATED_SUFFIX}`} />
-        ) : undefined
-      }
-      snackbarOffset={68}
     >
       <ScrollView
         style={styles.scroll}
@@ -155,6 +144,7 @@ function LedgerCreateScreen() {
         <View style={styles.form}>
           <TextField
             label={LEDGER_NAME_LABEL}
+            required
             value={name}
             onChangeText={text => {
               setName(text.slice(0, LEDGER_NAME_MAX_LENGTH));
@@ -178,6 +168,7 @@ function LedgerCreateScreen() {
             }}
             placeholder={LEDGER_BUDGET_PLACEHOLDER}
             keyboardType="number-pad"
+            suffix="원"
           />
         </View>
       </ScrollView>
@@ -197,6 +188,7 @@ function LedgerCreateScreen() {
         description={LEDGER_LEAVE_CONFIRM_DESCRIPTION}
         cancelLabel={LEDGER_LEAVE_CANCEL_LABEL}
         confirmLabel={LEDGER_LEAVE_CONFIRM_LABEL}
+        destructive
         onCancel={() => setLeaveConfirmVisible(false)}
         onConfirm={() => {
           setLeaveConfirmVisible(false);

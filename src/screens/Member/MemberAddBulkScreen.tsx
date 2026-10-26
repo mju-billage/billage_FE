@@ -7,7 +7,6 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import TextArea from '../../components/Input/Text Field/TextArea';
 import Button from '../../components/Input/Button/Button';
-import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import { getActiveGroup } from '../../types/group';
 import * as memberService from '../../services/memberService';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
@@ -33,8 +32,6 @@ import {
   SNACKBAR_MEMBER_BULK_ADDED_SUFFIX,
 } from '../../constants/memberScreenText';
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
-
 type MemberAddBulkNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'MemberAddBulk'
@@ -45,7 +42,6 @@ function MemberAddBulkScreen() {
   const [text, setText] = useState('');
   const [formError, setFormError] = useState<string | undefined>();
   const { isLocked: isSubmitting, run } = useSubmitLock();
-  const [snackbarInfo, setSnackbarInfo] = useState<{ count: number } | null>(null);
 
   const parsedNames = parseMemberNames(text);
   const canSubmit = parsedNames.length > 0 && !isSubmitting;
@@ -73,10 +69,14 @@ function MemberAddBulkScreen() {
     run(async () => {
     try {
       const created = await memberService.createMembersBulk(group.id, text.trim());
-      setSnackbarInfo({ count: created.length });
-      setTimeout(() => {
-        navigation.goBack();
-      }, SNACKBAR_AUTO_HIDE_MS);
+      navigation.popTo(
+        'MemberManage',
+        {
+          snackbarMessage: `${created.length}${SNACKBAR_MEMBER_BULK_ADDED_SUFFIX}`,
+          snackbarDescription: SNACKBAR_MEMBER_BULK_ADDED_DESCRIPTION,
+        },
+        { merge: true },
+      );
       return true;
     } catch (error) {
       if (isNetworkError(error)) {
@@ -92,19 +92,7 @@ function MemberAddBulkScreen() {
   };
 
   return (
-    <ScreenContainer
-      background="secondary"
-      snackbar={
-        snackbarInfo ? (
-          <Snackbar
-            visible
-            title={`${snackbarInfo.count}${SNACKBAR_MEMBER_BULK_ADDED_SUFFIX}`}
-            description={SNACKBAR_MEMBER_BULK_ADDED_DESCRIPTION}
-          />
-        ) : undefined
-      }
-      snackbarOffset={68}
-    >
+    <ScreenContainer background="secondary">
       <AppBar
         type="sub"
         title={MEMBER_ADD_BULK_TITLE}

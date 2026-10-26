@@ -32,8 +32,7 @@ export const LEDGER_DELETE_DIALOG_DESCRIPTION =
   '삭제 이후에는 데이터 복구가 어렵습니다.';
 export const LEDGER_DELETE_CONFIRM_LABEL = '삭제';
 
-export const SNACKBAR_LEDGER_RENAMED_PREFIX = "'";
-export const SNACKBAR_LEDGER_RENAMED_SUFFIX = "'으로 장부 이름이 변경되었어요.";
+export const SNACKBAR_LEDGER_RENAMED = '변경 사항이 저장되었어요.';
 export const SNACKBAR_LEDGER_DELETED_SUFFIX = ' 장부가 삭제되었어요.';
 
 export const LEDGER_COUNT_SUFFIX = ' 건';

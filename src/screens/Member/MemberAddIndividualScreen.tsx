@@ -10,7 +10,6 @@ import TextArea from '../../components/Input/Text Field/TextArea';
 import SelectionListItem from '../../components/Data Display/Lists/SelectionListItem';
 import TagField from '../../components/Input/Tag Field/TagField';
 import Button from '../../components/Input/Button/Button';
-import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import { getActiveGroup } from '../../types/group';
 import * as memberService from '../../services/memberService';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
@@ -46,8 +45,6 @@ import {
 import { FEEDBACK_NEGATIVE_BOLD, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
-
 type MemberAddIndividualNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'MemberAddIndividual'
@@ -69,7 +66,6 @@ function MemberAddIndividualScreen() {
   const [phoneError, setPhoneError] = useState<string | undefined>();
   const [formError, setFormError] = useState<string | undefined>();
   const { isLocked: isSubmitting, run } = useSubmitLock();
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   const openTagStep = () => {
     setDraftTags(tags);
@@ -104,10 +100,11 @@ function MemberAddIndividualScreen() {
           tags: tags.length > 0 ? tags : undefined,
           memo: memo.trim() || undefined,
         });
-        setSnackbarVisible(true);
-        setTimeout(() => {
-          navigation.goBack();
-        }, SNACKBAR_AUTO_HIDE_MS);
+        navigation.popTo(
+          'MemberManage',
+          { snackbarMessage: SNACKBAR_MEMBER_ADDED },
+          { merge: true },
+        );
         return true;
       } catch (error) {
         if (isNetworkError(error)) {
@@ -163,11 +160,7 @@ function MemberAddIndividualScreen() {
   }
 
   return (
-    <ScreenContainer
-      background="secondary"
-      snackbar={snackbarVisible ? <Snackbar visible title={SNACKBAR_MEMBER_ADDED} /> : undefined}
-      snackbarOffset={68}
-    >
+    <ScreenContainer background="secondary">
       <AppBar
         type="sub"
         title={MEMBER_ADD_INDIVIDUAL_TITLE}
@@ -180,6 +173,7 @@ function MemberAddIndividualScreen() {
       >
         <TextField
           label={MEMBER_NAME_LABEL}
+          required
           value={name}
           onChangeText={text => {
             setName(text);

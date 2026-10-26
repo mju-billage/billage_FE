@@ -28,6 +28,7 @@ import TransactionListItem from '../../components/Data Display/Lists/Transaction
 import CarouselIndicator from '../../components/Navigation/Carousel Indicator/CarouselIndicator';
 import Button from '../../components/Input/Button/Button';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
+import { setPendingSnackbar } from '../../utils/pendingSnackbar';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import FolderMoreMenu from './FolderMoreMenu';
 import LedgerFilterSheet, {
@@ -73,8 +74,7 @@ import {
   LEDGER_RENAME_DIALOG_TITLE,
   LEDGER_RENAME_PLACEHOLDER,
   SNACKBAR_LEDGER_DELETED_SUFFIX,
-  SNACKBAR_LEDGER_RENAMED_PREFIX,
-  SNACKBAR_LEDGER_RENAMED_SUFFIX,
+  SNACKBAR_LEDGER_RENAMED,
 } from '../../constants/ledgerScreenText';
 import { SNACKBAR_BUDGET_SAVED } from '../../constants/folderScreenText';
 import {
@@ -263,9 +263,7 @@ function LedgerDetailScreen() {
         try {
           await ledgerService.updateLedger(ledgerId, { name: trimmed });
           closeDialog();
-          showSnackbar(
-            `${SNACKBAR_LEDGER_RENAMED_PREFIX}${trimmed}${SNACKBAR_LEDGER_RENAMED_SUFFIX}`,
-          );
+          showSnackbar(SNACKBAR_LEDGER_RENAMED);
           load();
           return true;
         } catch (error) {
@@ -296,8 +294,8 @@ function LedgerDetailScreen() {
         try {
           await ledgerService.deleteLedger(ledgerId);
           closeDialog();
-          showSnackbar(`'${name}'${SNACKBAR_LEDGER_DELETED_SUFFIX}`);
-          setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
+          setPendingSnackbar(`'${name}'${SNACKBAR_LEDGER_DELETED_SUFFIX}`);
+          navigation.goBack();
           return true;
         } catch (error) {
           closeDialog();
@@ -480,6 +478,7 @@ function LedgerDetailScreen() {
         }}
         textFieldPlaceholder={dialogConfig.placeholder}
         textFieldKeyboardType={activeDialog === 'budget' ? 'number-pad' : undefined}
+        textFieldSuffix={activeDialog === 'budget' ? '원' : undefined}
         autoFocusTextField={activeDialog === 'rename'}
         textFieldError={dialogError}
         confirmLabel={dialogConfig.confirmLabel}
