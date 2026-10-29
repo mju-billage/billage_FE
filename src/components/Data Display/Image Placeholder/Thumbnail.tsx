@@ -1,4 +1,5 @@
 import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
+import { useAuthenticatedImage } from '../../../hooks/useAuthenticatedImage';
 import {
   BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_SUBTLE,
@@ -12,8 +13,10 @@ const CLOSE_ICON = require('../../../assets/icons/action/Close.png');
 const IMAGE_ICON = require('../../../assets/icons/content/Image.png');
 
 type ThumbnailProps = {
+  /** 로컬 미리보기(촬영 직후 등). 이미 바로 그릴 수 있는 uri — fetch 안 함. */
   imageUri?: string;
-  imageHeaders?: Record<string, string>;
+  /** 인증이 필요한 서버 이미지 url. 내부에서 useAuthenticatedImage 로 받아 그린다. */
+  imageUrl?: string;
   size?: number;
   onRemove?: () => void;
   uploading?: boolean;
@@ -21,16 +24,19 @@ type ThumbnailProps = {
 
 function Thumbnail({
   imageUri,
-  imageHeaders,
+  imageUrl,
   size = 56,
   onRemove,
   uploading = false,
 }: ThumbnailProps) {
+  const { uri: resolvedUri } = useAuthenticatedImage(imageUri ? undefined : imageUrl);
+  const finalUri = imageUri || resolvedUri;
+
   return (
     <View style={[styles.container, { width: size, height: size }]}>
-      {imageUri ? (
+      {finalUri ? (
         <Image
-          source={{ uri: imageUri, headers: imageHeaders }}
+          source={{ uri: finalUri }}
           style={styles.image}
         />
       ) : (

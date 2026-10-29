@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import TextField from '../../components/Input/Text Field/TextField';
 import Button from '../../components/Input/Button/Button';
 import type { GroupSummary } from '../../types/group';
 import * as groupService from '../../services/groupService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { ApiError } from '../../services/apiClient';
 import {
   API_NETWORK_ERROR_MESSAGE,
@@ -28,7 +29,13 @@ type JoinGroupSheetProps = {
 function JoinGroupSheet({ visible, onClose, onJoined }: JoinGroupSheetProps) {
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | undefined>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run, release } = useSubmitLock();
+
+  useEffect(() => {
+    if (visible) {
+      release();
+    }
+  }, [visible, release]);
 
   const handleClose = () => {
     setCode('');
@@ -36,34 +43,35 @@ function JoinGroupSheet({ visible, onClose, onJoined }: JoinGroupSheetProps) {
     onClose();
   };
 
-  const handleSubmit = async () => {
-    if (!code.trim() || isSubmitting) {
+  const handleSubmit = () => {
+    if (!code.trim()) {
       return;
     }
     setError(undefined);
-    setIsSubmitting(true);
-    try {
-      const group = await groupService.joinGroup(code.trim());
-      setCode('');
-      onJoined(group);
-    } catch (fetchError) {
-      if (isNetworkError(fetchError)) {
-        setError(API_NETWORK_ERROR_MESSAGE);
-      } else if (fetchError instanceof ApiError) {
-        if (
-          fetchError.code === 'INVALID_INVITATION_CODE' ||
-          fetchError.code === 'INVITATION_NOT_FOUND'
-        ) {
-          setError(JOIN_GROUP_INVALID_CODE_ERROR);
+    run(async () => {
+      try {
+        const group = await groupService.joinGroup(code.trim());
+        setCode('');
+        onJoined(group);
+        return true;
+      } catch (fetchError) {
+        if (isNetworkError(fetchError)) {
+          setError(API_NETWORK_ERROR_MESSAGE);
+        } else if (fetchError instanceof ApiError) {
+          if (
+            fetchError.code === 'INVALID_INVITATION_CODE' ||
+            fetchError.code === 'INVITATION_NOT_FOUND'
+          ) {
+            setError(JOIN_GROUP_INVALID_CODE_ERROR);
+          } else {
+            setError(getApiErrorMessage(fetchError.code, fetchError.message));
+          }
         } else {
-          setError(getApiErrorMessage(fetchError.code, fetchError.message));
+          setError(JOIN_GROUP_INVALID_CODE_ERROR);
         }
-      } else {
-        setError(JOIN_GROUP_INVALID_CODE_ERROR);
+        return false;
       }
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, { keepLockedOnSuccess: true });
   };
 
   return (

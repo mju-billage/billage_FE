@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   FOREGROUND_INACTIVE,
@@ -25,9 +26,23 @@ function Snackbar({
   onActionPress,
   onClose,
 }: SnackbarProps) {
-  if (!visible) {
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    setDismissed(false);
+  }, [visible, title, description]);
+
+  if (!visible || dismissed) {
     return null;
   }
+
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+    } else {
+      setDismissed(true);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -47,11 +62,9 @@ function Snackbar({
             <Text style={styles.actionLabel}>{actionLabel}</Text>
           </Pressable>
         )}
-        {onClose && (
-          <Pressable onPress={onClose} hitSlop={8}>
-            <Image source={CLOSE_ICON} style={styles.closeIcon} />
-          </Pressable>
-        )}
+        <Pressable onPress={handleClose} hitSlop={8}>
+          <Image source={CLOSE_ICON} style={styles.closeIcon} />
+        </Pressable>
       </View>
     </View>
   );
@@ -63,7 +76,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: GREY_700,
-    borderRadius: 12,
+    borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     gap: 12,

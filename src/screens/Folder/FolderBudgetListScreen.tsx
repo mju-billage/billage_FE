@@ -13,6 +13,7 @@ import ScreenContainer from '../../components/Layout/ScreenContainer';
 import type { LedgerSummary } from '../../types/ledger';
 import { getActiveGroup } from '../../types/group';
 import * as ledgerService from '../../services/ledgerService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import * as groupService from '../../services/groupService';
 import { ApiError } from '../../services/apiClient';
 import {
@@ -70,7 +71,7 @@ function FolderBudgetListScreen() {
   const [editingLedger, setEditingLedger] = useState<LedgerSummary | null>(null);
   const [budgetInput, setBudgetInput] = useState('');
   const [budgetError, setBudgetError] = useState<string | undefined>();
-  const [isSaving, setIsSaving] = useState(false);
+  const { isLocked: isSaving, run } = useSubmitLock();
   const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   const toErrorMessage = (error: unknown): string => {
@@ -120,27 +121,28 @@ function FolderBudgetListScreen() {
     setBudgetError(undefined);
   };
 
-  const handleSave = async () => {
-    if (!editingLedger || !budgetInput.trim() || isSaving) {
+  const handleSave = () => {
+    if (!editingLedger || !budgetInput.trim()) {
       return;
     }
-    setIsSaving(true);
-    try {
-      await ledgerService.updateLedgerBudget(editingLedger.id, Number(budgetInput.trim()));
-      setEditingLedger(null);
-      load();
-      setSnackbarVisible(true);
-      setTimeout(() => setSnackbarVisible(false), SNACKBAR_AUTO_HIDE_MS);
-    } catch (error) {
-      if (error instanceof ApiError) {
-        const fieldError = error.fieldErrors.find(fe => fe.field === 'budget');
-        setBudgetError(fieldError?.reason ?? getApiErrorMessage(error.code, error.message));
-      } else {
-        setBudgetError(toErrorMessage(error));
+    run(async () => {
+      try {
+        await ledgerService.updateLedgerBudget(editingLedger.id, Number(budgetInput.trim()));
+        setEditingLedger(null);
+        load();
+        setSnackbarVisible(true);
+        setTimeout(() => setSnackbarVisible(false), SNACKBAR_AUTO_HIDE_MS);
+        return true;
+      } catch (error) {
+        if (error instanceof ApiError) {
+          const fieldError = error.fieldErrors.find(fe => fe.field === 'budget');
+          setBudgetError(fieldError?.reason ?? getApiErrorMessage(error.code, error.message));
+        } else {
+          setBudgetError(toErrorMessage(error));
+        }
+        return false;
       }
-    } finally {
-      setIsSaving(false);
-    }
+    });
   };
 
   return (

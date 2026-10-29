@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Thumbnail from '../../components/Data Display/Image Placeholder/Thumbnail';
 import type { Receipt } from '../../types/receipt';
-import { buildAuthenticatedImageSource } from '../../utils/authenticatedImage';
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
@@ -43,14 +42,11 @@ function ReceiptGrid({ items, emptyText, onEndReached, onPressItem }: ReceiptGri
       contentContainerStyle={styles.gridContent}
       onEndReachedThreshold={0.5}
       onEndReached={onEndReached}
-      renderItem={({ item }) => {
-        const source = buildAuthenticatedImageSource(item.fileUrl);
-        return (
-          <Pressable onPress={() => onPressItem(item)}>
-            <Thumbnail imageUri={source.uri} imageHeaders={source.headers} size={tileSize} />
-          </Pressable>
-        );
-      }}
+      renderItem={({ item }) => (
+        <Pressable onPress={() => onPressItem(item)}>
+          <Thumbnail imageUrl={item.fileUrl} size={tileSize} />
+        </Pressable>
+      )}
     />
   );
 }

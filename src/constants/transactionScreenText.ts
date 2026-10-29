@@ -11,6 +11,7 @@ export const TRANSACTION_SEARCH_PLACEHOLDER = '내역명, 장부명을 입력해
 export const FILTER_LEDGER_LABEL = '장부';
 export const FILTER_LEDGER_ADD_LABEL = '선택하기';
 export const FILTER_PERIOD_CUSTOM_ICON_LABEL = '기간 선택';
+export const FILTER_PERIOD_SHEET_TITLE = '기간 선택';
 
 export const LEDGER_SELECT_SHEET_TITLE = '장부 선택';
 export const LEDGER_SELECT_EMPTY_GUIDE = '새로운 장부를 생성해주세요.';
@@ -25,6 +26,7 @@ export const ITEM_NAME_SHEET_TITLE = '내역명 작성';
 export const ITEM_NAME_SHEET_PLACEHOLDER = '20자까지 입력 가능해요.';
 export const ITEM_NAME_MAX_LENGTH = 20;
 export const TEXT_INPUT_SHEET_SAVE_LABEL = '입력하기';
+export const TEXT_INPUT_SHEET_EDIT_LABEL = '수정하기';
 export const TEXT_INPUT_SHEET_CANCEL_LABEL = '취소';
 
 export const MEMO_SHEET_TITLE = '메모 등록';
@@ -39,6 +41,7 @@ export const TRANSACTION_REGISTER_LEDGER_PLACEHOLDER = '장부를 선택해주�
 export const TRANSACTION_REGISTER_RECEIPT_LABEL = '증빙 자료';
 export const TRANSACTION_REGISTER_RECEIPT_MAX = 10;
 export const TRANSACTION_REGISTER_SUBMIT_LABEL = '추가하기';
+export const TRANSACTION_REGISTER_SAVE_LABEL = '저장하기';
 
 export const AMOUNT_SHEET_TITLE = '금액 입력';
 
@@ -66,6 +69,12 @@ export const SCAN_APPLY_CONFIRM_DESCRIPTION =
 export const SCAN_APPLY_CANCEL_LABEL = '아니요';
 export const SCAN_APPLY_CONFIRM_LABEL = '예';
 
+export const RECEIPT_DELETE_CONFIRM_TITLE = '해당 증빙자료를 삭제할까요?';
+export const RECEIPT_DELETE_CONFIRM_DESCRIPTION =
+  '연결된 세부 내역도 함께 삭제돼요.';
+export const RECEIPT_DELETE_CANCEL_LABEL = '취소';
+export const RECEIPT_DELETE_CONFIRM_LABEL = '삭제하기';
+
 export const SCAN_FAILED_TITLE = '영수증 인식에 실패했어요.';
 export const SCAN_FAILED_SUBTITLE = '영수증 전체가 잘 나오도록 촬영해주세요.';
 export const SCAN_FAILED_RETRY_LABEL = '다시 촬영하기';
@@ -86,7 +95,7 @@ export const SNACKBAR_RECEIPT_MAX_LIMIT =
 export const SNACKBAR_TRANSACTION_ADDED = '내역이 추가되었어요.';
 export const SNACKBAR_TRANSACTION_ADDED_PENDING =
   '내역이 추가되었어요. 총무 승인 후 반영돼요.';
-export const SNACKBAR_TRANSACTION_UPDATED = '내역이 수정되었어요.';
+export const SNACKBAR_TRANSACTION_UPDATED = '변경 사항이 저장되었어요.';
 export const TRANSACTION_REGISTER_LOADING = '불러오는 중이에요.';
 export const TRANSACTION_REGISTER_RETRY_LABEL = '다시 시도';
 export const TRANSACTION_REGISTER_LEDGER_LOCKED_HINT =
@@ -97,3 +106,7 @@ export const TRANSACTION_REGISTER_LEAVE_DESCRIPTION =
   '작성 중인 내용은 저장되지 않아요.';
 export const TRANSACTION_REGISTER_LEAVE_CANCEL_LABEL = '취소';
 export const TRANSACTION_REGISTER_LEAVE_CONFIRM_LABEL = '그만두기';
+
+export const TRANSACTION_EDIT_LEAVE_TITLE = '내역 수정을 그만둘까요?';
+export const TRANSACTION_EDIT_LEAVE_DESCRIPTION =
+  '변경된 내용은 저장되지 않아요.';

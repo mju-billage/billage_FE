@@ -6,7 +6,8 @@ import {
 
 export type MiniCalendarDay = {
   date: number;
-  amount: number | null;
+  income: number;
+  expense: number;
 };
 
 export type MiniCalendarData = {
@@ -42,21 +43,21 @@ export type DashboardSummary = {
   quickServices: QuickServiceItem[];
 };
 
-const MINI_CALENDAR_AMOUNTS: Array<number | null> = [
-  -10000,
-  -10000,
-  -5000,
-  null,
-  5000,
-  10000,
-  15000,
-  -10000,
-  -10000,
-  -5000,
-  -5000,
-  5000,
-  10000,
-  15000,
+const MINI_CALENDAR_AMOUNTS: Array<{ income: number; expense: number }> = [
+  { income: 0, expense: 10000 },
+  { income: 0, expense: 10000 },
+  { income: 0, expense: 5000 },
+  { income: 0, expense: 0 },
+  { income: 5000, expense: 0 },
+  { income: 10000, expense: 0 },
+  { income: 15000, expense: 0 },
+  { income: 0, expense: 10000 },
+  { income: 0, expense: 10000 },
+  { income: 0, expense: 5000 },
+  { income: 0, expense: 5000 },
+  { income: 5000, expense: 0 },
+  { income: 10000, expense: 0 },
+  { income: 15000, expense: 0 },
 ];
 
 export const MOCK_DASHBOARD_SUMMARY: DashboardSummary = {
@@ -65,9 +66,10 @@ export const MOCK_DASHBOARD_SUMMARY: DashboardSummary = {
     year: 2026,
     month: 7,
     monthLabel: '7월',
-    days: MINI_CALENDAR_AMOUNTS.map((amount, index) => ({
+    days: MINI_CALENDAR_AMOUNTS.map((split, index) => ({
       date: index + 1,
-      amount,
+      income: split.income,
+      expense: split.expense,
     })),
   },
   duesProgressList: [

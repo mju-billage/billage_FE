@@ -7,6 +7,8 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import SearchField from '../../components/Input/Search/SearchField';
+import Divider from '../../components/Data Display/Divider/Divider';
+import CountRow from '../../components/Data Display/Lists/CountRow';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import type { EntrySummary } from '../../types/entry';
 import { groupEntriesByDate } from '../../types/entry';
@@ -25,11 +27,13 @@ import {
 import { LEDGER_ENTRIES_LOADING_MORE, LEDGER_SEARCH_EMPTY } from '../../constants/ledgerScreenText';
 import {
   TRANSACTION_SEARCH_PLACEHOLDER,
+  TRANSACTIONS_COUNT_SUFFIX,
+  TRANSACTIONS_EMPTY,
   TRANSACTIONS_RETRY_LABEL,
   TRANSACTIONS_TITLE,
 } from '../../constants/transactionScreenText';
 import { formatDateHeader } from '../../utils/dateHeader';
-import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_NORMAL, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import {
   SNACKBAR_LOAD_MORE_FAILED,
@@ -43,7 +47,7 @@ type TransactionSearchNavigationProp = NativeStackNavigationProp<
   'TransactionSearch'
 >;
 
-type SearchState = 'idle' | 'loading' | 'error' | 'ready';
+type SearchState = 'loading' | 'error' | 'ready';
 
 function TransactionSearchScreen() {
   const navigation = useNavigation<TransactionSearchNavigationProp>();
@@ -51,12 +55,14 @@ function TransactionSearchScreen() {
   const [entries, setEntries] = useState<EntrySummary[]>([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  const [totalElements, setTotalElements] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [searchState, setSearchState] = useState<SearchState>('idle');
+  const [searchState, setSearchState] = useState<SearchState>('loading');
   const [errorMessage, setErrorMessage] = useState('');
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
   const loadMoreFailedRef = useRef(false);
+  const requestIdRef = useRef(0);
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
@@ -76,11 +82,7 @@ function TransactionSearchScreen() {
 
   const search = useCallback(async (keyword: string) => {
     const trimmed = keyword.trim();
-    if (!trimmed) {
-      setSearchState('idle');
-      setEntries([]);
-      return;
-    }
+    const requestId = ++requestIdRef.current;
     setSearchState('loading');
     try {
       let group = getActiveGroup();
@@ -89,20 +91,30 @@ function TransactionSearchScreen() {
         group = getActiveGroup();
       }
       if (!group) {
+        if (requestId !== requestIdRef.current) {
+          return;
+        }
         setErrorMessage(NO_ACTIVE_GROUP_MESSAGE);
         setSearchState('error');
         return;
       }
       const firstPage = await entryService.getGroupEntries(group.id, {
-        keyword: trimmed,
+        keyword: trimmed || undefined,
         page: 0,
       });
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
       setEntries(firstPage.items);
       setPage(firstPage.page);
       setHasMore(!firstPage.last);
+      setTotalElements(firstPage.totalElements);
       loadMoreFailedRef.current = false;
       setSearchState('ready');
     } catch (error) {
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
       setErrorMessage(toErrorMessage(error));
       setSearchState('error');
     }
@@ -112,6 +124,10 @@ function TransactionSearchScreen() {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
     }
+    if (!query.trim()) {
+      search(query);
+      return;
+    }
     debounceRef.current = setTimeout(() => {
       search(query);
     }, SEARCH_DEBOUNCE_MS);
@@ -120,11 +136,11 @@ function TransactionSearchScreen() {
         clearTimeout(debounceRef.current);
       }
     };
-  }, [query, search]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
 
   const loadMoreEntries = useCallback(async () => {
-    const trimmed = query.trim();
-    if (loadMoreFailedRef.current || isLoadingMore || !hasMore || !trimmed) {
+    if (loadMoreFailedRef.current || isLoadingMore || !hasMore) {
       return;
     }
     const group = getActiveGroup();
@@ -134,7 +150,7 @@ function TransactionSearchScreen() {
     setIsLoadingMore(true);
     try {
       const nextPage = await entryService.getGroupEntries(group.id, {
-        keyword: trimmed,
+        keyword: query.trim() || undefined,
         page: page + 1,
       });
       setEntries(current => [...current, ...nextPage.items]);
@@ -168,11 +184,23 @@ function TransactionSearchScreen() {
         <SearchField
           value={query}
           onChangeText={setQuery}
+          onClear={() => setQuery('')}
           placeholder={TRANSACTION_SEARCH_PLACEHOLDER}
           variant="outline"
         />
 
-        {searchState === 'idle' ? null : searchState === 'loading' ? (
+        {searchState === 'ready' && (
+          <>
+            <View style={styles.countRowWrapper}>
+              <CountRow text={`${totalElements}${TRANSACTIONS_COUNT_SUFFIX}`} />
+            </View>
+            <View style={styles.dividerBleed}>
+              <Divider />
+            </View>
+          </>
+        )}
+
+        {searchState === 'loading' ? (
           <View style={styles.stateContainer}>
             <ActivityIndicator size="small" />
           </View>
@@ -188,7 +216,9 @@ function TransactionSearchScreen() {
           </View>
         ) : entries.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>{LEDGER_SEARCH_EMPTY}</Text>
+            <Text style={styles.emptyTitle}>
+              {query.trim() ? LEDGER_SEARCH_EMPTY : TRANSACTIONS_EMPTY}
+            </Text>
           </View>
         ) : (
           <SectionList
@@ -237,13 +267,19 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingHorizontal: 20,
   },
+  countRowWrapper: {
+    marginTop: 16,
+    marginHorizontal: -20,
+  },
+  dividerBleed: {
+    marginHorizontal: -20,
+  },
   listContent: {
     paddingBottom: 24,
   },
   sectionHeader: {
-    ...TYPOGRAPHY.body3,
-    fontWeight: 'bold',
-    color: FOREGROUND_NEUTRAL_SUBTLE,
+    ...TYPOGRAPHY.caption,
+    color: FOREGROUND_NEUTRAL_NORMAL,
     marginTop: 12,
     marginBottom: 6,
   },
@@ -260,10 +296,10 @@ const styles = StyleSheet.create({
   emptyState: {
     flex: 1,
     alignItems: 'center',
-    paddingTop: 80,
+    paddingTop: 56,
   },
   emptyTitle: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   loadingMoreRow: {

@@ -170,6 +170,7 @@ const styles = StyleSheet.create({
   rightIcon: {
     width: 24,
     height: 24,
+    tintColor: FOREGROUND_PRIMARY,
   },
   selectedCountText: {
     ...TYPOGRAPHY.subtitle3,

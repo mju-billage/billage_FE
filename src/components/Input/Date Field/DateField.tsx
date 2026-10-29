@@ -11,6 +11,7 @@ type DateFieldProps = {
   endDate?: string;
   onPress: () => void;
   placeholder?: string;
+  bleed?: number;
 };
 
 function DateField({
@@ -18,10 +19,11 @@ function DateField({
   endDate,
   onPress,
   placeholder = 'YY.MM.DD',
+  bleed = 0,
 }: DateFieldProps) {
   return (
     <Pressable style={styles.container} onPress={onPress}>
-      <View style={styles.dividerWrapper}>
+      <View style={[styles.dividerWrapper, { marginHorizontal: -bleed }]}>
         <Divider />
       </View>
       <View style={styles.row}>

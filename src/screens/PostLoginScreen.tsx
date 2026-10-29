@@ -8,6 +8,7 @@ import Button from '../components/Input/Button/Button';
 import TextButton from '../components/Input/Button/TextButton';
 import ScreenContainer from '../components/Layout/ScreenContainer';
 import * as authService from '../services/authService';
+import { useSubmitLock } from '../hooks/useSubmitLock';
 import * as groupService from '../services/groupService';
 import { getCurrentUser } from '../types/session';
 import {
@@ -60,9 +61,14 @@ function PostLoginScreen() {
     load();
   }, [load]);
 
-  const handleLogout = async () => {
-    await authService.logout().catch(() => undefined);
-    navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+  const { isLocked: isLoggingOut, run: runLogout } = useSubmitLock();
+
+  const handleLogout = () => {
+    runLogout(async () => {
+      await authService.logout().catch(() => undefined);
+      navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+      return true;
+    }, { keepLockedOnSuccess: true });
   };
 
   if (errorMessage === null) {
@@ -82,6 +88,7 @@ function PostLoginScreen() {
             label={POST_LOGIN_LOGOUT_LABEL}
             hierarchy="tertiary"
             onPress={handleLogout}
+            disabled={isLoggingOut}
           />
         </View>
       </View>

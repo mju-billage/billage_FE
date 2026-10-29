@@ -24,8 +24,20 @@ const PREVIEW_SIZE = 240;
  * 사용자가 "인식은 안 됐지만 증빙으로는 첨부"할 수 있어야 해서 실패 쪽에도 실어 보낸다.
  */
 export type ScanOutcome =
-  | { kind: 'ok'; result: ocrService.OcrResult; fileId: number; previewUri: string }
-  | { kind: 'notRecognized'; fileId: number; previewUri: string; message?: string }
+  | {
+      kind: 'ok';
+      result: ocrService.OcrResult;
+      fileId: number;
+      previewUri: string;
+      sourceUrl: string;
+    }
+  | {
+      kind: 'notRecognized';
+      fileId: number;
+      previewUri: string;
+      sourceUrl: string;
+      message?: string;
+    }
   | { kind: 'rateLimited' }
   | { kind: 'failed'; message: string };
 
@@ -105,6 +117,7 @@ function ReceiptScanningView({ image, onComplete }: ReceiptScanningViewProps) {
  */
 async function scanReceipt(image: PickedImage): Promise<ScanOutcome> {
   let fileId: number;
+  let sourceUrl: string;
   try {
     const uploaded = await fileService.uploadFile(
       image.uri,
@@ -113,6 +126,7 @@ async function scanReceipt(image: PickedImage): Promise<ScanOutcome> {
       'RECEIPT',
     );
     fileId = Number(uploaded.id);
+    sourceUrl = uploaded.url;
   } catch (error) {
     // 올리지도 못했으면 남은 파일이 없다 — 증빙으로 붙일 것도 없다.
     return {
@@ -123,7 +137,7 @@ async function scanReceipt(image: PickedImage): Promise<ScanOutcome> {
 
   try {
     const result = await ocrService.recognizeReceipt(String(fileId));
-    return { kind: 'ok', result, fileId, previewUri: image.uri };
+    return { kind: 'ok', result, fileId, previewUri: image.uri, sourceUrl };
   } catch (error) {
     if (error instanceof ApiError) {
       if (error.code === ocrService.OCR_RATE_LIMITED) {
@@ -133,7 +147,7 @@ async function scanReceipt(image: PickedImage): Promise<ScanOutcome> {
         error.code === ocrService.OCR_RESULT_EMPTY ||
         error.code === ocrService.INVALID_OCR_FILE
       ) {
-        return { kind: 'notRecognized', fileId, previewUri: image.uri };
+        return { kind: 'notRecognized', fileId, previewUri: image.uri, sourceUrl };
       }
     }
     // 장애(OCR_PROCESSING_FAILED)나 네트워크 문제. 파일은 올라갔으니 증빙으로는 쓸 수 있다.
@@ -141,6 +155,7 @@ async function scanReceipt(image: PickedImage): Promise<ScanOutcome> {
       kind: 'notRecognized',
       fileId,
       previewUri: image.uri,
+      sourceUrl,
       message: isNetworkError(error)
         ? SNACKBAR_SCAN_NETWORK_ERROR_ATTACHED
         : SNACKBAR_SCAN_ERROR_ATTACHED,

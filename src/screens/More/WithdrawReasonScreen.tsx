@@ -13,6 +13,7 @@ import TextField from '../../components/Input/Text Field/TextField';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import * as authService from '../../services/authService';
 import type { WithdrawReasonCode } from '../../services/authService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { ApiError } from '../../services/apiClient';
 import {
   API_ERROR_DEFAULT_MESSAGE,
@@ -68,7 +69,7 @@ function WithdrawReasonScreen() {
   >([]);
   const [reasonDetail, setReasonDetail] = useState('');
   const [confirmDialogVisible, setConfirmDialogVisible] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run } = useSubmitLock();
   const [errorMessage, setErrorMessage] = useState('');
 
   const etcSelected = selectedReasons.includes('ETC');
@@ -84,42 +85,43 @@ function WithdrawReasonScreen() {
 
   const handleClose = () => navigation.navigate('MyProfile');
 
-  const handleWithdraw = async () => {
-    setIsSubmitting(true);
-    try {
-      await authService.withdraw({
-        ownershipTransfers,
-        reasons: selectedReasons,
-        reasonDetail: etcSelected ? reasonDetail.trim() : undefined,
-      });
-      navigation.dispatch(
-        CommonActions.reset({
-          index: 0,
-          routes: [
-            { name: 'Login', params: { snackbarMessage: SNACKBAR_WITHDRAW_COMPLETE } },
-          ],
-        }),
-      );
-    } catch (error) {
-      setConfirmDialogVisible(false);
-      if (error instanceof ApiError && error.code === 'OWNER_TRANSFER_REQUIRED') {
-        setErrorMessage(WITHDRAW_OWNER_TRANSFER_REQUIRED_ERROR);
-        return;
+  const handleWithdraw = () => {
+    run(async () => {
+      try {
+        await authService.withdraw({
+          ownershipTransfers,
+          reasons: selectedReasons,
+          reasonDetail: etcSelected ? reasonDetail.trim() : undefined,
+        });
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [
+              { name: 'Login', params: { snackbarMessage: SNACKBAR_WITHDRAW_COMPLETE } },
+            ],
+          }),
+        );
+        return true;
+      } catch (error) {
+        setConfirmDialogVisible(false);
+        if (error instanceof ApiError && error.code === 'OWNER_TRANSFER_REQUIRED') {
+          setErrorMessage(WITHDRAW_OWNER_TRANSFER_REQUIRED_ERROR);
+          return false;
+        }
+        if (error instanceof ApiError && error.code === 'MEMBERSHIP_NOT_FOUND') {
+          setErrorMessage(WITHDRAW_SUCCESSOR_NOT_FOUND_ERROR);
+          return false;
+        }
+        setErrorMessage(
+          isNetworkError(error)
+            ? API_NETWORK_ERROR_MESSAGE
+            : error instanceof ApiError
+            ? getApiErrorMessage(error.code, error.message)
+            : API_ERROR_DEFAULT_MESSAGE,
+        );
+        return false;
       }
-      if (error instanceof ApiError && error.code === 'MEMBERSHIP_NOT_FOUND') {
-        setErrorMessage(WITHDRAW_SUCCESSOR_NOT_FOUND_ERROR);
-        return;
-      }
-      setErrorMessage(
-        isNetworkError(error)
-          ? API_NETWORK_ERROR_MESSAGE
-          : error instanceof ApiError
-          ? getApiErrorMessage(error.code, error.message)
-          : API_ERROR_DEFAULT_MESSAGE,
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, { keepLockedOnSuccess: true });
   };
 
   return (

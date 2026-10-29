@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
@@ -9,6 +9,7 @@ import { getGroupMemberships } from '../../types/groupMembership';
 import type { GroupMembership } from '../../types/groupMembership';
 import { getActiveGroup } from '../../types/group';
 import * as groupMembershipService from '../../services/groupMembershipService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { ApiError } from '../../services/apiClient';
 import {
   API_ERROR_DEFAULT_MESSAGE,
@@ -72,7 +73,13 @@ function MemberProfileSheet({
   onLeftGroup,
 }: MemberProfileSheetProps) {
   const [confirmKind, setConfirmKind] = useState<ConfirmKind>('none');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run, release } = useSubmitLock();
+
+  useEffect(() => {
+    if (visible) {
+      release();
+    }
+  }, [visible, release]);
 
   if (!member) {
     return null;
@@ -95,67 +102,61 @@ function MemberProfileSheet({
     }
   };
 
-  const changeRole = async (role: 'OWNER' | 'MEMBER') => {
-    if (isSubmitting) {
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      await groupMembershipService.updateMembershipRole(
-        groupId,
-        member.membershipId,
-        role,
-      );
-      closeAll();
-      onChanged(
-        `${SNACKBAR_ROLE_CHANGED_PREFIX}${member.name}${SNACKBAR_ROLE_CHANGED_SUFFIX}`,
-      );
-    } catch (error) {
-      setConfirmKind('none');
-      handleApiError(error);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const changeRole = (role: 'OWNER' | 'MEMBER') => {
+    run(async () => {
+      try {
+        await groupMembershipService.updateMembershipRole(
+          groupId,
+          member.membershipId,
+          role,
+        );
+        closeAll();
+        onChanged(
+          `${SNACKBAR_ROLE_CHANGED_PREFIX}${member.name}${SNACKBAR_ROLE_CHANGED_SUFFIX}`,
+        );
+        return true;
+      } catch (error) {
+        setConfirmKind('none');
+        handleApiError(error);
+        return false;
+      }
+    }, { keepLockedOnSuccess: true });
   };
 
   const handlePromote = () => changeRole('OWNER');
   const handleDemote = () => changeRole('MEMBER');
 
-  const handleLeave = async () => {
-    if (isSubmitting) {
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      await groupMembershipService.leaveGroup(groupId);
-      setConfirmKind('none');
-      onClose();
-      onLeftGroup();
-    } catch (error) {
-      setConfirmKind('none');
-      handleApiError(error);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleLeave = () => {
+    run(async () => {
+      try {
+        await groupMembershipService.leaveGroup(groupId);
+        setConfirmKind('none');
+        onClose();
+        onLeftGroup();
+        return true;
+      } catch (error) {
+        setConfirmKind('none');
+        handleApiError(error);
+        return false;
+      }
+    }, { keepLockedOnSuccess: true });
   };
 
-  const handleKick = async () => {
-    if (isSubmitting) {
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      await groupMembershipService.removeMembership(groupId, member.membershipId);
-      closeAll();
-      onChanged(
-        `${SNACKBAR_MEMBER_REMOVED_PREFIX}${member.name}${SNACKBAR_MEMBER_REMOVED_SUFFIX}`,
-      );
-    } catch (error) {
-      setConfirmKind('none');
-      handleApiError(error);
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleKick = () => {
+    run(async () => {
+      try {
+        await groupMembershipService.removeMembership(groupId, member.membershipId);
+        closeAll();
+        onChanged(
+          `${SNACKBAR_MEMBER_REMOVED_PREFIX}${member.name}${SNACKBAR_MEMBER_REMOVED_SUFFIX}`,
+        );
+        return true;
+      } catch (error) {
+        setConfirmKind('none');
+        handleApiError(error);
+        return false;
+      }
+    }, { keepLockedOnSuccess: true });
   };
 
   const handlePressLeave = () => {

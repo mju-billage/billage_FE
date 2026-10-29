@@ -19,6 +19,7 @@ import TextButton from '../../components/Input/Button/TextButton';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import * as authService from '../../services/authService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import type { AuthUserResponse } from '../../services/authService';
 import { ApiError } from '../../services/apiClient';
 import { formatDateDot } from '../../utils/dueDate';
@@ -97,7 +98,7 @@ function MyProfileScreen() {
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [errorMessage, setErrorMessage] = useState('');
   const [logoutDialogVisible, setLogoutDialogVisible] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { isLocked: isLoggingOut, run } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(
     null,
   );
@@ -133,17 +134,18 @@ function MyProfileScreen() {
     }, [load, route.params?.snackbarMessage]),
   );
 
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    try {
-      await authService.logout();
-    } finally {
-      setIsLoggingOut(false);
-      setLogoutDialogVisible(false);
-      navigation.dispatch(
-        CommonActions.reset({ index: 0, routes: [{ name: 'Login' }] }),
-      );
-    }
+  const handleLogout = () => {
+    run(async () => {
+      try {
+        await authService.logout();
+      } finally {
+        setLogoutDialogVisible(false);
+        navigation.dispatch(
+          CommonActions.reset({ index: 0, routes: [{ name: 'Login' }] }),
+        );
+      }
+      return true;
+    }, { keepLockedOnSuccess: true });
   };
 
   const isEmailLogin = profile?.loginProvider === 'EMAIL';

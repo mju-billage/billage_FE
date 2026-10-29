@@ -82,6 +82,7 @@ import {
 import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Navigation/BottomNavigation';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 
 const MENU_ICON = require('../../assets/icons/action/MenuHorizontal.png');
 const STATISTICS_ICON = require('../../assets/icons/content/Graph.png');
@@ -122,7 +123,7 @@ function FolderScreen() {
   const [activeDialog, setActiveDialog] = useState<ActiveDialog>(null);
   const [dialogInputValue, setDialogInputValue] = useState('');
   const [dialogError, setDialogError] = useState<string | undefined>();
-  const [isSubmittingDialog, setIsSubmittingDialog] = useState(false);
+  const { isLocked, run } = useSubmitLock();
   const [snackbar, setSnackbar] = useState<{
     title: string;
     description?: string;
@@ -264,10 +265,7 @@ function FolderScreen() {
     }
   };
 
-  const handleConfirmDialog = async () => {
-    if (isSubmittingDialog) {
-      return;
-    }
+  const handleConfirmDialog = () => {
     const group = getActiveGroup();
 
     if (activeDialog === 'newFolder') {
@@ -275,67 +273,71 @@ function FolderScreen() {
       if (!trimmed || !group) {
         return;
       }
-      setIsSubmittingDialog(true);
-      try {
-        await folderService.createFolder(group.id, trimmed, folderId);
-        closeDialog();
-        showSnackbar(`'${trimmed}'${SNACKBAR_FOLDER_CREATED_SUFFIX}`);
-        loadItems();
-      } catch (error) {
-        setDialogError(fieldOrGeneralError(error, 'name'));
-      } finally {
-        setIsSubmittingDialog(false);
-      }
+      run(async () => {
+        try {
+          await folderService.createFolder(group.id, trimmed, folderId);
+          closeDialog();
+          showSnackbar(`'${trimmed}'${SNACKBAR_FOLDER_CREATED_SUFFIX}`);
+          loadItems();
+          return true;
+        } catch (error) {
+          setDialogError(fieldOrGeneralError(error, 'name'));
+          return false;
+        }
+      });
     } else if (activeDialog === 'rename') {
       const trimmed = dialogInputValue.trim();
       if (!trimmed || !folderId) {
         return;
       }
-      setIsSubmittingDialog(true);
-      try {
-        await folderService.updateFolder(folderId, { name: trimmed });
-        closeDialog();
-        showSnackbar(SNACKBAR_FOLDER_RENAMED);
-        navigation.setParams({ folderId, folderName: trimmed });
-        loadItems();
-      } catch (error) {
-        setDialogError(fieldOrGeneralError(error, 'name'));
-      } finally {
-        setIsSubmittingDialog(false);
-      }
+      run(async () => {
+        try {
+          await folderService.updateFolder(folderId, { name: trimmed });
+          closeDialog();
+          showSnackbar(SNACKBAR_FOLDER_RENAMED);
+          navigation.setParams({ folderId, folderName: trimmed });
+          loadItems();
+          return true;
+        } catch (error) {
+          setDialogError(fieldOrGeneralError(error, 'name'));
+          return false;
+        }
+      });
     } else if (activeDialog === 'unlink') {
       if (!folderId) {
         return;
       }
       const name = folderName ?? '';
-      setIsSubmittingDialog(true);
-      try {
-        await folderService.deleteFolder(folderId);
-        closeDialog();
-        showSnackbar(`'${name}'${SNACKBAR_FOLDER_UNLINKED_SUFFIX}`);
-        setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
-      } catch (error) {
-        closeDialog();
-        showSnackbar(toErrorMessage(error));
-      } finally {
-        setIsSubmittingDialog(false);
-      }
+      run(async () => {
+        try {
+          await folderService.deleteFolder(folderId);
+          closeDialog();
+          showSnackbar(`'${name}'${SNACKBAR_FOLDER_UNLINKED_SUFFIX}`);
+          setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
+          return true;
+        } catch (error) {
+          closeDialog();
+          showSnackbar(toErrorMessage(error));
+          return false;
+        }
+      }, { keepLockedOnSuccess: true });
     } else if (activeDialog === 'backup') {
       const trimmed = dialogInputValue.trim();
       if (!trimmed || !group) {
         return;
       }
-      setIsSubmittingDialog(true);
-      try {
-        await archiveService.createArchive(group.id, trimmed);
-        closeDialog();
-        showSnackbar(SNACKBAR_BACKUP_DONE_TITLE, SNACKBAR_BACKUP_DONE_DESCRIPTION);
-        loadItems();
-      } catch (error) {
-        setDialogError(fieldOrGeneralError(error, 'title'));
-      } finally {
-        setIsSubmittingDialog(false);
-      }
+      run(async () => {
+        try {
+          await archiveService.createArchive(group.id, trimmed);
+          closeDialog();
+          showSnackbar(SNACKBAR_BACKUP_DONE_TITLE, SNACKBAR_BACKUP_DONE_DESCRIPTION);
+          loadItems();
+          return true;
+        } catch (error) {
+          setDialogError(fieldOrGeneralError(error, 'title'));
+          return false;
+        }
+      });
     }
   };
 
@@ -484,7 +486,7 @@ function FolderScreen() {
         textFieldError={dialogError}
         confirmLabel={dialogConfig.confirmLabel}
         destructive={activeDialog === 'unlink'}
-        confirmDisabled={isSubmittingDialog}
+        confirmDisabled={isLocked}
         onCancel={closeDialog}
         onConfirm={handleConfirmDialog}
       />

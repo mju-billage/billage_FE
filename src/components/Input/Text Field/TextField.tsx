@@ -117,8 +117,8 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           <Pressable
             onPress={onClear}
             hitSlop={8}
-            pointerEvents={value.length > 0 ? 'auto' : 'none'}
-            style={value.length > 0 ? styles.iconShown : styles.iconHidden}
+            pointerEvents={isFocused && value.length > 0 ? 'auto' : 'none'}
+            style={isFocused && value.length > 0 ? styles.iconShown : styles.iconHidden}
           >
             <View style={styles.clearCircle}>
               <Image source={CLOSE_ICON} style={styles.clearIcon} />

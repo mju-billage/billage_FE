@@ -18,6 +18,7 @@ import ScreenContainer from '../../components/Layout/ScreenContainer';
 import type { DuesDetail, DuesMember, PaymentStatus } from '../../types/dues';
 import { getActiveGroup } from '../../types/group';
 import * as duesService from '../../services/duesService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { ApiError } from '../../services/apiClient';
 import {
   daysUntil,
@@ -95,11 +96,11 @@ function DuesDetailScreen() {
   const [moreMenuVisible, setMoreMenuVisible] = useState(false);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
   const [closeDialogVisible, setCloseDialogVisible] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
+  const { isLocked: isDeleting, run: runDelete } = useSubmitLock();
+  const { isLocked: isClosing, run: runClose } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
-  const [isChangingStatus, setIsChangingStatus] = useState(false);
+  const { isLocked: isChangingStatus, run: runChangeStatus } = useSubmitLock();
 
   const toErrorMessage = (error: unknown): string => {
     if (isNetworkError(error)) {
@@ -170,31 +171,32 @@ function DuesDetailScreen() {
     );
   };
 
-  const handleChangePaymentStatus = async () => {
-    if (selectedMemberIds.length === 0 || isChangingStatus) {
+  const handleChangePaymentStatus = () => {
+    if (selectedMemberIds.length === 0) {
       return;
     }
     const nextStatus: PaymentStatus = tab === 'unpaid' ? 'PAID' : 'UNPAID';
-    setIsChangingStatus(true);
-    try {
-      const result = await duesService.updateDuesMembersPaymentStatus(
-        duesId,
-        selectedMemberIds,
-        nextStatus,
-      );
-      showSnackbar(
-        nextStatus === 'PAID'
-          ? `${result.changedCount}${SNACKBAR_DUES_PAYMENT_CONFIRMED_SUFFIX}`
-          : `${result.changedCount}${SNACKBAR_DUES_PAYMENT_CANCELLED_SUFFIX}`,
-      );
-      const updatedDetail = await duesService.getDuesDetail(duesId);
-      setDetail(updatedDetail);
-      await loadMembers(tab);
-    } catch (error) {
-      showSnackbar(toErrorMessage(error));
-    } finally {
-      setIsChangingStatus(false);
-    }
+    runChangeStatus(async () => {
+      try {
+        const result = await duesService.updateDuesMembersPaymentStatus(
+          duesId,
+          selectedMemberIds,
+          nextStatus,
+        );
+        showSnackbar(
+          nextStatus === 'PAID'
+            ? `${result.changedCount}${SNACKBAR_DUES_PAYMENT_CONFIRMED_SUFFIX}`
+            : `${result.changedCount}${SNACKBAR_DUES_PAYMENT_CANCELLED_SUFFIX}`,
+        );
+        const updatedDetail = await duesService.getDuesDetail(duesId);
+        setDetail(updatedDetail);
+        await loadMembers(tab);
+        return true;
+      } catch (error) {
+        showSnackbar(toErrorMessage(error));
+        return false;
+      }
+    });
   };
 
   const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
@@ -225,62 +227,64 @@ function DuesDetailScreen() {
     }
   };
 
-  const handleConfirmDelete = async () => {
-    if (!detail || isDeleting) {
+  const handleConfirmDelete = () => {
+    if (!detail) {
       return;
     }
-    setIsDeleting(true);
-    try {
-      await duesService.deleteDues(detail.id);
-      navigation.reset({
-        index: 0,
-        routes: [
-          {
-            name: 'Main',
-            params: {
-              screen: 'Dues',
+    runDelete(async () => {
+      try {
+        await duesService.deleteDues(detail.id);
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'Main',
               params: {
-                snackbarMessage: `${SNACKBAR_DUES_DELETED_PREFIX}${detail.title}${SNACKBAR_DUES_DELETED_SUFFIX}`,
+                screen: 'Dues',
+                params: {
+                  snackbarMessage: `${SNACKBAR_DUES_DELETED_PREFIX}${detail.title}${SNACKBAR_DUES_DELETED_SUFFIX}`,
+                },
               },
             },
-          },
-        ],
-      });
-    } catch (error) {
-      setDeleteDialogVisible(false);
-      showSnackbar(toErrorMessage(error));
-    } finally {
-      setIsDeleting(false);
-    }
+          ],
+        });
+        return true;
+      } catch (error) {
+        setDeleteDialogVisible(false);
+        showSnackbar(toErrorMessage(error));
+        return false;
+      }
+    }, { keepLockedOnSuccess: true });
   };
 
-  const handleConfirmClose = async () => {
-    if (!detail || isClosing) {
+  const handleConfirmClose = () => {
+    if (!detail) {
       return;
     }
-    setIsClosing(true);
-    try {
-      await duesService.closeDues(detail.id);
-      navigation.reset({
-        index: 0,
-        routes: [
-          {
-            name: 'Main',
-            params: {
-              screen: 'Dues',
+    runClose(async () => {
+      try {
+        await duesService.closeDues(detail.id);
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: 'Main',
               params: {
-                snackbarMessage: `${SNACKBAR_DUES_CLOSED_PREFIX}${detail.title}${SNACKBAR_DUES_CLOSED_SUFFIX}`,
+                screen: 'Dues',
+                params: {
+                  snackbarMessage: `${SNACKBAR_DUES_CLOSED_PREFIX}${detail.title}${SNACKBAR_DUES_CLOSED_SUFFIX}`,
+                },
               },
             },
-          },
-        ],
-      });
-    } catch (error) {
-      setCloseDialogVisible(false);
-      showSnackbar(toErrorMessage(error));
-    } finally {
-      setIsClosing(false);
-    }
+          ],
+        });
+        return true;
+      } catch (error) {
+        setCloseDialogVisible(false);
+        showSnackbar(toErrorMessage(error));
+        return false;
+      }
+    }, { keepLockedOnSuccess: true });
   };
 
   if (loadState === 'loading' || loadState === 'error') {

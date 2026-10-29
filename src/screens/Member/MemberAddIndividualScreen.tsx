@@ -13,6 +13,7 @@ import Button from '../../components/Input/Button/Button';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import { getActiveGroup } from '../../types/group';
 import * as memberService from '../../services/memberService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { ApiError } from '../../services/apiClient';
 import { isValidPhoneNumber } from '../../utils/phone';
 import {
@@ -67,7 +68,7 @@ function MemberAddIndividualScreen() {
   const [nameError, setNameError] = useState<string | undefined>();
   const [phoneError, setPhoneError] = useState<string | undefined>();
   const [formError, setFormError] = useState<string | undefined>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run } = useSubmitLock();
   const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   const openTagStep = () => {
@@ -75,9 +76,9 @@ function MemberAddIndividualScreen() {
     setStep('tags');
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const trimmedName = name.trim();
-    if (!trimmedName || isSubmitting) {
+    if (!trimmedName) {
       return;
     }
     setNameError(undefined);
@@ -95,38 +96,39 @@ function MemberAddIndividualScreen() {
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      await memberService.createMember(group.id, {
-        name: trimmedName,
-        phoneNumber: trimmedPhone || undefined,
-        tags: tags.length > 0 ? tags : undefined,
-        memo: memo.trim() || undefined,
-      });
-      setSnackbarVisible(true);
-      setTimeout(() => {
-        navigation.goBack();
-      }, SNACKBAR_AUTO_HIDE_MS);
-    } catch (error) {
-      if (isNetworkError(error)) {
-        setFormError(API_NETWORK_ERROR_MESSAGE);
-      } else if (error instanceof ApiError) {
-        const nameFieldError = error.fieldErrors.find(fe => fe.field === 'name');
-        const phoneFieldError = error.fieldErrors.find(
-          fe => fe.field === 'phoneNumber',
-        );
-        if (nameFieldError || phoneFieldError) {
-          setNameError(nameFieldError?.reason);
-          setPhoneError(phoneFieldError?.reason);
+    run(async () => {
+      try {
+        await memberService.createMember(group.id, {
+          name: trimmedName,
+          phoneNumber: trimmedPhone || undefined,
+          tags: tags.length > 0 ? tags : undefined,
+          memo: memo.trim() || undefined,
+        });
+        setSnackbarVisible(true);
+        setTimeout(() => {
+          navigation.goBack();
+        }, SNACKBAR_AUTO_HIDE_MS);
+        return true;
+      } catch (error) {
+        if (isNetworkError(error)) {
+          setFormError(API_NETWORK_ERROR_MESSAGE);
+        } else if (error instanceof ApiError) {
+          const nameFieldError = error.fieldErrors.find(fe => fe.field === 'name');
+          const phoneFieldError = error.fieldErrors.find(
+            fe => fe.field === 'phoneNumber',
+          );
+          if (nameFieldError || phoneFieldError) {
+            setNameError(nameFieldError?.reason);
+            setPhoneError(phoneFieldError?.reason);
+          } else {
+            setFormError(getApiErrorMessage(error.code, error.message));
+          }
         } else {
-          setFormError(getApiErrorMessage(error.code, error.message));
+          setFormError(API_ERROR_DEFAULT_MESSAGE);
         }
-      } else {
-        setFormError(API_ERROR_DEFAULT_MESSAGE);
+        return false;
       }
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, { keepLockedOnSuccess: true });
   };
 
   if (step === 'tags') {

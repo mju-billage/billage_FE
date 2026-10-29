@@ -19,8 +19,8 @@ type MiniCalendarCardProps = {
 };
 
 function MiniCalendarCard({ data, onPress }: MiniCalendarCardProps) {
-  const amountsByDate = Object.fromEntries(
-    data.days.map(day => [day.date, day.amount]),
+  const amountsSplitByDate = Object.fromEntries(
+    data.days.map(day => [day.date, { income: day.income, expense: day.expense }]),
   );
 
   return (
@@ -37,11 +37,13 @@ function MiniCalendarCard({ data, onPress }: MiniCalendarCardProps) {
         year={data.year}
         month={data.month}
         weeksToShow={WEEKS_TO_SHOW}
+        todayDate={new Date().getDate()}
         showHeader={false}
         showDateFields={false}
         interactive={false}
-        amountsByDate={amountsByDate}
+        amountsSplitByDate={amountsSplitByDate}
         largeDates
+        variant="mini"
       />
     </CardBase>
   );

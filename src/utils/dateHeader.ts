@@ -8,5 +8,5 @@ export function formatDateHeader(isoDate: string): string {
 
 export function formatFullDate(isoDate: string): string {
   const [year, month, day] = isoDate.split('-').map(Number);
-  return `${year}년 ${month}월 ${day}일`;
+  return `${year}년 ${String(month).padStart(2, '0')}월 ${String(day).padStart(2, '0')}일`;
 }

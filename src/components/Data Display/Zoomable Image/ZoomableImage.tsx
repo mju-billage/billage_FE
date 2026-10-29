@@ -18,10 +18,9 @@ function clamp(value: number, min: number, max: number): number {
 
 type ZoomableImageProps = {
   uri: string;
-  headers?: Record<string, string>;
 };
 
-function ZoomableImage({ uri, headers }: ZoomableImageProps) {
+function ZoomableImage({ uri }: ZoomableImageProps) {
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const windowSizeRef = useRef({ width: windowWidth, height: windowHeight });
   windowSizeRef.current = { width: windowWidth, height: windowHeight };
@@ -125,7 +124,7 @@ function ZoomableImage({ uri, headers }: ZoomableImageProps) {
   return (
     <View style={styles.viewer} {...panResponder.panHandlers}>
       <Animated.Image
-        source={{ uri, headers }}
+        source={{ uri }}
         style={[
           styles.image,
           {

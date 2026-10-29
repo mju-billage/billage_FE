@@ -13,6 +13,7 @@ import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import DuesDateRangeSheet from './DuesDateRangeSheet';
 import TransactionSingleSelectSheet from '../Transactions/TransactionSingleSelectSheet';
 import * as duesService from '../../services/duesService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import * as ledgerService from '../../services/ledgerService';
 import { ApiError } from '../../services/apiClient';
 import {
@@ -90,7 +91,7 @@ function DuesEditScreen() {
   const [ledgerOptions, setLedgerOptions] = useState<LedgerOption[]>([]);
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>('none');
   const [leaveDialogVisible, setLeaveDialogVisible] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
   const [initial, setInitial] = useState({
@@ -177,14 +178,20 @@ function DuesEditScreen() {
     setActiveSheet('ledger');
   };
 
-  const loadLedgerOptions = async () => {
+  const loadLedgerOptions = useCallback(async () => {
     try {
       const ledgers = await ledgerService.getAllLedgersInGroup(groupId);
       setLedgerOptions(ledgers.map(l => ({ id: l.id, name: l.name })));
     } catch (error) {
       showSnackbar(toUserErrorMessage(error, SNACKBAR_LEDGER_OPTIONS_LOAD_FAILED));
     }
-  };
+  }, [groupId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadLedgerOptions();
+    }, [loadLedgerOptions]),
+  );
 
   const handleSelectLedger = (key: string) => {
     const option = ledgerOptions.find(item => item.id === key);
@@ -194,32 +201,33 @@ function DuesEditScreen() {
 
   const canSubmit = title.trim().length > 0;
 
-  const handleSubmit = async () => {
-    if (!canSubmit || isSubmitting) {
+  const handleSubmit = () => {
+    if (!canSubmit) {
       return;
     }
     if (!hasChanges) {
       navigation.goBack();
       return;
     }
-    setIsSubmitting(true);
-    try {
-      const trimmedTitle = title.trim();
-      const isoStart = toIsoDate(startDate);
-      const isoDue = toIsoDate(dueDate);
-      await duesService.updateDues(duesId, {
-        ...(trimmedTitle !== initial.title ? { title: trimmedTitle } : {}),
-        ...(ledgerId !== initial.ledgerId ? { ledgerId } : {}),
-        ...(isoStart !== initial.startDate ? { startDate: isoStart } : {}),
-        ...(isoDue !== initial.dueDate ? { dueDate: isoDue } : {}),
-      });
-      showSnackbar(SNACKBAR_DUES_UPDATED);
-      setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
-    } catch (error) {
-      showSnackbar(toErrorMessage(error));
-    } finally {
-      setIsSubmitting(false);
-    }
+    run(async () => {
+      try {
+        const trimmedTitle = title.trim();
+        const isoStart = toIsoDate(startDate);
+        const isoDue = toIsoDate(dueDate);
+        await duesService.updateDues(duesId, {
+          ...(trimmedTitle !== initial.title ? { title: trimmedTitle } : {}),
+          ...(ledgerId !== initial.ledgerId ? { ledgerId } : {}),
+          ...(isoStart !== initial.startDate ? { startDate: isoStart } : {}),
+          ...(isoDue !== initial.dueDate ? { dueDate: isoDue } : {}),
+        });
+        showSnackbar(SNACKBAR_DUES_UPDATED);
+        setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
+        return true;
+      } catch (error) {
+        showSnackbar(toErrorMessage(error));
+        return false;
+      }
+    }, { keepLockedOnSuccess: true });
   };
 
   if (loadState === 'loading' || loadState === 'error') {
@@ -307,6 +315,10 @@ function DuesEditScreen() {
         selectedKey={ledgerId || undefined}
         onClose={() => setActiveSheet('none')}
         onSelect={handleSelectLedger}
+        onPressEmptyStateCreate={() => {
+          setActiveSheet('none');
+          navigation.navigate('LedgerCreate', { parentId: null });
+        }}
       />
       <DuesDateRangeSheet
         visible={activeSheet === 'period'}

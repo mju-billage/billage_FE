@@ -3,25 +3,13 @@ import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Button from '../../components/Input/Button/Button';
 import Calendar from '../../components/Data Display/Calendar/Calendar';
-import { todayKey } from '../../utils/calendarGrid';
-import {
-  DATE_RANGE_SHEET_CANCEL_LABEL,
-  DATE_RANGE_SHEET_DATE_PLACEHOLDER,
-  DATE_RANGE_SHEET_END_LABEL,
-  DATE_RANGE_SHEET_START_LABEL,
-  DATE_RANGE_SHEET_TITLE,
-} from '../../constants/commonText';
-import { FOREGROUND_NEUTRAL_SUBTLE, FOREGROUND_SECONDARY } from '../../constants/colors';
+import { nextRangeSelection, todayKey } from '../../utils/calendarGrid';
+import { DATE_RANGE_SHEET_CANCEL_LABEL, DATE_RANGE_SHEET_TITLE } from '../../constants/commonText';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 function parseDateKey(date: string): { year: number; month: number } {
   const [year, month] = date.split('.').map(Number);
   return { year, month };
-}
-
-function toShortDate(dotDate: string): string {
-  const [year, month, day] = dotDate.split('.');
-  return `${year.slice(2)}.${month}.${day}`;
 }
 
 type DuesDateRangeSheetProps = {
@@ -59,15 +47,9 @@ function DuesDateRangeSheet({
   }, [visible]);
 
   const handleSelectDate = (date: string) => {
-    if (!draftStart || (draftStart && draftEnd)) {
-      setDraftStart(date);
-      setDraftEnd(undefined);
-    } else if (date < draftStart) {
-      setDraftEnd(draftStart);
-      setDraftStart(date);
-    } else {
-      setDraftEnd(date);
-    }
+    const next = nextRangeSelection({ start: draftStart, end: draftEnd }, date);
+    setDraftStart(next.start);
+    setDraftEnd(next.end);
   };
 
   const handleChangeMonth = (delta: number) => {
@@ -94,31 +76,19 @@ function DuesDateRangeSheet({
         selectedEndDate={draftEnd}
         onSelectDate={handleSelectDate}
         onChangeMonth={handleChangeMonth}
-        showDateFields={false}
+        outlinedDates={[todayKey()]}
+        showDateFields={!!draftStart}
       />
 
-      <View style={styles.previewRow}>
-        <View>
-          <Text style={styles.previewLabel}>{DATE_RANGE_SHEET_START_LABEL}</Text>
-          <Text style={styles.previewValue}>
-            {draftStart ? toShortDate(draftStart) : DATE_RANGE_SHEET_DATE_PLACEHOLDER}
-          </Text>
-        </View>
-        <View style={styles.previewEnd}>
-          <Text style={styles.previewLabel}>{DATE_RANGE_SHEET_END_LABEL}</Text>
-          <Text style={styles.previewValue}>
-            {draftEnd ? toShortDate(draftEnd) : DATE_RANGE_SHEET_DATE_PLACEHOLDER}
-          </Text>
-        </View>
-      </View>
-
       <View style={styles.footer}>
-        <Button
-          label={cancelLabel}
-          hierarchy="tertiary"
-          onPress={onClose}
-          style={styles.cancelButton}
-        />
+        <View style={styles.cancelButton}>
+          <Button
+            label={cancelLabel}
+            hierarchy="tertiary"
+            onPress={onClose}
+            fullWidth
+          />
+        </View>
         <View style={styles.confirmButton}>
           <Button
             label={confirmLabel}
@@ -134,34 +104,16 @@ function DuesDateRangeSheet({
 
 const styles = StyleSheet.create({
   title: {
-    ...TYPOGRAPHY.subtitle1,
+    ...TYPOGRAPHY.h3,
     marginBottom: 16,
-  },
-  previewRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
-  },
-  previewEnd: {
-    alignItems: 'flex-end',
-  },
-  previewLabel: {
-    ...TYPOGRAPHY.body3,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  previewValue: {
-    ...TYPOGRAPHY.subtitle2,
-    marginTop: 4,
-    color: FOREGROUND_SECONDARY,
   },
   footer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginTop: 20,
+    gap: 8,
+    marginTop: 24,
   },
   cancelButton: {
-    height: 52,
+    width: 74,
   },
   confirmButton: {
     flex: 1,

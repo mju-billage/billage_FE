@@ -67,13 +67,12 @@ const styles = StyleSheet.create({
   tab: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 10,
+    justifyContent: 'center',
+    height: 48,
     paddingHorizontal: 16,
-    borderRadius: 8,
   },
   tabFullWidth: {
     paddingHorizontal: 0,
-    borderRadius: 0,
   },
   tabPressed: {
     backgroundColor: FILL_NEUTRAL_NORMAL,
@@ -93,7 +92,6 @@ const styles = StyleSheet.create({
   },
   label: {
     ...TYPOGRAPHY.body2,
-    paddingVertical: 4,
     color: FOREGROUND_DISABLED,
   },
   labelSelected: {
@@ -101,9 +99,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   underline: {
-    marginTop: 8,
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
     height: 2,
-    width: '100%',
     backgroundColor: FOREGROUND_SECONDARY,
   },
 });

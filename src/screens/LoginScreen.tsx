@@ -20,6 +20,7 @@ import { SocialProfile, SocialType } from '../types/social';
 import { ApiError } from '../services/apiClient';
 import * as authService from '../services/authService';
 import { SocialAuthParseError } from '../services/authService';
+import { useSubmitLock } from '../hooks/useSubmitLock';
 import * as socialAuthService from '../services/socialAuthService';
 import {
   getApiErrorMessage,
@@ -65,17 +66,20 @@ const SOCIAL_ACCESSIBILITY_LABEL_BY_TYPE: Record<SocialType, string> = {
 function SocialLoginBadge({
   type,
   onPress,
+  disabled = false,
 }: {
   type: SocialType;
   onPress: () => void;
+  disabled?: boolean;
 }) {
   return (
     <Pressable
       style={({ pressed }) => [
         socialBadgeStyles.circle,
-        pressed && socialBadgeStyles.pressed,
+        pressed && !disabled && socialBadgeStyles.pressed,
       ]}
       onPress={onPress}
+      disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={SOCIAL_ACCESSIBILITY_LABEL_BY_TYPE[type]}
     >
@@ -108,7 +112,7 @@ function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState<string | undefined>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
   useFocusEffect(
@@ -127,61 +131,65 @@ function LoginScreen() {
     navigation.reset({ index: 0, routes: [{ name: 'PostLogin' }] });
   };
 
-  const performLogin = async (credentials: authService.LoginRequest) => {
-    if (isSubmitting) {
-      return;
-    }
+  const performLogin = (credentials: authService.LoginRequest) => {
     setLoginError(undefined);
-    setIsSubmitting(true);
-    try {
-      await authService.login(credentials);
-      goToMain();
-    } catch (error) {
-      if (error instanceof ApiError && error.code === 'INVALID_CREDENTIALS') {
-        setLoginError(LOGIN_INVALID_CREDENTIALS_ERROR);
-      } else {
-        setLoginError(toUserErrorMessage(error, LOGIN_GENERIC_ERROR));
+    run(async () => {
+      try {
+        await authService.login(credentials);
+        goToMain();
+        return true;
+      } catch (error) {
+        if (error instanceof ApiError && error.code === 'INVALID_CREDENTIALS') {
+          setLoginError(LOGIN_INVALID_CREDENTIALS_ERROR);
+        } else {
+          setLoginError(toUserErrorMessage(error, LOGIN_GENERIC_ERROR));
+        }
+        return false;
       }
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, { keepLockedOnSuccess: true });
   };
 
   const handleLogin = () => performLogin({ email, password });
 
-  const handleSocialLogin = async (provider: SocialType) => {
+  const handleSocialLogin = (provider: SocialType) => {
     setLoginError(undefined);
-    let profile: SocialProfile | null;
-    try {
-      profile = await getSocialProfile(provider);
-    } catch (error) {
-      console.warn('[SocialLogin][SDK] getSocialProfile 실패', provider, error);
-      setLoginError(LOGIN_SOCIAL_SDK_ERROR);
-      return;
-    }
-    if (!profile) {
-      return;
-    }
-
-    try {
-      await authService.socialLogin({
-        provider: profile.provider,
-        providerToken: profile.providerToken,
-      });
-      goToMain();
-    } catch (error) {
-      if (error instanceof ApiError && error.code === 'SOCIAL_MEMBER_NOT_FOUND') {
-        navigation.navigate('TermsAgreement', { socialProfile: profile });
-      } else if (error instanceof SocialAuthParseError) {
-        setLoginError(LOGIN_SOCIAL_PARSE_ERROR);
-      } else if (error instanceof ApiError) {
-        setLoginError(getApiErrorMessage(error.code, error.message));
-      } else if (isNetworkError(error)) {
-        setLoginError(LOGIN_SOCIAL_NETWORK_ERROR);
-      } else {
-        setLoginError(LOGIN_GENERIC_ERROR);
+    run(async () => {
+      let profile: SocialProfile | null;
+      try {
+        profile = await getSocialProfile(provider);
+      } catch (error) {
+        console.warn('[SocialLogin][SDK] getSocialProfile 실패', provider, error);
+        setLoginError(LOGIN_SOCIAL_SDK_ERROR);
+        return false;
       }
-    }
+      if (!profile) {
+        return false;
+      }
+
+      try {
+        await authService.socialLogin({
+          provider: profile.provider,
+          providerToken: profile.providerToken,
+        });
+        goToMain();
+        return true;
+      } catch (error) {
+        console.warn('[SocialLogin][API] socialLogin 실패', provider, error);
+        if (error instanceof ApiError && error.code === 'SOCIAL_MEMBER_NOT_FOUND') {
+          navigation.navigate('TermsAgreement', { socialProfile: profile });
+          return true;
+        } else if (error instanceof SocialAuthParseError) {
+          setLoginError(LOGIN_SOCIAL_PARSE_ERROR);
+        } else if (error instanceof ApiError) {
+          setLoginError(getApiErrorMessage(error.code, error.message));
+        } else if (isNetworkError(error)) {
+          setLoginError(LOGIN_SOCIAL_NETWORK_ERROR);
+        } else {
+          setLoginError(LOGIN_GENERIC_ERROR);
+        }
+        return false;
+      }
+    }, { keepLockedOnSuccess: true });
   };
 
   const getSocialProfile = (
@@ -282,14 +290,17 @@ function LoginScreen() {
           <SocialLoginBadge
             type="Kakao"
             onPress={() => handleSocialLogin('Kakao')}
+            disabled={isSubmitting}
           />
           <SocialLoginBadge
             type="Naver"
             onPress={() => handleSocialLogin('Naver')}
+            disabled={isSubmitting}
           />
           <SocialLoginBadge
             type="Google"
             onPress={() => handleSocialLogin('Google')}
+            disabled={isSubmitting}
           />
         </View>
 

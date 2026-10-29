@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Button from '../../components/Input/Button/Button';
@@ -33,6 +33,14 @@ function TransactionDateSheet({
   const [selectedDate, setSelectedDate] = useState(value);
   const [calendar, setCalendar] = useState(() => parseDateKey(value));
 
+  useEffect(() => {
+    if (visible) {
+      setSelectedDate(value);
+      setCalendar(parseDateKey(value));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
+
   const handleChangeMonth = (delta: number) => {
     const next = new Date(calendar.year, calendar.month - 1 + delta, 1);
     setCalendar({ year: next.getFullYear(), month: next.getMonth() + 1 });
@@ -59,10 +67,10 @@ function TransactionDateSheet({
       />
 
       <View style={styles.footerRow}>
-        <View style={styles.footerButton}>
+        <View style={styles.cancelButton}>
           <Button
             label={DATE_SHEET_CANCEL_LABEL}
-            hierarchy="secondary"
+            hierarchy="tertiary"
             onPress={onClose}
             fullWidth
           />
@@ -81,13 +89,16 @@ function TransactionDateSheet({
 
 const styles = StyleSheet.create({
   title: {
-    ...TYPOGRAPHY.subtitle1,
+    ...TYPOGRAPHY.h3,
     marginBottom: 16,
   },
   footerRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 20,
+    gap: 8,
+    marginTop: 24,
+  },
+  cancelButton: {
+    width: 74,
   },
   footerButton: {
     flex: 1,

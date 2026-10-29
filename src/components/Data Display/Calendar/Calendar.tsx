@@ -1,7 +1,11 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import DateField from '../../Input/Date Field/DateField';
-import { formatWon } from '../../../utils/currency';
-import { formatDateKey, getMonthGridWeeks } from '../../../utils/calendarGrid';
+import { formatWon, truncateDigits } from '../../../utils/currency';
+import {
+  formatDateKey,
+  getMonthGridWeeks,
+  getRecentDaysWeeks,
+} from '../../../utils/calendarGrid';
 import { CALENDAR_WEEKDAY_LABELS } from '../../../constants/calendarScreenText';
 import { FONT_FAMILY, FONT_WEIGHT, TYPOGRAPHY } from '../../../constants/typography';
 import {
@@ -20,6 +24,10 @@ import {
 const CHEVRON_LEFT_ICON = require('../../../assets/icons/nav/Chevron Left.png');
 const CHEVRON_RIGHT_ICON = require('../../../assets/icons/nav/Chevron Right.png');
 
+// 시안 실측: 기간 시작일은 종료일(FOREGROUND_SECONDARY) 색의 60%.
+// 글자는 불투명하게 유지해야 해서 opacity 대신 배경 알파를 쓴다.
+const RANGE_START_FILL = 'rgba(74, 127, 231, 0.6)';
+
 type CalendarProps = {
   year: number;
   month: number;
@@ -27,7 +35,6 @@ type CalendarProps = {
   selectedEndDate?: string;
   disabledDates?: string[];
   outlinedDates?: string[];
-  amountsByDate?: Record<number, number | null | undefined>;
   weeksToShow?: number;
   showHeader?: boolean;
   interactive?: boolean;
@@ -35,8 +42,9 @@ type CalendarProps = {
   onChangeMonth?: (delta: number) => void;
   showDateFields?: boolean;
   largeDates?: boolean;
-  variant?: 'default' | 'ledger';
+  variant?: 'default' | 'mini' | 'ledger';
   amountsSplitByDate?: Record<number, { income: number; expense: number }>;
+  todayDate?: number;
 };
 
 function Calendar({
@@ -46,7 +54,6 @@ function Calendar({
   selectedEndDate,
   disabledDates,
   outlinedDates,
-  amountsByDate,
   weeksToShow,
   showHeader = true,
   interactive = true,
@@ -56,10 +63,15 @@ function Calendar({
   largeDates = false,
   variant = 'default',
   amountsSplitByDate,
+  todayDate,
 }: CalendarProps) {
   const allWeeks = getMonthGridWeeks(year, month);
   const weeks =
-    weeksToShow != null ? allWeeks.slice(0, weeksToShow) : allWeeks;
+    variant === 'mini' && todayDate != null
+      ? getRecentDaysWeeks(year, month, todayDate)
+      : weeksToShow != null
+      ? allWeeks.slice(0, weeksToShow)
+      : allWeeks;
 
   const renderLedgerDayCell = (
     cellIndex: number,
@@ -131,20 +143,143 @@ function Calendar({
     );
   };
 
+  const renderDefaultDayCell = (
+    cellIndex: number,
+    cell: { date: number } | null,
+  ) => {
+    if (!cell) {
+      return (
+        <View key={cellIndex} style={[styles.dayCell, styles.dayCellDefault]} />
+      );
+    }
+    const dateKey = formatDateKey(year, month, cell.date);
+    const isStart = dateKey === selectedStartDate;
+    const isEnd = dateKey === selectedEndDate;
+    const isSelected = isStart || isEnd;
+    const hasRange =
+      selectedStartDate != null &&
+      selectedEndDate != null &&
+      selectedStartDate !== selectedEndDate;
+    const isRangeStart = isStart && hasRange;
+    const isRangeEnd = isEnd && hasRange;
+    const isSingleSelected = isSelected && !hasRange;
+    const isInRange =
+      selectedStartDate != null &&
+      selectedEndDate != null &&
+      dateKey > selectedStartDate &&
+      dateKey < selectedEndDate;
+    const isDisabled = disabledDates?.includes(dateKey) ?? false;
+    const isOutlined =
+      !isSelected &&
+      !isInRange &&
+      !isDisabled &&
+      (outlinedDates?.includes(dateKey) ?? false);
+
+    const cellStateStyle = (pressed: boolean) => {
+      if (isSingleSelected) {
+        return styles.dayCellSelected;
+      }
+      if (isRangeStart) {
+        return styles.dayCellRangeStart;
+      }
+      if (isRangeEnd) {
+        return styles.dayCellRangeEnd;
+      }
+      if (isInRange) {
+        return styles.dayCellInRange;
+      }
+      if (isOutlined) {
+        return styles.dayCellOutlined;
+      }
+      if (!isDisabled && pressed) {
+        return styles.dayCellPressed;
+      }
+      return null;
+    };
+
+    const textColor =
+      isSingleSelected || isRangeStart || isRangeEnd
+        ? FOREGROUND_INVERSE
+        : isInRange || isOutlined
+        ? FOREGROUND_SECONDARY
+        : isDisabled
+        ? FOREGROUND_DISABLED
+        : cellIndex === 0
+        ? FEEDBACK_NEGATIVE_BOLD
+        : FOREGROUND_NEUTRAL_NORMAL;
+
+    const content = (
+      <>
+        {isOutlined && <View pointerEvents="none" style={styles.todayOutline} />}
+        <Text style={[styles.dateTextDefault, { color: textColor }]}>
+          {cell.date}
+        </Text>
+      </>
+    );
+
+    if (interactive) {
+      return (
+        <Pressable
+          key={cellIndex}
+          style={({ pressed }) => [
+            styles.dayCell,
+            styles.dayCellDefault,
+            cellStateStyle(pressed),
+          ]}
+          disabled={isDisabled}
+          onPress={() => onSelectDate?.(dateKey)}
+        >
+          {content}
+        </Pressable>
+      );
+    }
+    return (
+      <View
+        key={cellIndex}
+        style={[styles.dayCell, styles.dayCellDefault, cellStateStyle(false)]}
+      >
+        {content}
+      </View>
+    );
+  };
+
+  const shortDateKey = (dateKey?: string) =>
+    dateKey ? dateKey.slice(2) : undefined;
+
   return (
     <View>
       {showHeader && (
-        <View style={styles.header}>
-          <Pressable onPress={() => onChangeMonth?.(-1)} hitSlop={8}>
-            <Image source={CHEVRON_LEFT_ICON} style={styles.chevron} />
-          </Pressable>
-          <Text style={styles.monthLabel}>
-            {year}년 {month}월
-          </Text>
-          <Pressable onPress={() => onChangeMonth?.(1)} hitSlop={8}>
-            <Image source={CHEVRON_RIGHT_ICON} style={styles.chevron} />
-          </Pressable>
-        </View>
+        variant === 'default' ? (
+          <View style={styles.header}>
+            <Pressable onPress={() => onChangeMonth?.(-1)} hitSlop={8}>
+              <Image
+                source={CHEVRON_LEFT_ICON}
+                style={[styles.chevron, styles.chevronMuted]}
+              />
+            </Pressable>
+            <Text style={styles.monthLabel}>
+              {year}년 {month}월
+            </Text>
+            <Pressable onPress={() => onChangeMonth?.(1)} hitSlop={8}>
+              <Image
+                source={CHEVRON_RIGHT_ICON}
+                style={[styles.chevron, styles.chevronMuted]}
+              />
+            </Pressable>
+          </View>
+        ) : (
+          <View style={styles.headerMini}>
+            <Pressable onPress={() => onChangeMonth?.(-1)} hitSlop={8}>
+              <Image source={CHEVRON_LEFT_ICON} style={styles.chevron} />
+            </Pressable>
+            <Text style={styles.monthLabel}>
+              {year}년 {month}월
+            </Text>
+            <Pressable onPress={() => onChangeMonth?.(1)} hitSlop={8}>
+              <Image source={CHEVRON_RIGHT_ICON} style={styles.chevron} />
+            </Pressable>
+          </View>
+        )
       )}
 
       <View style={styles.weekdayRow}>
@@ -154,6 +289,7 @@ function Calendar({
             style={[
               styles.weekdayLabel,
               variant === 'ledger' && styles.weekdayLabelLedger,
+              variant === 'default' && styles.weekdayLabelFlex,
             ]}
           >
             {label}
@@ -164,11 +300,18 @@ function Calendar({
       {weeks.map((week, weekIndex) => (
         <View
           key={weekIndex}
-          style={[styles.weekRow, variant === 'ledger' && styles.weekRowLedger]}
+          style={[
+            styles.weekRow,
+            variant === 'ledger' && styles.weekRowLedger,
+            variant === 'default' && styles.weekRowDefault,
+          ]}
         >
           {week.map((cell, cellIndex) => {
             if (variant === 'ledger') {
               return renderLedgerDayCell(cellIndex, cell);
+            }
+            if (variant === 'default') {
+              return renderDefaultDayCell(cellIndex, cell);
             }
             if (!cell) {
               return <View key={cellIndex} style={styles.dayCell} />;
@@ -193,7 +336,7 @@ function Calendar({
               !isSelected &&
               !isDisabled &&
               (outlinedDates?.includes(dateKey) ?? false);
-            const amount = amountsByDate?.[cell.date];
+            const split = amountsSplitByDate?.[cell.date];
 
             const renderCircle = (pressed: boolean) => (
               <View
@@ -249,16 +392,19 @@ function Calendar({
                 ) : (
                   renderCircle(false)
                 )}
-                {amount != null && (
-                  <Text
-                    style={[
-                      styles.amountText,
-                      amount > 0 && styles.amountTextPositive,
-                    ]}
-                  >
-                    {amount > 0 ? '+' : ''}
-                    {formatWon(amount)}
-                  </Text>
+                {split && (split.income > 0 || split.expense > 0) && (
+                  <View style={styles.amountWrap}>
+                    {split.income > 0 && (
+                      <Text style={styles.amountTextIncome} numberOfLines={1}>
+                        +{truncateDigits(formatWon(split.income), 8)}
+                      </Text>
+                    )}
+                    {split.expense > 0 && (
+                      <Text style={styles.amountTextExpense} numberOfLines={1}>
+                        -{truncateDigits(formatWon(split.expense), 8)}
+                      </Text>
+                    )}
+                  </View>
                 )}
               </View>
             );
@@ -268,11 +414,20 @@ function Calendar({
 
       {showDateFields && (
         <View style={styles.dateFieldWrapper}>
-          <DateField
-            startDate={selectedStartDate}
-            endDate={selectedEndDate}
-            onPress={() => {}}
-          />
+          {variant === 'default' ? (
+            <DateField
+              startDate={shortDateKey(selectedStartDate)}
+              endDate={shortDateKey(selectedEndDate)}
+              onPress={() => {}}
+              bleed={20}
+            />
+          ) : (
+            <DateField
+              startDate={selectedStartDate}
+              endDate={selectedEndDate}
+              onPress={() => {}}
+            />
+          )}
         </View>
       )}
     </View>
@@ -282,16 +437,26 @@ function Calendar({
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 12,
     marginBottom: 12,
   },
   chevron: {
     width: 20,
     height: 20,
   },
+  chevronMuted: {
+    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
+  },
   monthLabel: {
     ...TYPOGRAPHY.subtitle1,
+  },
+  headerMini: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
   weekdayRow: {
     flexDirection: 'row',
@@ -307,6 +472,9 @@ const styles = StyleSheet.create({
   weekdayLabelLedger: {
     flex: 1,
   },
+  weekdayLabelFlex: {
+    flex: 1,
+  },
   weekRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -315,11 +483,81 @@ const styles = StyleSheet.create({
   weekRowLedger: {
     marginBottom: 2,
   },
+  weekRowDefault: {
+    marginBottom: 4,
+  },
   dayCell: {
     width: 36,
     alignItems: 'center',
     gap: 2,
     position: 'relative',
+  },
+  dayCellDefault: {
+    flex: 1,
+    height: 44,
+    justifyContent: 'center',
+    overflow: 'hidden',
+    backgroundColor: 'transparent',
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  dayCellSelected: {
+    backgroundColor: FOREGROUND_SECONDARY,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+    borderBottomLeftRadius: 6,
+    borderBottomRightRadius: 6,
+  },
+  dayCellRangeStart: {
+    backgroundColor: RANGE_START_FILL,
+    borderTopLeftRadius: 6,
+    borderBottomLeftRadius: 6,
+    borderTopRightRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  dayCellRangeEnd: {
+    backgroundColor: FOREGROUND_SECONDARY,
+    borderTopRightRadius: 6,
+    borderBottomRightRadius: 6,
+    borderTopLeftRadius: 0,
+    borderBottomLeftRadius: 0,
+  },
+  dayCellInRange: {
+    backgroundColor: FILL_SECONDARY_SUBTLER,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+  },
+  dayCellOutlined: {
+    backgroundColor: 'transparent',
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+    borderBottomLeftRadius: 6,
+    borderBottomRightRadius: 6,
+  },
+  dayCellPressed: {
+    backgroundColor: FILL_NEUTRAL_NORMAL,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+    borderBottomLeftRadius: 6,
+    borderBottomRightRadius: 6,
+  },
+  todayOutline: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderWidth: 1,
+    borderColor: FOREGROUND_SECONDARY,
+    borderRadius: 6,
+  },
+  dateTextDefault: {
+    ...TYPOGRAPHY.subtitle1,
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   dayCellLedger: {
     flex: 1,
@@ -345,6 +583,7 @@ const styles = StyleSheet.create({
   },
   ledgerAmountWrap: {
     height: 18,
+    alignItems: 'center',
   },
   ledgerAmountIncome: {
     fontFamily: FONT_FAMILY,
@@ -440,12 +679,24 @@ const styles = StyleSheet.create({
   dateTextDisabled: {
     color: FOREGROUND_DISABLED,
   },
-  amountText: {
-    ...TYPOGRAPHY.caption,
-    color: FOREGROUND_NEUTRAL_NORMAL,
+  amountWrap: {
+    alignItems: 'center',
   },
-  amountTextPositive: {
+  amountTextIncome: {
+    fontFamily: FONT_FAMILY,
+    fontWeight: FONT_WEIGHT.medium,
+    fontSize: 7,
+    lineHeight: 9,
+    letterSpacing: 0.4,
     color: FOREGROUND_SECONDARY,
+  },
+  amountTextExpense: {
+    fontFamily: FONT_FAMILY,
+    fontWeight: FONT_WEIGHT.medium,
+    fontSize: 7,
+    lineHeight: 9,
+    letterSpacing: 0.4,
+    color: FOREGROUND_PRIMARY,
   },
   dateFieldWrapper: {
     marginTop: 16,

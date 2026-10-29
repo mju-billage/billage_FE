@@ -1,8 +1,15 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Animated, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Animated,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import type { CompositeNavigationProp } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import type { CompositeNavigationProp, RouteProp } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { MainTabParamList } from '../../navigation/MainTabNavigator';
@@ -14,6 +21,8 @@ import Tabs from '../../components/Navigation/Tabs/Tabs';
 import type { TabItem } from '../../components/Navigation/Tabs/Tabs';
 import AmountCard from '../../components/Data Display/Card/AmountCard';
 import Chip from '../../components/Data Display/Chips/Chip';
+import Divider from '../../components/Data Display/Divider/Divider';
+import CountRow from '../../components/Data Display/Lists/CountRow';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import FloatingActionButton, { FAB_SIZE } from '../../components/Input/Button/FAB';
 import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Navigation/BottomNavigation';
@@ -39,6 +48,13 @@ import {
   toUserErrorMessage,
 } from '../../constants/apiErrorMessages';
 import {
+  FILTER_PERIOD_1MONTH,
+  FILTER_PERIOD_3MONTH,
+  FILTER_PERIOD_6MONTH,
+  FILTER_PERIOD_CUSTOM,
+  FILTER_SORT_LATEST,
+  FILTER_SORT_OLDEST,
+  FILTER_TYPE_ALL,
   FILTER_TYPE_EXPENSE,
   FILTER_TYPE_INCOME,
   LEDGER_ENTRIES_LOADING_MORE,
@@ -57,6 +73,7 @@ import {
   BACKGROUND_PRIMARY,
   BACKGROUND_SECONDARY,
   FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
@@ -75,6 +92,7 @@ type TransactionsScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Transactions'>,
   NativeStackNavigationProp<RootStackParamList>
 >;
+type TransactionsScreenRouteProp = RouteProp<MainTabParamList, 'Transactions'>;
 
 const EMPTY_SUMMARY: EntryGroupSummary = { totalIncome: 0, totalExpense: 0, balance: 0 };
 
@@ -94,11 +112,6 @@ function getFilterChips(
   ledgerOptions: LedgerOption[],
 ): FilterChipInfo[] {
   const chips: FilterChipInfo[] = [];
-  if (filter.type === 'income') {
-    chips.push({ key: 'type', label: FILTER_TYPE_INCOME });
-  } else if (filter.type === 'expense') {
-    chips.push({ key: 'type', label: FILTER_TYPE_EXPENSE });
-  }
   for (const id of filter.ledgerIds) {
     const option = ledgerOptions.find(item => item.id === id);
     if (option) {
@@ -108,8 +121,35 @@ function getFilterChips(
   return chips;
 }
 
+const FILTER_PERIOD_LABEL_BY_VALUE: Record<EntryListFilterValue['period'], string> = {
+  '1month': FILTER_PERIOD_1MONTH,
+  '3month': FILTER_PERIOD_3MONTH,
+  '6month': FILTER_PERIOD_6MONTH,
+  custom: FILTER_PERIOD_CUSTOM,
+};
+
+const FILTER_TYPE_LABEL_BY_VALUE: Record<EntryListFilterValue['type'], string> = {
+  all: FILTER_TYPE_ALL,
+  income: FILTER_TYPE_INCOME,
+  expense: FILTER_TYPE_EXPENSE,
+};
+
+const FILTER_SORT_LABEL_BY_VALUE: Record<EntryListFilterValue['sort'], string> = {
+  latest: FILTER_SORT_LATEST,
+  oldest: FILTER_SORT_OLDEST,
+};
+
+function getFilterSummary(filter: EntryListFilterValue): string {
+  return [
+    FILTER_PERIOD_LABEL_BY_VALUE[filter.period],
+    FILTER_TYPE_LABEL_BY_VALUE[filter.type],
+    FILTER_SORT_LABEL_BY_VALUE[filter.sort],
+  ].join(' · ');
+}
+
 function TransactionsScreen() {
   const navigation = useNavigation<TransactionsScreenNavigationProp>();
+  const route = useRoute<TransactionsScreenRouteProp>();
   const [tab, setTab] = useState<TransactionsTab>('all');
   const [filter, setFilter] = useState<EntryListFilterValue>(
     DEFAULT_ENTRY_LIST_FILTER,
@@ -119,6 +159,7 @@ function TransactionsScreen() {
   const [entries, setEntries] = useState<EntrySummary[]>([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
+  const [totalElements, setTotalElements] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
@@ -129,6 +170,14 @@ function TransactionsScreen() {
     setSnackbarMessage(message);
     setTimeout(() => setSnackbarMessage(null), 1600);
   };
+
+  useEffect(() => {
+    if (route.params?.snackbarMessage) {
+      showSnackbar(route.params.snackbarMessage);
+      navigation.setParams({ snackbarMessage: undefined });
+    }
+  }, [route.params?.snackbarMessage, navigation]);
+
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const [cardBlockHeight, setCardBlockHeight] = useState(0);
@@ -187,6 +236,7 @@ function TransactionsScreen() {
       setEntries(firstPage.items);
       setPage(firstPage.page);
       setHasMore(!firstPage.last);
+      setTotalElements(firstPage.totalElements);
       loadMoreFailedRef.current = false;
       setLoadState('ready');
     } catch (error) {
@@ -255,6 +305,12 @@ function TransactionsScreen() {
   }));
 
   const filterChips = getFilterChips(filter, ledgerOptions);
+  const isFilterActive =
+    filter.period !== DEFAULT_ENTRY_LIST_FILTER.period ||
+    filter.type !== DEFAULT_ENTRY_LIST_FILTER.type ||
+    filter.sort !== DEFAULT_ENTRY_LIST_FILTER.sort ||
+    filter.ledgerIds.length > 0;
+  const filterSummary = getFilterSummary(filter);
 
   const showList = loadState === 'ready' && entries.length > 0;
   const listTopInset = cardBlockHeight + controlsHeight;
@@ -324,7 +380,7 @@ function TransactionsScreen() {
           )}
 
           {loadState === 'ready' && entries.length === 0 && (
-            <View style={[styles.emptyState, { paddingTop: listTopInset + 80 }]}>
+            <View style={[styles.emptyState, { paddingTop: listTopInset + 60 }]}>
               <Text style={styles.emptyText}>{TRANSACTIONS_EMPTY}</Text>
             </View>
           )}
@@ -384,40 +440,53 @@ function TransactionsScreen() {
             style={styles.controls}
             onLayout={event => setControlsHeight(event.nativeEvent.layout.height)}
           >
-            <View style={styles.tabsBleed}>
-              <Tabs items={TABS} value={tab} onChange={setTab} showIcon={false} fullWidth />
-            </View>
+            <Tabs items={TABS} value={tab} onChange={setTab} showIcon={false} fullWidth />
 
-            <View style={styles.actionRow}>
-              <View style={styles.iconRow}>
-                <IconButton
-                  icon={FILTER_ICON}
-                  onPress={() => setFilterSheetVisible(true)}
-                />
-                <IconButton
-                  icon={SEARCH_ICON}
-                  onPress={() => navigation.navigate('TransactionSearch')}
-                />
-              </View>
-            </View>
-
-            {filterChips.length > 0 && (
-              <View style={styles.chipRow}>
-                {filterChips.map(chip => (
-                  <Chip
-                    key={chip.key}
-                    label={chip.label}
-                    onRemove={() => removeFilterChip(chip.key)}
+            <View style={styles.filterSection}>
+              <View style={styles.actionRow}>
+                <View style={styles.iconRow}>
+                  <View style={styles.filterGroup}>
+                    {isFilterActive && (
+                      <Pressable onPress={() => setFilterSheetVisible(true)}>
+                        <Text style={styles.filterSummaryText} numberOfLines={1}>
+                          {filterSummary}
+                        </Text>
+                      </Pressable>
+                    )}
+                    <IconButton
+                      icon={FILTER_ICON}
+                      iconSize={20}
+                      iconColor={FOREGROUND_NEUTRAL_NORMAL}
+                      onPress={() => setFilterSheetVisible(true)}
+                    />
+                  </View>
+                  <IconButton
+                    icon={SEARCH_ICON}
+                    iconSize={20}
+                    iconColor={FOREGROUND_NEUTRAL_NORMAL}
+                    onPress={() => navigation.navigate('TransactionSearch')}
                   />
-                ))}
+                </View>
               </View>
-            )}
+
+              {filterChips.length > 0 && (
+                <View style={styles.chipRow}>
+                  {filterChips.map(chip => (
+                    <Chip
+                      key={chip.key}
+                      label={chip.label}
+                      onRemove={() => removeFilterChip(chip.key)}
+                    />
+                  ))}
+                </View>
+              )}
+            </View>
 
             {loadState === 'ready' && (
-              <Text style={styles.countText}>
-                {entries.length}
-                {TRANSACTIONS_COUNT_SUFFIX}
-              </Text>
+              <>
+                <CountRow text={`${totalElements}${TRANSACTIONS_COUNT_SUFFIX}`} />
+                <Divider />
+              </>
             )}
           </View>
         </Animated.View>
@@ -465,41 +534,46 @@ const styles = StyleSheet.create({
     backgroundColor: BACKGROUND_PRIMARY,
   },
   controls: {
-    paddingHorizontal: 20,
     backgroundColor: BACKGROUND_SECONDARY,
   },
-  tabsBleed: {
-    marginHorizontal: -20,
+  filterSection: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    gap: 12,
   },
   actionRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 8,
+    marginVertical: -8,
   },
   iconRow: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     gap: 4,
+    marginHorizontal: -8,
+  },
+  filterGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  filterSummaryText: {
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+    marginLeft: 8,
   },
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginBottom: 8,
-  },
-  countText: {
-    ...TYPOGRAPHY.body2,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
-    marginBottom: 8,
   },
   listContent: {
     paddingBottom: BOTTOM_NAVIGATION_HEIGHT + 96,
   },
   sectionHeader: {
-    ...TYPOGRAPHY.body3,
-    fontWeight: 'bold',
-    color: FOREGROUND_NEUTRAL_SUBTLE,
+    ...TYPOGRAPHY.caption,
+    color: FOREGROUND_NEUTRAL_NORMAL,
     marginTop: 12,
     marginBottom: 6,
   },
@@ -517,10 +591,11 @@ const styles = StyleSheet.create({
   emptyState: {
     flex: 1,
     alignItems: 'center',
-    paddingTop: 80,
+    paddingTop: 60,
   },
   emptyText: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   loadingMoreRow: {
     flexDirection: 'row',

@@ -32,6 +32,7 @@ import {
 } from '../../constants/transactionScreenText';
 import { FOREGROUND_NEUTRAL_NORMAL } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import { nextRangeSelection } from '../../utils/calendarGrid';
 
 const CALENDAR_ICON = require('../../assets/icons/system/Calendar.png');
 
@@ -61,13 +62,11 @@ function ReceiptFilterSheet({
   const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth() + 1);
 
   const handleSelectDate = (date: string) => {
-    if (!draft.customStart || (draft.customStart && draft.customEnd)) {
-      setDraft({ ...draft, customStart: date, customEnd: undefined });
-    } else if (date < draft.customStart) {
-      setDraft({ ...draft, customStart: date, customEnd: draft.customStart });
-    } else {
-      setDraft({ ...draft, customEnd: date });
-    }
+    const next = nextRangeSelection(
+      { start: draft.customStart, end: draft.customEnd },
+      date,
+    );
+    setDraft({ ...draft, customStart: next.start, customEnd: next.end });
   };
 
   const handleChangeMonth = (delta: number) => {

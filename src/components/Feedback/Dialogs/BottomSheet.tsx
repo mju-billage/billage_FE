@@ -1,5 +1,9 @@
 import { Modal, Pressable, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  SafeAreaProvider,
+  initialWindowMetrics,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import {
   BORDER_NEUTRAL_BOLD,
@@ -13,24 +17,34 @@ type BottomSheetProps = {
   children: React.ReactNode;
 };
 
-function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
+function BottomSheetInner({ onClose, children }: Omit<BottomSheetProps, 'visible'>) {
   const insets = useSafeAreaInsets();
+  return (
+    <View style={styles.root}>
+      <Pressable style={styles.backdrop} onPress={onClose} />
+      <KeyboardStickyView style={styles.stickyWrapper}>
+        <View style={[styles.sheet, { paddingBottom: 32 + insets.bottom }]}>
+          <View style={styles.handle} />
+          {children}
+        </View>
+      </KeyboardStickyView>
+    </View>
+  );
+}
+
+function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
   return (
     <Modal
       visible={visible}
       transparent
       animationType="slide"
+      statusBarTranslucent
+      navigationBarTranslucent
       onRequestClose={onClose}
     >
-      <View style={styles.root}>
-        <Pressable style={styles.backdrop} onPress={onClose} />
-        <KeyboardStickyView style={styles.stickyWrapper}>
-          <View style={[styles.sheet, { paddingBottom: 32 + insets.bottom }]}>
-            <View style={styles.handle} />
-            {children}
-          </View>
-        </KeyboardStickyView>
-      </View>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <BottomSheetInner onClose={onClose}>{children}</BottomSheetInner>
+      </SafeAreaProvider>
     </Modal>
   );
 }

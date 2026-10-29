@@ -10,6 +10,7 @@ import TextField from '../../components/Input/Text Field/TextField';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import * as ledgerService from '../../services/ledgerService';
 import { getActiveGroup } from '../../types/group';
 import { ApiError } from '../../services/apiClient';
@@ -55,13 +56,16 @@ function LedgerCreateScreen() {
   const [name, setName] = useState('');
   const [budget, setBudget] = useState('');
   const [nameError, setNameError] = useState<string | undefined>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked, run } = useSubmitLock();
   const [leaveConfirmVisible, setLeaveConfirmVisible] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   const hasInput = name.trim().length > 0 || budget.trim().length > 0;
 
   const handleBack = () => {
+    if (isLocked) {
+      return;
+    }
     if (hasInput) {
       setLeaveConfirmVisible(true);
     } else {
@@ -82,46 +86,46 @@ function LedgerCreateScreen() {
     }, [hasInput]),
   );
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const trimmedName = name.trim();
-    if (!trimmedName || isSubmitting) {
+    if (!trimmedName) {
       return;
     }
-    setNameError(undefined);
-    setIsSubmitting(true);
-    try {
-      const parsedBudget = budget.trim() ? Number(budget.trim()) : null;
-      if (parentId) {
-        await ledgerService.createLedger(parentId, trimmedName, parsedBudget);
-      } else {
-        const group = getActiveGroup();
-        if (!group) {
-          setNameError(API_ERROR_DEFAULT_MESSAGE);
-          setIsSubmitting(false);
-          return;
+    run(async () => {
+      setNameError(undefined);
+      try {
+        const parsedBudget = budget.trim() ? Number(budget.trim()) : null;
+        if (parentId) {
+          await ledgerService.createLedger(parentId, trimmedName, parsedBudget);
+        } else {
+          const group = getActiveGroup();
+          if (!group) {
+            setNameError(API_ERROR_DEFAULT_MESSAGE);
+            return false;
+          }
+          await ledgerService.createLedgerInGroup(group.id, {
+            name: trimmedName,
+            budget: parsedBudget,
+            folderId: null,
+          });
         }
-        await ledgerService.createLedgerInGroup(group.id, {
-          name: trimmedName,
-          budget: parsedBudget,
-          folderId: null,
-        });
+        setSnackbarVisible(true);
+        setTimeout(() => {
+          navigation.goBack();
+        }, SNACKBAR_AUTO_HIDE_MS);
+        return true;
+      } catch (error) {
+        if (isNetworkError(error)) {
+          setNameError(API_NETWORK_ERROR_MESSAGE);
+        } else if (error instanceof ApiError) {
+          const nameFieldError = error.fieldErrors.find(fe => fe.field === 'name');
+          setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code, error.message));
+        } else {
+          setNameError(API_ERROR_DEFAULT_MESSAGE);
+        }
+        return false;
       }
-      setSnackbarVisible(true);
-      setTimeout(() => {
-        navigation.goBack();
-      }, SNACKBAR_AUTO_HIDE_MS);
-    } catch (error) {
-      if (isNetworkError(error)) {
-        setNameError(API_NETWORK_ERROR_MESSAGE);
-      } else if (error instanceof ApiError) {
-        const nameFieldError = error.fieldErrors.find(fe => fe.field === 'name');
-        setNameError(nameFieldError?.reason ?? getApiErrorMessage(error.code, error.message));
-      } else {
-        setNameError(API_ERROR_DEFAULT_MESSAGE);
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, { keepLockedOnSuccess: true });
   };
 
   return (
@@ -181,7 +185,7 @@ function LedgerCreateScreen() {
       <View style={styles.footer}>
         <Button
           label={LEDGER_CREATE_SUBMIT_LABEL}
-          disabled={!name.trim() || isSubmitting}
+          disabled={!name.trim() || isLocked}
           fullWidth
           onPress={handleSubmit}
         />

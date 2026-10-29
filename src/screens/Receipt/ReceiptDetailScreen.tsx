@@ -1,4 +1,4 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -6,7 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import Button from '../../components/Input/Button/Button';
 import ZoomableImage from '../../components/Data Display/Zoomable Image/ZoomableImage';
-import { buildAuthenticatedImageSource } from '../../utils/authenticatedImage';
+import { useAuthenticatedImage } from '../../hooks/useAuthenticatedImage';
 import { RECEIPT_DETAIL_CTA_LABEL } from '../../constants/receiptScreenText';
 import { FILL_INVERSE, FOREGROUND_INVERSE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
@@ -26,7 +26,7 @@ function ReceiptDetailScreen() {
   const route = useRoute<ReceiptDetailRouteProp>();
   const { fileUrl, entryId, entryTitle, occurredOn } = route.params;
 
-  const source = buildAuthenticatedImageSource(fileUrl);
+  const { uri, status } = useAuthenticatedImage(fileUrl);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -42,7 +42,13 @@ function ReceiptDetailScreen() {
         </View>
       </View>
 
-      <ZoomableImage uri={source.uri} headers={source.headers} />
+      {status === 'ready' && uri ? (
+        <ZoomableImage uri={uri} />
+      ) : (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator color={FOREGROUND_INVERSE} />
+        </View>
+      )}
 
       <View style={styles.footer}>
         <Button
@@ -87,6 +93,11 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 20,
     paddingVertical: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

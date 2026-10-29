@@ -25,6 +25,27 @@ export function getMonthGridWeeks(
   return weeks;
 }
 
+export function getRecentDaysRange(today: number): { start: number; end: number } {
+  if (today >= 14) {
+    return { start: today - 13, end: today };
+  }
+  return { start: 1, end: 14 };
+}
+
+export function getRecentDaysWeeks(
+  year: number,
+  month: number,
+  today: number,
+): CalendarGridCell[][] {
+  const { start, end } = getRecentDaysRange(today);
+  const allWeeks = getMonthGridWeeks(year, month);
+  const inRange = (cell: CalendarGridCell) =>
+    cell != null && cell.date >= start && cell.date <= end;
+  return allWeeks
+    .filter(week => week.some(inRange))
+    .map(week => week.map(cell => (inRange(cell) ? cell : null)));
+}
+
 export function shiftMonth(
   year: number,
   month: number,
@@ -46,4 +67,22 @@ export function formatDateKey(year: number, month: number, date: number) {
 export function todayKey(): string {
   const now = new Date();
   return formatDateKey(now.getFullYear(), now.getMonth() + 1, now.getDate());
+}
+
+export function nextRangeSelection(
+  current: { start?: string; end?: string },
+  date: string,
+): { start: string; end: string } {
+  const { start, end } = current;
+  if (!start) {
+    return { start: date, end: date };
+  }
+  const isSingle = !end || end === start;
+  if (!isSingle) {
+    return { start: date, end: date };
+  }
+  if (date === start) {
+    return { start, end: start };
+  }
+  return date < start ? { start: date, end: start } : { start, end: date };
 }

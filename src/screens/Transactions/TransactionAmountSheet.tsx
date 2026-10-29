@@ -18,6 +18,7 @@ type TransactionAmountSheetProps = {
   value: number;
   onClose: () => void;
   onSave: (amount: number) => void;
+  confirmLabel?: string;
 };
 
 function TransactionAmountSheet({
@@ -25,6 +26,7 @@ function TransactionAmountSheet({
   value,
   onClose,
   onSave,
+  confirmLabel = TEXT_INPUT_SHEET_SAVE_LABEL,
 }: TransactionAmountSheetProps) {
   const [digits, setDigits] = useState(value > 0 ? String(value) : '');
   const inputRef = useRef<TextInput>(null);
@@ -61,17 +63,17 @@ function TransactionAmountSheet({
       />
 
       <View style={styles.footerRow}>
-        <View style={styles.footerButton}>
+        <View style={styles.cancelButton}>
           <Button
             label={TEXT_INPUT_SHEET_CANCEL_LABEL}
-            hierarchy="secondary"
+            hierarchy="tertiary"
             onPress={onClose}
             fullWidth
           />
         </View>
         <View style={styles.footerButton}>
           <Button
-            label={TEXT_INPUT_SHEET_SAVE_LABEL}
+            label={confirmLabel}
             onPress={handleSave}
             disabled={digits === ''}
             fullWidth
@@ -84,13 +86,16 @@ function TransactionAmountSheet({
 
 const styles = StyleSheet.create({
   title: {
-    ...TYPOGRAPHY.subtitle1,
+    ...TYPOGRAPHY.h3,
     marginBottom: 16,
   },
   footerRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
+    gap: 8,
+    marginTop: 24,
+  },
+  cancelButton: {
+    width: 74,
   },
   footerButton: {
     flex: 1,

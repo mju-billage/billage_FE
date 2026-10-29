@@ -13,6 +13,7 @@ import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import { getActiveGroup } from '../../types/group';
 import type { MemberDetail } from '../../types/member';
 import * as memberService from '../../services/memberService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { ApiError } from '../../services/apiClient';
 import { formatWon } from '../../utils/currency';
 import { formatPhoneNumber } from '../../utils/phone';
@@ -62,7 +63,7 @@ function MemberDetailScreen() {
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [member, setMember] = useState<MemberDetail | null>(null);
   const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { isLocked: isDeleting, run } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
   const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
@@ -101,23 +102,24 @@ function MemberDetailScreen() {
     }, [load]),
   );
 
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = () => {
     const group = getActiveGroup();
-    if (!group || isDeleting) {
+    if (!group) {
       return;
     }
-    setIsDeleting(true);
-    try {
-      await memberService.deleteMember(group.id, memberId);
-      navigation.navigate('MemberManage', {
-        snackbarMessage: `1${SNACKBAR_MEMBER_DELETED_SUFFIX}`,
-      });
-    } catch (error) {
-      setDeleteDialogVisible(false);
-      setSnackbarMessage(toErrorMessage(error));
-    } finally {
-      setIsDeleting(false);
-    }
+    run(async () => {
+      try {
+        await memberService.deleteMember(group.id, memberId);
+        navigation.navigate('MemberManage', {
+          snackbarMessage: `1${SNACKBAR_MEMBER_DELETED_SUFFIX}`,
+        });
+        return true;
+      } catch (error) {
+        setDeleteDialogVisible(false);
+        setSnackbarMessage(toErrorMessage(error));
+        return false;
+      }
+    }, { keepLockedOnSuccess: true });
   };
 
   if (loadState === 'loading' || loadState === 'error' || !member) {

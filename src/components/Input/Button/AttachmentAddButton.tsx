@@ -64,16 +64,17 @@ function AttachmentAddButton({
   );
 }
 
-const SIZE = 88;
+export const ATTACHMENT_SIZE = 70;
 
 const styles = StyleSheet.create({
   card: {
-    width: SIZE,
-    height: SIZE,
+    width: ATTACHMENT_SIZE,
+    height: ATTACHMENT_SIZE,
+    padding: 12,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 4,
   },
   attachmentCard: {
     backgroundColor: FILL_NEUTRAL_SUBTLE,
@@ -91,8 +92,8 @@ const styles = StyleSheet.create({
     opacity: 0.85,
   },
   icon: {
-    width: 22,
-    height: 22,
+    width: 24,
+    height: 24,
   },
   attachmentIcon: {
     tintColor: FOREGROUND_NEUTRAL_NORMAL,
@@ -104,7 +105,7 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_DISABLED,
   },
   label: {
-    ...TYPOGRAPHY.button,
+    ...TYPOGRAPHY.badge,
   },
   attachmentLabel: {
     color: FOREGROUND_NEUTRAL_NORMAL,

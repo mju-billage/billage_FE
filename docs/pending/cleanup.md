@@ -60,13 +60,6 @@ NAVY_800 을 배경색으로 직접 쓴다. 같은 유형일 수 있다.
 QA 시트가 오면 그때 함께 확인한다. 글자색으로 쓰는 곳은
 FOREGROUND_PRIMARY 와 값이 같아 문제가 아니다.
 
-## 8. 스낵바 close 버튼 미연결 화면
-
-Snackbar 는 onClose 를 받을 때만 close 버튼을 그린다.
-QA-013 에서 EmailVerificationScreen 만 연결했다.
-나머지 스낵바 사용 화면은 각 화면 QA 시트가 올 때 함께 연결한다.
-연결 방법은 onClose={() => setSnackbarMessage(null)} 한 줄이다.
-
 ## 9. MOCK_DASHBOARD_SUMMARY 정리
 
 버그가 아니라 이름과 죽은 필드의 문제다.
@@ -91,3 +84,4 @@ userNickname)와 MINI_CALENDAR_AMOUNTS 는 어디에서도 쓰이지 않는다.
   src/types/dashboard.ts
 
 백엔드 대기 항목이 아니다.
+

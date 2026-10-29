@@ -66,3 +66,49 @@ POST /api/v1/auth/login 실패 응답의 code 를 둘로 분리
 그러나 GET /api/v1/entries/{entryId} 응답에 OCR 품목이 없어 그릴 수 없다.
 Entry 명세는 'OCR 품목 데이터는 내역당 1건 유지'라고만 적혀 있고 조회 경로가 없다.
 응답에 품목 배열을 추가해 줄 수 있는지 확인 필요.
+
+QA-038(2026-10-18) 때도 같은 이유로 지출 시안의 '증빙 자료 세부 내역'
+아코디언을 구현하지 않았다. OCR 결과 저장 자체가 미확정이라는 점도
+그때 다시 확인됨 — 저장 여부가 먼저 정해져야 조회 경로를 설계할 수 있다.
+
+---
+
+## 3. 카카오 소셜 로그인 SOCIAL_TOKEN_INVALID
+
+**현상** 개발 서버(https://220-66-233-75.nip.io)에서 카카오 소셜 로그인 시
+`POST /api/v1/auth/social/login` 요청이 `SOCIAL_TOKEN_INVALID` 로 거절된다.
+앱 쪽 카카오 SDK 로그인(키 해시 검증 포함)은 성공한다. 2026-10-16 확인.
+
+**앱이 보내는 값** `{ provider: "KAKAO", token: <카카오 SDK access token> }`
+Swagger 의 요청 형식과 같다(src/services/authService.ts socialLogin).
+
+**가능한 원인(서버 쪽)**
+1. 서버가 검증에 쓰는 카카오 앱(앱 ID / REST API 키)과
+   앱의 KAKAO_NATIVE_APP_KEY 가 속한 카카오 앱이 다르다. 토큰은 발급 앱에 묶인다.
+2. 서버가 access token 이 아니라 id_token(OIDC)을 기대한다.
+3. 개발 서버의 카카오 설정 누락 또는 카카오 API 호출 실패가 같은 코드로 묶여 나온다.
+
+**물어볼 것**
+- 서버가 쓰는 카카오 앱 ID / REST API 키
+- 기대하는 토큰 종류(access token / id_token)
+- 2026-10-16 17:56 전후 서버 로그의 카카오 API 응답(에러 코드·메시지)
+
+**앱 수정이 필요한 경우** 답이 'id_token 을 보내 달라'이면
+socialAuthService.loginWithKakao 에서 id_token 을 받아 보내도록 바꿔야 한다.
+카카오 디벨로퍼스에서 OpenID Connect 활성화도 필요하다.
+
+---
+
+## 4. 내역 수정에서 장부 변경 필요
+
+시안(ADD-2-SHEET-03-0)은 수정 화면에서 장부를 다른 장부로 바꿀 수 있는
+것처럼 그려져 있다. 그러나 `PATCH /entries/{id}` 요청 바디에 `ledgerId`
+가 없어서(QA-039 때부터 확인) 수정 화면은 장부 행을 비활성으로 두고
+안내 문구만 보여준다(QA-044).
+
+`PATCH /entries/{id}` 에 `ledgerId` 지원이 추가되면 프론트에서 할 일:
+- `TransactionRegisterScreen` 의 `canChangeLedger = mode !== 'editReal'`
+  조건을 지우고 수정 모드에서도 장부 선택 시트를 쓸 수 있게 한다.
+- `handleSubmit` 의 editReal 분기에 `ledgerId` 변경 비교·PATCH 필드 추가.
+- `TRANSACTION_REGISTER_LEDGER_LOCKED_HINT` 문구·DetailFieldRow 의
+  disabled 처리를 제거한다.

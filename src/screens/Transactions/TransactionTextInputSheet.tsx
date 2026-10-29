@@ -17,6 +17,7 @@ type TransactionTextInputSheetProps = {
   value: string;
   onClose: () => void;
   onSave: (value: string) => void;
+  confirmLabel?: string;
 };
 
 function TransactionTextInputSheet({
@@ -27,6 +28,7 @@ function TransactionTextInputSheet({
   value,
   onClose,
   onSave,
+  confirmLabel = TEXT_INPUT_SHEET_SAVE_LABEL,
 }: TransactionTextInputSheetProps) {
   const [draft, setDraft] = useState(value);
 
@@ -48,17 +50,17 @@ function TransactionTextInputSheet({
       />
 
       <View style={styles.footerRow}>
-        <View style={styles.footerButton}>
+        <View style={styles.cancelButton}>
           <Button
             label={TEXT_INPUT_SHEET_CANCEL_LABEL}
-            hierarchy="secondary"
+            hierarchy="tertiary"
             onPress={onClose}
             fullWidth
           />
         </View>
         <View style={styles.footerButton}>
           <Button
-            label={TEXT_INPUT_SHEET_SAVE_LABEL}
+            label={confirmLabel}
             onPress={handleSave}
             disabled={draft.trim().length === 0}
             fullWidth
@@ -71,13 +73,16 @@ function TransactionTextInputSheet({
 
 const styles = StyleSheet.create({
   title: {
-    ...TYPOGRAPHY.subtitle1,
+    ...TYPOGRAPHY.h3,
     marginBottom: 16,
   },
   footerRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
+    gap: 8,
+    marginTop: 24,
+  },
+  cancelButton: {
+    width: 74,
   },
   footerButton: {
     flex: 1,

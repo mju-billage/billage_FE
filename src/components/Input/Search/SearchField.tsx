@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import {
   BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_SUBTLE,
-  FOREGROUND_DISABLED,
+  FOREGROUND_INVERSE,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
@@ -38,6 +39,12 @@ function SearchField({
   onClear,
 }: SearchFieldProps) {
   const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef<TextInput>(null);
+
+  const handleClear = () => {
+    onClear?.();
+    inputRef.current?.focus();
+  };
 
   return (
     <View
@@ -45,25 +52,30 @@ function SearchField({
         styles.container,
         size === 'sm' ? styles.containerSm : styles.containerLg,
         variant === 'outline' && styles.containerOutline,
-        variant === 'outline' && isFocused && styles.containerOutlineFocused,
       ]}
     >
       <TextInput
+        ref={inputRef}
         style={styles.input}
         cursorColor={FOREGROUND_SECONDARY}
         selectionColor={FOREGROUND_SECONDARY}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor={FOREGROUND_DISABLED}
+        placeholderTextColor={FOREGROUND_NEUTRAL_SUBTLE}
         onSubmitEditing={onSubmit}
         autoFocus={autoFocus}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
         returnKeyType="search"
       />
-      {onClear && value.length > 0 && (
-        <Pressable onPress={onClear} hitSlop={8} accessibilityLabel="검색어 지우기">
+      {onClear && isFocused && value.length > 0 && (
+        <Pressable
+          onPress={handleClear}
+          hitSlop={8}
+          accessibilityLabel="검색어 지우기"
+          style={styles.clearButton}
+        >
           <Image source={CLEAR_ICON} style={styles.clearIcon} />
         </Pressable>
       )}
@@ -90,25 +102,30 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: BORDER_NEUTRAL_NORMAL,
   },
-  containerOutlineFocused: {
-    borderColor: FOREGROUND_SECONDARY,
-  },
   input: {
     ...TYPOGRAPHY.body2,
     flex: 1,
     padding: 0,
-    color: FOREGROUND_NEUTRAL_NORMAL,
+    color: FOREGROUND_PRIMARY,
   },
   icon: {
-    width: 18,
-    height: 18,
-    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
+    width: 24,
+    height: 24,
+    tintColor: FOREGROUND_NEUTRAL_NORMAL,
   },
-  clearIcon: {
+  clearButton: {
     width: 16,
     height: 16,
+    borderRadius: 8,
+    backgroundColor: FOREGROUND_NEUTRAL_SUBTLE,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 8,
-    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
+  },
+  clearIcon: {
+    width: 10,
+    height: 10,
+    tintColor: FOREGROUND_INVERSE,
   },
 });
 

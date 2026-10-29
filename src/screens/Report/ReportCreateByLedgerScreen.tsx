@@ -14,6 +14,7 @@ import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import { getActiveGroup } from '../../types/group';
 import type { ReportEntryType } from '../../types/report';
 import * as reportService from '../../services/reportService';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { ApiError } from '../../services/apiClient';
 import {
   API_ERROR_DEFAULT_MESSAGE,
@@ -61,7 +62,7 @@ function ReportCreateByLedgerScreen() {
   const [titleError, setTitleError] = useState<string | undefined>();
   const [formError, setFormError] = useState<string | undefined>();
   const [leaveDialogVisible, setLeaveDialogVisible] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isLocked: isSubmitting, run } = useSubmitLock();
 
   const toErrorMessage = (error: unknown): string => {
     if (isNetworkError(error)) {
@@ -108,8 +109,8 @@ function ReportCreateByLedgerScreen() {
 
   const canSubmit = title.trim().length > 0 && ledgers.length > 0;
 
-  const handleSubmit = async () => {
-    if (!canSubmit || isSubmitting) {
+  const handleSubmit = () => {
+    if (!canSubmit) {
       return;
     }
     const group = getActiveGroup();
@@ -118,38 +119,39 @@ function ReportCreateByLedgerScreen() {
     }
     setTitleError(undefined);
     setFormError(undefined);
-    setIsSubmitting(true);
-    try {
-      const created = await reportService.createReportByLedger(group.id, {
-        title: title.trim(),
-        ledgerIds: ledgers.map(l => l.id),
-        entryType,
-      });
-      navigation.reset({
-        index: 2,
-        routes: [
-          { name: 'Main', params: { screen: 'More' } },
-          { name: 'ReportMain' },
-          {
-            name: 'ReportByLedgerDetail',
-            params: { reportId: created.reportId, snackbarMessage: SNACKBAR_REPORT_CREATED },
-          },
-        ],
-      });
-    } catch (error) {
-      if (error instanceof ApiError) {
-        const titleFieldError = error.fieldErrors.find(fe => fe.field === 'title');
-        if (titleFieldError) {
-          setTitleError(titleFieldError.reason);
+    run(async () => {
+      try {
+        const created = await reportService.createReportByLedger(group.id, {
+          title: title.trim(),
+          ledgerIds: ledgers.map(l => l.id),
+          entryType,
+        });
+        navigation.reset({
+          index: 2,
+          routes: [
+            { name: 'Main', params: { screen: 'More' } },
+            { name: 'ReportMain' },
+            {
+              name: 'ReportByLedgerDetail',
+              params: { reportId: created.reportId, snackbarMessage: SNACKBAR_REPORT_CREATED },
+            },
+          ],
+        });
+        return true;
+      } catch (error) {
+        if (error instanceof ApiError) {
+          const titleFieldError = error.fieldErrors.find(fe => fe.field === 'title');
+          if (titleFieldError) {
+            setTitleError(titleFieldError.reason);
+          } else {
+            setFormError(getApiErrorMessage(error.code, error.message));
+          }
         } else {
-          setFormError(getApiErrorMessage(error.code, error.message));
+          setFormError(toErrorMessage(error));
         }
-      } else {
-        setFormError(toErrorMessage(error));
+        return false;
       }
-    } finally {
-      setIsSubmitting(false);
-    }
+    }, { keepLockedOnSuccess: true });
   };
 
   return (

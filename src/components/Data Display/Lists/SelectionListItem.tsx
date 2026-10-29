@@ -3,6 +3,7 @@ import Switch from '../../Input/Control/Switch';
 import {
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
@@ -116,7 +117,7 @@ const styles = StyleSheet.create({
   chevron: {
     width: 14,
     height: 14,
-    tintColor: FOREGROUND_DISABLED,
+    tintColor: FOREGROUND_NEUTRAL_NORMAL,
   },
 });
 
