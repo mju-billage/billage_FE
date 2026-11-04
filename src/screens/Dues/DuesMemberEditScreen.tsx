@@ -41,7 +41,7 @@ import {
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
+const SNACKBAR_AUTO_HIDE_MS = 3000;
 
 type LoadState = 'loading' | 'error' | 'ready';
 

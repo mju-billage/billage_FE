@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
+import { truncateWithEllipsis } from '../../utils/truncateWithEllipsis';
 import {
   useFocusEffect,
   useNavigation,
@@ -100,8 +101,6 @@ type LedgerDetailRouteProp = RouteProp<RootStackParamList, 'LedgerDetail'>;
 
 type ActiveDialog = 'rename' | 'budget' | 'delete' | null;
 type LoadState = 'loading' | 'error' | 'ready';
-
-const SNACKBAR_AUTO_HIDE_MS = 1600;
 
 function LedgerDetailScreen() {
   const navigation = useNavigation<LedgerDetailNavigationProp>();
@@ -198,7 +197,6 @@ function LedgerDetailScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbar(message);
-    setTimeout(() => setSnackbar(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const handleApplyFilter = async (next: LedgerFilterValue) => {
@@ -342,10 +340,16 @@ function LedgerDetailScreen() {
     <ScreenContainer
       background="primary"
       edges={['top']}
-      snackbar={snackbar ? <Snackbar visible title={snackbar} /> : undefined}
+      snackbar={
+        <Snackbar
+          visible={snackbar != null}
+          title={snackbar ?? ''}
+          onClose={() => setSnackbar(null)}
+        />
+      }
     >
       <AppBar
-        title={ledger.name}
+        title={truncateWithEllipsis(ledger.name)}
         onBackPress={() => navigation.goBack()}
         rightIcons={[{ icon: MENU_ICON, onPress: () => setMoreMenuVisible(true) }]}
       />
@@ -477,6 +481,7 @@ function LedgerDetailScreen() {
           setDialogError(undefined);
         }}
         textFieldPlaceholder={dialogConfig.placeholder}
+        textFieldMaxLength={activeDialog === 'rename' ? LEDGER_NAME_MAX_LENGTH : undefined}
         textFieldKeyboardType={activeDialog === 'budget' ? 'number-pad' : undefined}
         textFieldSuffix={activeDialog === 'budget' ? '원' : undefined}
         autoFocusTextField={activeDialog === 'rename'}

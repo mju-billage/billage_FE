@@ -92,7 +92,7 @@ function ReceiptAlbumScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), 1600);
+    setTimeout(() => setSnackbarMessage(null), 3000);
   };
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);

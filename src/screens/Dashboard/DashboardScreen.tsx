@@ -18,7 +18,9 @@ import IconButton from '../../components/Input/Button/IconButton';
 import Button from '../../components/Input/Button/Button';
 import MiniCalendarCard from '../../components/Data Display/Card/MiniCalendarCard';
 import DuesProgressCard from '../../components/Data Display/Card/DuesProgressCard';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import QuickServiceCard from './QuickServiceCard';
+import { takePendingSnackbar } from '../../utils/pendingSnackbar';
 import { MOCK_DASHBOARD_SUMMARY } from '../../types/dashboard';
 import type { MiniCalendarData } from '../../types/dashboard';
 import { getActiveGroup } from '../../types/group';
@@ -98,6 +100,7 @@ function DashboardScreen() {
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [groupName, setGroupName] = useState(getActiveGroup()?.name ?? '');
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
   const nickname = getCurrentUser()?.name ?? '';
 
@@ -145,6 +148,10 @@ function DashboardScreen() {
   useFocusEffect(
     useCallback(() => {
       load();
+      const pending = takePendingSnackbar();
+      if (pending) {
+        setSnackbarMessage(pending.title);
+      }
     }, [load]),
   );
 
@@ -268,6 +275,13 @@ function DashboardScreen() {
         </View>
       </ScrollView>
       <FAB onPress={handlePressAddTransaction} />
+      <View style={styles.snackbarSlot} pointerEvents="box-none">
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -279,6 +293,15 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  snackbarSlot: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: BOTTOM_NAVIGATION_HEIGHT + 20,
+    paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
+    zIndex: 10,
+    elevation: 10,
   },
   scrollContent: {
     paddingHorizontal: SCREEN_HORIZONTAL_PADDING,

@@ -40,7 +40,7 @@ type SignupInfoNavigationProp = NativeStackNavigationProp<
 >;
 type SignupInfoRouteProp = RouteProp<RootStackParamList, 'SignupInfo'>;
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
+const SNACKBAR_AUTO_HIDE_MS = 3000;
 
 function SignupInfoScreen() {
   const navigation = useNavigation<SignupInfoNavigationProp>();

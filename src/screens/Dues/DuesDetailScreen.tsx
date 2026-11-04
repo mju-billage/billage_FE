@@ -72,8 +72,6 @@ import { TYPOGRAPHY } from '../../constants/typography';
 
 const MENU_ICON = require('../../assets/icons/action/Menu Vertical.png');
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
-
 type DuesDetailNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type DuesDetailRouteProp = RouteProp<RootStackParamList, 'DuesDetail'>;
 
@@ -160,7 +158,6 @@ function DuesDetailScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   useEffect(() => {
@@ -304,9 +301,11 @@ function DuesDetailScreen() {
       <ScreenContainer
         background="primary"
         snackbar={
-          snackbarMessage ? (
-            <Snackbar visible title={snackbarMessage} />
-          ) : undefined
+          <Snackbar
+            visible={snackbarMessage != null}
+            title={snackbarMessage ?? ''}
+            onClose={() => setSnackbarMessage(null)}
+          />
         }
       >
         <AppBar title="" onBackPress={() => navigation.goBack()} />
@@ -349,9 +348,11 @@ function DuesDetailScreen() {
       background="primary"
       edges={['top']}
       snackbar={
-        snackbarMessage ? (
-          <Snackbar visible title={snackbarMessage} />
-        ) : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
       // 푸터 위 8 + 아래 16 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
       snackbarOffset={canChangeStatus ? 64 : 0}

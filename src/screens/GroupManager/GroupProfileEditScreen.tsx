@@ -59,7 +59,7 @@ type Stage = 'form' | 'imagePicker';
 type ImageAction = 'none' | 'uploaded';
 type PermissionDialogKind = 'camera' | 'gallery' | null;
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
+const SNACKBAR_AUTO_HIDE_MS = 3000;
 
 function GroupProfileEditScreen() {
   const navigation = useNavigation<GroupProfileEditNavigationProp>();

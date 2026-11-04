@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   FOREGROUND_INACTIVE,
   FOREGROUND_INVERSE,
@@ -8,6 +8,9 @@ import {
 import { TYPOGRAPHY } from '../../../constants/typography';
 
 const CLOSE_ICON = require('../../../assets/icons/action/Close.png');
+
+export const SNACKBAR_DURATION_MS = 3000;
+const SNACKBAR_FADE_MS = 200;
 
 type SnackbarProps = {
   visible: boolean;
@@ -26,26 +29,54 @@ function Snackbar({
   onActionPress,
   onClose,
 }: SnackbarProps) {
-  const [dismissed, setDismissed] = useState(false);
+  const [mounted, setMounted] = useState(visible);
+  const opacity = useRef(new Animated.Value(0)).current;
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    setDismissed(false);
-  }, [visible, title, description]);
-
-  if (!visible || dismissed) {
-    return null;
-  }
-
-  const handleClose = () => {
-    if (onClose) {
-      onClose();
-    } else {
-      setDismissed(true);
+  const clearHideTimer = () => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
     }
   };
 
+  const fadeOutAndClose = () => {
+    clearHideTimer();
+    Animated.timing(opacity, {
+      toValue: 0,
+      duration: SNACKBAR_FADE_MS,
+      useNativeDriver: true,
+    }).start(() => {
+      setMounted(false);
+      onClose?.();
+    });
+  };
+
+  useEffect(() => {
+    if (visible) {
+      setMounted(true);
+      opacity.setValue(0);
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: SNACKBAR_FADE_MS,
+        useNativeDriver: true,
+      }).start();
+      clearHideTimer();
+      hideTimerRef.current = setTimeout(fadeOutAndClose, SNACKBAR_DURATION_MS);
+    } else {
+      clearHideTimer();
+      setMounted(false);
+    }
+    return clearHideTimer;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, title, description]);
+
+  if (!visible && !mounted) {
+    return null;
+  }
+
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { opacity }]}>
       <View style={styles.textColumn}>
         {title && <Text style={styles.title}>{title}</Text>}
         {description && <Text style={styles.description}>{description}</Text>}
@@ -62,11 +93,11 @@ function Snackbar({
             <Text style={styles.actionLabel}>{actionLabel}</Text>
           </Pressable>
         )}
-        <Pressable onPress={handleClose} hitSlop={8}>
+        <Pressable onPress={fadeOutAndClose} hitSlop={8}>
           <Image source={CLOSE_ICON} style={styles.closeIcon} />
         </Pressable>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 

@@ -3,6 +3,7 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Badge from '../Badge/Badge';
 import { CALENDAR_APPROVAL_BADGE_LABEL } from '../../../constants/calendarScreenText';
 import { formatExpense, formatWon } from '../../../utils/currency';
+import { truncateWithEllipsis } from '../../../utils/truncateWithEllipsis';
 import {
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_NORMAL,
@@ -54,7 +55,9 @@ function TransactionListItem({
         </View>
       </View>
       <View style={styles.bottomRow}>
-        <Text style={styles.itemName}>{itemName}</Text>
+        <Text style={styles.itemName} accessibilityLabel={itemName}>
+          {truncateWithEllipsis(itemName)}
+        </Text>
         <Text style={[styles.amount, isIncome && styles.amountIncome]}>
           {amount < 0 ? formatExpense(-amount) : `${formatWon(Math.abs(amount))}원`}
         </Text>

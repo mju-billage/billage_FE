@@ -104,9 +104,9 @@ function DuesStatusCard({
                 <Image source={MONEY_ICON} style={styles.icon} />
                 <Text style={styles.summaryDenominator}>
                   <Text style={styles.summaryHighlight}>
-                    {paidAmount.toLocaleString()}
+                    {formatWon(paidAmount)}원
                   </Text>{' '}
-                  / {formatWon(totalAmount)}
+                  / {formatWon(totalAmount)}원
                 </Text>
               </View>
             </View>
@@ -135,7 +135,7 @@ function DuesStatusCard({
               </View>
               <View style={styles.twoColumn}>
                 <Text style={styles.fieldLabel}>회비 금액</Text>
-                <Text style={styles.fieldValue}>{formatWon(duesAmount)}</Text>
+                <Text style={styles.fieldValue}>{formatWon(duesAmount)}원</Text>
               </View>
             </View>
           </CardBase>

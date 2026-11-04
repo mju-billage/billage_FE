@@ -66,6 +66,7 @@ import {
   SCAN_APPLY_CONFIRM_DESCRIPTION,
   SCAN_APPLY_CONFIRM_LABEL,
   SCAN_APPLY_CONFIRM_TITLE,
+  SNACKBAR_TRANSACTION_DELETED,
   SNACKBAR_TRANSACTION_UPDATED,
   TEXT_INPUT_SHEET_EDIT_LABEL,
   TRANSACTION_REGISTER_LEDGER_LOCKED_HINT,
@@ -129,7 +130,7 @@ function TransactionDetailScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), 1600);
+    setTimeout(() => setSnackbarMessage(null), 3000);
   };
 
   useEffect(() => {
@@ -232,7 +233,11 @@ function TransactionDetailScreen() {
       try {
         await entryService.deleteEntry(entry.id);
         setDeleteDialogVisible(false);
-        navigation.goBack();
+        navigation.popTo(
+          'Main',
+          { screen: 'Transactions', params: { snackbarMessage: SNACKBAR_TRANSACTION_DELETED } },
+          { merge: true },
+        );
         return true;
       } catch (error) {
         setDeleteDialogVisible(false);
@@ -441,7 +446,11 @@ function TransactionDetailScreen() {
     <ScreenContainer
       background="secondary"
       snackbar={
-        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar

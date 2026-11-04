@@ -66,7 +66,7 @@ function TransactionSearchScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), 1600);
+    setTimeout(() => setSnackbarMessage(null), 3000);
   };
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 

@@ -18,6 +18,7 @@ import * as reportService from '../../services/reportService';
 import * as groupService from '../../services/groupService';
 import { ApiError } from '../../services/apiClient';
 import { formatDateDot } from '../../utils/dueDate';
+import { truncateWithEllipsis } from '../../utils/truncateWithEllipsis';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
@@ -44,7 +45,6 @@ import {
 } from '../../constants/commonText';
 
 const PLUS_ICON = require('../../assets/icons/action/Plus.png');
-const SNACKBAR_AUTO_HIDE_MS = 3000;
 
 type LoadState = 'loading' | 'error' | 'ready';
 type ReportMainNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -58,7 +58,7 @@ const TABS = [
 function ReportMainScreen() {
   const navigation = useNavigation<ReportMainNavigationProp>();
   const route = useRoute<ReportMainRouteProp>();
-  const [tab, setTab] = useState<ReportType>('BY_LEDGER');
+  const [tab, setTab] = useState<ReportType>(route.params?.reportType ?? 'BY_LEDGER');
   const [reports, setReports] = useState<ReportSummaryItem[]>([]);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
@@ -72,7 +72,6 @@ function ReportMainScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const toErrorMessage = (error: unknown): string => {
@@ -147,7 +146,6 @@ function ReportMainScreen() {
   useEffect(() => {
     if (route.params?.snackbarMessage) {
       setSnackbarMessage(route.params.snackbarMessage);
-      setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
       navigation.setParams({ snackbarMessage: undefined });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -157,13 +155,11 @@ function ReportMainScreen() {
     <ScreenContainer
       background="primary"
       snackbar={
-        snackbarMessage ? (
-          <Snackbar
-            visible
-            title={snackbarMessage}
-            onClose={() => setSnackbarMessage(null)}
-          />
-        ) : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar
@@ -234,8 +230,12 @@ function ReportMainScreen() {
                     }
                   >
                     <CardBase style={styles.card}>
-                      <Text style={styles.cardTitle} numberOfLines={1}>
-                        {item.title}
+                      <Text
+                        style={styles.cardTitle}
+                        numberOfLines={1}
+                        accessibilityLabel={item.title}
+                      >
+                        {truncateWithEllipsis(item.title)}
                       </Text>
                       <Text style={styles.cardSubtitle}>{formatDateDot(item.createdAt)}</Text>
                     </CardBase>

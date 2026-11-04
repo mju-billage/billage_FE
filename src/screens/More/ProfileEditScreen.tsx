@@ -71,7 +71,7 @@ type ProfileEditNavigationProp = NativeStackNavigationProp<
 
 type Stage = 'form' | 'imagePicker';
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
+const SNACKBAR_AUTO_HIDE_MS = 3000;
 type ImageAction = 'none' | 'reset' | 'uploaded';
 type PermissionDialogKind = 'camera' | 'gallery' | null;
 

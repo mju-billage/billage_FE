@@ -49,7 +49,7 @@ type LoadState = 'loading' | 'error' | 'ready';
 type DuesNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type DuesRouteProp = RouteProp<MainTabParamList, 'Dues'>;
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
+const SNACKBAR_AUTO_HIDE_MS = 3000;
 
 function toCardProps(dues: DuesSummary) {
   const isClosed = dues.status === 'CLOSED';

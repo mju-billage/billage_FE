@@ -48,7 +48,7 @@ type EmailVerificationRouteProp = RouteProp<
 
 const CODE_LENGTH = 6;
 const COUNTDOWN_SECONDS = 180;
-const SNACKBAR_AUTO_HIDE_MS = 1600;
+const SNACKBAR_AUTO_HIDE_MS = 3000;
 
 function formatCountdown(seconds: number): string {
   const minutes = Math.floor(seconds / 60);

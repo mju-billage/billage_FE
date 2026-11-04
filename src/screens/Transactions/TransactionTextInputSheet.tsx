@@ -47,6 +47,7 @@ function TransactionTextInputSheet({
         placeholder={placeholder}
         maxLength={maxLength}
         onClear={() => setDraft('')}
+        autoFocus
       />
 
       <View style={styles.footerRow}>

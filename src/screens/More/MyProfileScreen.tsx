@@ -128,7 +128,7 @@ function MyProfileScreen() {
         const message = route.params.snackbarMessage;
         setSnackbarMessage(message);
         navigation.setParams({ snackbarMessage: undefined });
-        setTimeout(() => setSnackbarMessage(null), 1600);
+        setTimeout(() => setSnackbarMessage(null), 3000);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [load, route.params?.snackbarMessage]),

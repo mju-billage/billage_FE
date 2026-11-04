@@ -16,6 +16,7 @@ import * as reportService from '../../services/reportService';
 import { ApiError } from '../../services/apiClient';
 import { formatExpense, formatWon } from '../../utils/currency';
 import { formatDateDot } from '../../utils/dueDate';
+import { truncateWithEllipsis } from '../../utils/truncateWithEllipsis';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
@@ -42,7 +43,7 @@ import { TYPOGRAPHY } from '../../constants/typography';
 
 const SHARE_ICON = require('../../assets/icons/action/Share.png');
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/Chevron Right.png');
-const SNACKBAR_AUTO_HIDE_MS = 1600;
+const SNACKBAR_AUTO_HIDE_MS = 3000;
 
 type LoadState = 'loading' | 'error' | 'ready';
 type ReportByLedgerDetailNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -138,7 +139,7 @@ function ReportByLedgerDetailScreen() {
     >
       <AppBar
         type="sub"
-        title={report.title}
+        title={truncateWithEllipsis(report.title)}
         onBackPress={() => navigation.goBack()}
         rightIcons={[{ icon: SHARE_ICON, onPress: handleShare }]}
       />
@@ -150,8 +151,8 @@ function ReportByLedgerDetailScreen() {
 
         <CardBase style={styles.headerCard}>
           <FolderTabShape fill={FILL_NEUTRAL_SUBTLE} />
-          <Text style={styles.headerTitle} numberOfLines={1}>
-            {report.title}
+          <Text style={styles.headerTitle} numberOfLines={1} accessibilityLabel={report.title}>
+            {truncateWithEllipsis(report.title)}
           </Text>
           <Text style={styles.periodText}>
             {formatDateDot(report.startDate)} - {formatDateDot(report.endDate)}

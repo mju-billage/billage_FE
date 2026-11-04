@@ -14,6 +14,7 @@ import JoinGroupSheet from './JoinGroupSheet';
 import { setActiveGroup } from '../../types/group';
 import type { GroupSummary } from '../../types/group';
 import * as groupService from '../../services/groupService';
+import { setPendingSnackbar } from '../../utils/pendingSnackbar';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
@@ -27,11 +28,11 @@ import {
   ALL_GROUPS_ROLE_TREASURER,
   ALL_GROUPS_TITLE,
   SNACKBAR_GROUP_JOINED_SUFFIX,
+  SNACKBAR_GROUP_SWITCHED_PREFIX,
+  SNACKBAR_GROUP_SWITCHED_SUFFIX,
 } from '../../constants/groupManagerScreenText';
 import { FOREGROUND_DISABLED } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
-
-const SNACKBAR_AUTO_HIDE_MS = 1600;
 
 type AllGroupsNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -51,14 +52,9 @@ function AllGroupsScreen() {
   const [errorMessage, setErrorMessage] = useState('');
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
-  const showSnackbar = (message: string) => {
-    setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
-  };
-
   useEffect(() => {
     if (route.params?.snackbarMessage) {
-      showSnackbar(route.params.snackbarMessage);
+      setSnackbarMessage(route.params.snackbarMessage);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -89,7 +85,11 @@ function AllGroupsScreen() {
     <ScreenContainer
       background="primary"
       snackbar={
-        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar
@@ -129,7 +129,13 @@ function AllGroupsScreen() {
               memberCount={group.memberCount}
               onPress={() => {
                 setActiveGroup(group.id);
-                navigation.goBack();
+                setPendingSnackbar(
+                  `${SNACKBAR_GROUP_SWITCHED_PREFIX}${group.name}${SNACKBAR_GROUP_SWITCHED_SUFFIX}`,
+                );
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Main', params: { screen: 'Home' } }],
+                });
               }}
             />
           ))}
@@ -154,8 +160,11 @@ function AllGroupsScreen() {
         onClose={() => setSheet('none')}
         onJoined={joinedGroup => {
           setSheet('none');
-          showSnackbar(`${joinedGroup.name}${SNACKBAR_GROUP_JOINED_SUFFIX}`);
-          setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
+          setPendingSnackbar(`${joinedGroup.name}${SNACKBAR_GROUP_JOINED_SUFFIX}`);
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'Main', params: { screen: 'Home' } }],
+          });
         }}
       />
     </ScreenContainer>

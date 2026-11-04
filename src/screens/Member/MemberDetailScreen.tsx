@@ -45,7 +45,7 @@ import {
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
+const SNACKBAR_AUTO_HIDE_MS = 3000;
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const DELETE_ICON = require('../../assets/icons/action/Delete.png');

@@ -67,6 +67,7 @@ import {
   type ScanApplyValues,
 } from '../../hooks/useReceiptAttachments';
 import { todayKey } from '../../utils/calendarGrid';
+import { truncateWithEllipsis } from '../../utils/truncateWithEllipsis';
 import { formatFullDate } from '../../utils/dateHeader';
 import { getActiveGroup } from '../../types/group';
 import * as ledgerService from '../../services/ledgerService';
@@ -151,8 +152,6 @@ type ScreenLoadState = 'loading' | 'error' | 'ready';
 
 type LedgerOption = { id: string; name: string };
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
-
 function toIsoDate(dotDate: string): string {
   return dotDate.replace(/\./g, '-');
 }
@@ -220,7 +219,6 @@ function TransactionRegisterScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   /** 읽힌 값만 덮어쓴다. 못 읽은 칸(null)은 사용자가 채우거나 기본값으로 남는다. */
@@ -503,7 +501,13 @@ function TransactionRegisterScreen() {
   return (
     <ScreenContainer
       background="secondary"
-      snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
+      snackbar={
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
+      }
       // 푸터 아래 16 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
       snackbarOffset={64}
     >
@@ -534,7 +538,7 @@ function TransactionRegisterScreen() {
           />
           <DetailFieldRow
             label={TRANSACTION_ITEM_NAME_LABEL}
-            value={itemName}
+            value={truncateWithEllipsis(itemName)}
             onPress={() => setActiveSheet('itemName')}
           />
           <DetailFieldRow
@@ -552,7 +556,7 @@ function TransactionRegisterScreen() {
           </Text>
           <DetailFieldRow
             label={TRANSACTION_MEMO_LABEL}
-            value={memo}
+            value={truncateWithEllipsis(memo)}
             valuePlaceholder={TRANSACTION_MEMO_PLACEHOLDER}
             onPress={() => setActiveSheet('memo')}
           />
@@ -627,7 +631,7 @@ function TransactionRegisterScreen() {
             type="picker"
             title={TRANSACTION_ITEM_NAME_LABEL}
             required
-            value={itemName || TRANSACTION_REGISTER_ITEM_NAME_PLACEHOLDER}
+            value={truncateWithEllipsis(itemName) || TRANSACTION_REGISTER_ITEM_NAME_PLACEHOLDER}
             onPress={() => setActiveSheet('itemName')}
           />
           <SelectionListItem
@@ -652,7 +656,7 @@ function TransactionRegisterScreen() {
           <SelectionListItem
             type="picker"
             title={TRANSACTION_MEMO_LABEL}
-            value={memo || TRANSACTION_MEMO_PLACEHOLDER}
+            value={truncateWithEllipsis(memo) || TRANSACTION_MEMO_PLACEHOLDER}
             onPress={() => setActiveSheet('memo')}
           />
 

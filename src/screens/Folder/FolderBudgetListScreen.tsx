@@ -40,7 +40,7 @@ import {
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
+const SNACKBAR_AUTO_HIDE_MS = 3000;
 
 function clampBudgetInput(text: string): string {
   const digitsOnly = text.replace(/[^0-9]/g, '');
@@ -206,6 +206,7 @@ function FolderBudgetListScreen() {
           keyboardType="number-pad"
           error={budgetError}
           suffix="원"
+          autoFocus
         />
         <Button
           label={BUDGET_SAVE_LABEL}

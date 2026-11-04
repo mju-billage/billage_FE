@@ -46,7 +46,7 @@ import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Nav
 
 type LoadState = 'loading' | 'error' | 'ready';
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
+const SNACKBAR_AUTO_HIDE_MS = 3000;
 
 const CHEVRON_DOWN_ICON = require('../../assets/icons/nav/Chevron Down.png');
 const GROUP_ICON = require('../../assets/icons/user/Group.png');

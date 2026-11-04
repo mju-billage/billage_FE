@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { truncateWithEllipsis } from '../../utils/truncateWithEllipsis';
 import {
   useFocusEffect,
   useNavigation,
@@ -91,8 +92,6 @@ const GRID_ICON = require('../../assets/icons/system/Grid.png');
 const LIST_ICON = require('../../assets/icons/system/List.png');
 const PLUS_ICON = require('../../assets/icons/action/Plus.png');
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
-
 type FolderScreenNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<FolderTabParamList, 'FolderList'>,
   NativeStackNavigationProp<RootStackParamList>
@@ -177,7 +176,6 @@ function FolderScreen() {
       const pending = takePendingSnackbar();
       if (pending) {
         setSnackbar(pending);
-        setTimeout(() => setSnackbar(null), SNACKBAR_AUTO_HIDE_MS);
       }
     }, [loadItems]),
   );
@@ -200,7 +198,6 @@ function FolderScreen() {
 
   const showSnackbar = (title: string, description?: string) => {
     setSnackbar({ title, description });
-    setTimeout(() => setSnackbar(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const handlePressItem = (item: FolderListItem) => {
@@ -363,18 +360,17 @@ function FolderScreen() {
       avoidKeyboard={false}
       aboveTabBar
       snackbar={
-        snackbar ? (
-          <Snackbar
-            visible
-            title={snackbar.title}
-            description={snackbar.description}
-          />
-        ) : undefined
+        <Snackbar
+          visible={snackbar != null}
+          title={snackbar?.title ?? ''}
+          description={snackbar?.description}
+          onClose={() => setSnackbar(null)}
+        />
       }
     >
       <AppBar
         type={isRoot ? 'titleOnly' : 'sub'}
-        title={isRoot ? FOLDER_SCREEN_TITLE : folderName ?? ''}
+        title={isRoot ? FOLDER_SCREEN_TITLE : truncateWithEllipsis(folderName ?? '')}
         onBackPress={() => navigation.goBack()}
         rightIcons={[
           { icon: STATISTICS_ICON, onPress: () => navigation.navigate('Statistics') },
@@ -490,6 +486,7 @@ function FolderScreen() {
         }}
         textFieldPlaceholder={dialogConfig.placeholder}
         textFieldMaxLength={dialogConfig.showTextField ? FOLDER_NAME_MAX_LENGTH : undefined}
+        autoFocusTextField={activeDialog === 'backup'}
         textFieldError={dialogError}
         confirmLabel={dialogConfig.confirmLabel}
         destructive={activeDialog === 'unlink'}

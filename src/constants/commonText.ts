@@ -1,5 +1,8 @@
 export const NEXT_BUTTON_LABEL = '다음으로';
 
+export const TEXT_FIELD_MAX_LENGTH_ERROR = (maxLength: number) =>
+  `* ${maxLength}자를 초과하여 입력했어요.`;
+
 export const SNACKBAR_CAMERA_PERMISSION_DENIED =
   '카메라 권한이 없어서 촬영할 수 없어요. 다시 시도하면 권한을 요청해요.';
 export const SNACKBAR_CAMERA_ERROR = '촬영에 실패했어요. 잠시 후 다시 시도해주세요.';

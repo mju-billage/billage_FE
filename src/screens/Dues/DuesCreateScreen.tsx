@@ -30,6 +30,8 @@ import * as duesService from '../../services/duesService';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
 import * as ledgerService from '../../services/ledgerService';
 import * as memberService from '../../services/memberService';
+import { capDigits } from '../../utils/currency';
+import { TEXT_FIELD_MAX_LENGTH_ERROR } from '../../constants/commonText';
 import { ApiError } from '../../services/apiClient';
 import {
   API_ERROR_DEFAULT_MESSAGE,
@@ -83,6 +85,7 @@ const CLOSE_ICON = require('../../assets/icons/action/Close.png');
 const CALENDAR_ICON = require('../../assets/icons/system/Calendar.png');
 
 const SNACKBAR_AUTO_HIDE_MS = 1600;
+const DUES_AMOUNT_MAX_DIGITS = 9;
 
 type Step = 'basic' | 'members';
 type ActiveSheet = 'none' | 'ledger' | 'period';
@@ -109,6 +112,7 @@ function DuesCreateScreen() {
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>('none');
   const [leaveDialogVisible, setLeaveDialogVisible] = useState(false);
   const [periodError, setPeriodError] = useState<string | undefined>();
+  const [amountError, setAmountError] = useState<string | undefined>();
 
   const [members, setMembers] = useState<Member[]>([]);
   const [memberLoadState, setMemberLoadState] = useState<MemberLoadState>('loading');
@@ -176,19 +180,18 @@ function DuesCreateScreen() {
   );
 
   const handleAmountChange = (text: string) => {
-    const digitsOnly = text.replace(/[^0-9]/g, '');
-    const revertNative = () => {
+    const { value: capped, overflow } = capDigits(
+      text.replace(/[^0-9]/g, ''),
+      DUES_AMOUNT_MAX_DIGITS,
+    );
+    setAmountError(
+      overflow ? TEXT_FIELD_MAX_LENGTH_ERROR(DUES_AMOUNT_MAX_DIGITS) : undefined,
+    );
+    const next = capped ? Number(capped) : 0;
+    if (next === amount) {
       amountInputRef.current?.setNativeProps({
         text: amount > 0 ? amount.toLocaleString() : '',
       });
-    };
-    if (digitsOnly.length > 9) {
-      revertNative();
-      return;
-    }
-    const next = digitsOnly ? Number(digitsOnly) : 0;
-    if (next === amount) {
-      revertNative();
       return;
     }
     setAmount(next);
@@ -475,9 +478,11 @@ function DuesCreateScreen() {
           required
           value={amount > 0 ? amount.toLocaleString() : ''}
           onChangeText={handleAmountChange}
+          onBlur={() => setAmountError(undefined)}
           placeholder={DUES_CREATE_AMOUNT_PLACEHOLDER}
           keyboardType="number-pad"
           suffix="원"
+          error={amountError}
         />
         <View style={styles.fieldGroup}>
           <Text style={styles.fieldLabel}>{DUES_CREATE_LEDGER_LABEL}</Text>

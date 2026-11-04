@@ -1,0 +1,13 @@
+기능QA 수정 작업 시작 시점 파일 해시 목록
+생성 시각: 2026-11-04
+기준 커밋: b3922516182be22b23ad83b176cf2f74963b874b (b392251 .)
+
+git status: working tree clean (nothing to commit)
+git ls-files -m -o --exclude-standard: (출력 없음 — 수정/미추적 파일 없음)
+
+참고: 세션 시작 시 전달받은 환경 스냅샷에는 수정된 파일 다수(DuesProgressCard, CheckBox, SearchField 등 20개)와
+HEAD가 131517a로 표시돼 있었으나, 실제 작업 시작 시점(git status 실행 시각)에는 이미 커밋(b392251)되어
+작업 트리가 깨끗한 상태였다. 이번 실행은 b392251 기준으로 시작한다.
+
+이번 실행에서 수정/생성한 파일은 작업 종료 시 `git ls-files -m -o --exclude-standard` 재실행 결과로 비교해
+보고서 10절에 기록한다.

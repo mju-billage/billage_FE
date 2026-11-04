@@ -69,7 +69,7 @@ type GroupManageNavigationProp = NativeStackNavigationProp<
 type LoadState = 'loading' | 'error' | 'ready';
 type ConfirmKind = 'none' | 'leave' | 'leave-blocked' | 'delete';
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
+const SNACKBAR_AUTO_HIDE_MS = 3000;
 
 function GroupManageScreen() {
   const navigation = useNavigation<GroupManageNavigationProp>();
