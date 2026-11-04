@@ -40,8 +40,6 @@ import {
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-const SNACKBAR_AUTO_HIDE_MS = 3000;
-
 function clampBudgetInput(text: string): string {
   const digitsOnly = text.replace(/[^0-9]/g, '');
   if (!digitsOnly) {
@@ -131,7 +129,6 @@ function FolderBudgetListScreen() {
         setEditingLedger(null);
         load();
         setSnackbarVisible(true);
-        setTimeout(() => setSnackbarVisible(false), SNACKBAR_AUTO_HIDE_MS);
         return true;
       } catch (error) {
         if (error instanceof ApiError) {
@@ -149,9 +146,11 @@ function FolderBudgetListScreen() {
     <ScreenContainer
       background="primary"
       snackbar={
-        snackbarVisible ? (
-          <Snackbar visible title={SNACKBAR_BUDGET_SAVED} />
-        ) : undefined
+        <Snackbar
+          visible={snackbarVisible}
+          title={SNACKBAR_BUDGET_SAVED}
+          onClose={() => setSnackbarVisible(false)}
+        />
       }
     >
       <AppBar title={BUDGET_LIST_TITLE} onBackPress={() => navigation.goBack()} />

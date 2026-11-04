@@ -121,7 +121,6 @@ function LoginScreen() {
         const message = route.params.snackbarMessage;
         setSnackbarMessage(message);
         navigation.setParams({ snackbarMessage: undefined });
-        setTimeout(() => setSnackbarMessage(null), 3000);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [route.params?.snackbarMessage]),
@@ -218,7 +217,11 @@ function LoginScreen() {
       edges={['bottom']}
       style={styles.container}
       snackbar={
-        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <ScrollView

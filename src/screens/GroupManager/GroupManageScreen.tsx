@@ -69,8 +69,6 @@ type GroupManageNavigationProp = NativeStackNavigationProp<
 type LoadState = 'loading' | 'error' | 'ready';
 type ConfirmKind = 'none' | 'leave' | 'leave-blocked' | 'delete';
 
-const SNACKBAR_AUTO_HIDE_MS = 3000;
-
 function GroupManageScreen() {
   const navigation = useNavigation<GroupManageNavigationProp>();
   const [group, setGroup] = useState<GroupSummary | undefined>(getActiveGroup());
@@ -83,7 +81,6 @@ function GroupManageScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const viewerIsOwner = group?.myRole === 'OWNER';
@@ -206,7 +203,11 @@ function GroupManageScreen() {
     <ScreenContainer
       background="primary"
       snackbar={
-        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar

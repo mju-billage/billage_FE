@@ -50,7 +50,6 @@ import { TYPOGRAPHY } from '../../constants/typography';
 
 const MENU_ICON = require('../../assets/icons/action/Menu Vertical.png');
 const SEARCH_DEBOUNCE_MS = 300;
-const DELETE_SNACKBAR_AUTO_HIDE_MS = 3000;
 
 type MemberManageNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type MemberManageRouteProp = RouteProp<RootStackParamList, 'MemberManage'>;
@@ -90,7 +89,6 @@ function MemberManageScreen() {
 
   const showSnackbar = (title: string, description?: string) => {
     setSnackbar({ title, description });
-    setTimeout(() => setSnackbar(null), DELETE_SNACKBAR_AUTO_HIDE_MS);
   };
 
   const load = useCallback(async (searchKeyword: string) => {
@@ -209,14 +207,12 @@ function MemberManageScreen() {
     <ScreenContainer
       background="secondary"
       snackbar={
-        snackbar ? (
-          <Snackbar
-            visible
-            title={snackbar.title}
-            description={snackbar.description}
-            onClose={() => setSnackbar(null)}
-          />
-        ) : undefined
+        <Snackbar
+          visible={snackbar != null}
+          title={snackbar?.title ?? ''}
+          description={snackbar?.description}
+          onClose={() => setSnackbar(null)}
+        />
       }
     >
       <AppBar

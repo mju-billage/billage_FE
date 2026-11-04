@@ -49,8 +49,6 @@ type LoadState = 'loading' | 'error' | 'ready';
 type DuesNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type DuesRouteProp = RouteProp<MainTabParamList, 'Dues'>;
 
-const SNACKBAR_AUTO_HIDE_MS = 3000;
-
 function toCardProps(dues: DuesSummary) {
   const isClosed = dues.status === 'CLOSED';
   const isScheduled = dues.status === 'SCHEDULED';
@@ -138,17 +136,6 @@ function DuesScreen() {
     }
   }, [route.params?.snackbarMessage, navigation]);
 
-  useEffect(() => {
-    if (!snackbarMessage) {
-      return;
-    }
-    const timer = setTimeout(
-      () => setSnackbarMessage(null),
-      SNACKBAR_AUTO_HIDE_MS,
-    );
-    return () => clearTimeout(timer);
-  }, [snackbarMessage]);
-
   const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
 
   const handlePressCreate = () => {
@@ -165,9 +152,11 @@ function DuesScreen() {
       avoidKeyboard={false}
       aboveTabBar
       snackbar={
-        snackbarMessage ? (
-          <Snackbar visible title={snackbarMessage} />
-        ) : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar

@@ -85,7 +85,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
   const effectiveError = overflowError ?? error;
 
   useEffect(() => {
-    if (maxLength != null && Array.from(value).length <= maxLength && overflow) {
+    if (maxLength != null && Array.from(value).length < maxLength && overflow) {
       setOverflow(false);
     }
   }, [value, maxLength, overflow]);

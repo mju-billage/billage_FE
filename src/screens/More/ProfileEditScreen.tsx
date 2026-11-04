@@ -71,7 +71,6 @@ type ProfileEditNavigationProp = NativeStackNavigationProp<
 
 type Stage = 'form' | 'imagePicker';
 
-const SNACKBAR_AUTO_HIDE_MS = 3000;
 type ImageAction = 'none' | 'reset' | 'uploaded';
 type PermissionDialogKind = 'camera' | 'gallery' | null;
 
@@ -94,7 +93,6 @@ function ProfileEditScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const trimmedName = name.trim();
@@ -222,7 +220,11 @@ function ProfileEditScreen() {
     <ScreenContainer
       background="secondary"
       snackbar={
-        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar type="sub" title={PROFILE_EDIT_TITLE} onBackPress={handleBack} />

@@ -169,7 +169,6 @@ function TransactionsScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), 3000);
   };
 
   useEffect(() => {

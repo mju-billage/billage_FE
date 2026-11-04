@@ -92,7 +92,6 @@ function ReceiptAlbumScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), 3000);
   };
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
@@ -225,7 +224,13 @@ function ReceiptAlbumScreen() {
   return (
     <ScreenContainer
       background="secondary"
-      snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
+      snackbar={
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
+      }
     >
       <AppBar type="sub" title={RECEIPT_ALBUM_TITLE} onBackPress={() => navigation.goBack()} />
 

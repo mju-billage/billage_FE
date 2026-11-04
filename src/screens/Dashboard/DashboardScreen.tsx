@@ -13,7 +13,7 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { MainTabParamList } from '../../navigation/MainTabNavigator';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import FAB from '../../components/Input/Button/FAB';
+import FAB, { FAB_SIZE } from '../../components/Input/Button/FAB';
 import IconButton from '../../components/Input/Button/IconButton';
 import Button from '../../components/Input/Button/Button';
 import MiniCalendarCard from '../../components/Data Display/Card/MiniCalendarCard';
@@ -65,6 +65,8 @@ const BELL_ICON = require('../../assets/icons/communication/Bell.png');
 
 const SCREEN_HORIZONTAL_PADDING = 20;
 const DUES_CARD_GAP = 8;
+// 내역 탭의 SNACKBAR_FAB_GAP(TransactionsScreen.tsx)과 같은 값 — FAB 위로 스낵바를 띄우는 간격
+const SNACKBAR_FAB_GAP = 8;
 
 type DashboardScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Home'>,
@@ -298,7 +300,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: BOTTOM_NAVIGATION_HEIGHT + 20,
+    bottom: BOTTOM_NAVIGATION_HEIGHT + 20 + FAB_SIZE + SNACKBAR_FAB_GAP,
     paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
     zIndex: 10,
     elevation: 10,

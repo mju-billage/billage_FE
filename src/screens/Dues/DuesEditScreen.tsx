@@ -57,8 +57,6 @@ import {
 
 const CALENDAR_ICON = require('../../assets/icons/system/Calendar.png');
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
-
 type ActiveSheet = 'none' | 'ledger' | 'period';
 type LoadState = 'loading' | 'error' | 'ready';
 type LedgerOption = { id: string; name: string };
@@ -142,7 +140,6 @@ function DuesEditScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const hasChanges =
@@ -268,7 +265,11 @@ function DuesEditScreen() {
     <ScreenContainer
       background="secondary"
       snackbar={
-        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar type="sub" title={DUES_EDIT_TITLE} onBackPress={handleBack} />

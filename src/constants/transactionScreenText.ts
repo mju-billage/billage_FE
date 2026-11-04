@@ -95,7 +95,7 @@ export const SNACKBAR_RECEIPT_MAX_LIMIT =
 export const SNACKBAR_TRANSACTION_ADDED = '내역이 추가되었어요.';
 export const SNACKBAR_TRANSACTION_ADDED_PENDING =
   '내역이 추가되었어요. 총무 승인 후 반영돼요.';
-export const SNACKBAR_TRANSACTION_UPDATED = '변경 사항이 저장되었어요.';
+export const SNACKBAR_TRANSACTION_UPDATED = '내역 수정이 완료되었어요.';
 export const SNACKBAR_TRANSACTION_DELETED = '내역이 삭제되었어요.';
 export const TRANSACTION_REGISTER_LOADING = '불러오는 중이에요.';
 export const TRANSACTION_REGISTER_RETRY_LABEL = '다시 시도';

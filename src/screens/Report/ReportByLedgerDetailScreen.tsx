@@ -43,7 +43,6 @@ import { TYPOGRAPHY } from '../../constants/typography';
 
 const SHARE_ICON = require('../../assets/icons/action/Share.png');
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/Chevron Right.png');
-const SNACKBAR_AUTO_HIDE_MS = 3000;
 
 type LoadState = 'loading' | 'error' | 'ready';
 type ReportByLedgerDetailNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -62,7 +61,6 @@ function ReportByLedgerDetailScreen() {
   useEffect(() => {
     if (route.params.snackbarMessage) {
       setSnackbarMessage(route.params.snackbarMessage);
-      setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
       navigation.setParams({ snackbarMessage: undefined });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -132,9 +130,11 @@ function ReportByLedgerDetailScreen() {
     <ScreenContainer
       background="primary"
       snackbar={
-        snackbarMessage ? (
-          <Snackbar visible title={snackbarMessage} onClose={() => setSnackbarMessage(null)} />
-        ) : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar

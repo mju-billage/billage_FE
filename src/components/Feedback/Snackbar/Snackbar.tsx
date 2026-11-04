@@ -32,6 +32,14 @@ function Snackbar({
   const [mounted, setMounted] = useState(visible);
   const opacity = useRef(new Animated.Value(0)).current;
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
+
+  useEffect(
+    () => () => {
+      isMountedRef.current = false;
+    },
+    [],
+  );
 
   const clearHideTimer = () => {
     if (hideTimerRef.current) {
@@ -40,17 +48,22 @@ function Snackbar({
     }
   };
 
-  const fadeOutAndClose = () => {
+  const fadeOut = (onDone?: () => void) => {
     clearHideTimer();
     Animated.timing(opacity, {
       toValue: 0,
       duration: SNACKBAR_FADE_MS,
       useNativeDriver: true,
     }).start(() => {
+      if (!isMountedRef.current) {
+        return;
+      }
       setMounted(false);
-      onClose?.();
+      onDone?.();
     });
   };
+
+  const handleClosePress = () => fadeOut(onClose);
 
   useEffect(() => {
     if (visible) {
@@ -62,16 +75,15 @@ function Snackbar({
         useNativeDriver: true,
       }).start();
       clearHideTimer();
-      hideTimerRef.current = setTimeout(fadeOutAndClose, SNACKBAR_DURATION_MS);
+      hideTimerRef.current = setTimeout(() => fadeOut(onClose), SNACKBAR_DURATION_MS);
     } else {
-      clearHideTimer();
-      setMounted(false);
+      fadeOut();
     }
     return clearHideTimer;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, title, description]);
 
-  if (!visible && !mounted) {
+  if (!mounted) {
     return null;
   }
 
@@ -93,7 +105,7 @@ function Snackbar({
             <Text style={styles.actionLabel}>{actionLabel}</Text>
           </Pressable>
         )}
-        <Pressable onPress={fadeOutAndClose} hitSlop={8}>
+        <Pressable onPress={handleClosePress} hitSlop={8}>
           <Image source={CLOSE_ICON} style={styles.closeIcon} />
         </Pressable>
       </View>

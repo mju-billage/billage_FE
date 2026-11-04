@@ -84,7 +84,6 @@ import {
 const CLOSE_ICON = require('../../assets/icons/action/Close.png');
 const CALENDAR_ICON = require('../../assets/icons/system/Calendar.png');
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
 const DUES_AMOUNT_MAX_DIGITS = 9;
 
 type Step = 'basic' | 'members';
@@ -134,7 +133,6 @@ function DuesCreateScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const hasInput =
@@ -344,9 +342,11 @@ function DuesCreateScreen() {
       <ScreenContainer
         background="secondary"
         snackbar={
-          snackbarMessage ? (
-            <Snackbar visible title={snackbarMessage} />
-          ) : undefined
+          <Snackbar
+            visible={snackbarMessage != null}
+            title={snackbarMessage ?? ''}
+            onClose={() => setSnackbarMessage(null)}
+          />
         }
         // 푸터 위 8 + 아래 16 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
         snackbarOffset={64}
@@ -450,9 +450,11 @@ function DuesCreateScreen() {
     <ScreenContainer
       background="secondary"
       snackbar={
-        snackbarMessage ? (
-          <Snackbar visible title={snackbarMessage} />
-        ) : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
       // 푸터 위 8 + 아래 16 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
       snackbarOffset={64}

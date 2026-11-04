@@ -107,7 +107,13 @@ function FolderMoveDestinationScreen() {
   return (
     <ScreenContainer
       background="secondary"
-      snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
+      snackbar={
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
+      }
       // 푸터 위아래 16 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
       snackbarOffset={64}
     >

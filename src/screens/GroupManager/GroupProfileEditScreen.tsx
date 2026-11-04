@@ -59,8 +59,6 @@ type Stage = 'form' | 'imagePicker';
 type ImageAction = 'none' | 'uploaded';
 type PermissionDialogKind = 'camera' | 'gallery' | null;
 
-const SNACKBAR_AUTO_HIDE_MS = 3000;
-
 function GroupProfileEditScreen() {
   const navigation = useNavigation<GroupProfileEditNavigationProp>();
   const group = getActiveGroup();
@@ -79,7 +77,6 @@ function GroupProfileEditScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const trimmedName = name.trim();
@@ -174,7 +171,11 @@ function GroupProfileEditScreen() {
     <ScreenContainer
       background="secondary"
       snackbar={
-        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar
