@@ -205,6 +205,7 @@ function FolderBudgetListScreen() {
           placeholder={BUDGET_SHEET_PLACEHOLDER}
           keyboardType="number-pad"
           error={budgetError}
+          suffix="원"
         />
         <Button
           label={BUDGET_SAVE_LABEL}

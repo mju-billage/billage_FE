@@ -46,6 +46,7 @@ import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/nativ
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
+import { takePendingSnackbar } from '../../utils/pendingSnackbar';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import SegmentedControl from '../../components/Input/Control/SegmentedControl';
@@ -342,6 +343,10 @@ function TransactionRegisterScreen() {
       if (mode === 'createReal') {
         loadLedgerOptions();
       }
+      const pending = takePendingSnackbar();
+      if (pending) {
+        showSnackbar(pending.title);
+      }
     }, [mode, loadLedgerOptions]),
   );
 
@@ -400,11 +405,20 @@ function TransactionRegisterScreen() {
             managerUserId,
             receiptFileIds: uploadedReceiptFileIds,
           });
-          showSnackbar(
-            created.approvalStatus === 'PENDING'
-              ? SNACKBAR_TRANSACTION_ADDED_PENDING
-              : SNACKBAR_TRANSACTION_ADDED,
+          navigation.popTo(
+            'Main',
+            {
+              screen: 'Transactions',
+              params: {
+                snackbarMessage:
+                  created.approvalStatus === 'PENDING'
+                    ? SNACKBAR_TRANSACTION_ADDED_PENDING
+                    : SNACKBAR_TRANSACTION_ADDED,
+              },
+            },
+            { merge: true },
           );
+          return true;
         } else {
           const updates: entryService.UpdateEntryInput = {};
           const trimmedTitle = itemName.trim();
@@ -438,8 +452,6 @@ function TransactionRegisterScreen() {
           );
           return true;
         }
-        setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
-        return true;
       } catch (error) {
         showSnackbar(toErrorMessage(error));
         return false;
@@ -492,7 +504,8 @@ function TransactionRegisterScreen() {
     <ScreenContainer
       background="secondary"
       snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
-      snackbarOffset={68}
+      // 푸터 아래 16 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
+      snackbarOffset={64}
     >
       <AppBar
         type="sub"

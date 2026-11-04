@@ -5,6 +5,7 @@ import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/nativ
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
+import { takePendingSnackbar } from '../../utils/pendingSnackbar';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
@@ -27,7 +28,7 @@ import {
   DUES_CREATE_AMOUNT_LABEL,
   DUES_CREATE_LEAVE_CANCEL_LABEL,
   DUES_CREATE_LEAVE_CONFIRM_LABEL,
-  DUES_CREATE_LEAVE_DESCRIPTION,
+  DUES_EDIT_LEAVE_DESCRIPTION,
   DUES_CREATE_LEDGER_LABEL,
   DUES_CREATE_LEDGER_PLACEHOLDER,
   DUES_CREATE_PERIOD_LABEL,
@@ -160,6 +161,15 @@ function DuesEditScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      const pending = takePendingSnackbar();
+      if (pending) {
+        showSnackbar(pending.title);
+      }
+    }, []),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
       const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
         if (hasChanges) {
           setLeaveDialogVisible(true);
@@ -220,8 +230,11 @@ function DuesEditScreen() {
           ...(isoStart !== initial.startDate ? { startDate: isoStart } : {}),
           ...(isoDue !== initial.dueDate ? { dueDate: isoDue } : {}),
         });
-        showSnackbar(SNACKBAR_DUES_UPDATED);
-        setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
+        navigation.popTo(
+          'DuesDetail',
+          { duesId, snackbarMessage: SNACKBAR_DUES_UPDATED },
+          { merge: true },
+        );
         return true;
       } catch (error) {
         showSnackbar(toErrorMessage(error));
@@ -335,9 +348,10 @@ function DuesEditScreen() {
       <Dialog
         visible={leaveDialogVisible}
         title={DUES_EDIT_LEAVE_TITLE}
-        description={DUES_CREATE_LEAVE_DESCRIPTION}
+        description={DUES_EDIT_LEAVE_DESCRIPTION}
         cancelLabel={DUES_CREATE_LEAVE_CANCEL_LABEL}
         confirmLabel={DUES_CREATE_LEAVE_CONFIRM_LABEL}
+        destructive
         onCancel={() => setLeaveDialogVisible(false)}
         onConfirm={() => {
           setLeaveDialogVisible(false);

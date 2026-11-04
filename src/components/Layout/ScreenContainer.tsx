@@ -32,9 +32,12 @@ function ScreenContainer({
 }: ScreenContainerProps) {
   const insets = useSafeAreaInsets();
   const bottomEdgeInset = edges.includes('bottom') ? insets.bottom : 0;
+  // edges 에 bottom 이 없으면 SafeAreaView 가 아래 시스템 영역을 안 비워 둔다 — 그만큼 스낵바 칸을 올려
+  // "안전 영역 윗변에서 SNACKBAR_SLOT_BOTTOM" 이 되게 한다. (bottom 이 있으면 0 이라 그대로)
+  const uncoveredBottomInset = insets.bottom - bottomEdgeInset;
   const snackbarBottom = aboveTabBar
     ? BOTTOM_NAVIGATION_HEIGHT + SNACKBAR_TAB_BAR_GAP - bottomEdgeInset + snackbarOffset
-    : SNACKBAR_SLOT_BOTTOM + snackbarOffset;
+    : SNACKBAR_SLOT_BOTTOM + uncoveredBottomInset + snackbarOffset;
 
   return (
     <SafeAreaView
@@ -60,8 +63,8 @@ function ScreenContainer({
   );
 }
 
-const SNACKBAR_SLOT_BOTTOM = 24;
-const SNACKBAR_TAB_BAR_GAP = 12;
+const SNACKBAR_SLOT_BOTTOM = 20;
+const SNACKBAR_TAB_BAR_GAP = 20;
 
 const styles = StyleSheet.create({
   container: {

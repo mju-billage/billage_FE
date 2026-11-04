@@ -26,6 +26,7 @@ type DialogProps = {
   textFieldKeyboardType?: KeyboardTypeOptions;
   textFieldMaxLength?: number;
   textFieldError?: string;
+  textFieldSuffix?: string;
   autoFocusTextField?: boolean;
   cancelLabel?: string;
   confirmLabel?: string;
@@ -47,6 +48,7 @@ function Dialog({
   textFieldKeyboardType,
   textFieldMaxLength,
   textFieldError,
+  textFieldSuffix,
   autoFocusTextField = false,
   cancelLabel = '취소',
   confirmLabel = '확인',
@@ -81,6 +83,7 @@ function Dialog({
                   keyboardType={textFieldKeyboardType}
                   maxLength={textFieldMaxLength}
                   error={textFieldError}
+                  suffix={textFieldSuffix}
                   autoFocus={autoFocusTextField}
                   onClear={onChangeTextField ? () => onChangeTextField('') : undefined}
                 />

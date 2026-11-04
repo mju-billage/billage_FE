@@ -119,7 +119,8 @@ function SignupInfoScreen() {
       style={styles.container}
       avoidKeyboard={false}
       snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
-      snackbarOffset={76}
+      // 푸터 아래 24 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
+      snackbarOffset={72}
     >
       <View style={styles.backRow}>
         <BackButton onPress={() => navigation.goBack()} />

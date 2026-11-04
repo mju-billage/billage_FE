@@ -22,6 +22,7 @@ import FolderItem, {
 import Button from '../../components/Input/Button/Button';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
+import { setPendingSnackbar, takePendingSnackbar } from '../../utils/pendingSnackbar';
 import FolderMoreMenu from './FolderMoreMenu';
 import NewItemSheet from './NewItemSheet';
 import type { MenuItem } from '../../components/Navigation/Menu/Menu';
@@ -173,6 +174,11 @@ function FolderScreen() {
   useFocusEffect(
     useCallback(() => {
       loadItems();
+      const pending = takePendingSnackbar();
+      if (pending) {
+        setSnackbar(pending);
+        setTimeout(() => setSnackbar(null), SNACKBAR_AUTO_HIDE_MS);
+      }
     }, [loadItems]),
   );
 
@@ -312,8 +318,8 @@ function FolderScreen() {
         try {
           await folderService.deleteFolder(folderId);
           closeDialog();
-          showSnackbar(`'${name}'${SNACKBAR_FOLDER_UNLINKED_SUFFIX}`);
-          setTimeout(() => navigation.goBack(), SNACKBAR_AUTO_HIDE_MS);
+          setPendingSnackbar(`'${name}'${SNACKBAR_FOLDER_UNLINKED_SUFFIX}`);
+          navigation.goBack();
           return true;
         } catch (error) {
           closeDialog();
@@ -381,6 +387,7 @@ function FolderScreen() {
           <SearchField
             value={searchQuery}
             onChangeText={setSearchQuery}
+            onClear={() => setSearchQuery('')}
             placeholder={FOLDER_SEARCH_PLACEHOLDER}
           />
         </View>

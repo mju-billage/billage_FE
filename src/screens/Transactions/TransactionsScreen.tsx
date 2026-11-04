@@ -14,6 +14,7 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { MainTabParamList } from '../../navigation/MainTabNavigator';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
+import { takePendingSnackbar } from '../../utils/pendingSnackbar';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import IconButton from '../../components/Input/Button/IconButton';
 import Button from '../../components/Input/Button/Button';
@@ -86,7 +87,7 @@ import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 const FILTER_ICON = require('../../assets/icons/system/Filter.png');
 const SEARCH_ICON = require('../../assets/icons/system/Search.png');
 
-const SNACKBAR_FAB_GAP = 12;
+const SNACKBAR_FAB_GAP = 8;
 
 type TransactionsScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Transactions'>,
@@ -290,6 +291,10 @@ function TransactionsScreen() {
   useFocusEffect(
     useCallback(() => {
       load();
+      const pending = takePendingSnackbar();
+      if (pending) {
+        showSnackbar(pending.title);
+      }
     }, [load]),
   );
 

@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import {
-  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
 
@@ -25,18 +25,15 @@ function CarouselIndicator({ count, selectedIndex }: CarouselIndicatorProps) {
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    gap: 6,
+    gap: 8,
   },
   dot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: FOREGROUND_DISABLED,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
   dotSelected: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
     backgroundColor: FOREGROUND_SECONDARY,
   },
 });

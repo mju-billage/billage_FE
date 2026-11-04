@@ -124,15 +124,17 @@ export type RootStackParamList = {
   GroupManage: undefined;
   GroupManager: undefined;
   GroupProfileEdit: undefined;
-  DuesDetail: { duesId: string };
+  DuesDetail: { duesId: string; snackbarMessage?: string };
   DuesCreate: undefined;
   DuesEdit: { duesId: string };
   DuesMemberEdit: { duesId: string };
   DuesRequest: undefined;
-  MemberManage: { snackbarMessage?: string } | undefined;
+  MemberManage:
+    | { snackbarMessage?: string; snackbarDescription?: string }
+    | undefined;
   MemberAddIndividual: undefined;
   MemberAddBulk: undefined;
-  MemberDetail: { memberId: string };
+  MemberDetail: { memberId: string; snackbarMessage?: string };
   MemberEdit: { memberId: string };
   MemberPaymentHistory: { memberId: string };
   ReceiptAlbum: undefined;

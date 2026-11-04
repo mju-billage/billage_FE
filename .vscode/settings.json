@@ -1,0 +1,12 @@
+{
+  "java.import.gradle.enabled": false,
+  "java.import.maven.enabled": false,
+  "java.autobuild.enabled": false,
+  "java.import.exclusions": [
+    "**/android/**",
+    "**/ios/**",
+    "**/node_modules/**"
+  ],
+  "gradle.autoDetect": "off",
+  "gradle.nestedProjects": false
+}

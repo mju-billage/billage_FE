@@ -11,7 +11,6 @@ import TextArea from '../../components/Input/Text Field/TextArea';
 import SelectionListItem from '../../components/Data Display/Lists/SelectionListItem';
 import TagField from '../../components/Input/Tag Field/TagField';
 import Button from '../../components/Input/Button/Button';
-import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import { getActiveGroup } from '../../types/group';
 import * as memberService from '../../services/memberService';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
@@ -54,8 +53,6 @@ import {
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
-
 type MemberEditNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type MemberEditRouteProp = RouteProp<RootStackParamList, 'MemberEdit'>;
 type LoadState = 'loading' | 'error' | 'ready';
@@ -87,7 +84,6 @@ function MemberEditScreen() {
   const [phoneError, setPhoneError] = useState<string | undefined>();
   const [formError, setFormError] = useState<string | undefined>();
   const { isLocked: isSubmitting, run } = useSubmitLock();
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
 
   const toErrorMessage = (error: unknown): string => {
     if (isNetworkError(error)) {
@@ -180,10 +176,11 @@ function MemberEditScreen() {
           tags: tags.length > 0 ? tags : undefined,
           memo: memo.trim() || undefined,
         });
-        setSnackbarVisible(true);
-        setTimeout(() => {
-          navigation.goBack();
-        }, SNACKBAR_AUTO_HIDE_MS);
+        navigation.popTo(
+          'MemberDetail',
+          { memberId, snackbarMessage: SNACKBAR_MEMBER_UPDATED },
+          { merge: true },
+        );
         return true;
       } catch (error) {
         if (isNetworkError(error)) {
@@ -260,11 +257,7 @@ function MemberEditScreen() {
   }
 
   return (
-    <ScreenContainer
-      background="secondary"
-      snackbar={snackbarVisible ? <Snackbar visible title={SNACKBAR_MEMBER_UPDATED} /> : undefined}
-      snackbarOffset={68}
-    >
+    <ScreenContainer background="secondary">
       <AppBar type="sub" title={MEMBER_EDIT_TITLE} onBackPress={() => navigation.goBack()} />
       <ScrollView
         style={styles.content}
@@ -273,6 +266,7 @@ function MemberEditScreen() {
       >
         <TextField
           label={MEMBER_NAME_LABEL}
+          required
           value={name}
           onChangeText={text => {
             setName(text);

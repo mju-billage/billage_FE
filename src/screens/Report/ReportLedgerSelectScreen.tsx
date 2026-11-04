@@ -165,6 +165,7 @@ function ReportLedgerSelectScreen() {
         <SearchField
           value={keyword}
           onChangeText={setKeyword}
+          onClear={() => setKeyword('')}
           placeholder={REPORT_LEDGER_SELECT_SEARCH_PLACEHOLDER}
           variant="outline"
         />

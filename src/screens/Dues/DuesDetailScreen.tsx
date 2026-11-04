@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -163,6 +163,14 @@ function DuesDetailScreen() {
     setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
+  useEffect(() => {
+    if (route.params?.snackbarMessage) {
+      showSnackbar(route.params.snackbarMessage);
+      navigation.setParams({ snackbarMessage: undefined });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route.params?.snackbarMessage]);
+
   const toggleMemberSelection = (memberId: string) => {
     setSelectedMemberIds(current =>
       current.includes(memberId)
@@ -201,16 +209,20 @@ function DuesDetailScreen() {
 
   const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
 
-  const menuItems: MenuItem[] = detail
+  const menuSections: MenuItem[][] = detail
     ? [
-        { key: 'edit', label: DUES_MENU_EDIT_LABEL },
-        ...(detail.status !== 'CLOSED'
-          ? [{ key: 'members', label: DUES_MENU_MEMBERS_LABEL }]
-          : []),
-        ...(detail.status === 'OPEN'
-          ? [{ key: 'close', label: DUES_MENU_CLOSE_LABEL }]
-          : []),
-        { key: 'delete', label: DUES_MENU_DELETE_LABEL, destructive: true },
+        [
+          { key: 'edit', label: DUES_MENU_EDIT_LABEL },
+          ...(detail.status !== 'CLOSED'
+            ? [{ key: 'members', label: DUES_MENU_MEMBERS_LABEL }]
+            : []),
+        ],
+        [
+          ...(detail.status === 'OPEN'
+            ? [{ key: 'close', label: DUES_MENU_CLOSE_LABEL }]
+            : []),
+          { key: 'delete', label: DUES_MENU_DELETE_LABEL, destructive: true },
+        ],
       ]
     : [];
 
@@ -289,7 +301,14 @@ function DuesDetailScreen() {
 
   if (loadState === 'loading' || loadState === 'error') {
     return (
-      <ScreenContainer background="primary">
+      <ScreenContainer
+        background="primary"
+        snackbar={
+          snackbarMessage ? (
+            <Snackbar visible title={snackbarMessage} />
+          ) : undefined
+        }
+      >
         <AppBar title="" onBackPress={() => navigation.goBack()} />
         <View style={styles.stateContainer}>
           <Text style={styles.stateText}>
@@ -334,7 +353,8 @@ function DuesDetailScreen() {
           <Snackbar visible title={snackbarMessage} />
         ) : undefined
       }
-      snackbarOffset={canChangeStatus ? 68 : 0}
+      // 푸터 위 8 + 아래 16 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
+      snackbarOffset={canChangeStatus ? 64 : 0}
     >
       <AppBar
         title={detail.title}
@@ -450,7 +470,7 @@ function DuesDetailScreen() {
       <FolderMoreMenu
         visible={moreMenuVisible}
         onClose={() => setMoreMenuVisible(false)}
-        items={menuItems}
+        sections={menuSections}
         onSelect={handleSelectMenu}
       />
 

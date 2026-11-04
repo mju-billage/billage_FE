@@ -20,7 +20,7 @@ export type BottomNavigationItem = {
   label: string;
 };
 
-export const BOTTOM_NAVIGATION_HEIGHT = 78;
+export const BOTTOM_NAVIGATION_HEIGHT = 76;
 
 type BottomNavigationProps = {
   items: BottomNavigationItem[];

@@ -182,7 +182,8 @@ function EmailVerificationScreen() {
           />
         ) : undefined
       }
-      snackbarOffset={76}
+      // 푸터 아래 24 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
+      snackbarOffset={72}
     >
       <Pressable style={styles.body} onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.backRow}>

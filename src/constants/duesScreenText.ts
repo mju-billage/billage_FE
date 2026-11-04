@@ -40,7 +40,7 @@ export const DUES_CREATE_PERIOD_PLACEHOLDER = 'YY.MM.DD ~ YY.MM.DD';
 export const DUES_CREATE_NEXT_LABEL = '다음으로';
 
 export const DUES_CREATE_LEAVE_TITLE = '회비 생성을 그만둘까요?';
-export const DUES_CREATE_LEAVE_DESCRIPTION = '변경된 내용은 저장되지 않아요.';
+export const DUES_CREATE_LEAVE_DESCRIPTION = '작성 중인 내용은 저장되지 않아요.';
 export const DUES_CREATE_LEAVE_CANCEL_LABEL = '취소';
 export const DUES_CREATE_LEAVE_CONFIRM_LABEL = '그만두기';
 
@@ -49,6 +49,7 @@ export const DUES_MEMBER_SELECT_SEARCH_PLACEHOLDER = '검색어를 입력해주�
 export const DUES_MEMBER_SELECT_ALL_LABEL = '전체 선택';
 export const DUES_MEMBER_SELECT_COUNT_SUFFIX = '명';
 export const DUES_MEMBER_SELECT_EMPTY = '모임원을 추가해보세요.';
+export const DUES_MEMBER_SEARCH_EMPTY = '해당되는 모임원이 없어요';
 export const DUES_MEMBER_SELECT_SUBMIT_LABEL = '회비 생성하기';
 export const DUES_MEMBER_SELECT_LOADING = '모임원 목록을 불러오는 중이에요.';
 export const DUES_MEMBER_SELECT_RETRY_LABEL = '다시 시도';
@@ -67,6 +68,7 @@ export const DUES_EDIT_AMOUNT_LOCKED_HINT =
   '금액은 마감 전까지도 수정할 수 없어요.';
 export const DUES_EDIT_SUBMIT_LABEL = '수정하기';
 export const DUES_EDIT_LEAVE_TITLE = '회비 수정을 그만둘까요?';
+export const DUES_EDIT_LEAVE_DESCRIPTION = '변경된 내용은 저장되지 않아요.';
 export const DUES_EDIT_LOADING = '회비 정보를 불러오는 중이에요.';
 export const DUES_EDIT_RETRY_LABEL = '다시 시도';
 export const SNACKBAR_DUES_UPDATED = '회비 수정이 완료되었어요.';
@@ -75,9 +77,9 @@ export const DUES_MEMBER_EDIT_SUBMIT_LABEL = '수정하기';
 export const DUES_MEMBER_EDIT_LEAVE_TITLE = '모임원 선택을 그만둘까요?';
 export const SNACKBAR_DUES_MEMBERS_UPDATED = '변경 사항이 저장되었어요.';
 
-export const DUES_DELETE_CONFIRM_TITLE = '해당 회비를 삭제하시겠습니까?';
+export const DUES_DELETE_CONFIRM_TITLE = '해당 회비 항목을 삭제할까요?';
 export const DUES_DELETE_CONFIRM_DESCRIPTION =
-  '삭제 이후에는 데이터 복구가 어렵습니다.';
+  '삭제한 회비 내역은 다시 복구할 수 없어요.';
 export const DUES_DELETE_CONFIRM_LABEL = '삭제';
 export const SNACKBAR_DUES_DELETED_PREFIX = "'";
 export const SNACKBAR_DUES_DELETED_SUFFIX = "' 회비가 삭제되었어요.";

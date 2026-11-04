@@ -124,6 +124,7 @@ function ReceiptSearchScreen() {
         <SearchField
           value={keyword}
           onChangeText={setKeyword}
+          onClear={() => setKeyword('')}
           placeholder={RECEIPT_SEARCH_PLACEHOLDER}
           variant="outline"
         />
