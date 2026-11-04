@@ -57,6 +57,7 @@ import {
   DUES_MEMBER_SELECT_COUNT_SUFFIX,
   DUES_MEMBER_SELECT_EMPTY,
   DUES_MEMBER_SELECT_LOADING,
+  DUES_MEMBER_SEARCH_EMPTY,
   DUES_MEMBER_SELECT_RETRY_LABEL,
   DUES_MEMBER_SELECT_SEARCH_PLACEHOLDER,
   DUES_MEMBER_SELECT_SUBMIT_LABEL,
@@ -344,7 +345,8 @@ function DuesCreateScreen() {
             <Snackbar visible title={snackbarMessage} />
           ) : undefined
         }
-        snackbarOffset={68}
+        // 푸터 위 8 + 아래 16 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
+        snackbarOffset={64}
       >
         <AppBar
           type="sub"
@@ -359,6 +361,7 @@ function DuesCreateScreen() {
             onChangeText={setSearchQuery}
             placeholder={DUES_MEMBER_SELECT_SEARCH_PLACEHOLDER}
             variant="outline"
+            onClear={() => setSearchQuery('')}
           />
 
           {memberLoadState === 'loading' && (
@@ -394,6 +397,11 @@ function DuesCreateScreen() {
                       {selectedMemberIds.length}{DUES_MEMBER_SELECT_COUNT_SUFFIX}
                     </Text>
                   </View>
+                  {filteredMembers.length === 0 && (
+                    <View style={styles.searchEmpty}>
+                      <Text style={styles.searchEmptyText}>{DUES_MEMBER_SEARCH_EMPTY}</Text>
+                    </View>
+                  )}
                   {filteredMembers.map(member => (
                     <MemberListItem
                       key={member.memberId}
@@ -443,7 +451,8 @@ function DuesCreateScreen() {
           <Snackbar visible title={snackbarMessage} />
         ) : undefined
       }
-      snackbarOffset={68}
+      // 푸터 위 8 + 아래 16 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
+      snackbarOffset={64}
     >
       <AppBar
         type="titleOnly"
@@ -616,6 +625,16 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     ...TYPOGRAPHY.subtitle3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+  },
+  searchEmpty: {
+    height: 96,
+    marginVertical: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  searchEmptyText: {
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   memberListContent: {

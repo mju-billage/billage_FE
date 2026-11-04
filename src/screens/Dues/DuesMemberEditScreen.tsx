@@ -227,6 +227,7 @@ function DuesMemberEditScreen() {
         <SearchField
           value={searchQuery}
           onChangeText={setSearchQuery}
+          onClear={() => setSearchQuery('')}
           placeholder={DUES_MEMBER_SELECT_SEARCH_PLACEHOLDER}
           variant="outline"
         />

@@ -2,6 +2,7 @@ import { forwardRef, useState } from 'react';
 import {
   Image,
   KeyboardTypeOptions,
+  LayoutChangeEvent,
   Pressable,
   StyleSheet,
   Text,
@@ -72,7 +73,13 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
 ) {
   const [isFocused, setIsFocused] = useState(false);
   const [isSecure, setIsSecure] = useState(secureTextEntry || secureToggle);
+  const [measuredTextWidth, setMeasuredTextWidth] = useState<number | null>(null);
   const showIcon = isFocused || value.length > 0;
+  const showSuffix = Boolean(suffix) && value.length > 0;
+
+  const handleMeasureLayout = (event: LayoutChangeEvent) => {
+    setMeasuredTextWidth(event.nativeEvent.layout.width);
+  };
 
   const underlineColor = disabled
     ? BORDER_NEUTRAL_NORMAL
@@ -95,7 +102,14 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
       <View style={[styles.inputRow, { borderBottomColor: underlineColor }]}>
         <TextInput
           ref={ref}
-          style={[styles.input, disabled && styles.inputDisabled]}
+          style={[
+            styles.input,
+            disabled && styles.inputDisabled,
+            showSuffix && measuredTextWidth != null && styles.inputWithSuffix,
+            showSuffix && measuredTextWidth != null
+              ? { width: measuredTextWidth + 2 }
+              : null,
+          ]}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
@@ -113,22 +127,34 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           autoFocus={autoFocus}
           editable={!disabled}
         />
+        {suffix != null && (
+          <Text
+            style={styles.hiddenMeasure}
+            numberOfLines={1}
+            onLayout={handleMeasureLayout}
+          >
+            {value}
+          </Text>
+        )}
+        {showSuffix && (
+          <Text style={[styles.suffix, disabled && styles.inputDisabled]}>
+            {suffix}
+          </Text>
+        )}
         {onClear && !disabled && (
           <Pressable
             onPress={onClear}
             hitSlop={8}
             pointerEvents={isFocused && value.length > 0 ? 'auto' : 'none'}
-            style={isFocused && value.length > 0 ? styles.iconShown : styles.iconHidden}
+            style={[
+              styles.clearButton,
+              isFocused && value.length > 0 ? styles.iconShown : styles.iconHidden,
+            ]}
           >
             <View style={styles.clearCircle}>
               <Image source={CLOSE_ICON} style={styles.clearIcon} />
             </View>
           </Pressable>
-        )}
-        {suffix && (
-          <Text style={[styles.suffix, disabled && styles.inputDisabled]}>
-            {suffix}
-          </Text>
         )}
         {secureToggle && !disabled && (
           <Pressable
@@ -192,7 +218,9 @@ const styles = StyleSheet.create({
   },
   input: {
     ...TYPOGRAPHY.body1,
-    flex: 1,
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 0,
     padding: 0,
     color: FOREGROUND_NEUTRAL_NORMAL,
     outlineWidth: 0,
@@ -201,10 +229,22 @@ const styles = StyleSheet.create({
   inputDisabled: {
     color: FOREGROUND_DISABLED,
   },
+  inputWithSuffix: {
+    flexGrow: 0,
+    flexShrink: 1,
+    flexBasis: 'auto',
+  },
+  hiddenMeasure: {
+    ...TYPOGRAPHY.body1,
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    opacity: 0,
+  },
   suffix: {
     ...TYPOGRAPHY.body1,
     color: FOREGROUND_PRIMARY,
-    marginLeft: 4,
+    marginLeft: 0,
   },
   toggleIcon: {
     width: 20,
@@ -216,6 +256,9 @@ const styles = StyleSheet.create({
   },
   iconHidden: {
     opacity: 0,
+  },
+  clearButton: {
+    marginLeft: 'auto',
   },
   clearCircle: {
     width: 16,

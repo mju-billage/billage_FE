@@ -49,6 +49,7 @@ export const DUES_MEMBER_SELECT_SEARCH_PLACEHOLDER = '검색어를 입력해주�
 export const DUES_MEMBER_SELECT_ALL_LABEL = '전체 선택';
 export const DUES_MEMBER_SELECT_COUNT_SUFFIX = '명';
 export const DUES_MEMBER_SELECT_EMPTY = '모임원을 추가해보세요.';
+export const DUES_MEMBER_SEARCH_EMPTY = '해당되는 모임원이 없어요';
 export const DUES_MEMBER_SELECT_SUBMIT_LABEL = '회비 생성하기';
 export const DUES_MEMBER_SELECT_LOADING = '모임원 목록을 불러오는 중이에요.';
 export const DUES_MEMBER_SELECT_RETRY_LABEL = '다시 시도';

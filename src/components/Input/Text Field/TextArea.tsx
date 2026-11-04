@@ -1,12 +1,9 @@
-import { useState } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import {
-  BORDER_NEUTRAL_NORMAL,
   FEEDBACK_NEGATIVE_BOLD,
   FILL_NEUTRAL_SUBTLE,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
-  FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
 
@@ -33,12 +30,7 @@ function TextArea({
   autoFocus,
   filled = false,
 }: TextAreaProps) {
-  const [isFocused, setIsFocused] = useState(false);
-  const borderColor = error
-    ? FEEDBACK_NEGATIVE_BOLD
-    : isFocused
-    ? FOREGROUND_SECONDARY
-    : BORDER_NEUTRAL_NORMAL;
+  const borderColor = error ? FEEDBACK_NEGATIVE_BOLD : FOREGROUND_NEUTRAL_SUBTLE;
 
   return (
     <View style={styles.container}>
@@ -53,8 +45,6 @@ function TextArea({
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={FOREGROUND_DISABLED}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
         maxLength={maxLength}
         multiline
         textAlignVertical="top"

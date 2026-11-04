@@ -46,8 +46,8 @@ const styles = StyleSheet.create({
   box: {
     width: SIZE,
     height: SIZE,
-    borderRadius: 2,
-    borderWidth: 1.5,
+    borderRadius: 2.5,
+    borderWidth: 1.875,
     borderColor: BORDER_NEUTRAL_BOLD,
     alignItems: 'center',
     justifyContent: 'center',
@@ -67,8 +67,8 @@ const styles = StyleSheet.create({
     borderColor: FOREGROUND_DISABLED,
   },
   checkmark: {
-    width: 18,
-    height: 18,
+    width: 17,
+    height: 17,
     tintColor: FOREGROUND_INVERSE,
   },
 });

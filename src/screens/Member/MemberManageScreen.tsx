@@ -236,6 +236,7 @@ function MemberManageScreen() {
           onChangeText={setKeyword}
           placeholder={MEMBER_MANAGE_SEARCH_PLACEHOLDER}
           variant="outline"
+          onClear={() => setKeyword('')}
         />
 
         {loadState === 'loading' && (

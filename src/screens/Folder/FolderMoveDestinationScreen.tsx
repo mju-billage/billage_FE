@@ -108,7 +108,8 @@ function FolderMoveDestinationScreen() {
     <ScreenContainer
       background="secondary"
       snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
-      snackbarOffset={68}
+      // 푸터 위아래 16 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
+      snackbarOffset={64}
     >
       <AppBar title={title} onBackPress={() => navigation.goBack()} />
 

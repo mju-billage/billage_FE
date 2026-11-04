@@ -87,7 +87,7 @@ import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 const FILTER_ICON = require('../../assets/icons/system/Filter.png');
 const SEARCH_ICON = require('../../assets/icons/system/Search.png');
 
-const SNACKBAR_FAB_GAP = 12;
+const SNACKBAR_FAB_GAP = 8;
 
 type TransactionsScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Transactions'>,

@@ -222,6 +222,8 @@ const styles = StyleSheet.create({
   description: {
     ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
+    // 피그마는 이 줄 상자가 17(subtitle3 줄높이 20보다 3 작음) — 실측 후 보정
+    marginBottom: -3,
   },
   highlightDescription: {
     ...TYPOGRAPHY.h2,

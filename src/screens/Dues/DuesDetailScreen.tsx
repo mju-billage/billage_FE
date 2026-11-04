@@ -209,16 +209,20 @@ function DuesDetailScreen() {
 
   const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
 
-  const menuItems: MenuItem[] = detail
+  const menuSections: MenuItem[][] = detail
     ? [
-        { key: 'edit', label: DUES_MENU_EDIT_LABEL },
-        ...(detail.status !== 'CLOSED'
-          ? [{ key: 'members', label: DUES_MENU_MEMBERS_LABEL }]
-          : []),
-        ...(detail.status === 'OPEN'
-          ? [{ key: 'close', label: DUES_MENU_CLOSE_LABEL }]
-          : []),
-        { key: 'delete', label: DUES_MENU_DELETE_LABEL, destructive: true },
+        [
+          { key: 'edit', label: DUES_MENU_EDIT_LABEL },
+          ...(detail.status !== 'CLOSED'
+            ? [{ key: 'members', label: DUES_MENU_MEMBERS_LABEL }]
+            : []),
+        ],
+        [
+          ...(detail.status === 'OPEN'
+            ? [{ key: 'close', label: DUES_MENU_CLOSE_LABEL }]
+            : []),
+          { key: 'delete', label: DUES_MENU_DELETE_LABEL, destructive: true },
+        ],
       ]
     : [];
 
@@ -349,7 +353,8 @@ function DuesDetailScreen() {
           <Snackbar visible title={snackbarMessage} />
         ) : undefined
       }
-      snackbarOffset={canChangeStatus ? 68 : 0}
+      // 푸터 위 8 + 아래 16 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
+      snackbarOffset={canChangeStatus ? 64 : 0}
     >
       <AppBar
         title={detail.title}
@@ -465,7 +470,7 @@ function DuesDetailScreen() {
       <FolderMoreMenu
         visible={moreMenuVisible}
         onClose={() => setMoreMenuVisible(false)}
-        items={menuItems}
+        sections={menuSections}
         onSelect={handleSelectMenu}
       />
 

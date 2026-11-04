@@ -387,6 +387,7 @@ function FolderScreen() {
           <SearchField
             value={searchQuery}
             onChangeText={setSearchQuery}
+            onClear={() => setSearchQuery('')}
             placeholder={FOLDER_SEARCH_PLACEHOLDER}
           />
         </View>
