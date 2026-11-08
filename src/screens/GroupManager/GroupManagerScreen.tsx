@@ -228,6 +228,7 @@ function GroupManagerScreen() {
                   items: members.map(member => ({
                     key: member.membershipId,
                     itemType: 'avatar',
+                    avatarUri: member.profileImageUrl,
                     label: member.name,
                     tag:
                       member.role === 'OWNER'

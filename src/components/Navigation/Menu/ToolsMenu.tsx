@@ -26,6 +26,7 @@ export type ToolsMenuItem = {
   key: string;
   itemType?: ToolsMenuItemType;
   icon?: ImageSourcePropType;
+  avatarUri?: string | null;
   label: string;
   tag?: string;
   onPress: () => void;
@@ -80,7 +81,11 @@ function ToolsMenu({
                 onPress={item.onPress}
               >
                 {isAvatar ? (
-                  <Avatar type="icon" size="sm" />
+                  item.avatarUri ? (
+                    <Avatar type="image" imageUri={item.avatarUri} size="sm" />
+                  ) : (
+                    <Avatar type="icon" size="sm" />
+                  )
                 ) : (
                   <Image source={item.icon} style={styles.itemIcon} />
                 )}
