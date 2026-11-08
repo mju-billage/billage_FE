@@ -7,9 +7,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import TextField from '../../components/Input/Text Field/TextField';
-import TextArea from '../../components/Input/Text Field/TextArea';
-import SelectionListItem from '../../components/Data Display/Lists/SelectionListItem';
 import TagField from '../../components/Input/Tag Field/TagField';
+import TagSelectField from '../../components/Input/Tag Field/TagSelectField';
 import Button from '../../components/Input/Button/Button';
 import { getActiveGroup } from '../../types/group';
 import * as memberService from '../../services/memberService';
@@ -37,7 +36,6 @@ import {
   MEMBER_PHONE_INVALID_ERROR,
   MEMBER_PHONE_LABEL,
   MEMBER_PHONE_PLACEHOLDER,
-  MEMBER_TAG_EMPTY_VALUE,
   MEMBER_TAG_INPUT_HELPER,
   MEMBER_TAG_INPUT_PLACEHOLDER,
   MEMBER_TAG_INPUT_SUBMIT_LABEL,
@@ -287,24 +285,19 @@ function MemberEditScreen() {
           keyboardType="phone-pad"
           error={phoneError}
         />
-        <SelectionListItem
-          type="picker"
-          title={MEMBER_TAG_LABEL}
-          value={
-            tags.length > 0 ? tags.map(tag => `#${tag}`).join(' ') : MEMBER_TAG_EMPTY_VALUE
-          }
-          onPress={openTagStep}
+        <TagSelectField
+          label={MEMBER_TAG_LABEL}
+          tags={tags}
+          onRemoveTag={index => setTags(tags.filter((_, i) => i !== index))}
+          onPressAdd={openTagStep}
         />
-        <View style={styles.memoWrapper}>
-          <Text style={styles.memoLabel}>{MEMBER_MEMO_LABEL}</Text>
-          <TextArea
-            value={memo}
-            onChangeText={setMemo}
-            placeholder={MEMBER_MEMO_PLACEHOLDER}
-            maxLength={MEMBER_MEMO_MAX_LENGTH}
-            rows={3}
-          />
-        </View>
+        <TextField
+          label={MEMBER_MEMO_LABEL}
+          value={memo}
+          onChangeText={setMemo}
+          placeholder={MEMBER_MEMO_PLACEHOLDER}
+          maxLength={MEMBER_MEMO_MAX_LENGTH}
+        />
         {formError && <Text style={styles.formError}>{formError}</Text>}
       </ScrollView>
       <View style={styles.footer}>
@@ -323,7 +316,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingTop: 16,
   },
   stateContainer: {
     flex: 1,
@@ -335,16 +328,9 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_DISABLED,
   },
-  memoWrapper: {
-    marginBottom: 20,
-  },
-  memoLabel: {
-    ...TYPOGRAPHY.subtitle3,
-    marginBottom: 8,
-  },
   tagHelper: {
-    ...TYPOGRAPHY.body3,
-    marginTop: 8,
+    ...TYPOGRAPHY.caption,
+    marginTop: 12,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   formError: {

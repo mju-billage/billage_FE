@@ -39,13 +39,11 @@ import {
   SNACKBAR_MEMBER_DELETED_SUFFIX,
 } from '../../constants/memberScreenText';
 import {
-  BACKGROUND_PRIMARY,
+  FILL_NEUTRAL_SUBTLE,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
-
-const SNACKBAR_AUTO_HIDE_MS = 1600;
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const DELETE_ICON = require('../../assets/icons/action/Delete.png');
@@ -112,14 +110,6 @@ function MemberDetailScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route.params?.snackbarMessage]);
 
-  useEffect(() => {
-    if (!snackbarMessage) {
-      return;
-    }
-    const timer = setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
-    return () => clearTimeout(timer);
-  }, [snackbarMessage]);
-
   const handleConfirmDelete = () => {
     const group = getActiveGroup();
     if (!group) {
@@ -145,13 +135,11 @@ function MemberDetailScreen() {
       <ScreenContainer
         background="primary"
         snackbar={
-          snackbarMessage ? (
-            <Snackbar
-              visible
-              title={snackbarMessage}
-              onClose={() => setSnackbarMessage(null)}
-            />
-          ) : undefined
+          <Snackbar
+            visible={snackbarMessage != null}
+            title={snackbarMessage ?? ''}
+            onClose={() => setSnackbarMessage(null)}
+          />
         }
       >
         <AppBar type="sub" title="" onBackPress={() => navigation.goBack()} />
@@ -176,13 +164,11 @@ function MemberDetailScreen() {
     <ScreenContainer
       background="primary"
       snackbar={
-        snackbarMessage ? (
-          <Snackbar
-            visible
-            title={snackbarMessage}
-            onClose={() => setSnackbarMessage(null)}
-          />
-        ) : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar
@@ -224,23 +210,22 @@ function MemberDetailScreen() {
 
         <InfoCard
           fields={[
-            { label: MEMBER_DETAIL_NAME_LABEL, value: member.name },
+            { label: MEMBER_DETAIL_NAME_LABEL, value: member.name, required: true },
             {
               label: MEMBER_DETAIL_PHONE_LABEL,
               value: member.phoneNumber
                 ? formatPhoneNumber(member.phoneNumber)
                 : MEMBER_DETAIL_EMPTY_VALUE,
             },
-            {
-              label: MEMBER_DETAIL_TAG_LABEL,
-              value:
-                member.tags.length > 0
-                  ? member.tags.map(tag => `#${tag}`).join(' ')
-                  : MEMBER_DETAIL_EMPTY_VALUE,
-            },
+            ...(member.tags.length === 0
+              ? [{ label: MEMBER_DETAIL_TAG_LABEL, value: MEMBER_DETAIL_EMPTY_VALUE }]
+              : []),
           ]}
-          memo={member.memo || MEMBER_DETAIL_EMPTY_VALUE}
+          tags={member.tags.length > 0 ? member.tags : undefined}
+          tagsReadOnly
         />
+
+        <InfoCard fields={[]} memo={member.memo || MEMBER_DETAIL_EMPTY_VALUE} />
       </ScrollView>
 
       <Dialog
@@ -280,7 +265,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderRadius: 12,
     padding: 16,
-    backgroundColor: BACKGROUND_PRIMARY,
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
   },
   summaryLabel: {
     ...TYPOGRAPHY.body3,

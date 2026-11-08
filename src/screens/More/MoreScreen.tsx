@@ -46,8 +46,6 @@ import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Nav
 
 type LoadState = 'loading' | 'error' | 'ready';
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
-
 const CHEVRON_DOWN_ICON = require('../../assets/icons/nav/Chevron Down.png');
 const GROUP_ICON = require('../../assets/icons/user/Group.png');
 const REPORT_ICON = require('../../assets/icons/content/Report.png');
@@ -84,7 +82,6 @@ function MoreScreen() {
         setSwitchSnackbarMessage(
           toUserErrorMessage(adminError, MORE_ADMINS_LOAD_FAILED),
         );
-        setTimeout(() => setSwitchSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
       }
       setLoadState('ready');
     } catch (error) {
@@ -156,9 +153,11 @@ function MoreScreen() {
       avoidKeyboard={false}
       aboveTabBar
       snackbar={
-        switchSnackbarMessage ? (
-          <Snackbar visible title={switchSnackbarMessage} />
-        ) : undefined
+        <Snackbar
+          visible={switchSnackbarMessage != null}
+          title={switchSnackbarMessage ?? ''}
+          onClose={() => setSwitchSnackbarMessage(null)}
+        />
       }
     >
       <ScrollView
@@ -262,7 +261,6 @@ function MoreScreen() {
             setSwitchSnackbarMessage(
               `${SNACKBAR_GROUP_SWITCHED_PREFIX}${nextGroup.name}${SNACKBAR_GROUP_SWITCHED_SUFFIX}`,
             );
-            setTimeout(() => setSwitchSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
           }
         }}
         onPressAllGroups={() => {

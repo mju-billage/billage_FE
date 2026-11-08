@@ -45,6 +45,8 @@ import {
   DUES_DETAIL_RETRY_LABEL,
   DUES_MEMBER_COUNT_SUFFIX,
   DUES_MEMBER_LIST_EMPTY,
+  DUES_MEMBER_PAID_EMPTY_TITLE,
+  DUES_MEMBER_PAID_EMPTY_SUBTITLE,
   DUES_MEMBER_TAB_PAID,
   DUES_MEMBER_TAB_UNPAID,
   DUES_MENU_ACCESSIBILITY_LABEL,
@@ -71,8 +73,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const MENU_ICON = require('../../assets/icons/action/Menu Vertical.png');
-
-const SNACKBAR_AUTO_HIDE_MS = 1600;
 
 type DuesDetailNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type DuesDetailRouteProp = RouteProp<RootStackParamList, 'DuesDetail'>;
@@ -160,7 +160,6 @@ function DuesDetailScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   useEffect(() => {
@@ -304,9 +303,11 @@ function DuesDetailScreen() {
       <ScreenContainer
         background="primary"
         snackbar={
-          snackbarMessage ? (
-            <Snackbar visible title={snackbarMessage} />
-          ) : undefined
+          <Snackbar
+            visible={snackbarMessage != null}
+            title={snackbarMessage ?? ''}
+            onClose={() => setSnackbarMessage(null)}
+          />
         }
       >
         <AppBar title="" onBackPress={() => navigation.goBack()} />
@@ -349,9 +350,11 @@ function DuesDetailScreen() {
       background="primary"
       edges={['top']}
       snackbar={
-        snackbarMessage ? (
-          <Snackbar visible title={snackbarMessage} />
-        ) : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
       // 푸터 위 8 + 아래 16 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
       snackbarOffset={canChangeStatus ? 64 : 0}
@@ -429,7 +432,14 @@ function DuesDetailScreen() {
               />
             </View>
           ) : members.length === 0 ? (
-            <Text style={styles.emptyText}>{DUES_MEMBER_LIST_EMPTY}</Text>
+            tab === 'paid' ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyTitle}>{DUES_MEMBER_PAID_EMPTY_TITLE}</Text>
+                <Text style={styles.emptySubtitle}>{DUES_MEMBER_PAID_EMPTY_SUBTITLE}</Text>
+              </View>
+            ) : (
+              <Text style={styles.emptyText}>{DUES_MEMBER_LIST_EMPTY}</Text>
+            )
           ) : (
             <View style={styles.memberList}>
               {members.map(member => (
@@ -545,6 +555,20 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
     marginTop: 24,
+    textAlign: 'center',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingTop: 24,
+  },
+  emptyTitle: {
+    ...TYPOGRAPHY.subtitle3,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    ...TYPOGRAPHY.body2,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+    marginTop: 6,
     textAlign: 'center',
   },
   memberList: {

@@ -50,14 +50,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 14,
+    paddingVertical: 16,
   },
   title: {
     ...TYPOGRAPHY.subtitle3,
   },
   icon: {
-    width: 16,
-    height: 16,
+    width: 20,
+    height: 20,
     tintColor: FOREGROUND_NEUTRAL_NORMAL,
   },
   minusIcon: {
@@ -67,11 +67,12 @@ const styles = StyleSheet.create({
     backgroundColor: FOREGROUND_NEUTRAL_NORMAL,
   },
   body: {
-    paddingBottom: 14,
+    paddingTop: 12,
+    paddingBottom: 16,
     gap: 20,
   },
   item: {
-    ...TYPOGRAPHY.body2,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_NORMAL,
   },
 });

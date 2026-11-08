@@ -175,7 +175,11 @@ function MemberProfileSheet({
         </Text>
 
         <View style={styles.profileRow}>
-          <Avatar type="initial" initial={member.name.slice(0, 1)} />
+          {member.profileImageUrl ? (
+            <Avatar type="image" imageUri={member.profileImageUrl} />
+          ) : (
+            <Avatar type="initial" initial={member.name.slice(0, 1)} />
+          )}
           <View style={styles.profileTextColumn}>
             <View style={styles.nameRow}>
               <Text style={styles.name}>{member.name}</Text>

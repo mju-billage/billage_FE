@@ -31,7 +31,8 @@ import {
   MEMBER_PAYMENT_LOADING,
 } from '../../constants/memberScreenText';
 import {
-  BACKGROUND_PRIMARY,
+  BACKGROUND_SECONDARY,
+  FILL_NEUTRAL_SUBTLE,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
@@ -140,7 +141,7 @@ function MemberPaymentHistoryScreen() {
         onBackPress={() => navigation.goBack()}
       />
 
-      <View style={styles.body}>
+      <View style={styles.header}>
         <View style={styles.summaryCard}>
           <Text style={styles.summaryLabel}>{MEMBER_DETAIL_TOTAL_PAID_LABEL}</Text>
           <Text style={styles.summaryValue}>
@@ -148,7 +149,9 @@ function MemberPaymentHistoryScreen() {
             {MEMBER_DETAIL_TOTAL_PAID_SUFFIX}
           </Text>
         </View>
+      </View>
 
+      <View style={styles.listSection}>
         <Text style={styles.countText}>
           {payments.length}
           {MEMBER_PAYMENT_COUNT_SUFFIX}
@@ -181,11 +184,16 @@ function MemberPaymentHistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  body: {
-    flex: 1,
+  header: {
     paddingHorizontal: 20,
     paddingTop: 12,
-    gap: 8,
+  },
+  listSection: {
+    flex: 1,
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    backgroundColor: BACKGROUND_SECONDARY,
   },
   stateContainer: {
     flex: 1,
@@ -200,7 +208,7 @@ const styles = StyleSheet.create({
   summaryCard: {
     borderRadius: 12,
     padding: 16,
-    backgroundColor: BACKGROUND_PRIMARY,
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
   },
   summaryLabel: {
     ...TYPOGRAPHY.body3,

@@ -15,6 +15,7 @@ import * as reportService from '../../services/reportService';
 import { ApiError } from '../../services/apiClient';
 import { formatExpense, formatWon } from '../../utils/currency';
 import { formatDateDot } from '../../utils/dueDate';
+import { truncateWithEllipsis } from '../../utils/truncateWithEllipsis';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
@@ -41,7 +42,6 @@ import { TYPOGRAPHY } from '../../constants/typography';
 
 const SHARE_ICON = require('../../assets/icons/action/Share.png');
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/Chevron Right.png');
-const SNACKBAR_AUTO_HIDE_MS = 1600;
 
 type LoadState = 'loading' | 'error' | 'ready';
 type ReportByPeriodDetailNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -60,7 +60,6 @@ function ReportByPeriodDetailScreen() {
   useEffect(() => {
     if (route.params.snackbarMessage) {
       setSnackbarMessage(route.params.snackbarMessage);
-      setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
       navigation.setParams({ snackbarMessage: undefined });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -130,14 +129,16 @@ function ReportByPeriodDetailScreen() {
     <ScreenContainer
       background="primary"
       snackbar={
-        snackbarMessage ? (
-          <Snackbar visible title={snackbarMessage} onClose={() => setSnackbarMessage(null)} />
-        ) : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar
         type="sub"
-        title={report.title}
+        title={truncateWithEllipsis(report.title)}
         onBackPress={() => navigation.goBack()}
         rightIcons={[{ icon: SHARE_ICON, onPress: handleShare }]}
       />
@@ -161,8 +162,12 @@ function ReportByPeriodDetailScreen() {
           <CardBase style={styles.headerCard}>
             <FolderTabShape fill={FILL_NEUTRAL_SUBTLE} />
             <View style={styles.headerTopRow}>
-              <Text style={styles.headerTitle} numberOfLines={1}>
-                {report.title}
+              <Text
+                style={styles.headerTitle}
+                numberOfLines={1}
+                accessibilityLabel={report.title}
+              >
+                {truncateWithEllipsis(report.title)}
               </Text>
               <Image source={CHEVRON_RIGHT_ICON} style={styles.chevron} />
             </View>

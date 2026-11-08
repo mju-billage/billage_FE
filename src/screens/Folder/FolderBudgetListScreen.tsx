@@ -5,8 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
-import TextField from '../../components/Input/Text Field/TextField';
-import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
+import LedgerBudgetSheet from '../../components/Feedback/Dialogs/LedgerBudgetSheet';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import SelectionListItem from '../../components/Data Display/Lists/SelectionListItem';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -29,28 +28,13 @@ import {
   BUDGET_LIST_LOADING,
   BUDGET_LIST_RETRY_LABEL,
   BUDGET_LIST_TITLE,
-  BUDGET_SAVE_LABEL,
-  BUDGET_SHEET_PLACEHOLDER,
   SNACKBAR_BUDGET_SAVED,
 } from '../../constants/folderScreenText';
-import { LEDGER_BUDGET_MAX } from '../../constants/ledgerScreenText';
 import {
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
-
-const SNACKBAR_AUTO_HIDE_MS = 1600;
-
-function clampBudgetInput(text: string): string {
-  const digitsOnly = text.replace(/[^0-9]/g, '');
-  if (!digitsOnly) {
-    return '';
-  }
-  return Number(digitsOnly) > LEDGER_BUDGET_MAX
-    ? String(LEDGER_BUDGET_MAX)
-    : digitsOnly;
-}
 
 type FolderBudgetListNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -70,7 +54,7 @@ function FolderBudgetListScreen() {
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [editingLedger, setEditingLedger] = useState<LedgerSummary | null>(null);
   const [budgetInput, setBudgetInput] = useState('');
-  const [budgetError, setBudgetError] = useState<string | undefined>();
+  const [budgetError, setBudgetError] = useState<string | undefined>(undefined);
   const { isLocked: isSaving, run } = useSubmitLock();
   const [snackbarVisible, setSnackbarVisible] = useState(false);
 
@@ -131,7 +115,6 @@ function FolderBudgetListScreen() {
         setEditingLedger(null);
         load();
         setSnackbarVisible(true);
-        setTimeout(() => setSnackbarVisible(false), SNACKBAR_AUTO_HIDE_MS);
         return true;
       } catch (error) {
         if (error instanceof ApiError) {
@@ -149,9 +132,11 @@ function FolderBudgetListScreen() {
     <ScreenContainer
       background="primary"
       snackbar={
-        snackbarVisible ? (
-          <Snackbar visible title={SNACKBAR_BUDGET_SAVED} />
-        ) : undefined
+        <Snackbar
+          visible={snackbarVisible}
+          title={SNACKBAR_BUDGET_SAVED}
+          onClose={() => setSnackbarVisible(false)}
+        />
       }
     >
       <AppBar title={BUDGET_LIST_TITLE} onBackPress={() => navigation.goBack()} />
@@ -191,29 +176,19 @@ function FolderBudgetListScreen() {
           />
         ))}
 
-      <BottomSheet
+      <LedgerBudgetSheet
         visible={editingLedger !== null}
+        ledgerName={editingLedger?.name ?? ''}
+        value={budgetInput}
+        error={budgetError}
+        isSaving={isSaving}
+        onChangeValue={(next, error) => {
+          setBudgetInput(next);
+          setBudgetError(error);
+        }}
+        onSave={handleSave}
         onClose={() => setEditingLedger(null)}
-      >
-        <Text style={styles.sheetTitle}>{editingLedger?.name}</Text>
-        <TextField
-          value={budgetInput}
-          onChangeText={text => {
-            setBudgetInput(clampBudgetInput(text));
-            setBudgetError(undefined);
-          }}
-          placeholder={BUDGET_SHEET_PLACEHOLDER}
-          keyboardType="number-pad"
-          error={budgetError}
-          suffix="원"
-        />
-        <Button
-          label={BUDGET_SAVE_LABEL}
-          disabled={!budgetInput.trim() || isSaving}
-          onPress={handleSave}
-          fullWidth
-        />
-      </BottomSheet>
+      />
     </ScreenContainer>
   );
 }
@@ -246,10 +221,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  sheetTitle: {
-    ...TYPOGRAPHY.subtitle1,
-    marginBottom: 16,
   },
 });
 

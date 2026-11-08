@@ -88,6 +88,7 @@ function JoinGroupSheet({ visible, onClose, onJoined }: JoinGroupSheetProps) {
         onClear={() => setCode('')}
         autoCapitalize="none"
         autoCorrect={false}
+        autoFocus
       />
       <Button
         label={JOIN_GROUP_SUBMIT_LABEL}

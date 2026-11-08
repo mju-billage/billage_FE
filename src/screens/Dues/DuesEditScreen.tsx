@@ -36,7 +36,6 @@ import {
   DUES_CREATE_TITLE_FIELD_LABEL,
   DUES_CREATE_TITLE_PLACEHOLDER,
   DUES_DETAIL_RETRY_LABEL,
-  DUES_EDIT_AMOUNT_LOCKED_HINT,
   DUES_EDIT_LEAVE_TITLE,
   DUES_EDIT_LOADING,
   DUES_EDIT_SUBMIT_LABEL,
@@ -56,8 +55,6 @@ import {
 } from '../../constants/commonText';
 
 const CALENDAR_ICON = require('../../assets/icons/system/Calendar.png');
-
-const SNACKBAR_AUTO_HIDE_MS = 1600;
 
 type ActiveSheet = 'none' | 'ledger' | 'period';
 type LoadState = 'loading' | 'error' | 'ready';
@@ -142,7 +139,6 @@ function DuesEditScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const hasChanges =
@@ -268,7 +264,11 @@ function DuesEditScreen() {
     <ScreenContainer
       background="secondary"
       snackbar={
-        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar type="sub" title={DUES_EDIT_TITLE} onBackPress={handleBack} />
@@ -290,7 +290,6 @@ function DuesEditScreen() {
           placeholder=""
           suffix="원"
           disabled
-          helperText={DUES_EDIT_AMOUNT_LOCKED_HINT}
         />
         <View style={styles.fieldGroup}>
           <Text style={styles.fieldLabel}>{DUES_CREATE_LEDGER_LABEL}</Text>

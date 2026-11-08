@@ -16,7 +16,7 @@ import type { DuesSummary } from '../../types/dues';
 import * as duesService from '../../services/duesService';
 import * as groupService from '../../services/groupService';
 import { ApiError } from '../../services/apiClient';
-import { daysUntil, formatDateDot, formatDDayLabel, getDDaySeverity } from '../../utils/dueDate';
+import { daysUntil, formatDDayLabel, getDDaySeverity } from '../../utils/dueDate';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
@@ -27,6 +27,7 @@ import {
 import {
   DUES_ADD_ACCESSIBILITY_LABEL,
   DUES_BADGE_CLOSED,
+  DUES_BADGE_SCHEDULED,
   DUES_COUNT_SUFFIX,
   DUES_EMPTY_MESSAGE,
   DUES_LOADING,
@@ -49,8 +50,6 @@ type LoadState = 'loading' | 'error' | 'ready';
 type DuesNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type DuesRouteProp = RouteProp<MainTabParamList, 'Dues'>;
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
-
 function toCardProps(dues: DuesSummary) {
   const isClosed = dues.status === 'CLOSED';
   const isScheduled = dues.status === 'SCHEDULED';
@@ -63,7 +62,7 @@ function toCardProps(dues: DuesSummary) {
   const dateBadgeLabel = isClosed
     ? DUES_BADGE_CLOSED
     : isScheduled
-    ? `${formatDateDot(dues.startDate)} ${formatDDayLabel(daysUntil(dues.startDate))}`
+    ? DUES_BADGE_SCHEDULED
     : formatDDayLabel(daysLeft);
   const dateBadgeStatus: 'positive' | 'warning' | 'destructive' | 'neutral' =
     !isClosed && !isScheduled ? getDDaySeverity(daysLeft) : 'neutral';
@@ -138,17 +137,6 @@ function DuesScreen() {
     }
   }, [route.params?.snackbarMessage, navigation]);
 
-  useEffect(() => {
-    if (!snackbarMessage) {
-      return;
-    }
-    const timer = setTimeout(
-      () => setSnackbarMessage(null),
-      SNACKBAR_AUTO_HIDE_MS,
-    );
-    return () => clearTimeout(timer);
-  }, [snackbarMessage]);
-
   const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
 
   const handlePressCreate = () => {
@@ -165,9 +153,11 @@ function DuesScreen() {
       avoidKeyboard={false}
       aboveTabBar
       snackbar={
-        snackbarMessage ? (
-          <Snackbar visible title={snackbarMessage} />
-        ) : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar

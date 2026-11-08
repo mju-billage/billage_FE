@@ -1,5 +1,6 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  AppState,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,12 +14,14 @@ import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { MainTabParamList } from '../../navigation/MainTabNavigator';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import FAB from '../../components/Input/Button/FAB';
+import FAB, { FAB_SIZE } from '../../components/Input/Button/FAB';
 import IconButton from '../../components/Input/Button/IconButton';
 import Button from '../../components/Input/Button/Button';
 import MiniCalendarCard from '../../components/Data Display/Card/MiniCalendarCard';
 import DuesProgressCard from '../../components/Data Display/Card/DuesProgressCard';
+import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import QuickServiceCard from './QuickServiceCard';
+import { takePendingSnackbar } from '../../utils/pendingSnackbar';
 import { MOCK_DASHBOARD_SUMMARY } from '../../types/dashboard';
 import type { MiniCalendarData } from '../../types/dashboard';
 import { getActiveGroup } from '../../types/group';
@@ -31,6 +34,7 @@ import type {
 import * as groupService from '../../services/groupService';
 import { ApiError } from '../../services/apiClient';
 import { formatDDayLabel } from '../../utils/dueDate';
+import { getTwoWeekRange, todayKey } from '../../utils/calendarGrid';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
@@ -63,6 +67,8 @@ const BELL_ICON = require('../../assets/icons/communication/Bell.png');
 
 const SCREEN_HORIZONTAL_PADDING = 20;
 const DUES_CARD_GAP = 8;
+// 내역 탭의 SNACKBAR_FAB_GAP(TransactionsScreen.tsx)과 같은 값 — FAB 위로 스낵바를 띄우는 간격
+const SNACKBAR_FAB_GAP = 8;
 
 type DashboardScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Home'>,
@@ -70,23 +76,6 @@ type DashboardScreenNavigationProp = CompositeNavigationProp<
 >;
 
 type LoadState = 'loading' | 'error' | 'ready';
-
-function toMiniCalendarData(
-  year: number,
-  month: number,
-  days: CalendarDaySummary[],
-): MiniCalendarData {
-  return {
-    year,
-    month,
-    monthLabel: `${month}월`,
-    days: days.map(day => ({
-      date: Number(day.date.split('-')[2]),
-      income: day.income,
-      expense: day.expense,
-    })),
-  };
-}
 
 function DashboardScreen() {
   const navigation = useNavigation<DashboardScreenNavigationProp>();
@@ -98,6 +87,8 @@ function DashboardScreen() {
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [groupName, setGroupName] = useState(getActiveGroup()?.name ?? '');
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+  const lastLoadedDayRef = useRef(todayKey());
 
   const nickname = getCurrentUser()?.name ?? '';
 
@@ -125,16 +116,41 @@ function DashboardScreen() {
         setLoadState('error');
         return;
       }
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth() + 1;
-      const yearMonth = `${year}-${String(month).padStart(2, '0')}`;
-      const [result, monthDays] = await Promise.all([
+      const today = new Date();
+      const weeks = getTwoWeekRange(today);
+      const yearMonths = Array.from(
+        new Set(
+          weeks
+            .flat()
+            .map(cell => `${cell.year}-${String(cell.month).padStart(2, '0')}`),
+        ),
+      );
+      const [result, ...monthlyDaysList] = await Promise.all([
         dashboardService.getDashboard(group.id),
-        dashboardService.getMonthlyCalendar(group.id, yearMonth),
+        ...yearMonths.map(yearMonth =>
+          dashboardService.getMonthlyCalendar(group.id, yearMonth),
+        ),
       ]);
+      const daysByDateKey = new Map<string, CalendarDaySummary>();
+      monthlyDaysList.forEach(days => {
+        days.forEach(day => daysByDateKey.set(day.date, day));
+      });
       setOverview(result);
-      setMiniCalendar(toMiniCalendarData(year, month, monthDays));
+      setMiniCalendar({
+        monthLabel: `${today.getMonth() + 1}월`,
+        weeks: weeks.map(week =>
+          week.map(cell => {
+            const day = daysByDateKey.get(cell.dateKey);
+            return {
+              dateKey: cell.dateKey,
+              day: cell.day,
+              income: day?.income ?? 0,
+              expense: day?.expense ?? 0,
+            };
+          }),
+        ),
+      });
+      lastLoadedDayRef.current = todayKey();
       setLoadState('ready');
     } catch (error) {
       setLoadErrorMessage(toErrorMessage(error));
@@ -142,9 +158,22 @@ function DashboardScreen() {
     }
   }, []);
 
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextState => {
+      if (nextState === 'active' && todayKey() !== lastLoadedDayRef.current) {
+        load();
+      }
+    });
+    return () => subscription.remove();
+  }, [load]);
+
   useFocusEffect(
     useCallback(() => {
       load();
+      const pending = takePendingSnackbar();
+      if (pending) {
+        setSnackbarMessage(pending.title);
+      }
     }, [load]),
   );
 
@@ -180,10 +209,7 @@ function DashboardScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.scrollContent}
-      >
+      <View style={styles.fixedHeader}>
         <View style={styles.headerRow}>
           <Text style={styles.groupName} numberOfLines={1}>
             {groupName}
@@ -194,7 +220,11 @@ function DashboardScreen() {
             accessibilityLabel={DASHBOARD_NOTIFICATION_ACCESSIBILITY_LABEL}
           />
         </View>
-
+      </View>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+      >
         {miniCalendar && (
           <MiniCalendarCard data={miniCalendar} onPress={handlePressMiniCalendar} />
         )}
@@ -268,6 +298,13 @@ function DashboardScreen() {
         </View>
       </ScrollView>
       <FAB onPress={handlePressAddTransaction} />
+      <View style={styles.snackbarSlot} pointerEvents="box-none">
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -280,10 +317,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  snackbarSlot: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: BOTTOM_NAVIGATION_HEIGHT + 20 + FAB_SIZE + SNACKBAR_FAB_GAP,
+    paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
+    zIndex: 10,
+    elevation: 10,
+  },
   scrollContent: {
     paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
-    paddingTop: 16,
     paddingBottom: BOTTOM_NAVIGATION_HEIGHT+ 12,
+  },
+  fixedHeader: {
+    backgroundColor: BACKGROUND_PRIMARY,
+    paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
+    paddingTop: 16,
   },
   headerRow: {
     flexDirection: 'row',

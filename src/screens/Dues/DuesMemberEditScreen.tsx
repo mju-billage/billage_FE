@@ -41,8 +41,6 @@ import {
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
-
 type LoadState = 'loading' | 'error' | 'ready';
 
 type DuesMemberEditNavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -107,7 +105,6 @@ function DuesMemberEditScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const hasChanges = !sameIdSet(selectedMemberIds, initialMemberIds);
@@ -218,7 +215,11 @@ function DuesMemberEditScreen() {
     <ScreenContainer
       background="secondary"
       snackbar={
-        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar type="sub" title={DUES_MEMBER_SELECT_TITLE} onBackPress={handleBack} />

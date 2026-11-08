@@ -121,19 +121,18 @@ function ReportCreateByLedgerScreen() {
     setFormError(undefined);
     run(async () => {
       try {
-        const created = await reportService.createReportByLedger(group.id, {
+        await reportService.createReportByLedger(group.id, {
           title: title.trim(),
           ledgerIds: ledgers.map(l => l.id),
           entryType,
         });
         navigation.reset({
-          index: 2,
+          index: 1,
           routes: [
             { name: 'Main', params: { screen: 'More' } },
-            { name: 'ReportMain' },
             {
-              name: 'ReportByLedgerDetail',
-              params: { reportId: created.reportId, snackbarMessage: SNACKBAR_REPORT_CREATED },
+              name: 'ReportMain',
+              params: { reportType: 'BY_LEDGER', snackbarMessage: SNACKBAR_REPORT_CREATED },
             },
           ],
         });

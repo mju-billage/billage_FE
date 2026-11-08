@@ -1,12 +1,14 @@
-import { forwardRef, useState } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 import {
   Image,
   KeyboardTypeOptions,
   LayoutChangeEvent,
   Pressable,
+  StyleProp,
   StyleSheet,
   Text,
   TextInput,
+  TextStyle,
   View,
 } from 'react-native';
 import {
@@ -20,6 +22,7 @@ import {
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
+import { TEXT_FIELD_MAX_LENGTH_ERROR } from '../../../constants/commonText';
 
 const EYE_ICON = require('../../../assets/icons/system/Eye.png');
 const EYE_CLOSED_ICON = require('../../../assets/icons/system/Eye Closed.png');
@@ -45,6 +48,10 @@ type TextFieldProps = {
   autoCorrect?: boolean;
   autoFocus?: boolean;
   onBlur?: () => void;
+  /** true면 secureToggle 눈 아이콘을 포커스 중일 때만 보여준다(QA 결정: 옵트인, 기본 false) */
+  secureToggleOnFocusOnly?: boolean;
+  /** 글자 크기 등 입력칸 타이포만 바꿀 때 쓴다(예: 내역 금액의 큰 숫자, FT-22). 입력칸·숨은 측정 글자·'원' 모두에 같이 적용돼야 위치가 안 어긋난다. */
+  inputStyle?: StyleProp<TextStyle>;
 };
 
 const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
@@ -68,22 +75,52 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
     autoCorrect,
     autoFocus = false,
     onBlur,
+    secureToggleOnFocusOnly = false,
+    inputStyle,
   },
   ref,
 ) {
   const [isFocused, setIsFocused] = useState(false);
   const [isSecure, setIsSecure] = useState(secureTextEntry || secureToggle);
   const [measuredTextWidth, setMeasuredTextWidth] = useState<number | null>(null);
+  const [overflow, setOverflow] = useState(false);
   const showIcon = isFocused || value.length > 0;
+  const showSecureToggleIcon = secureToggleOnFocusOnly ? isFocused : showIcon;
   const showSuffix = Boolean(suffix) && value.length > 0;
+  const effectiveOnClear =
+    onClear ?? (secureTextEntry || secureToggle ? undefined : () => onChangeText(''));
+  const overflowError =
+    overflow && maxLength != null ? TEXT_FIELD_MAX_LENGTH_ERROR(maxLength) : undefined;
+  const effectiveError = overflowError ?? error;
+
+  useEffect(() => {
+    if (maxLength != null && Array.from(value).length < maxLength && overflow) {
+      setOverflow(false);
+    }
+  }, [value, maxLength, overflow]);
 
   const handleMeasureLayout = (event: LayoutChangeEvent) => {
     setMeasuredTextWidth(event.nativeEvent.layout.width);
   };
 
+  const handleChangeText = (text: string) => {
+    if (maxLength == null) {
+      onChangeText(text);
+      return;
+    }
+    const chars = Array.from(text);
+    if (chars.length > maxLength) {
+      setOverflow(true);
+      onChangeText(chars.slice(0, maxLength).join(''));
+      return;
+    }
+    setOverflow(false);
+    onChangeText(text);
+  };
+
   const underlineColor = disabled
     ? BORDER_NEUTRAL_NORMAL
-    : error
+    : effectiveError
     ? FEEDBACK_NEGATIVE_BOLD
     : success || isFocused
     ? FOREGROUND_SECONDARY
@@ -104,6 +141,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           ref={ref}
           style={[
             styles.input,
+            inputStyle,
             disabled && styles.inputDisabled,
             showSuffix && measuredTextWidth != null && styles.inputWithSuffix,
             showSuffix && measuredTextWidth != null
@@ -111,16 +149,16 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
               : null,
           ]}
           value={value}
-          onChangeText={onChangeText}
+          onChangeText={handleChangeText}
           placeholder={placeholder}
           placeholderTextColor={FOREGROUND_DISABLED}
           onFocus={() => setIsFocused(true)}
           onBlur={() => {
             setIsFocused(false);
+            setOverflow(false);
             onBlur?.();
           }}
           secureTextEntry={isSecure}
-          maxLength={maxLength}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
           autoCorrect={autoCorrect}
@@ -129,7 +167,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
         />
         {suffix != null && (
           <Text
-            style={styles.hiddenMeasure}
+            style={[styles.hiddenMeasure, inputStyle]}
             numberOfLines={1}
             onLayout={handleMeasureLayout}
           >
@@ -137,13 +175,13 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           </Text>
         )}
         {showSuffix && (
-          <Text style={[styles.suffix, disabled && styles.inputDisabled]}>
+          <Text style={[styles.suffix, inputStyle, disabled && styles.inputDisabled]}>
             {suffix}
           </Text>
         )}
-        {onClear && !disabled && (
+        {effectiveOnClear && !disabled && (
           <Pressable
-            onPress={onClear}
+            onPress={effectiveOnClear}
             hitSlop={8}
             pointerEvents={isFocused && value.length > 0 ? 'auto' : 'none'}
             style={[
@@ -159,8 +197,8 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
         {secureToggle && !disabled && (
           <Pressable
             onPress={() => setIsSecure(!isSecure)}
-            pointerEvents={showIcon ? 'auto' : 'none'}
-            style={showIcon ? styles.iconShown : styles.iconHidden}
+            pointerEvents={showSecureToggleIcon ? 'auto' : 'none'}
+            style={showSecureToggleIcon ? styles.iconShown : styles.iconHidden}
           >
             <Image
               source={isSecure ? EYE_CLOSED_ICON : EYE_ICON}
@@ -169,17 +207,17 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           </Pressable>
         )}
       </View>
-      {(error || helperText) && (
+      {(effectiveError || helperText) && (
         <Text
           style={
-            error
+            effectiveError
               ? styles.errorText
               : success
               ? styles.successText
               : styles.helperText
           }
         >
-          {error ?? helperText}
+          {effectiveError ?? helperText}
         </Text>
       )}
     </View>

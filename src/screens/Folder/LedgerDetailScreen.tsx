@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
+import { truncateWithEllipsis } from '../../utils/truncateWithEllipsis';
 import {
   useFocusEffect,
   useNavigation,
@@ -28,34 +29,44 @@ import TransactionListItem from '../../components/Data Display/Lists/Transaction
 import CarouselIndicator from '../../components/Navigation/Carousel Indicator/CarouselIndicator';
 import Button from '../../components/Input/Button/Button';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
+import LedgerBudgetSheet from '../../components/Feedback/Dialogs/LedgerBudgetSheet';
 import { setPendingSnackbar } from '../../utils/pendingSnackbar';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import FolderMoreMenu from './FolderMoreMenu';
 import LedgerFilterSheet, {
   DEFAULT_LEDGER_FILTER,
+  getLedgerFilterDateRange,
   toEntryFilterQuery,
   type LedgerFilterValue,
 } from './LedgerFilterSheet';
 import type { MenuItem } from '../../components/Navigation/Menu/Menu';
 import type { LedgerDetail } from '../../types/ledger';
 import { groupEntriesByDate, type EntrySummary } from '../../types/entry';
+import { getActiveGroup } from '../../types/group';
 import { formatDateHeader } from '../../utils/dateHeader';
 import * as ledgerService from '../../services/ledgerService';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
 import * as entryService from '../../services/entryService';
+import * as groupService from '../../services/groupService';
 import { ApiError } from '../../services/apiClient';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
+  NO_ACTIVE_GROUP_MESSAGE,
   getApiErrorMessage,
   isNetworkError,
   toUserErrorMessage,
 } from '../../constants/apiErrorMessages';
 import {
-  LEDGER_BUDGET_DIALOG_TITLE,
-  LEDGER_BUDGET_MAX,
-  LEDGER_BUDGET_PLACEHOLDER,
-  LEDGER_BUDGET_SAVE_LABEL,
+  FILTER_PERIOD_1MONTH,
+  FILTER_PERIOD_3MONTH,
+  FILTER_PERIOD_6MONTH,
+  FILTER_PERIOD_CUSTOM,
+  FILTER_SORT_LATEST,
+  FILTER_SORT_OLDEST,
+  FILTER_TYPE_ALL,
+  FILTER_TYPE_EXPENSE,
+  FILTER_TYPE_INCOME,
   LEDGER_DELETE_CONFIRM_LABEL,
   LEDGER_DELETE_DIALOG_DESCRIPTION,
   LEDGER_DELETE_DIALOG_TITLE,
@@ -101,7 +112,27 @@ type LedgerDetailRouteProp = RouteProp<RootStackParamList, 'LedgerDetail'>;
 type ActiveDialog = 'rename' | 'budget' | 'delete' | null;
 type LoadState = 'loading' | 'error' | 'ready';
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
+const FILTER_PERIOD_LABEL_BY_VALUE: Record<Exclude<LedgerFilterValue['period'], 'all'>, string> = {
+  '1month': FILTER_PERIOD_1MONTH,
+  '3month': FILTER_PERIOD_3MONTH,
+  '6month': FILTER_PERIOD_6MONTH,
+  custom: FILTER_PERIOD_CUSTOM,
+};
+
+function getFilterSummary(filter: LedgerFilterValue): string {
+  const typeLabel =
+    filter.type === 'income'
+      ? FILTER_TYPE_INCOME
+      : filter.type === 'expense'
+      ? FILTER_TYPE_EXPENSE
+      : FILTER_TYPE_ALL;
+  const sortLabel = filter.sort === 'oldest' ? FILTER_SORT_OLDEST : FILTER_SORT_LATEST;
+  const parts =
+    filter.period === 'all'
+      ? [typeLabel, sortLabel]
+      : [FILTER_PERIOD_LABEL_BY_VALUE[filter.period], typeLabel, sortLabel];
+  return parts.join(' · ');
+}
 
 function LedgerDetailScreen() {
   const navigation = useNavigation<LedgerDetailNavigationProp>();
@@ -128,6 +159,8 @@ function LedgerDetailScreen() {
   const [filter, setFilter] = useState<LedgerFilterValue>(DEFAULT_LEDGER_FILTER);
   const filterRef = useRef<LedgerFilterValue>(DEFAULT_LEDGER_FILTER);
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
+  /** 기간 필터용 모임 id 캐시(7-6) — `getActiveGroup()` 으로 한 번 구하면 화면에 머무는 동안 재사용한다. */
+  const groupIdRef = useRef<string | null>(null);
 
   const toErrorMessage = (error: unknown): string => {
     if (isNetworkError(error)) {
@@ -136,8 +169,58 @@ function LedgerDetailScreen() {
     if (error instanceof ApiError) {
       return getApiErrorMessage(error.code, error.message);
     }
+    if (error instanceof Error && error.message === NO_ACTIVE_GROUP_MESSAGE) {
+      return NO_ACTIVE_GROUP_MESSAGE;
+    }
     return API_ERROR_DEFAULT_MESSAGE;
   };
+
+  /**
+   * 장부별 내역 목록(`getEntries`)은 `from`/`to` 를 받지 않는다. 기간 필터가 걸리면
+   * 모임 전체 목록(`getGroupEntries`)을 `ledgerIds=[이 장부]` 로 불러 우회한다(기본안 B,
+   * 7-6). 서버가 장부별 목록에서 from/to 를 지원하면 이 분기만 걷어내면 된다 —
+   * docs/pending/backend.md 참조.
+   */
+  const fetchEntriesPage = useCallback(
+    async (
+      filterValue: LedgerFilterValue,
+      page: number,
+    ): Promise<entryService.EntryListPage> => {
+      if (filterValue.period === 'all') {
+        return entryService.getEntries(ledgerId, {
+          ...toEntryFilterQuery(filterValue),
+          page,
+        });
+      }
+      if (!groupIdRef.current) {
+        let group = getActiveGroup();
+        if (!group) {
+          await groupService.getMyGroups();
+          group = getActiveGroup();
+        }
+        groupIdRef.current = group ? group.id : null;
+      }
+      if (!groupIdRef.current) {
+        throw new Error(NO_ACTIVE_GROUP_MESSAGE);
+      }
+      const range = getLedgerFilterDateRange(filterValue);
+      const groupPage = await entryService.getGroupEntries(groupIdRef.current, {
+        ledgerIds: [ledgerId],
+        from: range.from,
+        to: range.to,
+        ...toEntryFilterQuery(filterValue),
+        page,
+      });
+      return {
+        items: groupPage.items,
+        page: groupPage.page,
+        totalPages: groupPage.totalPages,
+        totalElements: groupPage.totalElements,
+        last: groupPage.last,
+      };
+    },
+    [ledgerId],
+  );
 
   const fieldOrGeneralError = (error: unknown, field: string): string => {
     if (error instanceof ApiError) {
@@ -152,7 +235,7 @@ function LedgerDetailScreen() {
     try {
       const [detail, firstPage] = await Promise.all([
         ledgerService.getLedgerDetail(ledgerId),
-        entryService.getEntries(ledgerId, { ...toEntryFilterQuery(filterRef.current), page: 0 }),
+        fetchEntriesPage(filterRef.current, 0),
       ]);
       setLedger(detail);
       setEntries(firstPage.items);
@@ -165,7 +248,7 @@ function LedgerDetailScreen() {
       setLoadErrorMessage(toErrorMessage(error));
       setLoadState('error');
     }
-  }, [ledgerId]);
+  }, [ledgerId, fetchEntriesPage]);
 
   const loadMoreEntries = useCallback(async () => {
     if (loadMoreFailedRef.current || isLoadingMore || !hasMoreEntries) {
@@ -173,10 +256,7 @@ function LedgerDetailScreen() {
     }
     setIsLoadingMore(true);
     try {
-      const nextPage = await entryService.getEntries(ledgerId, {
-        ...toEntryFilterQuery(filter),
-        page: entryPage + 1,
-      });
+      const nextPage = await fetchEntriesPage(filter, entryPage + 1);
       setEntries(current => [...current, ...nextPage.items]);
       setEntryPage(nextPage.page);
       setHasMoreEntries(!nextPage.last);
@@ -186,7 +266,7 @@ function LedgerDetailScreen() {
     } finally {
       setIsLoadingMore(false);
     }
-  }, [ledgerId, entryPage, isLoadingMore, hasMoreEntries, filter]);
+  }, [entryPage, isLoadingMore, hasMoreEntries, filter, fetchEntriesPage]);
 
   useFocusEffect(
     useCallback(() => {
@@ -198,7 +278,6 @@ function LedgerDetailScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbar(message);
-    setTimeout(() => setSnackbar(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const handleApplyFilter = async (next: LedgerFilterValue) => {
@@ -206,10 +285,7 @@ function LedgerDetailScreen() {
     filterRef.current = next;
     setFilter(next);
     try {
-      const firstPage = await entryService.getEntries(ledgerId, {
-        ...toEntryFilterQuery(next),
-        page: 0,
-      });
+      const firstPage = await fetchEntriesPage(next, 0);
       setEntries(firstPage.items);
       setEntryTotal(firstPage.totalElements);
       setEntryPage(firstPage.page);
@@ -271,23 +347,6 @@ function LedgerDetailScreen() {
           return false;
         }
       });
-    } else if (activeDialog === 'budget') {
-      const parsed = Number(dialogInputValue.trim());
-      if (!dialogInputValue.trim() || Number.isNaN(parsed)) {
-        return;
-      }
-      run(async () => {
-        try {
-          await ledgerService.updateLedgerBudget(ledgerId, parsed);
-          closeDialog();
-          showSnackbar(SNACKBAR_BUDGET_SAVED);
-          load();
-          return true;
-        } catch (error) {
-          setDialogError(fieldOrGeneralError(error, 'budget'));
-          return false;
-        }
-      });
     } else if (activeDialog === 'delete') {
       const name = ledger.name;
       run(async () => {
@@ -306,7 +365,31 @@ function LedgerDetailScreen() {
     }
   };
 
+  const handleSaveBudget = () => {
+    const parsed = Number(dialogInputValue.trim());
+    if (!dialogInputValue.trim() || Number.isNaN(parsed)) {
+      return;
+    }
+    run(async () => {
+      try {
+        await ledgerService.updateLedgerBudget(ledgerId, parsed);
+        closeDialog();
+        showSnackbar(SNACKBAR_BUDGET_SAVED);
+        load();
+        return true;
+      } catch (error) {
+        setDialogError(fieldOrGeneralError(error, 'budget'));
+        return false;
+      }
+    });
+  };
+
   const dialogConfig = getDialogConfig(activeDialog);
+  const isFilterActive =
+    filter.period !== DEFAULT_LEDGER_FILTER.period ||
+    filter.type !== DEFAULT_LEDGER_FILTER.type ||
+    filter.sort !== DEFAULT_LEDGER_FILTER.sort;
+  const filterSummary = getFilterSummary(filter);
 
   const sections = groupEntriesByDate(entries).map(group => ({
     title: formatDateHeader(group.date),
@@ -342,10 +425,16 @@ function LedgerDetailScreen() {
     <ScreenContainer
       background="primary"
       edges={['top']}
-      snackbar={snackbar ? <Snackbar visible title={snackbar} /> : undefined}
+      snackbar={
+        <Snackbar
+          visible={snackbar != null}
+          title={snackbar ?? ''}
+          onClose={() => setSnackbar(null)}
+        />
+      }
     >
       <AppBar
-        title={ledger.name}
+        title={truncateWithEllipsis(ledger.name)}
         onBackPress={() => navigation.goBack()}
         rightIcons={[{ icon: MENU_ICON, onPress: () => setMoreMenuVisible(true) }]}
       />
@@ -394,13 +483,22 @@ function LedgerDetailScreen() {
 
             <View style={styles.listHeader}>
               <View style={styles.toolRow}>
-                <Pressable
-                  onPress={() => setFilterSheetVisible(true)}
-                  hitSlop={8}
-                  accessibilityLabel="필터"
-                >
-                  <Image source={FILTER_ICON} style={styles.toolIcon} />
-                </Pressable>
+                <View style={styles.filterGroup}>
+                  {isFilterActive && (
+                    <Pressable onPress={() => setFilterSheetVisible(true)}>
+                      <Text style={styles.filterSummaryText} numberOfLines={1}>
+                        {filterSummary}
+                      </Text>
+                    </Pressable>
+                  )}
+                  <Pressable
+                    onPress={() => setFilterSheetVisible(true)}
+                    hitSlop={8}
+                    accessibilityLabel="필터"
+                  >
+                    <Image source={FILTER_ICON} style={styles.toolIcon} />
+                  </Pressable>
+                </View>
                 <Pressable
                   onPress={() => navigation.navigate('LedgerSearch', { ledgerId, ledgerName: ledger.name })}
                   hitSlop={8}
@@ -463,22 +561,17 @@ function LedgerDetailScreen() {
       />
 
       <Dialog
-        visible={activeDialog !== null}
+        visible={activeDialog === 'rename' || activeDialog === 'delete'}
         title={dialogConfig.title}
         description={dialogConfig.description}
         showTextField={dialogConfig.showTextField}
         textFieldValue={dialogInputValue}
         onChangeTextField={text => {
-          const next =
-            activeDialog === 'rename'
-              ? text.slice(0, LEDGER_NAME_MAX_LENGTH)
-              : clampBudgetInput(text);
-          setDialogInputValue(next);
+          setDialogInputValue(text.slice(0, LEDGER_NAME_MAX_LENGTH));
           setDialogError(undefined);
         }}
         textFieldPlaceholder={dialogConfig.placeholder}
-        textFieldKeyboardType={activeDialog === 'budget' ? 'number-pad' : undefined}
-        textFieldSuffix={activeDialog === 'budget' ? '원' : undefined}
+        textFieldMaxLength={activeDialog === 'rename' ? LEDGER_NAME_MAX_LENGTH : undefined}
         autoFocusTextField={activeDialog === 'rename'}
         textFieldError={dialogError}
         confirmLabel={dialogConfig.confirmLabel}
@@ -487,17 +580,22 @@ function LedgerDetailScreen() {
         onCancel={closeDialog}
         onConfirm={handleConfirmDialog}
       />
+
+      <LedgerBudgetSheet
+        visible={activeDialog === 'budget'}
+        ledgerName={ledger.name}
+        value={dialogInputValue}
+        error={dialogError}
+        isSaving={isSubmittingDialog}
+        onChangeValue={(next, error) => {
+          setDialogInputValue(next);
+          setDialogError(error);
+        }}
+        onSave={handleSaveBudget}
+        onClose={closeDialog}
+      />
     </ScreenContainer>
   );
-}
-
-function clampBudgetInput(text: string): string {
-  const digitsOnly = text.replace(/[^0-9]/g, '');
-  if (!digitsOnly) {
-    return '';
-  }
-  const parsed = Number(digitsOnly);
-  return parsed > LEDGER_BUDGET_MAX ? String(LEDGER_BUDGET_MAX) : digitsOnly;
 }
 
 function getDialogConfig(activeDialog: ActiveDialog) {
@@ -509,14 +607,6 @@ function getDialogConfig(activeDialog: ActiveDialog) {
         showTextField: true,
         placeholder: LEDGER_RENAME_PLACEHOLDER,
         confirmLabel: LEDGER_RENAME_CONFIRM_LABEL,
-      };
-    case 'budget':
-      return {
-        title: LEDGER_BUDGET_DIALOG_TITLE,
-        description: undefined,
-        showTextField: true,
-        placeholder: LEDGER_BUDGET_PLACEHOLDER,
-        confirmLabel: LEDGER_BUDGET_SAVE_LABEL,
       };
     case 'delete':
       return {
@@ -555,6 +645,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 8,
+  },
+  filterGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  filterSummaryText: {
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   toolIcon: {
     width: 24,

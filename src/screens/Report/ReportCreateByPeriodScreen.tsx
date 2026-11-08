@@ -124,20 +124,19 @@ function ReportCreateByPeriodScreen() {
     setFormError(undefined);
     run(async () => {
       try {
-        const created = await reportService.createReportByPeriod(group.id, {
+        await reportService.createReportByPeriod(group.id, {
           title: title.trim(),
           startDate: toIsoDate(startDate),
           endDate: toIsoDate(endDate),
           entryType,
         });
         navigation.reset({
-          index: 2,
+          index: 1,
           routes: [
             { name: 'Main', params: { screen: 'More' } },
-            { name: 'ReportMain' },
             {
-              name: 'ReportByPeriodDetail',
-              params: { reportId: created.reportId, snackbarMessage: SNACKBAR_REPORT_CREATED },
+              name: 'ReportMain',
+              params: { reportType: 'BY_PERIOD', snackbarMessage: SNACKBAR_REPORT_CREATED },
             },
           ],
         });

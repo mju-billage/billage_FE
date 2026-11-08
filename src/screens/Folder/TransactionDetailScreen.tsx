@@ -22,6 +22,7 @@ import {
 import type { EntryDetail } from '../../types/entry';
 import * as entryService from '../../services/entryService';
 import * as groupMembershipService from '../../services/groupMembershipService';
+import * as ledgerService from '../../services/ledgerService';
 import * as fileService from '../../services/fileService';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { getActiveGroup } from '../../types/group';
@@ -66,9 +67,9 @@ import {
   SCAN_APPLY_CONFIRM_DESCRIPTION,
   SCAN_APPLY_CONFIRM_LABEL,
   SCAN_APPLY_CONFIRM_TITLE,
+  SNACKBAR_TRANSACTION_DELETED,
   SNACKBAR_TRANSACTION_UPDATED,
   TEXT_INPUT_SHEET_EDIT_LABEL,
-  TRANSACTION_REGISTER_LEDGER_LOCKED_HINT,
   TRANSACTION_REGISTER_RECEIPT_MAX,
 } from '../../constants/transactionScreenText';
 import { FOREGROUND_DISABLED } from '../../constants/colors';
@@ -90,7 +91,7 @@ type TransactionDetailRouteProp = RouteProp<
 >;
 
 type LoadState = 'loading' | 'error' | 'ready';
-type ActiveSheet = 'none' | 'date' | 'itemName' | 'manager' | 'memo';
+type ActiveSheet = 'none' | 'date' | 'itemName' | 'manager' | 'memo' | 'ledger';
 type ActiveDialog = 'none' | 'scanApply';
 
 function toDotDate(isoDate: string): string {
@@ -118,6 +119,7 @@ function TransactionDetailScreen() {
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>('none');
   const [activeDialog, setActiveDialog] = useState<ActiveDialog>('none');
   const [managerOptions, setManagerOptions] = useState<{ key: string; label: string }[]>([]);
+  const [ledgerOptions, setLedgerOptions] = useState<{ key: string; label: string }[]>([]);
   const [pendingScanValues, setPendingScanValues] = useState<ScanApplyValues | null>(null);
   const { isLocked: isApproving, run: runApprove } = useSubmitLock();
   const { isLocked: isDeleting, run: runDelete } = useSubmitLock();
@@ -129,7 +131,6 @@ function TransactionDetailScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), 1600);
   };
 
   useEffect(() => {
@@ -151,17 +152,17 @@ function TransactionDetailScreen() {
   };
 
   /**
-   * 스캔 인식 성공 시 호출된다(QA-039). 금액은 무시하고, 날짜·상호 중 현재 값과
-   * 다른 게 있을 때만 scanApply 다이얼로그를 띄운다. 증빙 자체는 훅이 이미 붙였고,
-   * 그 PATCH 는 아래 items-settle 이펙트가 알아서 보낸다 — 여기서는 필드만 다룬다.
+   * 스캔 인식 성공 시 호출된다(QA-039). 금액은 무시하고, 날짜가 현재 값과
+   * 다를 때만 scanApply 다이얼로그를 띄운다(내역명은 OCR 이 안 채운다 — FT-33).
+   * 증빙 자체는 훅이 이미 붙였고, 그 PATCH 는 아래 items-settle 이펙트가 알아서
+   * 보낸다 — 여기서는 필드만 다룬다.
    */
   const handleScanRecognized = (values: ScanApplyValues) => {
     if (!entry) {
       return;
     }
     const dateChanged = values.date !== null && toIsoDate(values.date) !== entry.occurredOn;
-    const nameChanged = values.merchantName !== null && values.merchantName !== entry.title;
-    if (dateChanged || nameChanged) {
+    if (dateChanged) {
       setPendingScanValues(values);
       setActiveDialog('scanApply');
     }
@@ -232,7 +233,11 @@ function TransactionDetailScreen() {
       try {
         await entryService.deleteEntry(entry.id);
         setDeleteDialogVisible(false);
-        navigation.goBack();
+        navigation.popTo(
+          'Main',
+          { screen: 'Transactions', params: { snackbarMessage: SNACKBAR_TRANSACTION_DELETED } },
+          { merge: true },
+        );
         return true;
       } catch (error) {
         setDeleteDialogVisible(false);
@@ -340,6 +345,33 @@ function TransactionDetailScreen() {
     setActiveSheet('manager');
   };
 
+  const loadLedgerOptions = async () => {
+    const group = getActiveGroup();
+    if (!group) {
+      return;
+    }
+    try {
+      const ledgers = await ledgerService.getAllLedgersInGroup(group.id);
+      setLedgerOptions(ledgers.map(l => ({ key: l.id, label: l.name })));
+    } catch (error) {
+      showSnackbar(toErrorMessage(error));
+    }
+  };
+
+  const handlePressLedger = () => {
+    if (ledgerOptions.length === 0) {
+      loadLedgerOptions();
+    }
+    setActiveSheet('ledger');
+  };
+
+  const handleSelectLedger = (key: string) => {
+    if (!entry || key === entry.ledgerId) {
+      return;
+    }
+    patchEntry({ ledgerId: key });
+  };
+
   const handleConfirmScanApply = () => {
     if (pendingScanValues && entry) {
       const updates: entryService.UpdateEntryInput = {};
@@ -348,12 +380,6 @@ function TransactionDetailScreen() {
         if (iso !== entry.occurredOn) {
           updates.occurredOn = iso;
         }
-      }
-      if (
-        pendingScanValues.merchantName !== null &&
-        pendingScanValues.merchantName !== entry.title
-      ) {
-        updates.title = pendingScanValues.merchantName;
       }
       patchEntry(updates);
     }
@@ -441,7 +467,11 @@ function TransactionDetailScreen() {
     <ScreenContainer
       background="secondary"
       snackbar={
-        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar
@@ -494,13 +524,8 @@ function TransactionDetailScreen() {
         <DetailFieldRow
           label={TRANSACTION_LEDGER_LABEL}
           value={ledgerNameValue}
-          disabled={editable}
+          onPress={editable ? handlePressLedger : undefined}
         />
-        {editable && (
-          <Text style={layoutStyles.ledgerLockedHint}>
-            {TRANSACTION_REGISTER_LEDGER_LOCKED_HINT}
-          </Text>
-        )}
         <DetailFieldRow
           label={TRANSACTION_MEMO_LABEL}
           value={memoValue}
@@ -640,6 +665,14 @@ function TransactionDetailScreen() {
             selectedKey={entry.manager.userId}
             onClose={() => setActiveSheet('none')}
             onSelect={handleSelectManager}
+          />
+          <TransactionSingleSelectSheet
+            visible={activeSheet === 'ledger'}
+            title={TRANSACTION_LEDGER_LABEL}
+            options={ledgerOptions}
+            selectedKey={entry.ledgerId}
+            onClose={() => setActiveSheet('none')}
+            onSelect={handleSelectLedger}
           />
           {attachments.sheetsAndDialogs}
           <Dialog

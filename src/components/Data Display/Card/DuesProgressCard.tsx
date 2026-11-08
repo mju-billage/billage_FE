@@ -2,6 +2,7 @@ import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Badge from '../Badge/Badge';
 import ProgressBar from '../../Feedback/Progress Bar/ProgressBar';
 import { formatWon } from '../../../utils/currency';
+import { truncateWithEllipsis } from '../../../utils/truncateWithEllipsis';
 import type { DuesProgress } from '../../../types/dashboard';
 import {
   BORDER_NEUTRAL_NORMAL,
@@ -64,11 +65,11 @@ function DateBadge({
   state: DuesProgressCardState;
   activeStatus: DateBadgeStatus;
 }) {
-  if (state === 'upcoming') {
-    return <Text style={styles.upcomingDate}>{label}</Text>;
-  }
   return (
-    <Badge label={label} status={state === 'ended' ? 'neutral' : activeStatus} />
+    <Badge
+      label={label}
+      status={state === 'active' ? activeStatus : 'neutral'}
+    />
   );
 }
 
@@ -93,8 +94,12 @@ function DashboardCard({
     >
       <View style={styles.badgeRowStart}>
         <DateBadge label={progress.dDayLabel} state={state} activeStatus="destructive" />
-        <Text style={[styles.groupName, ended && styles.textEnded]}>
-          {progress.groupName}
+        <Text
+          style={[styles.groupName, ended && styles.textEnded]}
+          numberOfLines={1}
+          accessibilityLabel={progress.groupName}
+        >
+          {truncateWithEllipsis(progress.groupName)}
         </Text>
       </View>
       <Text style={[styles.description, ended && styles.textEnded]}>
@@ -150,8 +155,12 @@ function PaymentManagementCard({
   return (
     <View style={[styles.card, fullWidth && styles.cardFullWidth, ended && styles.cardEnded]}>
       <View style={styles.badgeRow}>
-        <Text style={[styles.groupName, ended && styles.textEnded]}>
-          {title}
+        <Text
+          style={[styles.groupName, ended && styles.textEnded]}
+          numberOfLines={1}
+          accessibilityLabel={title}
+        >
+          {truncateWithEllipsis(title)}
         </Text>
         <DateBadge label={dateBadgeLabel} state={state} activeStatus={dateBadgeStatus} />
       </View>
@@ -162,7 +171,7 @@ function PaymentManagementCard({
           </Text>
         </View>
         <Text style={[styles.paymentSummaryAmount, ended && styles.textEnded]}>
-          {formatWon(paidAmount)} / {formatWon(totalAmount)}
+          {formatWon(paidAmount)}원 / {formatWon(totalAmount)}원
         </Text>
       </View>
       <ProgressBar
@@ -197,11 +206,6 @@ const styles = StyleSheet.create({
   },
   iconEnded: {
     tintColor: FOREGROUND_DISABLED,
-  },
-  upcomingDate: {
-    ...TYPOGRAPHY.body3,
-    fontWeight: 'bold',
-    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   badgeRow: {
     flexDirection: 'row',

@@ -66,7 +66,6 @@ function TransactionSearchScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), 1600);
   };
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -172,7 +171,13 @@ function TransactionSearchScreen() {
   return (
     <ScreenContainer
       background="secondary"
-      snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
+      snackbar={
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
+      }
     >
       <AppBar
         type="sub"

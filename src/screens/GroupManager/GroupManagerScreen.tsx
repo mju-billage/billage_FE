@@ -44,7 +44,6 @@ type GroupManagerNavigationProp = NativeStackNavigationProp<
   'GroupManager'
 >;
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
 type LoadState = 'loading' | 'error' | 'ready';
 
 function GroupManagerScreen() {
@@ -76,7 +75,6 @@ function GroupManagerScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const fetchInvitation = useCallback(
@@ -178,7 +176,11 @@ function GroupManagerScreen() {
     <ScreenContainer
       background="primary"
       snackbar={
-        snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
     >
       <AppBar
@@ -226,6 +228,7 @@ function GroupManagerScreen() {
                   items: members.map(member => ({
                     key: member.membershipId,
                     itemType: 'avatar',
+                    avatarUri: member.profileImageUrl,
                     label: member.name,
                     tag:
                       member.role === 'OWNER'

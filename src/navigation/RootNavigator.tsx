@@ -146,7 +146,9 @@ export type RootStackParamList = {
     entryTitle: string;
     occurredOn: string;
   };
-  ReportMain: { snackbarMessage?: string } | undefined;
+  ReportMain:
+    | { snackbarMessage?: string; reportType?: 'BY_LEDGER' | 'BY_PERIOD' }
+    | undefined;
   ReportCreateByLedger: { selectedLedgers?: { id: string; name: string }[] } | undefined;
   ReportLedgerSelect: { selectedLedgers: { id: string; name: string }[] };
   ReportCreateByPeriod: undefined;

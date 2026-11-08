@@ -36,6 +36,11 @@ export function useAuthenticatedImage(url?: string | null): AuthenticatedImageSt
       return;
     }
 
+    if (__DEV__) {
+      // TODO(QA-IMG): 원인 확인 후 제거
+      console.log('[IMG][RAW]', url.split('?')[0]);
+    }
+
     let alive = true;
     setState({ uri: undefined, status: 'loading' });
 

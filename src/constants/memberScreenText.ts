@@ -27,7 +27,7 @@ export const MEMBER_ADD_SUBMIT_LABEL = '추가하기';
 
 export const MEMBER_TAG_INPUT_TITLE = '태그';
 export const MEMBER_TAG_MAX_COUNT = 3;
-export const MEMBER_TAG_INPUT_PLACEHOLDER = `# 태그를 입력해 주세요(최대 ${MEMBER_TAG_MAX_COUNT}개)`;
+export const MEMBER_TAG_INPUT_PLACEHOLDER = `태그를 입력해 주세요(최대 ${MEMBER_TAG_MAX_COUNT}개)`;
 export const MEMBER_TAG_INPUT_HELPER = '회비를 모을 때 태그로 멤버를 쉽게 선택할 수 있어요';
 export const MEMBER_TAG_INPUT_SUBMIT_LABEL = '입력하기';
 

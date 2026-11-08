@@ -28,3 +28,11 @@ export function formatDateDot(isoDateOrDateTime: string | null | undefined): str
   }
   return isoDateOrDateTime.slice(0, 10).replace(/-/g, '.');
 }
+
+export function formatDateShort(isoDateOrDateTime: string | null | undefined): string {
+  if (!isoDateOrDateTime) {
+    return '';
+  }
+  const [year, month, day] = isoDateOrDateTime.slice(0, 10).split('-');
+  return `${year.slice(2)}.${month}.${day}`;
+}

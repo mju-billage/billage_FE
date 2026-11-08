@@ -1,5 +1,5 @@
 import { Platform, PermissionsAndroid } from 'react-native';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { launchCamera, launchImageLibrary, type Asset } from 'react-native-image-picker';
 import {
   SNACKBAR_CAMERA_ERROR,
   SNACKBAR_CAMERA_PERMISSION_DENIED,
@@ -12,7 +12,32 @@ export type PickedImage = {
   fileName: string;
   type: string;
   size?: number;
+  /**
+   * 갤러리에서 고른 사진의 중복 판단용 식별자(FT-35). `id` → `originalPath` →
+   * (`timestamp`+`fileSize`+`width`+`height`) 순서로 구할 수 있는 첫 값을 쓴다.
+   * 카메라 촬영은 항상 새 사진이라 만들지 않는다(= 중복 검사 대상이 아니다).
+   */
+  sourceKey?: string;
 };
+
+/** `Asset`에서 구할 수 있는 첫 식별자를 중복 판단 키로 쓴다(라이브러리 버전에 따라 일부만 올 수 있어 순서대로 시도). */
+function computeSourceKey(asset: Asset): string | undefined {
+  if (asset.id) {
+    return `id:${asset.id}`;
+  }
+  if (asset.originalPath) {
+    return `path:${asset.originalPath}`;
+  }
+  if (
+    asset.timestamp != null &&
+    asset.fileSize != null &&
+    asset.width != null &&
+    asset.height != null
+  ) {
+    return `meta:${asset.timestamp}:${asset.fileSize}:${asset.width}:${asset.height}`;
+  }
+  return undefined;
+}
 
 export type CameraResult =
   | { kind: 'ok'; image: PickedImage }
@@ -133,6 +158,7 @@ export async function pickFromGallery(limit: number): Promise<GalleryResult> {
   const result = await launchImageLibrary({
     mediaType: 'photo',
     selectionLimit: limit,
+    includeExtra: true,
   });
 
   if (result.didCancel) {
@@ -156,6 +182,7 @@ export async function pickFromGallery(limit: number): Promise<GalleryResult> {
       fileName: asset.fileName ?? `gallery-${Date.now()}-${index}.jpg`,
       type: asset.type ?? 'image/jpeg',
       size: asset.fileSize,
+      sourceKey: computeSourceKey(asset),
     })),
   };
 }

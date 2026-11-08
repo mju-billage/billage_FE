@@ -40,8 +40,6 @@ type SignupInfoNavigationProp = NativeStackNavigationProp<
 >;
 type SignupInfoRouteProp = RouteProp<RootStackParamList, 'SignupInfo'>;
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
-
 function SignupInfoScreen() {
   const navigation = useNavigation<SignupInfoNavigationProp>();
   const route = useRoute<SignupInfoRouteProp>();
@@ -58,7 +56,6 @@ function SignupInfoScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const emailError =
@@ -118,7 +115,13 @@ function SignupInfoScreen() {
       edges={['bottom']}
       style={styles.container}
       avoidKeyboard={false}
-      snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
+      snackbar={
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
+      }
       // 푸터 아래 24 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
       snackbarOffset={72}
     >

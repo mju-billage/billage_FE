@@ -48,7 +48,6 @@ type EmailVerificationRouteProp = RouteProp<
 
 const CODE_LENGTH = 6;
 const COUNTDOWN_SECONDS = 180;
-const SNACKBAR_AUTO_HIDE_MS = 1600;
 
 function formatCountdown(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
@@ -75,7 +74,6 @@ function EmailVerificationScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   useEffect(() => {
@@ -174,13 +172,11 @@ function EmailVerificationScreen() {
       style={styles.container}
       avoidKeyboard={false}
       snackbar={
-        snackbarMessage ? (
-          <Snackbar
-            visible
-            title={snackbarMessage}
-            onClose={() => setSnackbarMessage(null)}
-          />
-        ) : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
       }
       // 푸터 아래 24 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
       snackbarOffset={72}

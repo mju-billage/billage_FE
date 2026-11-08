@@ -67,7 +67,13 @@ export function flattenFolderIds(tree: FolderNode[]): string[] {
 
 export type FolderListItem =
   | { kind: 'folder'; id: string; name: string; itemCount: number }
-  | { kind: 'ledger'; id: string; name: string; budget: number | null };
+  | {
+      kind: 'ledger';
+      id: string;
+      name: string;
+      budget: number | null;
+      createdAt?: string;
+    };
 
 export function mergeFolderListItems(
   childFolders: FolderNode[],
@@ -88,6 +94,7 @@ export function mergeFolderListItems(
         id: ledger.id,
         name: ledger.name,
         budget: ledger.budget,
+        createdAt: ledger.createdAt,
       }),
     ),
   ];

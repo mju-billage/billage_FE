@@ -32,6 +32,7 @@ import {
 import {
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 const { version: APP_VERSION } = require('../../../package.json');
@@ -116,7 +117,12 @@ function SettingsScreen() {
               type={profile.profileImageUrl ? 'image' : 'icon'}
               imageUri={profile.profileImageUrl ?? ''}
             />
-            <Text style={styles.profileName}>{profile.name}</Text>
+            <View style={styles.profileTextColumn}>
+              <Text style={styles.profileName}>{profile.name}</Text>
+              {profile.email ? (
+                <Text style={styles.profileEmail}>{profile.email}</Text>
+              ) : null}
+            </View>
           </CardBase>
 
           <CardBase onPress={() => navigation.navigate('NotificationSettings')}>
@@ -181,8 +187,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
+  profileTextColumn: {
+    gap: 2,
+  },
   profileName: {
     ...TYPOGRAPHY.subtitle2,
+  },
+  profileEmail: {
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   supportCard: {
     paddingTop: 16,

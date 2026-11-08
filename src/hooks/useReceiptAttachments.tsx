@@ -26,7 +26,7 @@ import {
   SCAN_RESCAN_CONFIRM_DESCRIPTION,
   SCAN_RESCAN_CONFIRM_LABEL,
   SCAN_RESCAN_CONFIRM_TITLE,
-  SNACKBAR_RECEIPT_ADDED,
+  SNACKBAR_RECEIPT_DUPLICATE,
   SNACKBAR_RECEIPT_MAX_LIMIT,
   SNACKBAR_SCAN_NOT_RECOGNIZED,
   SNACKBAR_SCAN_RATE_LIMITED,
@@ -55,6 +55,8 @@ export type ReceiptItem = {
    * 이번 세션에 올린 모든 경우에 채워진다(QA-041).
    */
   sourceUrl?: string;
+  /** 갤러리에서 고른 사진의 중복 판단 키(FT-35) — `imagePicker.ts`의 `PickedImage.sourceKey` 그대로. 카메라/서버에서 불러온 증빙은 없다. */
+  sourceKey?: string;
 };
 
 /**
@@ -168,14 +170,43 @@ export function useReceiptAttachments({
     }
   };
 
+  /**
+   * 이미 붙은 사진과 `sourceKey`가 같으면(같은 선택 묶음 안의 중복 포함) 걸러서
+   * 추가하지 않는다(FT-35) — `sourceKey`가 없는 사진(카메라 촬영, 서버 원본)은
+   * 중복 검사 대상이 아니라 항상 통과시킨다.
+   */
   const addPickedImages = async (images: PickedImage[]) => {
+    const seenKeys = new Set(
+      itemsRef.current
+        .map(item => item.sourceKey)
+        .filter((key): key is string => key != null),
+    );
+    let foundDuplicate = false;
+    const toAdd: PickedImage[] = [];
     for (const image of images) {
+      if (image.sourceKey != null) {
+        if (seenKeys.has(image.sourceKey)) {
+          foundDuplicate = true;
+          continue;
+        }
+        seenKeys.add(image.sourceKey);
+      }
+      toAdd.push(image);
+    }
+    if (foundDuplicate) {
+      showSnackbar(SNACKBAR_RECEIPT_DUPLICATE);
+    }
+
+    for (const image of toAdd) {
       if (image.size !== undefined && image.size > fileService.MAX_UPLOAD_FILE_SIZE_BYTES) {
         showSnackbar(SNACKBAR_IMAGE_TOO_LARGE);
         continue;
       }
       const key = `local-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      setItems(current => [...current, { key, previewUri: image.uri, uploading: true }]);
+      setItems(current => [
+        ...current,
+        { key, previewUri: image.uri, uploading: true, sourceKey: image.sourceKey },
+      ]);
       await uploadReceiptImage(key, image);
     }
   };
@@ -192,7 +223,6 @@ export function useReceiptAttachments({
       return;
     }
     if (mode === 'photo') {
-      showSnackbar(SNACKBAR_RECEIPT_ADDED);
       addPickedImages([image]);
     } else {
       // 촬영본을 그대로 넘긴다 — 스캔 화면이 이걸 올리고 그 fileId 로 인식을 부른다.
@@ -258,6 +288,10 @@ export function useReceiptAttachments({
     if (outcome.kind === 'rateLimited') {
       // 서버가 외부 OCR 을 건당 과금으로 부른다. 재촬영을 권하는 실패 화면으로 보내면
       // 사용자가 곧장 다시 시도하게 되므로, 폼으로 돌려보내고 알리기만 한다.
+      // 폼으로 돌아가면 이 fileId 는 어디에도 연결되지 않으니 서버에 주인 없이 남는다 — 지운다.
+      fileService.deleteFile(String(outcome.fileId)).catch(() => {
+        // 지우기까지 실패하면 남겨 두는 수밖에 없다. 사용자에게 또 알릴 일은 아니다.
+      });
       setStage({ kind: 'form' });
       showSnackbar(SNACKBAR_SCAN_RATE_LIMITED);
       return;
@@ -265,6 +299,17 @@ export function useReceiptAttachments({
     if (outcome.kind === 'failed') {
       setStage({ kind: 'form' });
       showSnackbar(outcome.message);
+      return;
+    }
+    if (outcome.kind === 'notRecognized' && !outcome.message) {
+      // 진짜 인식 실패(OCR_RESULT_EMPTY·INVALID_OCR_FILE) — 증빙으로 붙이지 않고
+      // 실패 화면으로 보낸다(FT-32). `message`가 있는 쪽(네트워크·처리 오류)은
+      // 파일이 이미 올라가 있으니 증빙으로 유지하는 기존 동작 그대로(아래로 진행).
+      // 증빙으로 붙이지 않으므로 이미 올라간 파일은 주인 없이 서버에 남는다 — 지운다.
+      fileService.deleteFile(String(outcome.fileId)).catch(() => {
+        // 지우기까지 실패하면 남겨 두는 수밖에 없다. 사용자에게 또 알릴 일은 아니다.
+      });
+      setStage({ kind: 'scanFailed' });
       return;
     }
 
@@ -322,7 +367,6 @@ export function useReceiptAttachments({
         remainingSlots={maxCount - items.length}
         onPicked={images => {
           setStage({ kind: 'form' });
-          showSnackbar(SNACKBAR_RECEIPT_ADDED);
           addPickedImages(images);
         }}
         onBack={() => setStage({ kind: 'form' })}

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ActivityIndicator, Image, Pressable, StyleSheet, View } from 'react-native';
 import { useAuthenticatedImage } from '../../../hooks/useAuthenticatedImage';
 import {
@@ -31,13 +32,27 @@ function Thumbnail({
 }: ThumbnailProps) {
   const { uri: resolvedUri } = useAuthenticatedImage(imageUri ? undefined : imageUrl);
   const finalUri = imageUri || resolvedUri;
+  /** `uri`는 받았지만 `<Image>`가 실제로 못 그린 경우(예: data URI 디코딩 실패) — 원인과 무관하게 빈 placeholder로 눈에 보이게 한다(FT-08·FT-13). */
+  const [renderFailed, setRenderFailed] = useState(false);
+
+  // finalUri 가 바뀌면(다른 사진으로 재사용되는 등) 이전 실패 기록을 지운다.
+  const [lastUri, setLastUri] = useState(finalUri);
+  if (finalUri !== lastUri) {
+    setLastUri(finalUri);
+    if (renderFailed) {
+      setRenderFailed(false);
+    }
+  }
+
+  const showImage = Boolean(finalUri) && !renderFailed;
 
   return (
     <View style={[styles.container, { width: size, height: size }]}>
-      {finalUri ? (
+      {showImage ? (
         <Image
           source={{ uri: finalUri }}
           style={styles.image}
+          onError={() => setRenderFailed(true)}
         />
       ) : (
         <View style={styles.emptyBackground}>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -44,15 +44,12 @@ import { useSubmitLock } from '../../hooks/useSubmitLock';
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const CLOSE_ICON = require('../../assets/icons/action/Close.png');
 
-const SNACKBAR_AUTO_HIDE_MS = 3000;
-
 type ArchiveListNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 type LoadState = 'loading' | 'error' | 'ready';
 type ActiveDialog = 'rename' | 'delete' | null;
 
 function ArchiveListScreen() {
   const navigation = useNavigation<ArchiveListNavigationProp>();
-  const snackbarTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [archives, setArchives] = useState<ArchiveSummary[]>([]);
   const [loadState, setLoadState] = useState<LoadState>('loading');
@@ -98,14 +95,6 @@ function ArchiveListScreen() {
     }, [loadArchives]),
   );
 
-  useEffect(() => {
-    return () => {
-      if (snackbarTimeoutRef.current) {
-        clearTimeout(snackbarTimeoutRef.current);
-      }
-    };
-  }, []);
-
   const closeDialog = () => {
     setActiveDialog(null);
     setTargetArchive(null);
@@ -114,18 +103,10 @@ function ArchiveListScreen() {
   };
 
   const showSnackbar = (message: string) => {
-    if (snackbarTimeoutRef.current) {
-      clearTimeout(snackbarTimeoutRef.current);
-    }
     setSnackbarMessage(message);
-    snackbarTimeoutRef.current = setTimeout(() => setSnackbarMessage(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const closeSnackbar = () => {
-    if (snackbarTimeoutRef.current) {
-      clearTimeout(snackbarTimeoutRef.current);
-      snackbarTimeoutRef.current = null;
-    }
     setSnackbarMessage(null);
   };
 
@@ -176,9 +157,11 @@ function ArchiveListScreen() {
     <ScreenContainer
       background="primary"
       snackbar={
-        snackbarMessage ? (
-          <Snackbar visible title={snackbarMessage} onClose={closeSnackbar} />
-        ) : undefined
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={closeSnackbar}
+        />
       }
     >
       <AppBar type="sub" title={ARCHIVE_SCREEN_TITLE} onBackPress={() => navigation.goBack()} />

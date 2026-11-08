@@ -169,7 +169,6 @@ function TransactionsScreen() {
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
-    setTimeout(() => setSnackbarMessage(null), 1600);
   };
 
   useEffect(() => {
@@ -360,7 +359,13 @@ function TransactionsScreen() {
       edges={['top']}
       aboveTabBar
       snackbarOffset={FAB_SIZE + SNACKBAR_FAB_GAP}
-      snackbar={snackbarMessage ? <Snackbar visible title={snackbarMessage} /> : undefined}
+      snackbar={
+        <Snackbar
+          visible={snackbarMessage != null}
+          title={snackbarMessage ?? ''}
+          onClose={() => setSnackbarMessage(null)}
+        />
+      }
     >
       <AppBar type="titleOnly" title={TRANSACTIONS_TITLE} />
 

@@ -70,6 +70,8 @@ export const BUDGET_LIST_EMPTY_TITLE =
   '아직 예산 설정할 장부가 존재하지 않아요.';
 export const BUDGET_LIST_EMPTY_SUBTITLE = "'폴더'에서 장부를 생성해주세요.";
 export const BUDGET_SHEET_PLACEHOLDER = '예산을 입력해주세요.';
+export const BUDGET_SHEET_TITLE = (ledgerName: string) => `'${ledgerName}' 예산 설정`;
+export const BUDGET_SHEET_CANCEL_LABEL = '취소';
 export const BUDGET_SAVE_LABEL = '저장하기';
 export const SNACKBAR_BUDGET_SAVED = '예산 설정이 완료되었어요.';
 export const BUDGET_LIST_LOADING = '장부 목록을 불러오는 중이에요.';

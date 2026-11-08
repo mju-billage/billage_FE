@@ -138,6 +138,7 @@ function PasswordChangeScreen() {
           }}
           placeholder={PASSWORD_CHANGE_CURRENT_PLACEHOLDER}
           secureToggle
+          secureToggleOnFocusOnly
           error={currentPasswordError}
         />
         <TextField
@@ -152,6 +153,7 @@ function PasswordChangeScreen() {
           }}
           placeholder={PASSWORD_CHANGE_NEW_PLACEHOLDER}
           secureToggle
+          secureToggleOnFocusOnly
           error={newPasswordError}
         />
         <TextField
@@ -167,6 +169,7 @@ function PasswordChangeScreen() {
           }}
           placeholder={PASSWORD_CHANGE_NEW_PLACEHOLDER}
           secureToggle
+          secureToggleOnFocusOnly
           error={confirmError}
         />
       </ScrollView>

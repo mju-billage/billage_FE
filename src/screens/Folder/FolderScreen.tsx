@@ -1,5 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useSyncExternalStore } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { truncateWithEllipsis } from '../../utils/truncateWithEllipsis';
+import { formatDateShort } from '../../utils/dueDate';
 import {
   useFocusEffect,
   useNavigation,
@@ -29,6 +31,11 @@ import type { MenuItem } from '../../components/Navigation/Menu/Menu';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { getActiveGroup } from '../../types/group';
 import { getChildFolders, mergeFolderListItems } from '../../utils/folderTree';
+import {
+  getFolderViewMode,
+  setFolderViewMode,
+  subscribeFolderViewMode,
+} from '../../utils/folderViewMode';
 import type { FolderListItem } from '../../utils/folderTree';
 import * as folderService from '../../services/folderService';
 import * as ledgerService from '../../services/ledgerService';
@@ -62,7 +69,6 @@ import {
   FOLDER_SEARCH_EMPTY_SUBTITLE,
   FOLDER_SEARCH_EMPTY_TITLE,
   FOLDER_SEARCH_PLACEHOLDER,
-  LEDGER_ITEM_BUDGET_UNSET,
   NEW_FOLDER_CREATE_LABEL,
   NEW_FOLDER_DIALOG_TITLE,
   NEW_FOLDER_NAME_PLACEHOLDER,
@@ -91,8 +97,6 @@ const GRID_ICON = require('../../assets/icons/system/Grid.png');
 const LIST_ICON = require('../../assets/icons/system/List.png');
 const PLUS_ICON = require('../../assets/icons/action/Plus.png');
 
-const SNACKBAR_AUTO_HIDE_MS = 1600;
-
 type FolderScreenNavigationProp = CompositeNavigationProp<
   NativeStackNavigationProp<FolderTabParamList, 'FolderList'>,
   NativeStackNavigationProp<RootStackParamList>
@@ -114,7 +118,7 @@ function FolderScreen() {
   const folderName = route.params?.folderName;
   const isRoot = folderId === null;
 
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const viewMode = useSyncExternalStore(subscribeFolderViewMode, getFolderViewMode);
   const [searchQuery, setSearchQuery] = useState('');
   const [items, setItems] = useState<FolderListItem[]>([]);
   const [loadState, setLoadState] = useState<LoadState>('loading');
@@ -177,7 +181,6 @@ function FolderScreen() {
       const pending = takePendingSnackbar();
       if (pending) {
         setSnackbar(pending);
-        setTimeout(() => setSnackbar(null), SNACKBAR_AUTO_HIDE_MS);
       }
     }, [loadItems]),
   );
@@ -200,7 +203,6 @@ function FolderScreen() {
 
   const showSnackbar = (title: string, description?: string) => {
     setSnackbar({ title, description });
-    setTimeout(() => setSnackbar(null), SNACKBAR_AUTO_HIDE_MS);
   };
 
   const handlePressItem = (item: FolderListItem) => {
@@ -246,11 +248,11 @@ function FolderScreen() {
         setActiveDialog('rename');
         break;
       case 'grid':
-        setViewMode('grid');
+        setFolderViewMode('grid');
         closeMoreMenu();
         break;
       case 'list':
-        setViewMode('list');
+        setFolderViewMode('list');
         closeMoreMenu();
         break;
       case 'unlink':
@@ -363,18 +365,17 @@ function FolderScreen() {
       avoidKeyboard={false}
       aboveTabBar
       snackbar={
-        snackbar ? (
-          <Snackbar
-            visible
-            title={snackbar.title}
-            description={snackbar.description}
-          />
-        ) : undefined
+        <Snackbar
+          visible={snackbar != null}
+          title={snackbar?.title ?? ''}
+          description={snackbar?.description}
+          onClose={() => setSnackbar(null)}
+        />
       }
     >
       <AppBar
         type={isRoot ? 'titleOnly' : 'sub'}
-        title={isRoot ? FOLDER_SCREEN_TITLE : folderName ?? ''}
+        title={isRoot ? FOLDER_SCREEN_TITLE : truncateWithEllipsis(folderName ?? '')}
         onBackPress={() => navigation.goBack()}
         rightIcons={[
           { icon: STATISTICS_ICON, onPress: () => navigation.navigate('Statistics') },
@@ -416,18 +417,20 @@ function FolderScreen() {
             </View>
 
             {filteredItems.length === 0 ? (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyTitle}>
-                  {searchQuery.trim()
-                    ? FOLDER_SEARCH_EMPTY_TITLE
-                    : FOLDER_EMPTY_TITLE}
-                </Text>
-                <Text style={styles.emptySubtitle}>
-                  {searchQuery.trim()
-                    ? FOLDER_SEARCH_EMPTY_SUBTITLE
-                    : FOLDER_EMPTY_SUBTITLE}
-                </Text>
-              </View>
+              !isRoot && !searchQuery.trim() ? null : (
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyTitle}>
+                    {searchQuery.trim()
+                      ? FOLDER_SEARCH_EMPTY_TITLE
+                      : FOLDER_EMPTY_TITLE}
+                  </Text>
+                  <Text style={styles.emptySubtitle}>
+                    {searchQuery.trim()
+                      ? FOLDER_SEARCH_EMPTY_SUBTITLE
+                      : FOLDER_EMPTY_SUBTITLE}
+                  </Text>
+                </View>
+              )
             ) : (
               <FlatList
                 key={viewMode}
@@ -490,6 +493,7 @@ function FolderScreen() {
         }}
         textFieldPlaceholder={dialogConfig.placeholder}
         textFieldMaxLength={dialogConfig.showTextField ? FOLDER_NAME_MAX_LENGTH : undefined}
+        autoFocusTextField={activeDialog === 'backup'}
         textFieldError={dialogError}
         confirmLabel={dialogConfig.confirmLabel}
         destructive={activeDialog === 'unlink'}
@@ -505,9 +509,7 @@ function getItemSubtitle(item: FolderListItem): string {
   if (item.kind === 'folder') {
     return `${item.itemCount}개의 항목`;
   }
-  return item.budget != null
-    ? `예산 ${item.budget.toLocaleString()}원`
-    : LEDGER_ITEM_BUDGET_UNSET;
+  return formatDateShort(item.createdAt);
 }
 
 function getDialogConfig(activeDialog: ActiveDialog) {

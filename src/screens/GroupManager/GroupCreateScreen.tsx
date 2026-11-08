@@ -8,6 +8,7 @@ import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import * as groupService from '../../services/groupService';
+import { setPendingSnackbar } from '../../utils/pendingSnackbar';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
 import { ApiError } from '../../services/apiClient';
 import {
@@ -48,17 +49,10 @@ function GroupCreateScreen() {
     run(async () => {
       try {
         await groupService.createGroup({ name: trimmedName });
+        setPendingSnackbar(`'${trimmedName}'${SNACKBAR_GROUP_CREATED_SUFFIX}`);
         navigation.reset({
-          index: 1,
-          routes: [
-            { name: 'Main', params: { screen: 'More' } },
-            {
-              name: 'AllGroups',
-              params: {
-                snackbarMessage: `'${trimmedName}'${SNACKBAR_GROUP_CREATED_SUFFIX}`,
-              },
-            },
-          ],
+          index: 0,
+          routes: [{ name: 'Main', params: { screen: 'Home' } }],
         });
         return true;
       } catch (error) {

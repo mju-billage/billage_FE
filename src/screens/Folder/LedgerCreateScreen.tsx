@@ -12,6 +12,8 @@ import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
 import * as ledgerService from '../../services/ledgerService';
 import { setPendingSnackbar } from '../../utils/pendingSnackbar';
+import { capDigits } from '../../utils/currency';
+import { TEXT_FIELD_MAX_LENGTH_ERROR } from '../../constants/commonText';
 import { getActiveGroup } from '../../types/group';
 import { ApiError } from '../../services/apiClient';
 import {
@@ -46,6 +48,8 @@ type LedgerCreateNavigationProp = NativeStackNavigationProp<
 >;
 type LedgerCreateRouteProp = RouteProp<RootStackParamList, 'LedgerCreate'>;
 
+const LEDGER_BUDGET_MAX_DIGITS = String(LEDGER_BUDGET_MAX).length;
+
 function LedgerCreateScreen() {
   const navigation = useNavigation<LedgerCreateNavigationProp>();
   const route = useRoute<LedgerCreateRouteProp>();
@@ -54,6 +58,7 @@ function LedgerCreateScreen() {
   const [name, setName] = useState('');
   const [budget, setBudget] = useState('');
   const [nameError, setNameError] = useState<string | undefined>();
+  const [budgetError, setBudgetError] = useState<string | undefined>();
   const { isLocked, run } = useSubmitLock();
   const [leaveConfirmVisible, setLeaveConfirmVisible] = useState(false);
 
@@ -159,16 +164,20 @@ function LedgerCreateScreen() {
             label={LEDGER_BUDGET_LABEL}
             value={budget}
             onChangeText={text => {
-              const digitsOnly = text.replace(/[^0-9]/g, '');
-              const clamped =
-                digitsOnly && Number(digitsOnly) > LEDGER_BUDGET_MAX
-                  ? String(LEDGER_BUDGET_MAX)
-                  : digitsOnly;
-              setBudget(clamped);
+              const { value, overflow } = capDigits(
+                text.replace(/[^0-9]/g, ''),
+                LEDGER_BUDGET_MAX_DIGITS,
+              );
+              setBudget(value);
+              setBudgetError(
+                overflow ? TEXT_FIELD_MAX_LENGTH_ERROR(LEDGER_BUDGET_MAX_DIGITS) : undefined,
+              );
             }}
+            onBlur={() => setBudgetError(undefined)}
             placeholder={LEDGER_BUDGET_PLACEHOLDER}
             keyboardType="number-pad"
             suffix="원"
+            error={budgetError}
           />
         </View>
       </ScrollView>

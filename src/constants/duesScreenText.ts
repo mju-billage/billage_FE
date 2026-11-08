@@ -12,6 +12,7 @@ export const DUES_LOADING = '회비 목록을 불러오는 중이에요.';
 export const DUES_RETRY_LABEL = '다시 시도';
 
 export const DUES_BADGE_CLOSED = '마감';
+export const DUES_BADGE_SCHEDULED = '예정';
 
 export const DUES_DETAIL_LOADING = '회비 정보를 불러오는 중이에요.';
 export const DUES_DETAIL_RETRY_LABEL = '다시 시도';
@@ -21,6 +22,8 @@ export const DUES_MEMBER_TAB_UNPAID = '미납부';
 export const DUES_MEMBER_TAB_PAID = '납부 완료';
 export const DUES_MEMBER_COUNT_SUFFIX = '명';
 export const DUES_MEMBER_LIST_EMPTY = '대상자가 없어요.';
+export const DUES_MEMBER_PAID_EMPTY_TITLE = '납부 완료된 모임원이 없어요.';
+export const DUES_MEMBER_PAID_EMPTY_SUBTITLE = '모임원의 납부 현황을 확인해주세요.';
 
 export const DUES_CREATE_TITLE = '회비 생성';
 export const DUES_CREATE_TITLE_FIELD_LABEL = '제목';
@@ -64,8 +67,6 @@ export const DUES_MENU_CLOSE_LABEL = '회비 마감';
 export const DUES_MENU_DELETE_LABEL = '회비 삭제';
 
 export const DUES_EDIT_TITLE = '회비 수정';
-export const DUES_EDIT_AMOUNT_LOCKED_HINT =
-  '금액은 마감 전까지도 수정할 수 없어요.';
 export const DUES_EDIT_SUBMIT_LABEL = '수정하기';
 export const DUES_EDIT_LEAVE_TITLE = '회비 수정을 그만둘까요?';
 export const DUES_EDIT_LEAVE_DESCRIPTION = '변경된 내용은 저장되지 않아요.';
@@ -92,8 +93,6 @@ export const SNACKBAR_DUES_PAYMENT_CANCELLED_SUFFIX = '명의 납부가 취소�
 export const DUES_REQUEST_TITLE = '회비 요청';
 export const DUES_REQUEST_PLACEHOLDER = '회비 납부 요청 글을 작성해 주세요';
 export const DUES_REQUEST_SUBMIT_LABEL = '회비 요청하기';
-export const DUES_REQUEST_LEAVE_TITLE = '회비 요청 작성을 그만둘까요?';
-export const DUES_REQUEST_LEAVE_DESCRIPTION = '작성 중인 내용이 사라져요.';
 export const DUES_REQUEST_ENTRY_LABEL = '회비 요청하기';
 
 export const DUES_CLOSE_CONFIRM_TITLE = '회비 수납을 마감할까요?';

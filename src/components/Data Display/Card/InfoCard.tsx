@@ -19,6 +19,7 @@ type InfoCardField = {
 type InfoCardProps = {
   fields: InfoCardField[];
   tags?: string[];
+  tagsReadOnly?: boolean;
   onRemoveTag?: (index: number) => void;
   onAddTag?: () => void;
   memo?: string;
@@ -28,13 +29,14 @@ type InfoCardProps = {
 function InfoCard({
   fields,
   tags,
+  tagsReadOnly = false,
   onRemoveTag,
   onAddTag,
   memo,
   memoPlaceholder = '메모를 입력해주세요.',
 }: InfoCardProps) {
   return (
-    <CardBase variant="dashed">
+    <CardBase>
       {fields.map(field => (
         <View key={field.label} style={styles.fieldColumn}>
           <Text style={styles.fieldLabel}>
@@ -53,9 +55,10 @@ function InfoCard({
         <View style={styles.tagSection}>
           <View style={styles.tagHeaderRow}>
             <Text style={styles.fieldLabel}>
-              태그<Text style={styles.required}>*</Text>
+              태그
+              {!tagsReadOnly && <Text style={styles.required}>*</Text>}
             </Text>
-            {onAddTag && (
+            {onAddTag && !tagsReadOnly && (
               <Pressable style={styles.addTagRow} onPress={onAddTag}>
                 <Text style={styles.addTagText}>추가하기</Text>
                 <Image source={CHEVRON_RIGHT_ICON} style={styles.chevron} />
@@ -67,6 +70,7 @@ function InfoCard({
               <Chip
                 key={`${tag}-${index}`}
                 label={tag}
+                removable={!tagsReadOnly}
                 onRemove={() => onRemoveTag?.(index)}
               />
             ))}
