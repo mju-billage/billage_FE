@@ -301,6 +301,10 @@ export function useReceiptAttachments({
       // 진짜 인식 실패(OCR_RESULT_EMPTY·INVALID_OCR_FILE) — 증빙으로 붙이지 않고
       // 실패 화면으로 보낸다(FT-32). `message`가 있는 쪽(네트워크·처리 오류)은
       // 파일이 이미 올라가 있으니 증빙으로 유지하는 기존 동작 그대로(아래로 진행).
+      // 증빙으로 붙이지 않으므로 이미 올라간 파일은 주인 없이 서버에 남는다 — 지운다.
+      fileService.deleteFile(String(outcome.fileId)).catch(() => {
+        // 지우기까지 실패하면 남겨 두는 수밖에 없다. 사용자에게 또 알릴 일은 아니다.
+      });
       setStage({ kind: 'scanFailed' });
       return;
     }
