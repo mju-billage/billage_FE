@@ -131,6 +131,14 @@ function LedgerFilterSheet({
     }
   };
 
+  const togglePeriod = (period: LedgerFilterPeriod) => {
+    if (draft.period === period) {
+      setDraft({ ...draft, period: 'all', customStart: undefined, customEnd: undefined });
+    } else {
+      setDraft({ ...draft, period });
+    }
+  };
+
   const openPeriodStep = () => {
     const start = draft.customStart;
     setPeriodDraft({ start, end: draft.customEnd });
@@ -181,28 +189,28 @@ function LedgerFilterSheet({
               showIcon={false}
               style={styles.chipFlex}
               active={draft.period === '1month'}
-              onPress={() => setDraft({ ...draft, period: '1month' })}
+              onPress={() => togglePeriod('1month')}
             />
             <FilterChip
               label={FILTER_PERIOD_3MONTH}
               showIcon={false}
               style={styles.chipFlex}
               active={draft.period === '3month'}
-              onPress={() => setDraft({ ...draft, period: '3month' })}
+              onPress={() => togglePeriod('3month')}
             />
             <FilterChip
               label={FILTER_PERIOD_6MONTH}
               showIcon={false}
               style={styles.chipFlex}
               active={draft.period === '6month'}
-              onPress={() => setDraft({ ...draft, period: '6month' })}
+              onPress={() => togglePeriod('6month')}
             />
             <FilterChip
               label={FILTER_PERIOD_CUSTOM}
               showIcon={false}
               style={styles.chipFlex}
               active={draft.period === 'custom'}
-              onPress={() => setDraft({ ...draft, period: 'custom' })}
+              onPress={() => togglePeriod('custom')}
             />
           </View>
           {draft.period === 'custom' && (
