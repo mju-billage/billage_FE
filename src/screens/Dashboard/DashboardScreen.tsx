@@ -69,6 +69,8 @@ const SCREEN_HORIZONTAL_PADDING = 20;
 const DUES_CARD_GAP = 8;
 // 내역 탭의 SNACKBAR_FAB_GAP(TransactionsScreen.tsx)과 같은 값 — FAB 위로 스낵바를 띄우는 간격
 const SNACKBAR_FAB_GAP = 8;
+// FolderTabShape 가 카드 위로 튀어나오는 높이(top: -20)
+const FOLDER_TAB_OVERHANG = 20;
 
 type DashboardScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'Home'>,
@@ -328,6 +330,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: SCREEN_HORIZONTAL_PADDING,
+    paddingTop: FOLDER_TAB_OVERHANG,
     paddingBottom: BOTTOM_NAVIGATION_HEIGHT+ 12,
   },
   fixedHeader: {
@@ -339,7 +342,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 60,
+    marginBottom: 60 - FOLDER_TAB_OVERHANG,
   },
   groupName: {
     ...TYPOGRAPHY.h3,
