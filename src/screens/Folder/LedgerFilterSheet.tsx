@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Button from '../../components/Input/Button/Button';
@@ -106,6 +106,13 @@ function LedgerFilterSheet({
   const [periodDraft, setPeriodDraft] = useState<PeriodDraft>({});
   const [calendarYear, setCalendarYear] = useState(() => new Date().getFullYear());
   const [calendarMonth, setCalendarMonth] = useState(() => new Date().getMonth() + 1);
+
+  useEffect(() => {
+    if (visible) {
+      setDraft(value);
+      setStep('filter');
+    }
+  }, [visible, value]);
 
   const handleReset = () => {
     setDraft(DEFAULT_LEDGER_FILTER);
