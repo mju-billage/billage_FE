@@ -148,7 +148,7 @@ function ProfileEditScreen() {
         if (Object.keys(payload).length > 0) {
           await authService.updateMyProfile(payload);
         }
-        navigation.navigate('MyProfile', {
+        navigation.popTo('MyProfile', {
           snackbarMessage: SNACKBAR_PROFILE_UPDATED,
         });
         return true;

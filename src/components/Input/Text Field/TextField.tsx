@@ -4,9 +4,11 @@ import {
   KeyboardTypeOptions,
   LayoutChangeEvent,
   Pressable,
+  StyleProp,
   StyleSheet,
   Text,
   TextInput,
+  TextStyle,
   View,
 } from 'react-native';
 import {
@@ -46,6 +48,10 @@ type TextFieldProps = {
   autoCorrect?: boolean;
   autoFocus?: boolean;
   onBlur?: () => void;
+  /** true면 secureToggle 눈 아이콘을 포커스 중일 때만 보여준다(QA 결정: 옵트인, 기본 false) */
+  secureToggleOnFocusOnly?: boolean;
+  /** 글자 크기 등 입력칸 타이포만 바꿀 때 쓴다(예: 내역 금액의 큰 숫자, FT-22). 입력칸·숨은 측정 글자·'원' 모두에 같이 적용돼야 위치가 안 어긋난다. */
+  inputStyle?: StyleProp<TextStyle>;
 };
 
 const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
@@ -69,6 +75,8 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
     autoCorrect,
     autoFocus = false,
     onBlur,
+    secureToggleOnFocusOnly = false,
+    inputStyle,
   },
   ref,
 ) {
@@ -77,6 +85,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
   const [measuredTextWidth, setMeasuredTextWidth] = useState<number | null>(null);
   const [overflow, setOverflow] = useState(false);
   const showIcon = isFocused || value.length > 0;
+  const showSecureToggleIcon = secureToggleOnFocusOnly ? isFocused : showIcon;
   const showSuffix = Boolean(suffix) && value.length > 0;
   const effectiveOnClear =
     onClear ?? (secureTextEntry || secureToggle ? undefined : () => onChangeText(''));
@@ -132,6 +141,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           ref={ref}
           style={[
             styles.input,
+            inputStyle,
             disabled && styles.inputDisabled,
             showSuffix && measuredTextWidth != null && styles.inputWithSuffix,
             showSuffix && measuredTextWidth != null
@@ -157,7 +167,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
         />
         {suffix != null && (
           <Text
-            style={styles.hiddenMeasure}
+            style={[styles.hiddenMeasure, inputStyle]}
             numberOfLines={1}
             onLayout={handleMeasureLayout}
           >
@@ -165,7 +175,7 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
           </Text>
         )}
         {showSuffix && (
-          <Text style={[styles.suffix, disabled && styles.inputDisabled]}>
+          <Text style={[styles.suffix, inputStyle, disabled && styles.inputDisabled]}>
             {suffix}
           </Text>
         )}
@@ -187,8 +197,8 @@ const TextField = forwardRef<TextInput, TextFieldProps>(function TextFieldInner(
         {secureToggle && !disabled && (
           <Pressable
             onPress={() => setIsSecure(!isSecure)}
-            pointerEvents={showIcon ? 'auto' : 'none'}
-            style={showIcon ? styles.iconShown : styles.iconHidden}
+            pointerEvents={showSecureToggleIcon ? 'auto' : 'none'}
+            style={showSecureToggleIcon ? styles.iconShown : styles.iconHidden}
           >
             <Image
               source={isSecure ? EYE_CLOSED_ICON : EYE_ICON}

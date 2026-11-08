@@ -34,6 +34,8 @@ import {
   LOGIN_FIND_PASSWORD_LABEL,
   LOGIN_GO_TO_SIGNUP_LABEL,
   LOGIN_INVALID_CREDENTIALS_ERROR,
+  LOGIN_USER_NOT_FOUND_ERROR,
+  LOGIN_INVALID_PASSWORD_ERROR,
   LOGIN_GENERIC_ERROR,
   LOGIN_SOCIAL_SDK_ERROR,
   LOGIN_SOCIAL_NETWORK_ERROR,
@@ -112,6 +114,7 @@ function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState<string | undefined>();
+  const [emailError, setEmailError] = useState<string | undefined>();
   const { isLocked: isSubmitting, run } = useSubmitLock();
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
 
@@ -132,13 +135,18 @@ function LoginScreen() {
 
   const performLogin = (credentials: authService.LoginRequest) => {
     setLoginError(undefined);
+    setEmailError(undefined);
     run(async () => {
       try {
         await authService.login(credentials);
         goToMain();
         return true;
       } catch (error) {
-        if (error instanceof ApiError && error.code === 'INVALID_CREDENTIALS') {
+        if (error instanceof ApiError && error.code === 'USER_NOT_FOUND') {
+          setEmailError(LOGIN_USER_NOT_FOUND_ERROR);
+        } else if (error instanceof ApiError && error.code === 'INVALID_PASSWORD') {
+          setLoginError(LOGIN_INVALID_PASSWORD_ERROR);
+        } else if (error instanceof ApiError && error.code === 'INVALID_CREDENTIALS') {
           setLoginError(LOGIN_INVALID_CREDENTIALS_ERROR);
         } else {
           setLoginError(toUserErrorMessage(error, LOGIN_GENERIC_ERROR));
@@ -152,6 +160,7 @@ function LoginScreen() {
 
   const handleSocialLogin = (provider: SocialType) => {
     setLoginError(undefined);
+    setEmailError(undefined);
     run(async () => {
       let profile: SocialProfile | null;
       try {
@@ -240,15 +249,16 @@ function LoginScreen() {
             value={email}
             onChangeText={text => {
               setEmail(text);
-              setLoginError(undefined);
+              setEmailError(undefined);
             }}
             onClear={() => {
               setEmail('');
-              setLoginError(undefined);
+              setEmailError(undefined);
             }}
             placeholder={LOGIN_EMAIL_PLACEHOLDER}
             autoCapitalize="none"
             keyboardType="email-address"
+            error={emailError}
           />
           <View id="hv" style={{ height: 8}} />
           <TextField

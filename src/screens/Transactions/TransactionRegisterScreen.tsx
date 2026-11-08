@@ -16,9 +16,9 @@
  * User 기준)여야 한다 — 납부 명단(`Member`)은 담당자가 될 수 없다(Entry.txt §4). 그래서
  * 선택 목록도 `groupMembershipService.getMemberships()`에서 가져온다.
  *
- * 실 API로 가는 두 모드에서 여전히 뺀 것:
- *  - "장부" 변경(editReal만): `PATCH /entries/{id}`에 ledgerId가 없어 등록 후엔
- *    장부를 옮길 수 없다 — 표시만 하고 못 누르게 막았다.
+ * "장부" 변경(2026-11-05 연동, editReal만): 총무(`OWNER`)만 `PATCH /entries/{id}`의
+ * `ledgerId`로 장부를 옮길 수 있다 — 같은 모임의 장부만 허용되고, 아니면 서버가
+ * `LEDGER_NOT_FOUND`를 돌려준다. 총무가 아니면 지금처럼 표시만 하고 못 누르게 막는다.
  *
  * 2026-09-11부터 증빙 실제 업로드가 붙었다 — 카메라/갤러리로 고른 사진을
  * 촬영·선택 직후 `fileService.uploadFile(..., 'RECEIPT')`로 바로 업로드하고,
@@ -30,7 +30,7 @@
  * 부른다. **서버는 `totalAmount`만 항상 채우므로** 상호·결제일은 읽힌 것만 덮어쓴다
  * (`applyScanValues`). 인식에 실패해도 사진은 이미 올라가 있어 증빙으로 붙인다.
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   BackHandler,
   Image,
@@ -38,6 +38,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -50,6 +51,7 @@ import { takePendingSnackbar } from '../../utils/pendingSnackbar';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import SegmentedControl from '../../components/Input/Control/SegmentedControl';
+import TextField from '../../components/Input/Text Field/TextField';
 import SelectionListItem from '../../components/Data Display/Lists/SelectionListItem';
 import DetailFieldRow from '../../components/Data Display/Lists/DetailFieldRow';
 import Divider from '../../components/Data Display/Divider/Divider';
@@ -57,7 +59,6 @@ import AttachmentAddButton, { ATTACHMENT_SIZE } from '../../components/Input/But
 import Thumbnail from '../../components/Data Display/Image Placeholder/Thumbnail';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
-import TransactionAmountSheet from './TransactionAmountSheet';
 import TransactionDateSheet from './TransactionDateSheet';
 import TransactionSingleSelectSheet from './TransactionSingleSelectSheet';
 import TransactionTextInputSheet from './TransactionTextInputSheet';
@@ -68,8 +69,10 @@ import {
 } from '../../hooks/useReceiptAttachments';
 import { todayKey } from '../../utils/calendarGrid';
 import { truncateWithEllipsis } from '../../utils/truncateWithEllipsis';
+import { capDigits } from '../../utils/currency';
 import { formatFullDate } from '../../utils/dateHeader';
 import { getActiveGroup } from '../../types/group';
+import { getCurrentUser } from '../../types/session';
 import * as ledgerService from '../../services/ledgerService';
 import * as entryService from '../../services/entryService';
 import * as groupMembershipService from '../../services/groupMembershipService';
@@ -132,15 +135,17 @@ import {
 } from '../../constants/transactionScreenText';
 import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+import { TEXT_FIELD_MAX_LENGTH_ERROR } from '../../constants/commonText';
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 
 type TransactionKind = 'income' | 'expense';
 type RegisterMode = 'createReal' | 'editReal';
 
+const AMOUNT_MAX_DIGITS = 9;
+
 type ActiveSheet =
   | 'none'
-  | 'amount'
   | 'date'
   | 'itemName'
   | 'manager'
@@ -184,9 +189,12 @@ function TransactionRegisterScreen() {
   const transactionId = route.params?.transactionId;
 
   const mode: RegisterMode = !transactionId ? 'createReal' : 'editReal';
+  const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
 
   const [transactionKind, setTransactionKind] = useState<TransactionKind>('expense');
   const [amount, setAmount] = useState(0);
+  const [amountError, setAmountError] = useState<string | undefined>();
+  const amountInputRef = useRef<TextInput>(null);
   const [date, setDate] = useState(todayKey());
   const [itemName, setItemName] = useState('');
   const [managerUserId, setManagerUserId] = useState<string | undefined>(undefined);
@@ -209,6 +217,7 @@ function TransactionRegisterScreen() {
     memo: string;
     managerUserId: string;
     receiptFileIds: number[];
+    ledgerId: string;
   } | null>(null);
 
   const [activeSheet, setActiveSheet] = useState<ActiveSheet>('none');
@@ -221,14 +230,11 @@ function TransactionRegisterScreen() {
     setSnackbarMessage(message);
   };
 
-  /** 읽힌 값만 덮어쓴다. 못 읽은 칸(null)은 사용자가 채우거나 기본값으로 남는다. */
+  /** 읽힌 값만 덮어쓴다. 못 읽은 칸(null)은 사용자가 채우거나 기본값으로 남는다. 내역명은 OCR 이 안 채운다 — 사용자가 직접 입력한다(FT-33). */
   const applyScanValues = (values: ScanApplyValues) => {
     setAmount(values.amount);
     if (values.date !== null) {
       setDate(values.date);
-    }
-    if (values.merchantName !== null && itemName === '') {
-      setItemName(values.merchantName);
     }
   };
 
@@ -245,10 +251,8 @@ function TransactionRegisterScreen() {
     const amountConflict = amount !== 0 && amount !== values.amount;
     const dateConflict =
       values.date !== null && date !== todayKey() && date !== values.date;
-    const nameConflict =
-      values.merchantName !== null && itemName !== '' && itemName !== values.merchantName;
 
-    if (amountConflict || dateConflict || nameConflict) {
+    if (amountConflict || dateConflict) {
       setPendingScanResult(values);
       setActiveDialog('scanApply');
       return;
@@ -279,12 +283,23 @@ function TransactionRegisterScreen() {
       const group = getActiveGroup();
       if (group) {
         const memberships = await groupMembershipService.getMemberships(group.id);
-        setManagerOptions(memberships.map(m => ({ key: m.userId, label: m.name })));
+        const options = memberships.map(m => ({ key: m.userId, label: m.name }));
+        setManagerOptions(options);
+        if (mode === 'createReal') {
+          // 담당자 기본값 = 나(FT-27). 내가 이 모임 관리자 목록에 없으면(일반 모임원 등) 비워 둔다.
+          const myUserId = getCurrentUser()?.userId;
+          const myOption = options.find(option => option.key === myUserId);
+          if (myOption) {
+            setManagerUserId(myOption.key);
+            setManagerName(myOption.label);
+          }
+        }
       }
-      if (mode === 'createReal') {
+      if (mode === 'createReal' || viewerIsOwner) {
         const ledgers = group ? await ledgerService.getAllLedgersInGroup(group.id) : [];
         setLedgerOptions(ledgers.map(l => ({ id: l.id, name: l.name })));
-      } else if (mode === 'editReal') {
+      }
+      if (mode === 'editReal') {
         const detail = await entryService.getEntryDetail(transactionId!);
         setTransactionKind(detail.type === 'INCOME' ? 'income' : 'expense');
         setAmount(detail.amount);
@@ -312,6 +327,7 @@ function TransactionRegisterScreen() {
           memo: detail.memo ?? '',
           managerUserId: detail.manager.userId,
           receiptFileIds: realIds.map(Number),
+          ledgerId: detail.ledgerId,
         });
       }
       setScreenLoadState('ready');
@@ -320,7 +336,7 @@ function TransactionRegisterScreen() {
       setScreenLoadState('error');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, transactionId]);
+  }, [mode, transactionId, viewerIsOwner]);
 
   useEffect(() => {
     loadReal();
@@ -338,17 +354,17 @@ function TransactionRegisterScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      if (mode === 'createReal') {
+      if (mode === 'createReal' || viewerIsOwner) {
         loadLedgerOptions();
       }
       const pending = takePendingSnackbar();
       if (pending) {
         showSnackbar(pending.title);
       }
-    }, [mode, loadLedgerOptions]),
+    }, [mode, viewerIsOwner, loadLedgerOptions]),
   );
 
-  const canChangeLedger = mode !== 'editReal';
+  const canChangeLedger = mode !== 'editReal' || viewerIsOwner;
   const canSubmit =
     itemName.trim().length > 0 &&
     ledgerId.length > 0 &&
@@ -358,6 +374,23 @@ function TransactionRegisterScreen() {
   const handleSelectManager = (key: string) => {
     setManagerUserId(key);
     setManagerName(managerOptions.find(option => option.key === key)?.label ?? '');
+  };
+
+  /** 9자리 초과 시 값은 유지하고 입력만 막은 뒤 에러를 보인다(FT-22, FD-09와 같은 방식). */
+  const handleAmountChange = (text: string) => {
+    const { value: capped, overflow } = capDigits(
+      text.replace(/[^0-9]/g, ''),
+      AMOUNT_MAX_DIGITS,
+    );
+    setAmountError(overflow ? TEXT_FIELD_MAX_LENGTH_ERROR(AMOUNT_MAX_DIGITS) : undefined);
+    const next = capped ? Number(capped) : 0;
+    if (next === amount) {
+      amountInputRef.current?.setNativeProps({
+        text: amount > 0 ? amount.toLocaleString() : '',
+      });
+      return;
+    }
+    setAmount(next);
   };
 
   const handleBack = () => {
@@ -441,6 +474,9 @@ function TransactionRegisterScreen() {
             if (!sameNumberSet(uploadedReceiptFileIds, initialSnapshot.receiptFileIds)) {
               updates.receiptFileIds = uploadedReceiptFileIds;
             }
+            if (ledgerId !== initialSnapshot.ledgerId) {
+              updates.ledgerId = ledgerId;
+            }
           }
           await entryService.updateEntry(transactionId!, updates);
           navigation.popTo(
@@ -519,13 +555,27 @@ function TransactionRegisterScreen() {
 
       {mode === 'editReal' ? (
         <ScrollView contentContainerStyle={layoutStyles.content}>
-          <Pressable style={editStyles.amountRow} onPress={() => setActiveSheet('amount')}>
-            <Text style={layoutStyles.amountText}>
-              {transactionKind === 'income' ? '' : '-'}
-              {amount.toLocaleString()}원
-            </Text>
-            <Image source={EDIT_ICON} style={editStyles.amountEditIcon} />
-          </Pressable>
+          <View style={editStyles.amountRow}>
+            {amount > 0 && transactionKind !== 'income' && (
+              <Text style={[layoutStyles.amountText, editStyles.amountSign]}>-</Text>
+            )}
+            <View style={editStyles.amountFieldWrapper}>
+              <TextField
+                ref={amountInputRef}
+                value={amount > 0 ? amount.toLocaleString() : ''}
+                onChangeText={handleAmountChange}
+                onBlur={() => setAmountError(undefined)}
+                placeholder={TRANSACTION_REGISTER_AMOUNT_PLACEHOLDER}
+                keyboardType="number-pad"
+                suffix="원"
+                inputStyle={layoutStyles.amountText}
+                error={amountError}
+              />
+            </View>
+            <Pressable onPress={() => amountInputRef.current?.focus()} hitSlop={8}>
+              <Image source={EDIT_ICON} style={editStyles.amountEditIcon} />
+            </Pressable>
+          </View>
 
           <DetailFieldRow
             label={
@@ -549,11 +599,14 @@ function TransactionRegisterScreen() {
           <DetailFieldRow
             label={TRANSACTION_LEDGER_LABEL}
             value={ledgerName}
-            disabled
+            disabled={!canChangeLedger}
+            onPress={canChangeLedger ? () => setActiveSheet('ledger') : undefined}
           />
-          <Text style={layoutStyles.ledgerLockedHint}>
-            {TRANSACTION_REGISTER_LEDGER_LOCKED_HINT}
-          </Text>
+          {!canChangeLedger && (
+            <Text style={layoutStyles.ledgerLockedHint}>
+              {TRANSACTION_REGISTER_LEDGER_LOCKED_HINT}
+            </Text>
+          )}
           <DetailFieldRow
             label={TRANSACTION_MEMO_LABEL}
             value={truncateWithEllipsis(memo)}
@@ -597,25 +650,25 @@ function TransactionRegisterScreen() {
           <View style={styles.segmentWrapper}>
             <SegmentedControl
               options={[
-                { label: FILTER_TYPE_INCOME, value: 'income' },
                 { label: FILTER_TYPE_EXPENSE, value: 'expense' },
+                { label: FILTER_TYPE_INCOME, value: 'income' },
               ]}
               value={transactionKind}
               onChange={setTransactionKind}
             />
           </View>
 
-          <Pressable onPress={() => setActiveSheet('amount')}>
-            {amount === 0 ? (
-              <Text style={styles.amountPlaceholder}>
-                {TRANSACTION_REGISTER_AMOUNT_PLACEHOLDER}
-              </Text>
-            ) : (
-              <Text style={styles.amountValue}>
-                {amount.toLocaleString()}원
-              </Text>
-            )}
-          </Pressable>
+          <TextField
+            ref={amountInputRef}
+            value={amount > 0 ? amount.toLocaleString() : ''}
+            onChangeText={handleAmountChange}
+            onBlur={() => setAmountError(undefined)}
+            placeholder={TRANSACTION_REGISTER_AMOUNT_PLACEHOLDER}
+            keyboardType="number-pad"
+            suffix="원"
+            inputStyle={styles.amountValue}
+            error={amountError}
+          />
 
           <SelectionListItem
             type="picker"
@@ -661,10 +714,17 @@ function TransactionRegisterScreen() {
           />
 
           <View style={styles.section}>
-            <Text style={styles.sectionLabel}>
-              {TRANSACTION_REGISTER_RECEIPT_LABEL}
-              {` ${attachments.items.length}/${attachments.maxCount}`}
-            </Text>
+            <View style={layoutStyles.sectionLabelRow}>
+              <Text style={layoutStyles.receiptSectionLabel}>
+                {TRANSACTION_REGISTER_RECEIPT_LABEL}
+              </Text>
+              <Text style={layoutStyles.receiptCount}>
+                <Text style={layoutStyles.receiptCountCurrent}>
+                  {attachments.items.length}
+                </Text>
+                /{attachments.maxCount}
+              </Text>
+            </View>
             <View style={styles.thumbnailRow}>
               <AttachmentAddButton
                 onPress={attachments.openAttachMenu}
@@ -694,13 +754,6 @@ function TransactionRegisterScreen() {
         />
       </View>
 
-      <TransactionAmountSheet
-        visible={activeSheet === 'amount'}
-        value={amount}
-        onClose={() => setActiveSheet('none')}
-        onSave={setAmount}
-        confirmLabel={mode === 'editReal' ? TEXT_INPUT_SHEET_EDIT_LABEL : undefined}
-      />
       <TransactionDateSheet
         visible={activeSheet === 'date'}
         title={
@@ -801,14 +854,8 @@ const styles = StyleSheet.create({
   segmentWrapper: {
     marginBottom: 20,
   },
-  amountPlaceholder: {
-    ...TYPOGRAPHY.h1,
-    color: FOREGROUND_DISABLED,
-    marginBottom: 8,
-  },
   amountValue: {
     ...TYPOGRAPHY.h1,
-    marginBottom: 8,
   },
   ledgerLockedHint: {
     ...TYPOGRAPHY.body3,
@@ -840,12 +887,18 @@ const editStyles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     marginTop: 8,
-    marginBottom: 24,
+  },
+  amountFieldWrapper: {
+    flex: 1,
+  },
+  amountSign: {
+    marginBottom: 20, // TextField 자체 컨테이너의 marginBottom(20)과 기준선을 맞춤
   },
   amountEditIcon: {
     width: 24,
     height: 24,
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
+    marginBottom: 20,
   },
 });
 

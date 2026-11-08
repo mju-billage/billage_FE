@@ -65,11 +65,11 @@ function DateBadge({
   state: DuesProgressCardState;
   activeStatus: DateBadgeStatus;
 }) {
-  if (state === 'upcoming') {
-    return <Text style={styles.upcomingDate}>{label}</Text>;
-  }
   return (
-    <Badge label={label} status={state === 'ended' ? 'neutral' : activeStatus} />
+    <Badge
+      label={label}
+      status={state === 'active' ? activeStatus : 'neutral'}
+    />
   );
 }
 
@@ -206,11 +206,6 @@ const styles = StyleSheet.create({
   },
   iconEnded: {
     tintColor: FOREGROUND_DISABLED,
-  },
-  upcomingDate: {
-    ...TYPOGRAPHY.body3,
-    fontWeight: 'bold',
-    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   badgeRow: {
     flexDirection: 'row',

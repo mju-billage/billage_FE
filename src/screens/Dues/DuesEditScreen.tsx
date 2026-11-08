@@ -36,7 +36,6 @@ import {
   DUES_CREATE_TITLE_FIELD_LABEL,
   DUES_CREATE_TITLE_PLACEHOLDER,
   DUES_DETAIL_RETRY_LABEL,
-  DUES_EDIT_AMOUNT_LOCKED_HINT,
   DUES_EDIT_LEAVE_TITLE,
   DUES_EDIT_LOADING,
   DUES_EDIT_SUBMIT_LABEL,
@@ -291,7 +290,6 @@ function DuesEditScreen() {
           placeholder=""
           suffix="원"
           disabled
-          helperText={DUES_EDIT_AMOUNT_LOCKED_HINT}
         />
         <View style={styles.fieldGroup}>
           <Text style={styles.fieldLabel}>{DUES_CREATE_LEDGER_LABEL}</Text>

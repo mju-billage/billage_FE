@@ -1,17 +1,26 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import CardBase from './CardBase';
 import Divider from '../Divider/Divider';
-import Calendar from '../Calendar/Calendar';
 import FolderTabShape from './FolderTabShape';
+import { formatWon, truncateDigits } from '../../../utils/currency';
+import { todayKey } from '../../../utils/calendarGrid';
+import { CALENDAR_WEEKDAY_LABELS } from '../../../constants/calendarScreenText';
 import type { MiniCalendarData } from '../../../types/dashboard';
 import {
+  FEEDBACK_NEGATIVE_BOLD,
   FILL_NEUTRAL_SUBTLE,
+  FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_PRIMARY,
+  FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
-import { TYPOGRAPHY } from '../../../constants/typography';
+import { FONT_FAMILY, FONT_WEIGHT, TYPOGRAPHY } from '../../../constants/typography';
 
 const CHEVRON_RIGHT_ICON = require('../../../assets/icons/nav/Chevron Right.png');
-const WEEKS_TO_SHOW = 2;
+
+function toDotDateKey(dateKey: string): string {
+  return dateKey.replace(/-/g, '.');
+}
 
 type MiniCalendarCardProps = {
   data: MiniCalendarData;
@@ -19,9 +28,7 @@ type MiniCalendarCardProps = {
 };
 
 function MiniCalendarCard({ data, onPress }: MiniCalendarCardProps) {
-  const amountsSplitByDate = Object.fromEntries(
-    data.days.map(day => [day.date, { income: day.income, expense: day.expense }]),
-  );
+  const todayDotKey = todayKey();
 
   return (
     <CardBase>
@@ -33,18 +40,50 @@ function MiniCalendarCard({ data, onPress }: MiniCalendarCardProps) {
       <View style={styles.dividerWrapper}>
         <Divider />
       </View>
-      <Calendar
-        year={data.year}
-        month={data.month}
-        weeksToShow={WEEKS_TO_SHOW}
-        todayDate={new Date().getDate()}
-        showHeader={false}
-        showDateFields={false}
-        interactive={false}
-        amountsSplitByDate={amountsSplitByDate}
-        largeDates
-        variant="mini"
-      />
+
+      <View style={styles.weekdayRow}>
+        {CALENDAR_WEEKDAY_LABELS.map(label => (
+          <Text key={label} style={styles.weekdayLabel}>
+            {label}
+          </Text>
+        ))}
+      </View>
+
+      {data.weeks.map((week, weekIndex) => (
+        <View key={weekIndex} style={styles.weekRow}>
+          {week.map((cell, cellIndex) => {
+            const isToday = toDotDateKey(cell.dateKey) === todayDotKey;
+            return (
+              <View key={cell.dateKey} style={styles.dayCell}>
+                <View
+                  style={[styles.dateCircle, isToday && styles.dateCircleToday]}
+                >
+                  <Text
+                    style={[
+                      styles.dateText,
+                      cellIndex === 0 && styles.dateTextSunday,
+                    ]}
+                  >
+                    {cell.day}
+                  </Text>
+                </View>
+                <View style={styles.amountWrap}>
+                  {cell.income > 0 && (
+                    <Text style={styles.amountTextIncome} numberOfLines={1}>
+                      +{truncateDigits(formatWon(cell.income), 8)}
+                    </Text>
+                  )}
+                  {cell.expense > 0 && (
+                    <Text style={styles.amountTextExpense} numberOfLines={1}>
+                      -{truncateDigits(formatWon(cell.expense), 8)}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            );
+          })}
+        </View>
+      ))}
     </CardBase>
   );
 }
@@ -65,6 +104,64 @@ const styles = StyleSheet.create({
   },
   dividerWrapper: {
     marginVertical: 12,
+  },
+  weekdayRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  weekdayLabel: {
+    ...TYPOGRAPHY.subtitle1,
+    width: 36,
+    textAlign: 'center',
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+  },
+  weekRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  dayCell: {
+    width: 36,
+    alignItems: 'center',
+    gap: 2,
+  },
+  dateCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dateCircleToday: {
+    borderWidth: 1.5,
+    borderColor: FOREGROUND_SECONDARY,
+  },
+  dateText: {
+    ...TYPOGRAPHY.subtitle1,
+    color: FOREGROUND_NEUTRAL_NORMAL,
+  },
+  dateTextSunday: {
+    color: FEEDBACK_NEGATIVE_BOLD,
+  },
+  amountWrap: {
+    alignItems: 'center',
+  },
+  amountTextIncome: {
+    fontFamily: FONT_FAMILY,
+    fontWeight: FONT_WEIGHT.medium,
+    fontSize: 7,
+    lineHeight: 9,
+    letterSpacing: 0.4,
+    color: FOREGROUND_SECONDARY,
+  },
+  amountTextExpense: {
+    fontFamily: FONT_FAMILY,
+    fontWeight: FONT_WEIGHT.medium,
+    fontSize: 7,
+    lineHeight: 9,
+    letterSpacing: 0.4,
+    color: FOREGROUND_PRIMARY,
   },
 });
 

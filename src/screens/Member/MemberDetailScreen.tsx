@@ -39,7 +39,7 @@ import {
   SNACKBAR_MEMBER_DELETED_SUFFIX,
 } from '../../constants/memberScreenText';
 import {
-  BACKGROUND_PRIMARY,
+  FILL_NEUTRAL_SUBTLE,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
@@ -210,23 +210,22 @@ function MemberDetailScreen() {
 
         <InfoCard
           fields={[
-            { label: MEMBER_DETAIL_NAME_LABEL, value: member.name },
+            { label: MEMBER_DETAIL_NAME_LABEL, value: member.name, required: true },
             {
               label: MEMBER_DETAIL_PHONE_LABEL,
               value: member.phoneNumber
                 ? formatPhoneNumber(member.phoneNumber)
                 : MEMBER_DETAIL_EMPTY_VALUE,
             },
-            {
-              label: MEMBER_DETAIL_TAG_LABEL,
-              value:
-                member.tags.length > 0
-                  ? member.tags.map(tag => `#${tag}`).join(' ')
-                  : MEMBER_DETAIL_EMPTY_VALUE,
-            },
+            ...(member.tags.length === 0
+              ? [{ label: MEMBER_DETAIL_TAG_LABEL, value: MEMBER_DETAIL_EMPTY_VALUE }]
+              : []),
           ]}
-          memo={member.memo || MEMBER_DETAIL_EMPTY_VALUE}
+          tags={member.tags.length > 0 ? member.tags : undefined}
+          tagsReadOnly
         />
+
+        <InfoCard fields={[]} memo={member.memo || MEMBER_DETAIL_EMPTY_VALUE} />
       </ScrollView>
 
       <Dialog
@@ -266,7 +265,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderRadius: 12,
     padding: 16,
-    backgroundColor: BACKGROUND_PRIMARY,
+    backgroundColor: FILL_NEUTRAL_SUBTLE,
   },
   summaryLabel: {
     ...TYPOGRAPHY.body3,

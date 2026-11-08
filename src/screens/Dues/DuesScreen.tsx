@@ -16,7 +16,7 @@ import type { DuesSummary } from '../../types/dues';
 import * as duesService from '../../services/duesService';
 import * as groupService from '../../services/groupService';
 import { ApiError } from '../../services/apiClient';
-import { daysUntil, formatDateDot, formatDDayLabel, getDDaySeverity } from '../../utils/dueDate';
+import { daysUntil, formatDDayLabel, getDDaySeverity } from '../../utils/dueDate';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
@@ -27,6 +27,7 @@ import {
 import {
   DUES_ADD_ACCESSIBILITY_LABEL,
   DUES_BADGE_CLOSED,
+  DUES_BADGE_SCHEDULED,
   DUES_COUNT_SUFFIX,
   DUES_EMPTY_MESSAGE,
   DUES_LOADING,
@@ -61,7 +62,7 @@ function toCardProps(dues: DuesSummary) {
   const dateBadgeLabel = isClosed
     ? DUES_BADGE_CLOSED
     : isScheduled
-    ? `${formatDateDot(dues.startDate)} ${formatDDayLabel(daysUntil(dues.startDate))}`
+    ? DUES_BADGE_SCHEDULED
     : formatDDayLabel(daysLeft);
   const dateBadgeStatus: 'positive' | 'warning' | 'destructive' | 'neutral' =
     !isClosed && !isScheduled ? getDDaySeverity(daysLeft) : 'neutral';

@@ -27,6 +27,7 @@ function getGridItemWidth(windowWidth: number): number {
 
 type FolderItemKind = 'folder' | 'ledger';
 type FolderItemLayout = 'grid' | 'list';
+type FolderItemIconVariant = 'default' | 'folder';
 
 type FolderItemProps = {
   kind: FolderItemKind;
@@ -36,6 +37,8 @@ type FolderItemProps = {
   selected?: boolean;
   hasItems?: boolean;
   onPress?: () => void;
+  /** 'folder' 면 kind가 'ledger' 여도 폴더+장부 조합 아이콘을 그린다(FE-39, 통계 화면 전용). 폴더 탭은 영향 없음. */
+  iconVariant?: FolderItemIconVariant;
 };
 
 const TabShape = ({ fill }: { fill: string }) => (
@@ -80,9 +83,11 @@ function FolderItem({
   selected = false,
   hasItems = true,
   onPress,
+  iconVariant = 'default',
 }: FolderItemProps) {
   const { width: windowWidth } = useWindowDimensions();
   const gridItemWidth = useMemo(() => getGridItemWidth(windowWidth), [windowWidth]);
+  const showFolderGraphic = kind === 'folder' || iconVariant === 'folder';
 
   return (
     <Pressable
@@ -95,13 +100,13 @@ function FolderItem({
     >
       {layout === 'list' ? (
         <View style={styles.iconSlot}>
-          {kind === 'folder' ? (
+          {showFolderGraphic ? (
             <FolderGraphic hasItems={hasItems} />
           ) : (
             <LedgerGraphic />
           )}
         </View>
-      ) : kind === 'folder' ? (
+      ) : showFolderGraphic ? (
         <FolderGraphic hasItems={hasItems} />
       ) : (
         <LedgerGraphic />

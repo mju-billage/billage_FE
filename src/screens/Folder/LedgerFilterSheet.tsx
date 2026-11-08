@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Button from '../../components/Input/Button/Button';
-import TextButton from '../../components/Input/Button/TextButton';
 import FilterPill from '../../components/Input/Filter/FilterPill';
 import type { EntryListParams } from '../../services/entryService';
 import {
@@ -12,10 +11,6 @@ import {
   FILTER_SORT_LABEL,
   FILTER_SORT_LATEST,
   FILTER_SORT_OLDEST,
-  FILTER_STATUS_ALL,
-  FILTER_STATUS_APPROVED,
-  FILTER_STATUS_LABEL,
-  FILTER_STATUS_PENDING,
   FILTER_TYPE_ALL,
   FILTER_TYPE_EXPENSE,
   FILTER_TYPE_INCOME,
@@ -25,28 +20,23 @@ import { FOREGROUND_NEUTRAL_NORMAL } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 export type LedgerFilterType = 'all' | 'income' | 'expense';
-export type LedgerFilterStatus = 'all' | 'pending' | 'approved';
 export type LedgerFilterSort = 'latest' | 'oldest';
 
 export type LedgerFilterValue = {
   type: LedgerFilterType;
-  status: LedgerFilterStatus;
   sort: LedgerFilterSort;
 };
 
 export const DEFAULT_LEDGER_FILTER: LedgerFilterValue = {
   type: 'all',
-  status: 'all',
   sort: 'latest',
 };
 
 export function toEntryFilterQuery(
   value: LedgerFilterValue,
-): Pick<EntryListParams, 'type' | 'status' | 'sort'> {
+): Pick<EntryListParams, 'type' | 'sort'> {
   return {
     type: value.type === 'income' ? 'INCOME' : value.type === 'expense' ? 'EXPENSE' : undefined,
-    status:
-      value.status === 'pending' ? 'PENDING' : value.status === 'approved' ? 'APPROVED' : undefined,
     sort: value.sort === 'oldest' ? 'occurredOn,asc' : undefined,
   };
 }
@@ -77,14 +67,7 @@ function LedgerFilterSheet({
 
   return (
     <BottomSheet visible={visible} onClose={onClose}>
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>{FILTER_SHEET_TITLE}</Text>
-        <TextButton
-          label={FILTER_RESET_LABEL}
-          hierarchy="tertiary"
-          onPress={handleReset}
-        />
-      </View>
+      <Text style={styles.title}>{FILTER_SHEET_TITLE}</Text>
 
       <Text style={styles.sectionLabel}>{FILTER_TYPE_LABEL}</Text>
       <View style={styles.chipRow}>
@@ -105,25 +88,6 @@ function LedgerFilterSheet({
         />
       </View>
 
-      <Text style={styles.sectionLabel}>{FILTER_STATUS_LABEL}</Text>
-      <View style={styles.chipRow}>
-        <FilterPill
-          label={FILTER_STATUS_ALL}
-          active={draft.status === 'all'}
-          onPress={() => setDraft({ ...draft, status: 'all' })}
-        />
-        <FilterPill
-          label={FILTER_STATUS_PENDING}
-          active={draft.status === 'pending'}
-          onPress={() => setDraft({ ...draft, status: 'pending' })}
-        />
-        <FilterPill
-          label={FILTER_STATUS_APPROVED}
-          active={draft.status === 'approved'}
-          onPress={() => setDraft({ ...draft, status: 'approved' })}
-        />
-      </View>
-
       <Text style={styles.sectionLabel}>{FILTER_SORT_LABEL}</Text>
       <View style={styles.chipRow}>
         <FilterPill
@@ -139,21 +103,26 @@ function LedgerFilterSheet({
       </View>
 
       <View style={styles.footer}>
-        <Button label={FILTER_APPLY_LABEL} onPress={handleApply} fullWidth />
+        <View style={styles.resetButton}>
+          <Button
+            label={FILTER_RESET_LABEL}
+            hierarchy="tertiary"
+            onPress={handleReset}
+            fullWidth
+          />
+        </View>
+        <View style={styles.applyButton}>
+          <Button label={FILTER_APPLY_LABEL} onPress={handleApply} fullWidth />
+        </View>
       </View>
     </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
   title: {
     ...TYPOGRAPHY.subtitle1,
+    marginBottom: 16,
   },
   sectionLabel: {
     ...TYPOGRAPHY.body3,
@@ -168,7 +137,15 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   footer: {
+    flexDirection: 'row',
+    gap: 8,
     marginTop: 24,
+  },
+  resetButton: {
+    width: 75,
+  },
+  applyButton: {
+    flex: 1,
   },
 });
 

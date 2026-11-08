@@ -3,13 +3,26 @@ import { StyleSheet, Text, View } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Button from '../../components/Input/Button/Button';
 import Calendar from '../../components/Data Display/Calendar/Calendar';
-import { nextRangeSelection, todayKey } from '../../utils/calendarGrid';
+import { formatDateKey, nextRangeSelection, todayKey } from '../../utils/calendarGrid';
 import { DATE_RANGE_SHEET_CANCEL_LABEL, DATE_RANGE_SHEET_TITLE } from '../../constants/commonText';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 function parseDateKey(date: string): { year: number; month: number } {
   const [year, month] = date.split('.').map(Number);
   return { year, month };
+}
+
+function getPastDateKeysInMonth(year: number, month: number): string[] {
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const today = todayKey();
+  const keys: string[] = [];
+  for (let day = 1; day <= daysInMonth; day++) {
+    const key = formatDateKey(year, month, day);
+    if (key < today) {
+      keys.push(key);
+    }
+  }
+  return keys;
 }
 
 type DuesDateRangeSheetProps = {
@@ -57,11 +70,17 @@ function DuesDateRangeSheet({
     setCalendar({ year: next.getFullYear(), month: next.getMonth() + 1 });
   };
 
+  const isPickingEnd = !!draftStart && (!draftEnd || draftEnd === draftStart);
+  const disabledDates = isPickingEnd
+    ? getPastDateKeysInMonth(calendar.year, calendar.month)
+    : [];
+  const isSaveDisabled = !draftStart || !draftEnd || draftEnd < todayKey();
+
   const handleSave = () => {
-    if (!draftStart || !draftEnd) {
+    if (isSaveDisabled) {
       return;
     }
-    onSave(draftStart, draftEnd);
+    onSave(draftStart!, draftEnd!);
     onClose();
   };
 
@@ -74,6 +93,7 @@ function DuesDateRangeSheet({
         month={calendar.month}
         selectedStartDate={draftStart}
         selectedEndDate={draftEnd}
+        disabledDates={disabledDates}
         onSelectDate={handleSelectDate}
         onChangeMonth={handleChangeMonth}
         outlinedDates={[todayKey()]}
@@ -93,7 +113,7 @@ function DuesDateRangeSheet({
           <Button
             label={confirmLabel}
             onPress={handleSave}
-            disabled={!draftStart || !draftEnd}
+            disabled={isSaveDisabled}
             fullWidth
           />
         </View>

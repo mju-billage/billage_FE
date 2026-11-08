@@ -34,12 +34,12 @@ function Snackbar({
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMountedRef = useRef(true);
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
       isMountedRef.current = false;
-    },
-    [],
-  );
+    };
+  }, []);
 
   const clearHideTimer = () => {
     if (hideTimerRef.current) {
@@ -54,8 +54,8 @@ function Snackbar({
       toValue: 0,
       duration: SNACKBAR_FADE_MS,
       useNativeDriver: true,
-    }).start(() => {
-      if (!isMountedRef.current) {
+    }).start(({ finished }) => {
+      if (!finished || !isMountedRef.current) {
         return;
       }
       setMounted(false);
@@ -77,7 +77,10 @@ function Snackbar({
       clearHideTimer();
       hideTimerRef.current = setTimeout(() => fadeOut(onClose), SNACKBAR_DURATION_MS);
     } else {
-      fadeOut();
+      clearHideTimer();
+      if (mounted) {
+        fadeOut();
+      }
     }
     return clearHideTimer;
     // eslint-disable-next-line react-hooks/exhaustive-deps

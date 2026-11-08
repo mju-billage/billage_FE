@@ -6,19 +6,15 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import SearchField from '../../components/Input/Search/SearchField';
-import TextButton from '../../components/Input/Button/TextButton';
 import Button from '../../components/Input/Button/Button';
+import CountRow from '../../components/Data Display/Lists/CountRow';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { groupEntriesByDate, type EntrySummary } from '../../types/entry';
 import { formatDateHeader } from '../../utils/dateHeader';
 import * as entryService from '../../services/entryService';
-import LedgerFilterSheet, {
-  DEFAULT_LEDGER_FILTER,
-  toEntryFilterQuery,
-  type LedgerFilterValue,
-} from './LedgerFilterSheet';
 import {
+  LEDGER_COUNT_SUFFIX,
   LEDGER_DETAIL_RETRY_LABEL,
   LEDGER_ENTRIES_LOADING_MORE,
   LEDGER_ENTRY_SEARCH_EMPTY,
@@ -34,8 +30,6 @@ import {
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-const FILTER_LABEL = '필터';
-
 type LedgerSearchNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'LedgerSearch'
@@ -48,9 +42,8 @@ function LedgerSearchScreen() {
   const { ledgerId, ledgerName } = route.params;
 
   const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState<LedgerFilterValue>(DEFAULT_LEDGER_FILTER);
-  const [filterSheetVisible, setFilterSheetVisible] = useState(false);
   const [results, setResults] = useState<EntrySummary[]>([]);
+  const [totalElements, setTotalElements] = useState(0);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -75,10 +68,10 @@ function LedgerSearchScreen() {
       try {
         const result = await entryService.getEntries(ledgerId, {
           keyword: query.trim() || undefined,
-          ...toEntryFilterQuery(filter),
           page: nextPage,
         });
         setResults(current => (reset ? result.items : [...current, ...result.items]));
+        setTotalElements(result.totalElements);
         setPage(result.page);
         setHasMore(!result.last);
         if (reset) {
@@ -87,6 +80,7 @@ function LedgerSearchScreen() {
       } catch (error) {
         if (reset) {
           setResults([]);
+          setTotalElements(0);
           setHasMore(false);
           setSearchError(toErrorMessage(error));
         }
@@ -94,13 +88,13 @@ function LedgerSearchScreen() {
         setIsLoadingMore(false);
       }
     },
-    [ledgerId, query, filter, page],
+    [ledgerId, query, page],
   );
 
   useEffect(() => {
     search(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ledgerId, query, filter]);
+  }, [ledgerId, query]);
 
   const sections = groupEntriesByDate(results).map(group => ({
     title: formatDateHeader(group.date),
@@ -134,13 +128,7 @@ function LedgerSearchScreen() {
           />
         </View>
 
-        <View style={styles.filterRow}>
-          <TextButton
-            label={FILTER_LABEL}
-            hierarchy="tertiary"
-            onPress={() => setFilterSheetVisible(true)}
-          />
-        </View>
+        {!searchError && <CountRow text={`${totalElements}${LEDGER_COUNT_SUFFIX}`} />}
 
         {searchError ? (
           <View style={styles.emptyState}>
@@ -190,13 +178,6 @@ function LedgerSearchScreen() {
           />
         )}
       </View>
-
-      <LedgerFilterSheet
-        visible={filterSheetVisible}
-        value={filter}
-        onClose={() => setFilterSheetVisible(false)}
-        onApply={setFilter}
-      />
     </ScreenContainer>
   );
 }
@@ -209,11 +190,6 @@ const styles = StyleSheet.create({
   searchWrapper: {
     marginTop: 8,
     marginBottom: 12,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginBottom: 8,
   },
   listContent: {
     paddingBottom: 24,

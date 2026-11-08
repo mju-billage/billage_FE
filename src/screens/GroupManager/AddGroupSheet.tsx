@@ -1,8 +1,11 @@
+import { StyleSheet, Text } from 'react-native';
 import BottomSheet from '../../components/Feedback/Dialogs/BottomSheet';
 import Menu from '../../components/Navigation/Menu/Menu';
+import { TYPOGRAPHY } from '../../constants/typography';
 import {
   ADD_GROUP_CREATE_LABEL,
   ADD_GROUP_JOIN_LABEL,
+  ADD_GROUP_SHEET_TITLE,
 } from '../../constants/groupManagerScreenText';
 
 const GROUP_ICON = require('../../assets/icons/user/Group.png');
@@ -19,6 +22,7 @@ type AddGroupSheetProps = {
 function AddGroupSheet({ visible, onClose, onSelect }: AddGroupSheetProps) {
   return (
     <BottomSheet visible={visible} onClose={onClose}>
+      <Text style={styles.sheetTitle}>{ADD_GROUP_SHEET_TITLE}</Text>
       <Menu
         sections={[
           [
@@ -31,5 +35,12 @@ function AddGroupSheet({ visible, onClose, onSelect }: AddGroupSheetProps) {
     </BottomSheet>
   );
 }
+
+const styles = StyleSheet.create({
+  sheetTitle: {
+    ...TYPOGRAPHY.subtitle1,
+    marginBottom: 16,
+  },
+});
 
 export default AddGroupSheet;

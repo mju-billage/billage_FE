@@ -313,6 +313,7 @@ export type UpdateEntryInput = {
   memo?: string;
   managerUserId?: string;
   receiptFileIds?: number[];
+  ledgerId?: string;
 };
 
 export async function updateEntry(
@@ -337,6 +338,9 @@ export async function updateEntry(
   }
   if (updates.receiptFileIds !== undefined) {
     body.receiptFileIds = updates.receiptFileIds;
+  }
+  if (updates.ledgerId !== undefined) {
+    body.ledgerId = Number(updates.ledgerId);
   }
   await request<void>(`/api/v1/entries/${entryId}`, {
     method: 'PATCH',

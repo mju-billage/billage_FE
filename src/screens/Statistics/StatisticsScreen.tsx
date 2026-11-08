@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -60,6 +60,8 @@ import {
   YELLOW_500,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+
+const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/Chevron Right.png');
 
 type StatisticsScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -163,17 +165,23 @@ function StatisticsScreen() {
               {STATISTICS_ACTIVE_SUBTITLE_SUFFIX}
             </Text>
 
-            <FolderItem
-              kind="ledger"
-              name={mostActiveLedger.name}
-              subtitle=""
-              layout="list"
-              onPress={() =>
-                navigation.navigate('LedgerDetail', {
-                  ledgerId: mostActiveLedger.ledgerId,
-                })
-              }
-            />
+            <View style={styles.ledgerRow}>
+              <View style={styles.ledgerRowItem}>
+                <FolderItem
+                  kind="ledger"
+                  iconVariant="folder"
+                  name={mostActiveLedger.name}
+                  subtitle=""
+                  layout="list"
+                  onPress={() =>
+                    navigation.navigate('LedgerDetail', {
+                      ledgerId: mostActiveLedger.ledgerId,
+                    })
+                  }
+                />
+              </View>
+              <Image source={CHEVRON_RIGHT_ICON} style={styles.ledgerRowChevron} />
+            </View>
 
             <View style={styles.amountRow}>
               <Text style={styles.amountLabel}>{STATISTICS_ACTIVE_INCOME_LABEL}</Text>
@@ -358,6 +366,18 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.caption,
     color: FOREGROUND_NEUTRAL_SUBTLE,
     marginBottom: 4,
+  },
+  ledgerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ledgerRowItem: {
+    flex: 1,
+  },
+  ledgerRowChevron: {
+    width: 20,
+    height: 20,
+    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
   amountRow: {
     flexDirection: 'row',

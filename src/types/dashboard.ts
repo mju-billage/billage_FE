@@ -4,17 +4,16 @@ import {
   ALBUM_GRAPHIC_XML,
 } from '../assets/graphics/dashboardGraphics';
 
-export type MiniCalendarDay = {
-  date: number;
+export type MiniCalendarCell = {
+  dateKey: string;
+  day: number;
   income: number;
   expense: number;
 };
 
 export type MiniCalendarData = {
-  year: number;
-  month: number;
   monthLabel: string;
-  days: MiniCalendarDay[];
+  weeks: MiniCalendarCell[][];
 };
 
 export type DuesProgress = {
@@ -63,14 +62,21 @@ const MINI_CALENDAR_AMOUNTS: Array<{ income: number; expense: number }> = [
 export const MOCK_DASHBOARD_SUMMARY: DashboardSummary = {
   userNickname: '김둘봉이',
   miniCalendar: {
-    year: 2026,
-    month: 7,
     monthLabel: '7월',
-    days: MINI_CALENDAR_AMOUNTS.map((split, index) => ({
-      date: index + 1,
-      income: split.income,
-      expense: split.expense,
-    })),
+    weeks: [
+      MINI_CALENDAR_AMOUNTS.slice(0, 7).map((split, index) => ({
+        dateKey: `2026-07-${String(index + 1).padStart(2, '0')}`,
+        day: index + 1,
+        income: split.income,
+        expense: split.expense,
+      })),
+      MINI_CALENDAR_AMOUNTS.slice(7, 14).map((split, index) => ({
+        dateKey: `2026-07-${String(index + 8).padStart(2, '0')}`,
+        day: index + 8,
+        income: split.income,
+        expense: split.expense,
+      })),
+    ],
   },
   duesProgressList: [
     {

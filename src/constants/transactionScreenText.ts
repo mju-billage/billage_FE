@@ -34,10 +34,10 @@ export const MEMO_SHEET_PLACEHOLDER = '30자까지 입력 가능해요.';
 export const MEMO_MAX_LENGTH = 30;
 
 export const TRANSACTION_REGISTER_TITLE = '내역 추가';
-export const TRANSACTION_REGISTER_AMOUNT_PLACEHOLDER = '금액을 입력해주세요.';
-export const TRANSACTION_REGISTER_ITEM_NAME_PLACEHOLDER = '내역명을 입력해주세요.';
-export const TRANSACTION_REGISTER_MANAGER_PLACEHOLDER = '담당자를 선택해주세요.';
-export const TRANSACTION_REGISTER_LEDGER_PLACEHOLDER = '장부를 선택해주세요.';
+export const TRANSACTION_REGISTER_AMOUNT_PLACEHOLDER = '금액을 입력해주세요';
+export const TRANSACTION_REGISTER_ITEM_NAME_PLACEHOLDER = '내역명을 입력해주세요';
+export const TRANSACTION_REGISTER_MANAGER_PLACEHOLDER = '담당자를 선택해주세요';
+export const TRANSACTION_REGISTER_LEDGER_PLACEHOLDER = '장부를 선택해주세요';
 export const TRANSACTION_REGISTER_RECEIPT_LABEL = '증빙 자료';
 export const TRANSACTION_REGISTER_RECEIPT_MAX = 10;
 export const TRANSACTION_REGISTER_SUBMIT_LABEL = '추가하기';
@@ -92,6 +92,8 @@ export const SNACKBAR_SCAN_RATE_LIMITED =
   '영수증 인식을 너무 많이 요청했어요. 잠시 후 다시 시도해주세요.';
 export const SNACKBAR_RECEIPT_MAX_LIMIT =
   '사진은 최대 10장까지 첨부할 수 있어요.';
+/** 임시 문구 — 피그마에 없음(FT-35). TO-BE 문구가 나오면 바꾼다. */
+export const SNACKBAR_RECEIPT_DUPLICATE = '이미 첨부된 사진이에요.';
 export const SNACKBAR_TRANSACTION_ADDED = '내역이 추가되었어요.';
 export const SNACKBAR_TRANSACTION_ADDED_PENDING =
   '내역이 추가되었어요. 총무 승인 후 반영돼요.';

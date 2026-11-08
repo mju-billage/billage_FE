@@ -46,6 +46,41 @@ export function getRecentDaysWeeks(
     .map(week => week.map(cell => (inRange(cell) ? cell : null)));
 }
 
+export type TwoWeekRangeCell = {
+  year: number;
+  month: number;
+  day: number;
+  dateKey: string;
+};
+
+function toIsoDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// 지난 주(일~토) + 이번 주(일~토) 14일 — 월 경계를 넘을 수 있다.
+export function getTwoWeekRange(today: Date): TwoWeekRangeCell[][] {
+  const sundayThisWeek = new Date(today);
+  sundayThisWeek.setDate(today.getDate() - today.getDay());
+  const startLastWeek = new Date(sundayThisWeek);
+  startLastWeek.setDate(sundayThisWeek.getDate() - 7);
+
+  const cells: TwoWeekRangeCell[] = Array.from({ length: 14 }, (_, index) => {
+    const date = new Date(startLastWeek);
+    date.setDate(startLastWeek.getDate() + index);
+    return {
+      year: date.getFullYear(),
+      month: date.getMonth() + 1,
+      day: date.getDate(),
+      dateKey: toIsoDateKey(date),
+    };
+  });
+
+  return [cells.slice(0, 7), cells.slice(7, 14)];
+}
+
 export function shiftMonth(
   year: number,
   month: number,
