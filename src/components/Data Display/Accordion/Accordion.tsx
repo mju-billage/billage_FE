@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 14,
+    paddingVertical: 16,
   },
   title: {
     ...TYPOGRAPHY.subtitle3,
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingTop: 12,
-    paddingBottom: 14,
+    paddingBottom: 16,
     gap: 20,
   },
   item: {

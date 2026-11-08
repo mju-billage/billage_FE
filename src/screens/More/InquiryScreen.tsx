@@ -137,11 +137,12 @@ const styles = StyleSheet.create({
   contactRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 24,
+    gap: 12,
+    marginTop: 16,
     backgroundColor: FILL_NEUTRAL_NORMAL,
     borderRadius: 12,
-    padding: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
   },
   contactLabel: {
     ...TYPOGRAPHY.subtitle3,
