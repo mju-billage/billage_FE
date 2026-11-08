@@ -39,9 +39,10 @@ function Avatar(props: AvatarProps) {
   const variant = props.style ?? 'default';
   const dimension = SIZE_BY_KEY[size];
   const cornerRadius = getSquircleRadius(dimension);
-  const { uri: resolvedImageUri } = useAuthenticatedImage(
+  const { uri: resolvedImageUri, status: imageStatus } = useAuthenticatedImage(
     props.type === 'image' ? props.imageUri : undefined,
   );
+  const showFallbackIcon = props.type === 'icon' || (props.type === 'image' && imageStatus === 'error');
 
   return (
     <View
@@ -51,7 +52,7 @@ function Avatar(props: AvatarProps) {
         variant === 'neutral' ? styles.neutral : styles.default,
       ]}
     >
-      {props.type === 'icon' && (
+      {showFallbackIcon && (
         <Image
           source={MEMBER_ICON}
           style={[
@@ -65,7 +66,7 @@ function Avatar(props: AvatarProps) {
           {props.initial}
         </Text>
       )}
-      {props.type === 'image' && resolvedImageUri && (
+      {props.type === 'image' && imageStatus !== 'error' && resolvedImageUri && (
         <Image source={{ uri: resolvedImageUri }} style={styles.image} />
       )}
     </View>

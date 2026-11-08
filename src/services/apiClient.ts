@@ -175,20 +175,66 @@ async function fetchImageOnce(resolvedUrl: string): Promise<Response> {
   return fetch(resolvedUrl, { headers: authFetchHeaders() });
 }
 
+function stripQuery(url: string): string {
+  return url.split('?')[0];
+}
+
+function extractHost(url: string): string | undefined {
+  return /^https?:\/\/([^/]+)/.exec(url)?.[1];
+}
+
 async function loadAuthenticatedDataUri(resolvedUrl: string): Promise<string> {
-  let response = await fetchImageOnce(resolvedUrl);
-  if (response.status === 401) {
-    await refreshSession();
+  let response: Response | undefined;
+  try {
     response = await fetchImageOnce(resolvedUrl);
+    let retried = false;
+    if (response.status === 401) {
+      await refreshSession();
+      response = await fetchImageOnce(resolvedUrl);
+      retried = true;
+    }
+    if (!response.ok) {
+      throw new ApiError(
+        'IMAGE_FETCH_FAILED',
+        `이미지를 불러오지 못했습니다. (${response.status})`,
+      );
+    }
+    const contentType = response.headers.get('content-type');
+    const blob = await response.blob();
+    const dataUri = await blobToDataUri(blob);
+    if (__DEV__) {
+      // TODO(QA-IMG): 원인 확인 후 제거
+      console.log(
+        '[IMG]',
+        JSON.stringify({
+          url: stripQuery(resolvedUrl),
+          host: extractHost(resolvedUrl),
+          apiHost: extractHost(API_BASE_URL),
+          sameHost: extractHost(resolvedUrl) === extractHost(API_BASE_URL),
+          status: response.status,
+          retried: retried || undefined,
+          contentType,
+          blobType: blob.type,
+          blobSize: blob.size,
+          dataUriHead: dataUri.slice(0, 40),
+        }),
+      );
+    }
+    return dataUri;
+  } catch (error) {
+    if (__DEV__) {
+      // TODO(QA-IMG): 원인 확인 후 제거
+      console.log(
+        '[IMG][FAIL]',
+        JSON.stringify({
+          url: stripQuery(resolvedUrl),
+          status: response?.status,
+          error: error instanceof Error ? error.message : undefined,
+        }),
+      );
+    }
+    throw error;
   }
-  if (!response.ok) {
-    throw new ApiError(
-      'IMAGE_FETCH_FAILED',
-      `이미지를 불러오지 못했습니다. (${response.status})`,
-    );
-  }
-  const blob = await response.blob();
-  return blobToDataUri(blob);
 }
 
 /**
