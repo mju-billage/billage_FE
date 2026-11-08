@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   cancelButton: {
-    width: 74,
+    width: 75,
   },
   confirmButton: {
     flex: 1,

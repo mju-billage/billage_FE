@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     marginTop: 36,
   },
   footerReset: {
-    width: 74,
+    width: 75,
   },
   footerApply: {
     flex: 1,
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   footerPrevious: {
-    width: 74,
+    width: 75,
   },
   footerConfirm: {
     flex: 1,
