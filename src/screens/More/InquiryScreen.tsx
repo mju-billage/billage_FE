@@ -25,8 +25,15 @@ import {
   INQUIRY_RETRY_LABEL,
   INQUIRY_TITLE,
 } from '../../constants/settingsScreenText';
-import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_NORMAL } from '../../constants/colors';
+import {
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_SECONDARY,
+  FILL_NEUTRAL_NORMAL,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+
+const CLOSE_ICON = require('../../assets/icons/action/Close.png');
 
 type InquiryNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Inquiry'>;
 type LoadState = 'loading' | 'error' | 'ready';
@@ -63,7 +70,14 @@ function InquiryScreen() {
 
   return (
     <ScreenContainer background="secondary">
-      <AppBar type="sub" title={INQUIRY_TITLE} onBackPress={() => navigation.goBack()} />
+      <AppBar
+        type="sub"
+        title={INQUIRY_TITLE}
+        onBackPress={() => navigation.goBack()}
+        rightIcons={[
+          { icon: CLOSE_ICON, onPress: () => navigation.goBack(), accessibilityLabel: 'close' },
+        ]}
+      />
 
       {loadState === 'loading' && (
         <View style={styles.stateContainer}>
@@ -112,6 +126,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     ...TYPOGRAPHY.subtitle2,
+    color: FOREGROUND_NEUTRAL_NORMAL,
     marginBottom: 8,
   },
   emptyText: {
@@ -124,13 +139,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginTop: 24,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
+    borderRadius: 12,
+    padding: 16,
   },
   contactLabel: {
     ...TYPOGRAPHY.subtitle3,
   },
   contactEmail: {
     ...TYPOGRAPHY.body2,
-    color: FOREGROUND_NEUTRAL_NORMAL,
+    color: FOREGROUND_SECONDARY,
   },
   stateContainer: {
     flex: 1,

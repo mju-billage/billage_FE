@@ -56,8 +56,8 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.subtitle3,
   },
   icon: {
-    width: 16,
-    height: 16,
+    width: 20,
+    height: 20,
     tintColor: FOREGROUND_NEUTRAL_NORMAL,
   },
   minusIcon: {
@@ -67,11 +67,12 @@ const styles = StyleSheet.create({
     backgroundColor: FOREGROUND_NEUTRAL_NORMAL,
   },
   body: {
+    paddingTop: 12,
     paddingBottom: 14,
     gap: 20,
   },
   item: {
-    ...TYPOGRAPHY.body2,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_NORMAL,
   },
 });
