@@ -214,6 +214,8 @@ function FolderSelectMoveScreen() {
           onClose={() => setSnackbar(null)}
         />
       }
+      // 푸터 위아래 16 + 버튼 48 → 스낵바는 버튼 윗변보다 20 위
+      snackbarOffset={64}
     >
       <AppBar
         title={SELECT_MOVE_TITLE}
