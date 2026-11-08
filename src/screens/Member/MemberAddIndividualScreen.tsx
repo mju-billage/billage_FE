@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingTop: 16,
   },
   memoWrapper: {
     marginBottom: 20,
@@ -240,8 +240,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   tagHelper: {
-    ...TYPOGRAPHY.body3,
-    marginTop: 8,
+    ...TYPOGRAPHY.caption,
+    marginTop: 12,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   formError: {
