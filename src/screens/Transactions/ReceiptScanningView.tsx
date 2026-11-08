@@ -38,7 +38,7 @@ export type ScanOutcome =
       sourceUrl: string;
       message?: string;
     }
-  | { kind: 'rateLimited' }
+  | { kind: 'rateLimited'; fileId: number }
   | { kind: 'failed'; message: string };
 
 type ReceiptScanningViewProps = {
@@ -141,7 +141,7 @@ async function scanReceipt(image: PickedImage): Promise<ScanOutcome> {
   } catch (error) {
     if (error instanceof ApiError) {
       if (error.code === ocrService.OCR_RATE_LIMITED) {
-        return { kind: 'rateLimited' };
+        return { kind: 'rateLimited', fileId };
       }
       if (
         error.code === ocrService.OCR_RESULT_EMPTY ||

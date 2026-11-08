@@ -288,6 +288,10 @@ export function useReceiptAttachments({
     if (outcome.kind === 'rateLimited') {
       // 서버가 외부 OCR 을 건당 과금으로 부른다. 재촬영을 권하는 실패 화면으로 보내면
       // 사용자가 곧장 다시 시도하게 되므로, 폼으로 돌려보내고 알리기만 한다.
+      // 폼으로 돌아가면 이 fileId 는 어디에도 연결되지 않으니 서버에 주인 없이 남는다 — 지운다.
+      fileService.deleteFile(String(outcome.fileId)).catch(() => {
+        // 지우기까지 실패하면 남겨 두는 수밖에 없다. 사용자에게 또 알릴 일은 아니다.
+      });
       setStage({ kind: 'form' });
       showSnackbar(SNACKBAR_SCAN_RATE_LIMITED);
       return;
