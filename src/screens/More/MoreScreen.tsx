@@ -40,7 +40,11 @@ import {
   MORE_ADMINS_LOAD_FAILED,
 } from '../../constants/groupManagerScreenText';
 import { SETTINGS_TITLE } from '../../constants/settingsScreenText';
-import { FOREGROUND_DISABLED, FOREGROUND_SECONDARY } from '../../constants/colors';
+import {
+  FOREGROUND_DISABLED,
+  FOREGROUND_PRIMARY,
+  FOREGROUND_SECONDARY,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Navigation/BottomNavigation';
 
@@ -296,8 +300,9 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.h3,
   },
   chevronIcon: {
-    width: 20,
-    height: 20,
+    width: 24,
+    height: 24,
+    tintColor: FOREGROUND_PRIMARY,
   },
   memberCard: {
     gap: 12,
@@ -309,6 +314,7 @@ const styles = StyleSheet.create({
   },
   memberCardTitle: {
     ...TYPOGRAPHY.subtitle1,
+    color: FOREGROUND_PRIMARY,
   },
   viewAllRow: {
     flexDirection: 'row',

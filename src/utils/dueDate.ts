@@ -36,3 +36,11 @@ export function formatDateShort(isoDateOrDateTime: string | null | undefined): s
   const [year, month, day] = isoDateOrDateTime.slice(0, 10).split('-');
   return `${year.slice(2)}.${month}.${day}`;
 }
+
+export function formatMonthDayDot(isoDateOrDateTime: string | null | undefined): string {
+  if (!isoDateOrDateTime) {
+    return '';
+  }
+  const [, month, day] = isoDateOrDateTime.slice(0, 10).split('-');
+  return `${month}.${day}`;
+}

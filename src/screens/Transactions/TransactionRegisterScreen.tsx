@@ -102,6 +102,7 @@ import {
   ITEM_NAME_MAX_LENGTH,
   ITEM_NAME_SHEET_PLACEHOLDER,
   ITEM_NAME_SHEET_TITLE,
+  LEDGER_SELECT_SHEET_TITLE,
   MANAGER_SELECT_SHEET_TITLE,
   MEMO_MAX_LENGTH,
   MEMO_SHEET_PLACEHOLDER,
@@ -795,7 +796,7 @@ function TransactionRegisterScreen() {
       />
       <TransactionSingleSelectSheet
         visible={activeSheet === 'ledger' && canChangeLedger}
-        title={TRANSACTION_LEDGER_LABEL}
+        title={LEDGER_SELECT_SHEET_TITLE}
         options={ledgerOptions.map(option => ({
           key: option.id,
           label: option.name,

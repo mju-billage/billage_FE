@@ -1,4 +1,4 @@
-import { useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -10,6 +10,7 @@ import Button from '../../components/Input/Button/Button';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import { setPendingSnackbar } from '../../utils/pendingSnackbar';
+import { formatDateShort } from '../../utils/dueDate';
 import FolderItem, {
   FOLDER_GRID_COLUMNS,
   FOLDER_GRID_COLUMN_GAP,
@@ -18,8 +19,15 @@ import FolderMoreMenu from './FolderMoreMenu';
 import type { MenuItem } from '../../components/Navigation/Menu/Menu';
 import { getActiveGroup } from '../../types/group';
 import { getCachedFolderTree } from '../../types/folderTree';
-import { findFolderNode, getChildFolders } from '../../utils/folderTree';
+import {
+  findFolderNode,
+  getChildFolders,
+  mergeFolderListItems,
+  type FolderListItem,
+} from '../../utils/folderTree';
 import * as folderService from '../../services/folderService';
+import * as ledgerService from '../../services/ledgerService';
+import type { LedgerSummary } from '../../types/ledger';
 import { ApiError } from '../../services/apiClient';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
 import {
@@ -53,7 +61,7 @@ import { FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const FOLDER_ADD_ICON = require('../../assets/icons/content/Folder Add.png');
-const MENU_ICON = require('../../assets/icons/action/MenuHorizontal.png');
+const MENU_ICON = require('../../assets/icons/action/Menu Vertical.png');
 const GRID_ICON = require('../../assets/icons/system/Grid.png');
 const LIST_ICON = require('../../assets/icons/system/List.png');
 
@@ -73,7 +81,8 @@ function FolderMoveDestinationScreen() {
 
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [isMoving, setIsMoving] = useState(false);
-  const [, setRefreshTick] = useState(0);
+  const [refreshTick, setRefreshTick] = useState(0);
+  const [ledgers, setLedgers] = useState<LedgerSummary[]>([]);
   const viewMode = useSyncExternalStore(subscribeFolderViewMode, getFolderViewMode);
   const [moreMenuVisible, setMoreMenuVisible] = useState(false);
   const [newFolderDialogVisible, setNewFolderDialogVisible] = useState(false);
@@ -93,12 +102,28 @@ function FolderMoveDestinationScreen() {
     : MOVE_DESTINATION_ROOT_TITLE;
   const isSameAsSource = destinationFolderId === sourceFolderId;
 
-  const selectedFolderIds = new Set(
-    items.filter(item => item.kind === 'folder').map(item => item.id),
-  );
-  const subfolders = getChildFolders(tree, destinationFolderId).filter(
-    folder => !selectedFolderIds.has(folder.id),
-  );
+  const selectedIds = new Set(items.map(item => `${item.kind}-${item.id}`));
+  const subfolders = getChildFolders(tree, destinationFolderId);
+  const listItems: FolderListItem[] = mergeFolderListItems(subfolders, ledgers);
+
+  const loadLedgers = useCallback(async () => {
+    if (!group) {
+      return;
+    }
+    const allLedgers = destinationFolderId
+      ? await ledgerService.getLedgersInFolder(destinationFolderId)
+      : await ledgerService.getAllLedgersInGroup(group.id);
+    setLedgers(
+      destinationFolderId
+        ? allLedgers
+        : allLedgers.filter(ledger => ledger.folderId === null),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [destinationFolderId, group?.id, refreshTick]);
+
+  useEffect(() => {
+    loadLedgers();
+  }, [loadLedgers]);
 
   const toErrorMessage = (error: unknown): string => {
     if (isNetworkError(error)) {
@@ -208,7 +233,7 @@ function FolderMoveDestinationScreen() {
       />
 
       <View style={styles.body}>
-        {subfolders.length === 0 ? (
+        {listItems.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyTitle}>
               {MOVE_DESTINATION_NO_SUBFOLDER}
@@ -217,19 +242,28 @@ function FolderMoveDestinationScreen() {
         ) : (
           <FlatList
             key={viewMode}
-            data={subfolders}
-            keyExtractor={item => item.id}
+            data={listItems}
+            keyExtractor={item => `${item.kind}-${item.id}`}
             numColumns={viewMode === 'grid' ? FOLDER_GRID_COLUMNS : 1}
             columnWrapperStyle={viewMode === 'grid' ? styles.gridRow : undefined}
             contentContainerStyle={styles.listContent}
             renderItem={({ item }) => (
               <FolderItem
-                kind="folder"
+                kind={item.kind}
                 name={item.name}
-                subtitle={`${item.children.length + item.ledgerCount}개의 항목`}
+                subtitle={
+                  item.kind === 'folder'
+                    ? `${item.itemCount}개의 항목`
+                    : formatDateShort(item.createdAt)
+                }
                 layout={viewMode}
-                hasItems={item.children.length + item.ledgerCount > 0}
-                onPress={() => handlePressFolder(item.id)}
+                hasItems={item.kind === 'folder' ? item.itemCount > 0 : undefined}
+                disabled={selectedIds.has(`${item.kind}-${item.id}`)}
+                onPress={
+                  item.kind === 'folder'
+                    ? () => handlePressFolder(item.id)
+                    : undefined
+                }
               />
             )}
           />
@@ -264,7 +298,6 @@ function FolderMoveDestinationScreen() {
         }}
         textFieldPlaceholder={NEW_FOLDER_NAME_PLACEHOLDER}
         textFieldMaxLength={FOLDER_NAME_MAX_LENGTH}
-        autoFocusTextField
         textFieldError={newFolderError}
         confirmLabel={NEW_FOLDER_CREATE_LABEL}
         confirmDisabled={isLocked}

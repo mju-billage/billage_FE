@@ -79,7 +79,10 @@ function getFilterChips(
 
 function ReceiptAlbumScreen() {
   const navigation = useNavigation<ReceiptAlbumNavigationProp>();
-  const [filter, setFilter] = useState<EntryListFilterValue>(DEFAULT_ENTRY_LIST_FILTER);
+  const [filter, setFilter] = useState<EntryListFilterValue>({
+    ...DEFAULT_ENTRY_LIST_FILTER,
+    period: 'all',
+  });
   const [ledgerOptions, setLedgerOptions] = useState<LedgerOption[]>([]);
   const [receipts, setReceipts] = useState<Receipt[]>([]);
   const [page, setPage] = useState(0);

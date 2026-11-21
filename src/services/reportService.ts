@@ -188,11 +188,19 @@ export async function getReports(
   };
 }
 
+type ReportEntryReceiptFileResponse = {
+  fileId: number;
+  fileName?: string;
+  fileUrl: string;
+};
+
 type ReportEntrySnapshotResponse = {
   type: 'INCOME' | 'EXPENSE';
   title: string;
   amount: number;
   occurredOn: string;
+  memo: string | null;
+  receiptFiles: ReportEntryReceiptFileResponse[];
 };
 
 type ReportLedgerDetailResponse = {
@@ -222,6 +230,10 @@ type ReportDetailResponse = {
   createdAt: string;
 };
 
+export async function deleteReport(reportId: string): Promise<void> {
+  await request<void>(`/api/v1/reports/${reportId}`, { method: 'DELETE' });
+}
+
 export async function getReportDetail(reportId: string): Promise<ReportDetail> {
   const response = await request<ReportDetailResponse>(`/api/v1/reports/${reportId}`, {
     method: 'GET',
@@ -244,6 +256,12 @@ export async function getReportDetail(reportId: string): Promise<ReportDetail> {
         title: entry.title,
         amount: entry.amount,
         occurredOn: entry.occurredOn,
+        memo: entry.memo,
+        receiptFiles: entry.receiptFiles.map(file => ({
+          fileId: String(file.fileId),
+          fileName: file.fileName,
+          fileUrl: file.fileUrl,
+        })),
       })),
     })),
     createdAt: response.createdAt,

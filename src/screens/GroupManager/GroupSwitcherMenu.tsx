@@ -5,6 +5,7 @@ import { GROUP_SWITCHER_ADD_ALL } from '../../constants/groupManagerScreenText';
 import { BORDER_NEUTRAL_NORMAL, FILL_NEUTRAL_SUBTLE, OVERLAY_MENU_BACKDROP } from '../../constants/colors';
 
 const ALL_GROUPS_KEY = '__all_groups__';
+const PLUS_ICON = require('../../assets/icons/action/Plus.png');
 
 type GroupSwitcherMenuProps = {
   visible: boolean;
@@ -31,12 +32,9 @@ function GroupSwitcherMenu({
         <View style={styles.menuWrapper}>
           <Menu
             sections={[
-              [
-                ...groups.map(group => ({ key: group.id, label: group.name })),
-                { key: ALL_GROUPS_KEY, label: `+ ${GROUP_SWITCHER_ADD_ALL}` },
-              ],
+              groups.map(group => ({ key: group.id, label: group.name })),
+              [{ key: ALL_GROUPS_KEY, label: GROUP_SWITCHER_ADD_ALL, icon: PLUS_ICON }],
             ]}
-            showIcon={false}
             onSelect={key => {
               if (key === ALL_GROUPS_KEY) {
                 onPressAllGroups();

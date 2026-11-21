@@ -10,7 +10,8 @@ import TextButton from '../../Input/Button/TextButton';
 import TextField from '../../Input/Text Field/TextField';
 import {
   FILL_NEUTRAL_SUBTLE,
-  FOREGROUND_NEUTRAL_SUBTLE,
+  FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_PRIMARY,
   OVERLAY_SCRIM,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
@@ -121,7 +122,7 @@ const styles = StyleSheet.create({
   },
   overlayDocked: {
     justifyContent: 'flex-end',
-    paddingBottom: 0,
+    paddingBottom: 16,
   },
   stickyWrapper: {
     width: '100%',
@@ -133,12 +134,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    ...TYPOGRAPHY.subtitle1,
+    ...TYPOGRAPHY.h3,
+    color: FOREGROUND_PRIMARY,
   },
   description: {
-    ...TYPOGRAPHY.body2,
+    ...TYPOGRAPHY.body3,
     marginTop: 4,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   textFieldWrapper: {
     marginTop: 16,

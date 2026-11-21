@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     paddingTop: 80,
   },
   emptyText: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
 });

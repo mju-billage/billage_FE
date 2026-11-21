@@ -45,7 +45,6 @@ import {
 import {
   DASHBOARD_DUES_CARD_DESCRIPTION,
   DASHBOARD_DUES_CARD_REMAINING_SUFFIX,
-  DASHBOARD_DUES_EMPTY,
   DASHBOARD_DUES_SECTION_TITLE,
   DASHBOARD_LOADING,
   DASHBOARD_NOTIFICATION_ACCESSIBILITY_LABEL,
@@ -58,7 +57,6 @@ import {
   BASIC_0,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_NORMAL,
-  FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Navigation/BottomNavigation';
@@ -244,44 +242,40 @@ function DashboardScreen() {
           </View>
         )}
 
-        {loadState === 'ready' && overview && (
+        {loadState === 'ready' && overview && overview.upcomingDues.length > 0 && (
           <>
             <Text style={styles.duesSectionTitle}>{DASHBOARD_DUES_SECTION_TITLE}</Text>
-            {overview.upcomingDues.length === 0 ? (
-              <Text style={styles.duesEmptyText}>{DASHBOARD_DUES_EMPTY}</Text>
-            ) : (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.duesCarouselScroll}
-                contentContainerStyle={styles.duesCarousel}
-                snapToInterval={duesCardWidth + DUES_CARD_GAP}
-                snapToAlignment="start"
-                decelerationRate="fast"
-                disableIntervalMomentum
-              >
-                {overview.upcomingDues.map(dues => (
-                  <DuesProgressCard
-                    key={dues.duesId}
-                    type="dashboard"
-                    width={duesCardWidth}
-                    onPress={() => handlePressDues(dues.duesId)}
-                    progress={{
-                      id: dues.duesId,
-                      groupName: dues.title,
-                      dDayLabel: formatDDayLabel(dues.daysLeft),
-                      description: DASHBOARD_DUES_CARD_DESCRIPTION,
-                      highlightCount: dues.targetCount - dues.paidCount,
-                      highlightDescription: DASHBOARD_DUES_CARD_REMAINING_SUFFIX,
-                      paidMemberCount: dues.paidCount,
-                      totalMemberCount: dues.targetCount,
-                      progressRatio:
-                        dues.targetCount > 0 ? dues.paidCount / dues.targetCount : 0,
-                    }}
-                  />
-                ))}
-              </ScrollView>
-            )}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.duesCarouselScroll}
+              contentContainerStyle={styles.duesCarousel}
+              snapToInterval={duesCardWidth + DUES_CARD_GAP}
+              snapToAlignment="start"
+              decelerationRate="fast"
+              disableIntervalMomentum
+            >
+              {overview.upcomingDues.map(dues => (
+                <DuesProgressCard
+                  key={dues.duesId}
+                  type="dashboard"
+                  width={duesCardWidth}
+                  onPress={() => handlePressDues(dues.duesId)}
+                  progress={{
+                    id: dues.duesId,
+                    groupName: dues.title,
+                    dDayLabel: formatDDayLabel(dues.daysLeft),
+                    description: DASHBOARD_DUES_CARD_DESCRIPTION,
+                    highlightCount: dues.targetCount - dues.paidCount,
+                    highlightDescription: DASHBOARD_DUES_CARD_REMAINING_SUFFIX,
+                    paidMemberCount: dues.paidCount,
+                    totalMemberCount: dues.targetCount,
+                    progressRatio:
+                      dues.targetCount > 0 ? dues.paidCount / dues.targetCount : 0,
+                  }}
+                />
+              ))}
+            </ScrollView>
           </>
         )}
 
@@ -351,7 +345,7 @@ const styles = StyleSheet.create({
   },
   duesSectionTitle: {
     ...TYPOGRAPHY.subtitle1,
-    marginTop: 12,
+    marginTop: 20,
     marginBottom: 10,
   },
   stateContainer: {
@@ -363,11 +357,6 @@ const styles = StyleSheet.create({
   stateText: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_DISABLED,
-  },
-  duesEmptyText: {
-    ...TYPOGRAPHY.body2,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
-    marginTop: 6,
   },
   duesCarouselScroll: {
     marginHorizontal: -SCREEN_HORIZONTAL_PADDING,

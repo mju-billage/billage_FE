@@ -25,6 +25,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import AmountCard from '../../components/Data Display/Card/AmountCard';
 import BudgetCard from '../../components/Data Display/Card/BudgetCard';
+import Divider from '../../components/Data Display/Divider/Divider';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import CarouselIndicator from '../../components/Navigation/Carousel Indicator/CarouselIndicator';
 import Button from '../../components/Input/Button/Button';
@@ -42,12 +43,10 @@ import LedgerFilterSheet, {
 import type { MenuItem } from '../../components/Navigation/Menu/Menu';
 import type { LedgerDetail } from '../../types/ledger';
 import { groupEntriesByDate, type EntrySummary } from '../../types/entry';
-import { getActiveGroup } from '../../types/group';
 import { formatDateHeader } from '../../utils/dateHeader';
 import * as ledgerService from '../../services/ledgerService';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
 import * as entryService from '../../services/entryService';
-import * as groupService from '../../services/groupService';
 import { ApiError } from '../../services/apiClient';
 import {
   API_ERROR_DEFAULT_MESSAGE,
@@ -92,6 +91,7 @@ import {
   BACKGROUND_PRIMARY,
   BACKGROUND_SECONDARY,
   FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
@@ -101,7 +101,7 @@ import {
 
 const SEARCH_ICON = require('../../assets/icons/system/Search.png');
 const FILTER_ICON = require('../../assets/icons/system/Filter.png');
-const MENU_ICON = require('../../assets/icons/action/MenuHorizontal.png');
+const MENU_ICON = require('../../assets/icons/action/Menu Vertical.png');
 
 type LedgerDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -159,8 +159,6 @@ function LedgerDetailScreen() {
   const [filter, setFilter] = useState<LedgerFilterValue>(DEFAULT_LEDGER_FILTER);
   const filterRef = useRef<LedgerFilterValue>(DEFAULT_LEDGER_FILTER);
   const [filterSheetVisible, setFilterSheetVisible] = useState(false);
-  /** 기간 필터용 모임 id 캐시(7-6) — `getActiveGroup()` 으로 한 번 구하면 화면에 머무는 동안 재사용한다. */
-  const groupIdRef = useRef<string | null>(null);
 
   const toErrorMessage = (error: unknown): string => {
     if (isNetworkError(error)) {
@@ -175,49 +173,16 @@ function LedgerDetailScreen() {
     return API_ERROR_DEFAULT_MESSAGE;
   };
 
-  /**
-   * 장부별 내역 목록(`getEntries`)은 `from`/`to` 를 받지 않는다. 기간 필터가 걸리면
-   * 모임 전체 목록(`getGroupEntries`)을 `ledgerIds=[이 장부]` 로 불러 우회한다(기본안 B,
-   * 7-6). 서버가 장부별 목록에서 from/to 를 지원하면 이 분기만 걷어내면 된다 —
-   * docs/pending/backend.md 참조.
-   */
   const fetchEntriesPage = useCallback(
     async (
       filterValue: LedgerFilterValue,
       page: number,
     ): Promise<entryService.EntryListPage> => {
-      if (filterValue.period === 'all') {
-        return entryService.getEntries(ledgerId, {
-          ...toEntryFilterQuery(filterValue),
-          page,
-        });
-      }
-      if (!groupIdRef.current) {
-        let group = getActiveGroup();
-        if (!group) {
-          await groupService.getMyGroups();
-          group = getActiveGroup();
-        }
-        groupIdRef.current = group ? group.id : null;
-      }
-      if (!groupIdRef.current) {
-        throw new Error(NO_ACTIVE_GROUP_MESSAGE);
-      }
-      const range = getLedgerFilterDateRange(filterValue);
-      const groupPage = await entryService.getGroupEntries(groupIdRef.current, {
-        ledgerIds: [ledgerId],
-        from: range.from,
-        to: range.to,
+      return entryService.getEntries(ledgerId, {
         ...toEntryFilterQuery(filterValue),
+        ...getLedgerFilterDateRange(filterValue),
         page,
       });
-      return {
-        items: groupPage.items,
-        page: groupPage.page,
-        totalPages: groupPage.totalPages,
-        totalElements: groupPage.totalElements,
-        last: groupPage.last,
-      };
     },
     [ledgerId],
   );
@@ -513,6 +478,9 @@ function LedgerDetailScreen() {
                 {LEDGER_COUNT_SUFFIX}
               </Text>
             </View>
+            <View style={styles.listDividerWrapper}>
+              <Divider />
+            </View>
           </>
         }
         ListEmptyComponent={
@@ -572,7 +540,6 @@ function LedgerDetailScreen() {
         }}
         textFieldPlaceholder={dialogConfig.placeholder}
         textFieldMaxLength={activeDialog === 'rename' ? LEDGER_NAME_MAX_LENGTH : undefined}
-        autoFocusTextField={activeDialog === 'rename'}
         textFieldError={dialogError}
         confirmLabel={dialogConfig.confirmLabel}
         destructive={activeDialog === 'delete'}
@@ -652,8 +619,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   filterSummaryText: {
-    ...TYPOGRAPHY.body3,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
+    ...TYPOGRAPHY.caption,
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   toolIcon: {
     width: 24,
@@ -674,6 +641,9 @@ const styles = StyleSheet.create({
   listHeader: {
     paddingHorizontal: 20,
     paddingTop: 12,
+  },
+  listDividerWrapper: {
+    marginHorizontal: 20,
   },
   itemWrapper: {
     paddingHorizontal: 20,

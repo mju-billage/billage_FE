@@ -15,7 +15,6 @@ import { ApiError } from '../../services/apiClient';
 import { toUserErrorMessage } from '../../constants/apiErrorMessages';
 import {
   FEEDBACK_NEGATIVE_BOLD,
-  FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
 } from '../../constants/colors';
@@ -226,6 +225,7 @@ function EmailVerificationScreen() {
             onPress={handleResend}
             disabled={isSending}
             hierarchy="tertiary"
+            size="caption"
             underline
           />
         </View>
@@ -287,11 +287,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
+    marginTop: 64,
   },
   resendLabel: {
-    ...TYPOGRAPHY.body3,
-    color: FOREGROUND_NEUTRAL_NORMAL,
+    ...TYPOGRAPHY.caption,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   footer: {
     paddingBottom: 24,

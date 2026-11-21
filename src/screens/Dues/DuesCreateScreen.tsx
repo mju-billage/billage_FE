@@ -593,7 +593,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   ledgerPlaceholder: {
-    ...TYPOGRAPHY.body1,
+    ...TYPOGRAPHY.button,
     color: FOREGROUND_DISABLED,
   },
   ledgerValue: {

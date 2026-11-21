@@ -21,6 +21,9 @@ import {
   FILTER_PERIOD_LABEL,
   FILTER_RESET_LABEL,
   FILTER_SHEET_TITLE,
+  FILTER_SORT_LABEL,
+  FILTER_SORT_LATEST,
+  FILTER_SORT_OLDEST,
   FILTER_TYPE_ALL,
   FILTER_TYPE_EXPENSE,
   FILTER_TYPE_INCOME,
@@ -76,7 +79,7 @@ function ReceiptFilterSheet({
   };
 
   const handleReset = () => {
-    setDraft(DEFAULT_ENTRY_LIST_FILTER);
+    setDraft({ ...DEFAULT_ENTRY_LIST_FILTER, period: 'all' });
   };
 
   const handleApply = () => {
@@ -167,8 +170,24 @@ function ReceiptFilterSheet({
         />
       </View>
 
+      <Text style={styles.sectionLabel}>{FILTER_SORT_LABEL}</Text>
+      <View style={styles.chipRow}>
+        <FilterPill
+          label={FILTER_SORT_LATEST}
+          active={draft.sort === 'latest'}
+          onPress={() => setDraft({ ...draft, sort: 'latest' })}
+        />
+        <FilterPill
+          label={FILTER_SORT_OLDEST}
+          active={draft.sort === 'oldest'}
+          onPress={() => setDraft({ ...draft, sort: 'oldest' })}
+        />
+      </View>
+
       <View style={styles.footer}>
-        <TextButton label={FILTER_RESET_LABEL} hierarchy="tertiary" onPress={handleReset} />
+        <View style={styles.resetButton}>
+          <Button label={FILTER_RESET_LABEL} hierarchy="tertiary" onPress={handleReset} fullWidth />
+        </View>
         <View style={styles.applyButton}>
           <Button label={FILTER_APPLY_LABEL} onPress={handleApply} fullWidth />
         </View>
@@ -210,7 +229,7 @@ function ReceiptFilterSheet({
 
 const styles = StyleSheet.create({
   title: {
-    ...TYPOGRAPHY.subtitle1,
+    ...TYPOGRAPHY.h3,
     marginBottom: 16,
   },
   sectionLabel: {
@@ -229,8 +248,11 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
     marginTop: 24,
+  },
+  resetButton: {
+    width: 75,
   },
   applyButton: {
     flex: 1,

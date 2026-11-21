@@ -12,7 +12,6 @@ export const MY_PROFILE_TITLE = '내 프로필';
 export const MY_PROFILE_EDIT_LABEL = '프로필 변경';
 export const MY_PROFILE_PASSWORD_CHANGE_LABEL = '비밀번호 변경';
 export const MY_PROFILE_ACCOUNT_LABEL = '로그인 계정';
-export const MY_PROFILE_JOINED_AT_PREFIX = '가입일 ';
 export const MY_PROFILE_LOGOUT_LABEL = '로그아웃';
 export const MY_PROFILE_WITHDRAW_LABEL = '회원탈퇴';
 export const MY_PROFILE_LOGOUT_CONFIRM_TITLE = '로그아웃 할까요?';

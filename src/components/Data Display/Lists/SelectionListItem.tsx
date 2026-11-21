@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.body2,
     color: FOREGROUND_PRIMARY,
   },
   subtitle: {
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   },
   value: {
     ...TYPOGRAPHY.body2,
-    color: FOREGROUND_PRIMARY,
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   valueRequired: {
     color: FOREGROUND_SECONDARY,

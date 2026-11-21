@@ -205,14 +205,10 @@ function DuesEditScreen() {
     setLedgerName(option?.name ?? '');
   };
 
-  const canSubmit = title.trim().length > 0;
+  const canSubmit = title.trim().length > 0 && hasChanges;
 
   const handleSubmit = () => {
     if (!canSubmit) {
-      return;
-    }
-    if (!hasChanges) {
-      navigation.goBack();
       return;
     }
     run(async () => {

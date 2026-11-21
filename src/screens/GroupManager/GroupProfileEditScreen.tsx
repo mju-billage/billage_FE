@@ -80,7 +80,9 @@ function GroupProfileEditScreen() {
   };
 
   const trimmedName = name.trim();
-  const canSubmit = trimmedName.length > 0 && !isSubmitting && !isUploadingImage;
+  const hasChanges = trimmedName !== (group?.name ?? '') || imageAction === 'uploaded';
+  const canSubmit =
+    hasChanges && trimmedName.length > 0 && !isSubmitting && !isUploadingImage;
 
   const handleImagePicked = async (image: PickedImage) => {
     if (image.size !== undefined && image.size > fileService.MAX_UPLOAD_FILE_SIZE_BYTES) {

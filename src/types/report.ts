@@ -30,11 +30,19 @@ export type Report = {
   createdAt: string;
 };
 
+export type ReportEntryReceiptFile = {
+  fileId: string;
+  fileName?: string;
+  fileUrl: string;
+};
+
 export type ReportEntrySnapshot = {
   type: 'INCOME' | 'EXPENSE';
   title: string;
   amount: number;
   occurredOn: string;
+  memo: string | null;
+  receiptFiles: ReportEntryReceiptFile[];
 };
 
 export type ReportLedgerDetail = {

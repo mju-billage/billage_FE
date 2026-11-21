@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 6,
     borderRadius: 8,
   },
   itemPressed: {
@@ -102,6 +102,7 @@ const styles = StyleSheet.create({
   },
   label: {
     ...TYPOGRAPHY.body2,
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   labelSelected: {
     color: FOREGROUND_SECONDARY,

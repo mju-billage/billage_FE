@@ -26,7 +26,7 @@ import { TYPOGRAPHY } from '../../constants/typography';
 const SETTINGS_ICON = require('../../assets/icons/system/Setting.png');
 
 const NOTIFICATION_LOADING = '알림을 불러오는 중이에요.';
-const NOTIFICATION_EMPTY = '아직 알림이 없어요.';
+const NOTIFICATION_EMPTY = '새로운 알림이 없어요';
 const NOTIFICATION_RETRY_LABEL = '다시 시도';
 
 type NotificationScreenNavigationProp = NativeStackNavigationProp<

@@ -8,6 +8,7 @@ import AppBar from '../../components/Navigation/App bar/AppBar';
 import SearchField from '../../components/Input/Search/SearchField';
 import Button from '../../components/Input/Button/Button';
 import CountRow from '../../components/Data Display/Lists/CountRow';
+import Divider from '../../components/Data Display/Divider/Divider';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { groupEntriesByDate, type EntrySummary } from '../../types/entry';
@@ -128,7 +129,14 @@ function LedgerSearchScreen() {
           />
         </View>
 
-        {!searchError && <CountRow text={`${totalElements}${LEDGER_COUNT_SUFFIX}`} />}
+        {!searchError && (
+          <>
+            <CountRow text={`${totalElements}${LEDGER_COUNT_SUFFIX}`} />
+            <View style={styles.countDividerWrapper}>
+              <Divider />
+            </View>
+          </>
+        )}
 
         {searchError ? (
           <View style={styles.emptyState}>
@@ -190,6 +198,9 @@ const styles = StyleSheet.create({
   searchWrapper: {
     marginTop: 8,
     marginBottom: 12,
+  },
+  countDividerWrapper: {
+    marginBottom: 8,
   },
   listContent: {
     paddingBottom: 24,

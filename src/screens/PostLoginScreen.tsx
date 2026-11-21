@@ -4,8 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/RootNavigator';
 import SplashScreen from './SplashScreen';
+import AppBar from '../components/Navigation/App bar/AppBar';
 import Button from '../components/Input/Button/Button';
-import TextButton from '../components/Input/Button/TextButton';
 import ScreenContainer from '../components/Layout/ScreenContainer';
 import * as authService from '../services/authService';
 import { useSubmitLock } from '../hooks/useSubmitLock';
@@ -18,7 +18,6 @@ import {
 } from '../constants/apiErrorMessages';
 import {
   POST_LOGIN_LOAD_ERROR_TITLE,
-  POST_LOGIN_LOGOUT_LABEL,
   POST_LOGIN_RETRY_LABEL,
 } from '../constants/postLoginScreenText';
 import { FOREGROUND_NEUTRAL_SUBTLE } from '../constants/colors';
@@ -77,20 +76,18 @@ function PostLoginScreen() {
 
   return (
     <ScreenContainer background="secondary" edges={['bottom']} style={styles.container}>
+      <AppBar type="sub" title="" onBackPress={handleLogout} />
       <View style={styles.body}>
         <Text style={styles.title}>{POST_LOGIN_LOAD_ERROR_TITLE}</Text>
         <Text style={styles.message}>{errorMessage}</Text>
       </View>
       <View style={styles.footer}>
-        <Button label={POST_LOGIN_RETRY_LABEL} onPress={load} fullWidth />
-        <View style={styles.logoutRow}>
-          <TextButton
-            label={POST_LOGIN_LOGOUT_LABEL}
-            hierarchy="tertiary"
-            onPress={handleLogout}
-            disabled={isLoggingOut}
-          />
-        </View>
+        <Button
+          label={POST_LOGIN_RETRY_LABEL}
+          onPress={load}
+          disabled={isLoggingOut}
+          fullWidth
+        />
       </View>
     </ScreenContainer>
   );
@@ -99,13 +96,12 @@ function PostLoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
-    paddingHorizontal: 20,
   },
   body: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 20,
   },
   title: {
     ...TYPOGRAPHY.h3,
@@ -118,11 +114,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   footer: {
+    paddingHorizontal: 20,
     paddingBottom: 24,
-  },
-  logoutRow: {
-    marginTop: 12,
-    alignItems: 'center',
   },
 });
 

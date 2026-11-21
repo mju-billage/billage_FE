@@ -28,6 +28,7 @@ import {
   toUserErrorMessage,
 } from '../../constants/apiErrorMessages';
 import {
+  REPORT_DETAIL_CREATED_AT_LABEL,
   REPORT_MAIN_COUNT_SUFFIX,
   REPORT_MAIN_EMPTY_BY_LEDGER,
   REPORT_MAIN_EMPTY_BY_PERIOD,
@@ -237,7 +238,9 @@ function ReportMainScreen() {
                       >
                         {truncateWithEllipsis(item.title)}
                       </Text>
-                      <Text style={styles.cardSubtitle}>{formatDateDot(item.createdAt)}</Text>
+                      <Text style={styles.cardSubtitle}>
+                        {REPORT_DETAIL_CREATED_AT_LABEL} {formatDateDot(item.createdAt)}
+                      </Text>
                     </CardBase>
                   </Pressable>
                 )}
@@ -305,7 +308,7 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.subtitle2,
   },
   cardSubtitle: {
-    ...TYPOGRAPHY.body3,
+    ...TYPOGRAPHY.caption,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   loadingMoreRow: {

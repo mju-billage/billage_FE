@@ -6,6 +6,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import LedgerBudgetSheet from '../../components/Feedback/Dialogs/LedgerBudgetSheet';
+import SearchField from '../../components/Input/Search/SearchField';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import SelectionListItem from '../../components/Data Display/Lists/SelectionListItem';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
@@ -28,6 +29,8 @@ import {
   BUDGET_LIST_LOADING,
   BUDGET_LIST_RETRY_LABEL,
   BUDGET_LIST_TITLE,
+  FOLDER_COUNT_SUFFIX,
+  FOLDER_SEARCH_PLACEHOLDER,
   SNACKBAR_BUDGET_SAVED,
 } from '../../constants/folderScreenText';
 import {
@@ -50,6 +53,7 @@ function FolderBudgetListScreen() {
   const navigation = useNavigation<FolderBudgetListNavigationProp>();
 
   const [ledgers, setLedgers] = useState<LedgerSummary[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [editingLedger, setEditingLedger] = useState<LedgerSummary | null>(null);
@@ -98,6 +102,12 @@ function FolderBudgetListScreen() {
       load();
     }, [load]),
   );
+
+  const filteredLedgers = searchQuery.trim()
+    ? ledgers.filter(ledger =>
+        ledger.name.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+      )
+    : ledgers;
 
   const handlePressLedger = (ledger: LedgerSummary) => {
     setEditingLedger(ledger);
@@ -154,27 +164,45 @@ function FolderBudgetListScreen() {
         </View>
       )}
 
-      {loadState === 'ready' &&
-        (ledgers.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>{BUDGET_LIST_EMPTY_TITLE}</Text>
-            <Text style={styles.emptySubtitle}>{BUDGET_LIST_EMPTY_SUBTITLE}</Text>
+      {loadState === 'ready' && (
+        <>
+          <View style={styles.searchWrapper}>
+            <SearchField
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onClear={() => setSearchQuery('')}
+              placeholder={FOLDER_SEARCH_PLACEHOLDER}
+            />
           </View>
-        ) : (
-          <FlatList
-            data={ledgers}
-            keyExtractor={item => item.id}
-            contentContainerStyle={styles.listContent}
-            renderItem={({ item }) => (
-              <SelectionListItem
-                type="picker"
-                title={item.name}
-                value={getBudgetValue(item)}
-                onPress={() => handlePressLedger(item)}
+
+          {filteredLedgers.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyTitle}>{BUDGET_LIST_EMPTY_TITLE}</Text>
+              <Text style={styles.emptySubtitle}>{BUDGET_LIST_EMPTY_SUBTITLE}</Text>
+            </View>
+          ) : (
+            <>
+              <Text style={styles.countText}>
+                {filteredLedgers.length}
+                {FOLDER_COUNT_SUFFIX}
+              </Text>
+              <FlatList
+                data={filteredLedgers}
+                keyExtractor={item => item.id}
+                contentContainerStyle={styles.listContent}
+                renderItem={({ item }) => (
+                  <SelectionListItem
+                    type="picker"
+                    title={item.name}
+                    value={getBudgetValue(item)}
+                    onPress={() => handlePressLedger(item)}
+                  />
+                )}
               />
-            )}
-          />
-        ))}
+            </>
+          )}
+        </>
+      )}
 
       <LedgerBudgetSheet
         visible={editingLedger !== null}
@@ -194,6 +222,16 @@ function FolderBudgetListScreen() {
 }
 
 const styles = StyleSheet.create({
+  searchWrapper: {
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+  countText: {
+    ...TYPOGRAPHY.body2,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
+    paddingHorizontal: 20,
+    marginBottom: 8,
+  },
   listContent: {
     paddingHorizontal: 20,
     paddingBottom: 24,

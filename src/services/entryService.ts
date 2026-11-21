@@ -3,6 +3,7 @@ import type {
   EntryApprovalStatus,
   EntryDetail,
   EntryGroupSummary,
+  EntryOcr,
   EntryReceiptFile,
   EntrySummary,
   EntryType,
@@ -44,6 +45,13 @@ type ReceiptFileResponse = {
   fileUrl: string;
 };
 
+type OcrItemResponse = {
+  name: string;
+  quantity: number | null;
+  unitPrice: number | null;
+  amount: number | null;
+};
+
 type EntryDetailResponse = {
   entryId: number;
   ledgerId: number;
@@ -59,6 +67,7 @@ type EntryDetailResponse = {
   approvedBy: { userId: number; name: string } | null;
   approvedAt: string | null;
   receiptFiles: ReceiptFileResponse[];
+  ocr?: { items: OcrItemResponse[] } | null;
   duesId: number | null;
   duesTitle: string | null;
   duesExists: boolean;
@@ -88,6 +97,13 @@ type EntryApproveResponse = {
 
 function toReceiptFile(response: ReceiptFileResponse): EntryReceiptFile {
   return { id: String(response.fileId), url: response.fileUrl, name: response.fileName };
+}
+
+function toEntryOcr(response: EntryDetailResponse['ocr']): EntryOcr | null {
+  if (!response) {
+    return null;
+  }
+  return { items: response.items };
 }
 
 function toEntrySummary(response: EntryListItemResponse): EntrySummary {
@@ -131,6 +147,7 @@ function toEntryDetail(response: EntryDetailResponse): EntryDetail {
       : null,
     approvedAt: response.approvedAt,
     receiptFiles: response.receiptFiles.map(toReceiptFile),
+    ocr: toEntryOcr(response.ocr),
     duesId: response.duesId != null ? String(response.duesId) : null,
     duesTitle: response.duesTitle,
     duesExists: response.duesExists,
@@ -146,6 +163,8 @@ function toEntryDetail(response: EntryDetailResponse): EntryDetail {
 export type EntryListParams = {
   type?: EntryType;
   status?: EntryApprovalStatus;
+  from?: string;
+  to?: string;
   keyword?: string;
   page?: number;
   size?: number;
@@ -170,6 +189,12 @@ export async function getEntries(
   }
   if (params.status) {
     query.set('status', params.status);
+  }
+  if (params.from) {
+    query.set('from', params.from);
+  }
+  if (params.to) {
+    query.set('to', params.to);
   }
   if (params.keyword) {
     query.set('keyword', params.keyword);

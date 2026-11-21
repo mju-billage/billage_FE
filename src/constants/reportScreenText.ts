@@ -62,5 +62,14 @@ export const REPORT_ENTRY_DETAIL_TYPE_LABEL = '구분';
 export const REPORT_ENTRY_DETAIL_DATE_LABEL = '발생일';
 export const REPORT_ENTRY_DETAIL_AMOUNT_LABEL = '금액';
 export const REPORT_ENTRY_DETAIL_TITLE_LABEL = '내역명';
+export const REPORT_ENTRY_DETAIL_MEMO_LABEL = '메모';
+export const REPORT_ENTRY_DETAIL_MEMO_EMPTY_PLACEHOLDER = '-';
+export const REPORT_ENTRY_DETAIL_RECEIPT_LABEL = '증빙 자료';
 export const REPORT_ENTRY_DETAIL_SNAPSHOT_NOTICE =
-  '이 내역은 보고서 생성 시점 기준이에요. 원본이 나중에 바뀌어도 반영되지 않고, 영수증·메모는 아직 이 화면에서 볼 수 없어요.';
+  '이 내역은 보고서 생성 시점 기준이에요. 원본이 나중에 바뀌어도 반영되지 않아요.';
+
+export const REPORT_DELETE_CONFIRM_TITLE = '보고서를 삭제하시겠습니까?';
+export const REPORT_DELETE_CONFIRM_DESCRIPTION =
+  '삭제한 보고서는 복구할 수 없어요. 장부·내역·증빙은 그대로 남아요.';
+export const REPORT_DELETE_CONFIRM_LABEL = '삭제';
+export const SNACKBAR_REPORT_DELETED = '보고서가 삭제되었어요.';

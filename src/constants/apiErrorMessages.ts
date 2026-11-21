@@ -88,6 +88,8 @@ const DUES_ERROR_MESSAGES: Record<string, string> = {
   DUES_AMOUNT_IMMUTABLE: '금액은 수정할 수 없어요.',
   DUES_NOT_STARTED: '아직 시작하지 않은 회비예요.',
   INVALID_PAYMENT_STATUS: '납부 상태를 변경할 수 없어요. 다시 시도해주세요.',
+  DUES_DUE_DATE_PAST: '마감일은 오늘 이후여야 합니다.',
+  MANAGER_NOT_IN_GROUP: '담당자는 모임 관리자 중에서만 선택할 수 있어요.',
 };
 
 const ENTRY_ERROR_MESSAGES: Record<string, string> = {
@@ -101,6 +103,7 @@ const FILE_ERROR_MESSAGES: Record<string, string> = {
   FILE_SIZE_EXCEEDED: '파일 용량이 너무 커요. 10MB 이하 파일을 사용해주세요.',
   FILE_UPLOAD_FAILED: '파일 업로드에 실패했어요. 잠시 후 다시 시도해주세요.',
   FILE_DELETE_FAILED: '파일 삭제에 실패했어요. 잠시 후 다시 시도해주세요.',
+  DUPLICATE_RECEIPT_FILE: '이미 첨부된 사진이에요.',
 };
 
 const OCR_ERROR_MESSAGES: Record<string, string> = {
@@ -122,6 +125,13 @@ const REPORT_ERROR_MESSAGES: Record<string, string> = {
   REPORT_RANGE_EMPTY: '선택한 장부·기간에 보고서로 만들 내역이 없어요.',
 };
 
+const SUPPORT_ERROR_MESSAGES: Record<string, string> = {
+  NOTICE_NOT_FOUND: '공지사항을 찾을 수 없어요. 이미 삭제됐을 수 있어요.',
+  TERMS_NOT_FOUND: '약관 내용을 아직 준비하고 있어요.',
+  INQUIRY_LIMIT_EXCEEDED: '문의는 하루 5건까지 보낼 수 있어요. 내일 다시 시도해주세요.',
+  NOTIFICATION_NOT_FOUND: '알림을 찾을 수 없어요.',
+};
+
 const API_ERROR_MESSAGES: Record<string, string> = {
   ...COMMON_ERROR_MESSAGES,
   ...AUTH_ERROR_MESSAGES,
@@ -137,6 +147,7 @@ const API_ERROR_MESSAGES: Record<string, string> = {
   ...USER_ERROR_MESSAGES,
   ...ARCHIVE_ERROR_MESSAGES,
   ...REPORT_ERROR_MESSAGES,
+  ...SUPPORT_ERROR_MESSAGES,
 };
 
 const SERVER_GENERIC_INVALID_REQUEST_MESSAGE = '요청 값이 올바르지 않습니다.';

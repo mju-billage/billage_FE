@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomWidth: 1,
     paddingVertical: 8,
-    paddingLeft: 16,
+    paddingLeft: 20,
     paddingRight: 10,
   },
   input: {

@@ -8,6 +8,7 @@ import {
   BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
@@ -222,6 +223,7 @@ const styles = StyleSheet.create({
   },
   groupName: {
     ...TYPOGRAPHY.subtitle3,
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   description: {
     ...TYPOGRAPHY.subtitle3,

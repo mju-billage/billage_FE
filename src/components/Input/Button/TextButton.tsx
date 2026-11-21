@@ -26,6 +26,8 @@ type TextButtonProps = {
   icon?: ImageSourcePropType;
   disabled?: boolean;
   underline?: boolean;
+  /** 'caption'이면 Other/Caption(10px/regular) 사용 — 로그인 화면 하단 링크 등 보조 텍스트용(옵트인, 기본 'default') */
+  size?: 'default' | 'caption';
 };
 
 const PRESSED_BG_BY_HIERARCHY: Record<TextButtonHierarchy, object> = {
@@ -42,6 +44,7 @@ function TextButton({
   icon,
   disabled = false,
   underline = false,
+  size = 'default',
 }: TextButtonProps) {
   const labelStyle = disabled
     ? styles.disabledLabel
@@ -68,7 +71,15 @@ function TextButton({
           style={[styles.icon, { tintColor: labelStyle.color }]}
         />
       )}
-      <Text style={[styles.label, labelStyle, underline && styles.underline]}>{label}</Text>
+      <Text
+        style={[
+          size === 'caption' ? styles.labelCaption : styles.label,
+          labelStyle,
+          underline && styles.underline,
+        ]}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 }
@@ -89,6 +100,9 @@ const styles = StyleSheet.create({
   },
   label: {
     ...TYPOGRAPHY.button,
+  },
+  labelCaption: {
+    ...TYPOGRAPHY.caption,
   },
   underline: {
     textDecorationLine: 'underline',

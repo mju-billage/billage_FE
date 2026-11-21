@@ -83,6 +83,7 @@ function GroupCreateScreen() {
       <View style={styles.form}>
         <TextField
           label={GROUP_NAME_LABEL}
+          required
           value={name}
           onChangeText={text => {
             setName(text);
@@ -109,7 +110,7 @@ function GroupCreateScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
+    paddingTop: 48,
     paddingHorizontal: 20,
   },
   headerRow: {

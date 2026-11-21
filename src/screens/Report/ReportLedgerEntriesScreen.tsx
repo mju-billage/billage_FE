@@ -37,6 +37,7 @@ function ReportLedgerEntriesScreen() {
 
       <ReportEntryList
         sheet
+        showLedgerName={false}
         entries={entries.map(entry => ({ ...entry, ledgerName }))}
         onPressEntry={entry =>
           navigation.navigate('ReportEntryDetail', { ledgerName, entry })

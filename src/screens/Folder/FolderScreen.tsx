@@ -86,12 +86,16 @@ import {
   VIEW_TOGGLE_GRID_LABEL,
   VIEW_TOGGLE_LIST_LABEL,
 } from '../../constants/folderScreenText';
-import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import {
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { BOTTOM_NAVIGATION_HEIGHT } from '../../components/Navigation/Bottom Navigation/BottomNavigation';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
 
-const MENU_ICON = require('../../assets/icons/action/MenuHorizontal.png');
+const MENU_ICON = require('../../assets/icons/action/Menu Vertical.png');
 const STATISTICS_ICON = require('../../assets/icons/content/Graph.png');
 const GRID_ICON = require('../../assets/icons/system/Grid.png');
 const LIST_ICON = require('../../assets/icons/system/List.png');
@@ -343,6 +347,9 @@ function FolderScreen() {
           return true;
         } catch (error) {
           setDialogError(fieldOrGeneralError(error, 'title'));
+          if (!(error instanceof ApiError)) {
+            showSnackbar(toErrorMessage(error));
+          }
           return false;
         }
       });
@@ -412,6 +419,8 @@ function FolderScreen() {
               <Text style={styles.countText}>{filteredItems.length} {FOLDER_COUNT_SUFFIX}</Text>
               <IconButton
                 icon={PLUS_ICON}
+                iconSize={20}
+                iconColor={FOREGROUND_NEUTRAL_NORMAL}
                 onPress={() => setNewItemSheetVisible(true)}
               />
             </View>
@@ -493,7 +502,6 @@ function FolderScreen() {
         }}
         textFieldPlaceholder={dialogConfig.placeholder}
         textFieldMaxLength={dialogConfig.showTextField ? FOLDER_NAME_MAX_LENGTH : undefined}
-        autoFocusTextField={activeDialog === 'backup'}
         textFieldError={dialogError}
         confirmLabel={dialogConfig.confirmLabel}
         destructive={activeDialog === 'unlink'}
@@ -574,7 +582,7 @@ const styles = StyleSheet.create({
   },
   countText: {
     ...TYPOGRAPHY.body2,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
+    color: FOREGROUND_NEUTRAL_NORMAL,
   },
   listContent: {
     paddingBottom: BOTTOM_NAVIGATION_HEIGHT + 24,

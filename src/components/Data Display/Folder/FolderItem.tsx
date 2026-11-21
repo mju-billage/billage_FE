@@ -35,6 +35,7 @@ type FolderItemProps = {
   subtitle: string;
   layout?: FolderItemLayout;
   selected?: boolean;
+  disabled?: boolean;
   hasItems?: boolean;
   onPress?: () => void;
   /** 'folder' 면 kind가 'ledger' 여도 폴더+장부 조합 아이콘을 그린다(FE-39, 통계 화면 전용). 폴더 탭은 영향 없음. */
@@ -81,6 +82,7 @@ function FolderItem({
   subtitle,
   layout = 'grid',
   selected = false,
+  disabled = false,
   hasItems = true,
   onPress,
   iconVariant = 'default',
@@ -95,8 +97,11 @@ function FolderItem({
         styles.container,
         layout === 'list' ? styles.listLayout : [styles.gridLayout, { width: gridItemWidth }],
         selected && styles.selected,
+        layout === 'list' && selected && styles.selectedList,
+        disabled && styles.disabled,
       ]}
-      onPress={onPress}
+      onPress={disabled ? undefined : onPress}
+      disabled={disabled}
     >
       {layout === 'list' ? (
         <View style={styles.iconSlot}>
@@ -202,6 +207,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    width: '100%',
   },
   iconSlot: {
     width: 65,
@@ -209,6 +215,12 @@ const styles = StyleSheet.create({
   },
   selected: {
     backgroundColor: BACKGROUND_PRIMARY,
+  },
+  selectedList: {
+    borderRadius: 0,
+  },
+  disabled: {
+    opacity: 0.4,
   },
   gridTextColumn: {
     alignItems: 'center',
@@ -218,11 +230,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   name: {
-    ...TYPOGRAPHY.body3,
-    fontWeight: 'bold',
+    ...TYPOGRAPHY.body2,
   },
   subtitle: {
-    ...TYPOGRAPHY.caption,
+    ...TYPOGRAPHY.overline,
     marginTop: 2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },

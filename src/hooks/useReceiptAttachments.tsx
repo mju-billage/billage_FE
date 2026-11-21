@@ -356,10 +356,7 @@ export function useReceiptAttachments({
     stageView = <ReceiptScanningView image={stage.image} onComplete={handleScanComplete} />;
   } else if (stage.kind === 'scanFailed') {
     stageView = (
-      <ReceiptScanFailedView
-        onRetry={() => handleTakePhoto('scan')}
-        onClose={() => setStage({ kind: 'form' })}
-      />
+      <ReceiptScanFailedView onRetry={() => handleTakePhoto('scan')} />
     );
   } else if (stage.kind === 'gallery') {
     stageView = (

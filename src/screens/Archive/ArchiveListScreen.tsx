@@ -21,7 +21,6 @@ import {
   isNetworkError,
 } from '../../constants/apiErrorMessages';
 import {
-  ARCHIVE_CARD_LEDGER_COUNT_SUFFIX,
   ARCHIVE_CARD_VIEW_LABEL,
   ARCHIVE_DELETE_CONFIRM_LABEL,
   ARCHIVE_DELETE_DIALOG_DESCRIPTION,
@@ -37,9 +36,14 @@ import {
   SNACKBAR_ARCHIVE_DELETED,
   SNACKBAR_ARCHIVE_RENAMED,
 } from '../../constants/archiveScreenText';
-import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import {
+  FOREGROUND_DISABLED,
+  FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
+import { formatDateDot } from '../../utils/dueDate';
 
 const EDIT_ICON = require('../../assets/icons/action/Edit.png');
 const CLOSE_ICON = require('../../assets/icons/action/Close.png');
@@ -210,7 +214,7 @@ function ArchiveListScreen() {
                           setActiveDialog('rename');
                         }}
                       >
-                        <Image source={EDIT_ICON} style={styles.headerIcon} />
+                        <Image source={EDIT_ICON} style={styles.editIcon} />
                       </Pressable>
                     </View>
                     <Pressable
@@ -225,8 +229,7 @@ function ArchiveListScreen() {
                   </View>
                   <Text style={styles.cardMeta}>{formatArchivedAt(item.createdAt)}</Text>
                   <Text style={styles.cardLedgerCount}>
-                    {item.ledgerCount}
-                    {ARCHIVE_CARD_LEDGER_COUNT_SUFFIX}
+                    {formatDateDot(item.startDate)} - {formatDateDot(item.endDate)}
                   </Text>
                   <Button
                     label={ARCHIVE_CARD_VIEW_LABEL}
@@ -351,8 +354,13 @@ const styles = StyleSheet.create({
     height: 20,
     tintColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
+  editIcon: {
+    width: 16,
+    height: 16,
+    tintColor: FOREGROUND_NEUTRAL_NORMAL,
+  },
   cardMeta: {
-    ...TYPOGRAPHY.body3,
+    ...TYPOGRAPHY.caption,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   cardLedgerCount: {

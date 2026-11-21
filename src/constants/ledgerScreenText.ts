@@ -49,6 +49,7 @@ export const LEDGER_ENTRY_SEARCH_EMPTY = '해당되는 내역이 없어요';
 
 export const FILTER_SHEET_TITLE = '필터 선택';
 export const FILTER_PERIOD_LABEL = '기간';
+export const FILTER_PERIOD_ALL = '전체';
 export const FILTER_PERIOD_1MONTH = '1개월';
 export const FILTER_PERIOD_3MONTH = '3개월';
 export const FILTER_PERIOD_6MONTH = '6개월';
@@ -80,14 +81,16 @@ export const TRANSACTION_RECEIPT_LABEL = '증빙 자료';
 export const TRANSACTION_RECEIPT_DETAIL_LABEL = '증빙 자료 세부 내역';
 export const TRANSACTION_RECEIPT_ITEM_NAME_LABEL = '상품명';
 export const TRANSACTION_RECEIPT_QUANTITY_LABEL = '수량';
+export const TRANSACTION_RECEIPT_UNIT_PRICE_LABEL = '단가';
 export const TRANSACTION_RECEIPT_AMOUNT_LABEL = '금액';
 export const TRANSACTION_RECEIPT_TOTAL_LABEL = '합계';
+export const TRANSACTION_RECEIPT_ITEMS_EMPTY_LABEL = '품목을 읽지 못했어요';
 export const TRANSACTION_PAYER_COUNT_SUFFIX = '명';
 export const TRANSACTION_DUES_DETAIL_CTA_LABEL = '회비 상세보기';
-export const TRANSACTION_DELETE_CONFIRM_TITLE = '내역을 삭제하시겠습니까?';
+export const TRANSACTION_DELETE_CONFIRM_TITLE = '내역을 삭제할까요?';
 export const TRANSACTION_DELETE_CONFIRM_DESCRIPTION =
-  '삭제 이후에는 데이터 복구가 어렵습니다.';
-export const TRANSACTION_DELETE_CONFIRM_LABEL = '삭제';
+  '삭제한 내역은 복구할 수 없어요.';
+export const TRANSACTION_DELETE_CONFIRM_LABEL = '삭제하기';
 
 export const TRANSACTION_DETAIL_LOADING = '내역을 불러오는 중이에요.';
 export const TRANSACTION_DETAIL_RETRY_LABEL = '다시 시도';

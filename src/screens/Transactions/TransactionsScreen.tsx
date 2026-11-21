@@ -49,6 +49,7 @@ import {
   toUserErrorMessage,
 } from '../../constants/apiErrorMessages';
 import {
+  FILTER_PERIOD_ALL,
   FILTER_PERIOD_1MONTH,
   FILTER_PERIOD_3MONTH,
   FILTER_PERIOD_6MONTH,
@@ -123,6 +124,7 @@ function getFilterChips(
 }
 
 const FILTER_PERIOD_LABEL_BY_VALUE: Record<EntryListFilterValue['period'], string> = {
+  all: FILTER_PERIOD_ALL,
   '1month': FILTER_PERIOD_1MONTH,
   '3month': FILTER_PERIOD_3MONTH,
   '6month': FILTER_PERIOD_6MONTH,
@@ -570,7 +572,7 @@ const styles = StyleSheet.create({
   },
   filterSummaryText: {
     ...TYPOGRAPHY.body3,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
+    color: FOREGROUND_NEUTRAL_NORMAL,
     marginLeft: 8,
   },
   chipRow: {
@@ -582,7 +584,7 @@ const styles = StyleSheet.create({
     paddingBottom: BOTTOM_NAVIGATION_HEIGHT + 96,
   },
   sectionHeader: {
-    ...TYPOGRAPHY.caption,
+    ...TYPOGRAPHY.body3,
     color: FOREGROUND_NEUTRAL_NORMAL,
     marginTop: 12,
     marginBottom: 6,

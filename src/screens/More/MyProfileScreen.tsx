@@ -22,7 +22,6 @@ import * as authService from '../../services/authService';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
 import type { AuthUserResponse } from '../../services/authService';
 import { ApiError } from '../../services/apiClient';
-import { formatDateDot } from '../../utils/dueDate';
 import {
   API_ERROR_DEFAULT_MESSAGE,
   API_NETWORK_ERROR_MESSAGE,
@@ -32,7 +31,6 @@ import {
 import {
   MY_PROFILE_ACCOUNT_LABEL,
   MY_PROFILE_EDIT_LABEL,
-  MY_PROFILE_JOINED_AT_PREFIX,
   MY_PROFILE_LOADING,
   MY_PROFILE_LOGOUT_CANCEL_LABEL,
   MY_PROFILE_LOGOUT_CONFIRM_LABEL,
@@ -217,12 +215,6 @@ function MyProfileScreen() {
               )}
               <Text style={styles.accountEmail}>{profile.email}</Text>
             </View>
-            {profile.createdAt && (
-              <Text style={styles.joinedAt}>
-                {MY_PROFILE_JOINED_AT_PREFIX}
-                {formatDateDot(profile.createdAt)}
-              </Text>
-            )}
           </CardBase>
 
           <View style={styles.footerRow}>
@@ -325,11 +317,6 @@ const styles = StyleSheet.create({
   },
   accountEmail: {
     ...TYPOGRAPHY.subtitle3,
-  },
-  joinedAt: {
-    ...TYPOGRAPHY.body3,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
-    marginTop: 8,
   },
   socialBadge: {
     width: 18,

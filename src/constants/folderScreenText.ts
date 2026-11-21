@@ -38,7 +38,7 @@ export const UNLINK_FOLDER_DIALOG_DESCRIPTION =
 export const UNLINK_CONFIRM_LABEL = '해제';
 
 export const BACKUP_DIALOG_TITLE = '현재까지 장부를 모두 보관할까요?';
-export const BACKUP_DIALOG_DESCRIPTION = '보관된 장부는 수정이 불가합니다.';
+export const BACKUP_DIALOG_DESCRIPTION = '보관된 장부는 수정할 수 없어요.';
 export const BACKUP_TITLE_PLACEHOLDER = '보관 제목을 입력해주세요.';
 export const BACKUP_CONFIRM_LABEL = '보관';
 

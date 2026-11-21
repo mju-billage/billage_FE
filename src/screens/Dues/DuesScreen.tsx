@@ -116,7 +116,12 @@ function DuesScreen() {
       const result = await duesService.getDuesList(group.id, {
         status: filter === 'inProgress' ? 'OPEN' : undefined,
       });
-      setDues(result);
+      const sorted = [...result].sort((a, b) => {
+        const aScheduled = a.status === 'SCHEDULED' ? 1 : 0;
+        const bScheduled = b.status === 'SCHEDULED' ? 1 : 0;
+        return aScheduled - bScheduled;
+      });
+      setDues(sorted);
       setLoadState('ready');
     } catch (error) {
       setLoadErrorMessage(toErrorMessage(error));

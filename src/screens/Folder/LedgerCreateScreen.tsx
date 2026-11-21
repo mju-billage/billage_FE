@@ -56,6 +56,7 @@ function LedgerCreateScreen() {
   const parentId = route.params.parentId;
 
   const [name, setName] = useState('');
+  const [hasTypedName, setHasTypedName] = useState(false);
   const [budget, setBudget] = useState('');
   const [nameError, setNameError] = useState<string | undefined>();
   const [budgetError, setBudgetError] = useState<string | undefined>();
@@ -154,9 +155,10 @@ function LedgerCreateScreen() {
             onChangeText={text => {
               setName(text.slice(0, LEDGER_NAME_MAX_LENGTH));
               setNameError(undefined);
+              setHasTypedName(true);
             }}
             placeholder={LEDGER_NAME_PLACEHOLDER}
-            helperText={LEDGER_NAME_HELPER}
+            helperText={hasTypedName && !name ? LEDGER_NAME_HELPER : undefined}
             error={nameError}
             maxLength={LEDGER_NAME_MAX_LENGTH}
           />
@@ -224,7 +226,7 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.h1,
   },
   subtitle: {
-    marginTop: 6,
+    marginTop: 32,
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },

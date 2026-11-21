@@ -40,7 +40,7 @@ export function groupEntriesByDate(
 }
 
 export type EntryListFilterValue = {
-  period: '1month' | '3month' | '6month' | 'custom';
+  period: 'all' | '1month' | '3month' | '6month' | 'custom';
   customStart?: string;
   customEnd?: string;
   ledgerIds: string[];
@@ -73,6 +73,9 @@ const FILTER_PERIOD_MONTHS = { '1month': 1, '3month': 3, '6month': 6 } as const;
 export function getEntryListFilterDateRange(
   filter: EntryListFilterValue,
 ): { from?: string; to?: string } {
+  if (filter.period === 'all') {
+    return {};
+  }
   if (filter.period === 'custom') {
     return filter.customStart && filter.customEnd
       ? { from: toIsoDate(filter.customStart), to: toIsoDate(filter.customEnd) }
@@ -90,6 +93,17 @@ export type EntryReceiptFile = {
   name?: string;
 };
 
+export type EntryOcrItem = {
+  name: string;
+  quantity: number | null;
+  unitPrice: number | null;
+  amount: number | null;
+};
+
+export type EntryOcr = {
+  items: EntryOcrItem[];
+};
+
 export type EntryDetail = {
   id: string;
   ledgerId: string;
@@ -105,6 +119,7 @@ export type EntryDetail = {
   approvedBy: { userId: string; name: string } | null;
   approvedAt: string | null;
   receiptFiles: EntryReceiptFile[];
+  ocr: EntryOcr | null;
   duesId: string | null;
   duesTitle: string | null;
   duesExists: boolean;

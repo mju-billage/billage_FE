@@ -25,6 +25,7 @@ import {
   daysUntil,
   formatDDayLabel,
   formatDateDot,
+  formatMonthDayDot,
   getDDaySeverity,
 } from '../../utils/dueDate';
 import {
@@ -45,7 +46,6 @@ import {
   DUES_DETAIL_LOADING,
   DUES_DETAIL_RETRY_LABEL,
   DUES_MEMBER_COUNT_SUFFIX,
-  DUES_MEMBER_LIST_EMPTY,
   DUES_MEMBER_PAID_EMPTY_TITLE,
   DUES_MEMBER_PAID_EMPTY_SUBTITLE,
   DUES_MEMBER_TAB_PAID,
@@ -184,6 +184,7 @@ function DuesDetailScreen() {
       return;
     }
     const nextStatus: PaymentStatus = tab === 'unpaid' ? 'PAID' : 'UNPAID';
+    const nextTab: MemberTab = nextStatus === 'PAID' ? 'paid' : 'unpaid';
     runChangeStatus(async () => {
       try {
         const result = await duesService.updateDuesMembersPaymentStatus(
@@ -198,7 +199,8 @@ function DuesDetailScreen() {
         );
         const updatedDetail = await duesService.getDuesDetail(duesId);
         setDetail(updatedDetail);
-        await loadMembers(tab);
+        setTab(nextTab);
+        await loadMembers(nextTab);
         return true;
       } catch (error) {
         showSnackbar(toErrorMessage(error));
@@ -340,7 +342,7 @@ function DuesDetailScreen() {
   const dDayLabel = isClosed
     ? DUES_BADGE_CLOSED
     : isScheduled
-    ? formatDateDot(detail.startDate)
+    ? formatMonthDayDot(detail.startDate)
     : formatDDayLabel(daysLeft);
   const badgeStatus: 'positive' | 'warning' | 'destructive' | 'neutral' =
     !isClosed && !isScheduled ? getDDaySeverity(daysLeft) : 'neutral';
@@ -413,7 +415,7 @@ function DuesDetailScreen() {
           {viewerIsOwner && tab === 'unpaid' && (
             <TextButton
               label={DUES_REQUEST_ENTRY_LABEL}
-              hierarchy="tertiary"
+              hierarchy="secondary"
               onPress={() => navigation.navigate('DuesRequest')}
             />
           )}
@@ -441,9 +443,7 @@ function DuesDetailScreen() {
                 <Text style={styles.emptyTitle}>{DUES_MEMBER_PAID_EMPTY_TITLE}</Text>
                 <Text style={styles.emptySubtitle}>{DUES_MEMBER_PAID_EMPTY_SUBTITLE}</Text>
               </View>
-            ) : (
-              <Text style={styles.emptyText}>{DUES_MEMBER_LIST_EMPTY}</Text>
-            )
+            ) : null
           ) : (
             <View style={styles.memberList}>
               {members.map(member => (
@@ -557,12 +557,6 @@ const styles = StyleSheet.create({
   memberCountText: {
     ...TYPOGRAPHY.body2,
     color: FOREGROUND_NEUTRAL_SUBTLE,
-  },
-  emptyText: {
-    ...TYPOGRAPHY.body2,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
-    marginTop: 24,
-    textAlign: 'center',
   },
   emptyState: {
     alignItems: 'center',

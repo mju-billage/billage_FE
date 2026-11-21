@@ -13,7 +13,11 @@ import {
   REPORT_LEDGER_ENTRIES_TAB_EXPENSE,
   REPORT_LEDGER_ENTRIES_TAB_INCOME,
 } from '../../constants/reportScreenText';
-import { BACKGROUND_SECONDARY, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
+import {
+  BACKGROUND_SECONDARY,
+  FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_SUBTLE,
+} from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 export type TaggedReportEntry = ReportEntrySnapshot & {
@@ -48,9 +52,15 @@ type ReportEntryListProps = {
   entries: TaggedReportEntry[];
   onPressEntry: (entry: TaggedReportEntry) => void;
   sheet?: boolean;
+  showLedgerName?: boolean;
 };
 
-function ReportEntryList({ entries, onPressEntry, sheet = false }: ReportEntryListProps) {
+function ReportEntryList({
+  entries,
+  onPressEntry,
+  sheet = false,
+  showLedgerName = true,
+}: ReportEntryListProps) {
   const [tab, setTab] = useState<Tab>('all');
   const insets = useSafeAreaInsets();
   const inset = sheet ? styles.sheetInset : undefined;
@@ -100,7 +110,7 @@ function ReportEntryList({ entries, onPressEntry, sheet = false }: ReportEntryLi
           renderItem={({ item }) => (
             <View style={inset}>
               <TransactionListItem
-                label={item.ledgerName}
+                label={showLedgerName ? item.ledgerName : undefined}
                 itemName={item.title}
                 amount={item.type === 'INCOME' ? item.amount : -item.amount}
                 hasReceipt={(item.receiptFiles?.length ?? 0) > 0}
@@ -144,7 +154,7 @@ const styles = StyleSheet.create({
   },
   sectionHeader: {
     ...TYPOGRAPHY.body3,
-    color: FOREGROUND_NEUTRAL_SUBTLE,
+    color: FOREGROUND_NEUTRAL_NORMAL,
     marginTop: 12,
     marginBottom: 4,
   },

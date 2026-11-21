@@ -2,7 +2,7 @@ export const TRANSACTIONS_TITLE = '내역';
 export const TRANSACTIONS_TAB_ALL = '전체 내역';
 export const TRANSACTIONS_TAB_PENDING = '승인요청';
 export const TRANSACTIONS_COUNT_SUFFIX = ' 건';
-export const TRANSACTIONS_EMPTY = '등록된 내역이 없어요.';
+export const TRANSACTIONS_EMPTY = '등록된 내역이 없어요';
 export const TRANSACTIONS_LOADING = '불러오는 중이에요.';
 export const TRANSACTIONS_RETRY_LABEL = '다시 시도';
 
@@ -14,7 +14,7 @@ export const FILTER_PERIOD_CUSTOM_ICON_LABEL = '기간 선택';
 export const FILTER_PERIOD_SHEET_TITLE = '기간 선택';
 
 export const LEDGER_SELECT_SHEET_TITLE = '장부 선택';
-export const LEDGER_SELECT_EMPTY_GUIDE = '새로운 장부를 생성해주세요.';
+export const LEDGER_SELECT_EMPTY_GUIDE = '새로운 장부를 생성해주세요';
 export const LEDGER_SELECT_CREATE_NEW_LABEL = '새 장부 생성하기';
 export const LEDGER_SELECT_PREVIOUS_LABEL = '이전';
 export const LEDGER_SELECT_CONFIRM_LABEL = '선택하기';

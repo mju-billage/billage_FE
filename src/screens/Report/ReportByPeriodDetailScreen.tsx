@@ -8,11 +8,14 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import CardBase from '../../components/Data Display/Card/CardBase';
+import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import FolderTabShape from '../../components/Data Display/Card/FolderTabShape';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import type { ReportDetail } from '../../types/report';
 import * as reportService from '../../services/reportService';
 import { ApiError } from '../../services/apiClient';
+import { useSubmitLock } from '../../hooks/useSubmitLock';
+import { getActiveGroup } from '../../types/group';
 import { formatExpense, formatWon } from '../../utils/currency';
 import { formatDateDot } from '../../utils/dueDate';
 import { truncateWithEllipsis } from '../../utils/truncateWithEllipsis';
@@ -23,6 +26,9 @@ import {
   isNetworkError,
 } from '../../constants/apiErrorMessages';
 import {
+  REPORT_DELETE_CONFIRM_DESCRIPTION,
+  REPORT_DELETE_CONFIRM_LABEL,
+  REPORT_DELETE_CONFIRM_TITLE,
   REPORT_DETAIL_CREATED_AT_LABEL,
   REPORT_DETAIL_EMPTY,
   REPORT_DETAIL_EXPENSE_LABEL,
@@ -31,6 +37,7 @@ import {
   REPORT_MAIN_RETRY_LABEL,
   REPORT_SHARE_EXPENSE_LABEL,
   REPORT_SHARE_INCOME_LABEL,
+  SNACKBAR_REPORT_DELETED,
 } from '../../constants/reportScreenText';
 import {
   FEEDBACK_POSITIVE_BOLD,
@@ -41,6 +48,7 @@ import {
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const SHARE_ICON = require('../../assets/icons/action/Share.png');
+const DELETE_ICON = require('../../assets/icons/action/Delete.png');
 const CHEVRON_RIGHT_ICON = require('../../assets/icons/nav/Chevron Right.png');
 
 type LoadState = 'loading' | 'error' | 'ready';
@@ -56,6 +64,9 @@ function ReportByPeriodDetailScreen() {
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const { isLocked: isDeleting, run: runDelete } = useSubmitLock();
+  const viewerIsOwner = getActiveGroup()?.myRole === 'OWNER';
 
   useEffect(() => {
     if (route.params.snackbarMessage) {
@@ -104,6 +115,24 @@ function ReportByPeriodDetailScreen() {
     });
   };
 
+  const handleConfirmDelete = () => {
+    if (!report) {
+      return;
+    }
+    runDelete(async () => {
+      try {
+        await reportService.deleteReport(report.reportId);
+        setDeleteDialogVisible(false);
+        navigation.navigate('ReportMain', { snackbarMessage: SNACKBAR_REPORT_DELETED });
+        return true;
+      } catch (error) {
+        setDeleteDialogVisible(false);
+        setSnackbarMessage(toErrorMessage(error));
+        return false;
+      }
+    }, { keepLockedOnSuccess: true });
+  };
+
   if (loadState === 'loading' || loadState === 'error' || !report) {
     return (
       <ScreenContainer background="primary">
@@ -140,7 +169,12 @@ function ReportByPeriodDetailScreen() {
         type="sub"
         title={truncateWithEllipsis(report.title)}
         onBackPress={() => navigation.goBack()}
-        rightIcons={[{ icon: SHARE_ICON, onPress: handleShare }]}
+        rightIcons={[
+          { icon: SHARE_ICON, onPress: handleShare },
+          ...(viewerIsOwner
+            ? [{ icon: DELETE_ICON, onPress: () => setDeleteDialogVisible(true) }]
+            : []),
+        ]}
       />
 
       <View style={styles.body}>
@@ -219,6 +253,17 @@ function ReportByPeriodDetailScreen() {
           />
         )}
       </View>
+
+      <Dialog
+        visible={deleteDialogVisible}
+        title={REPORT_DELETE_CONFIRM_TITLE}
+        description={REPORT_DELETE_CONFIRM_DESCRIPTION}
+        confirmLabel={REPORT_DELETE_CONFIRM_LABEL}
+        destructive
+        confirmDisabled={isDeleting}
+        onCancel={() => setDeleteDialogVisible(false)}
+        onConfirm={handleConfirmDelete}
+      />
     </ScreenContainer>
   );
 }
@@ -266,15 +311,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   amountLabel: {
-    ...TYPOGRAPHY.body3,
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   headerIncome: {
-    ...TYPOGRAPHY.body2,
+    ...TYPOGRAPHY.subtitle1,
     color: FEEDBACK_POSITIVE_BOLD,
   },
   headerExpense: {
-    ...TYPOGRAPHY.body2,
+    ...TYPOGRAPHY.subtitle1,
   },
   emptyState: {
     flex: 1,

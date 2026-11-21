@@ -391,11 +391,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   amountLabel: {
-    ...TYPOGRAPHY.body2,
+    ...TYPOGRAPHY.subtitle3,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   amountValue: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.subtitle1,
   },
   incomeValue: {
     color: FEEDBACK_POSITIVE_BOLD,

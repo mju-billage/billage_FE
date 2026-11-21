@@ -289,12 +289,14 @@ function LoginScreen() {
             label={LOGIN_FIND_PASSWORD_LABEL}
             onPress={handleFindPassword}
             hierarchy="tertiary"
+            size="caption"
             underline
           />
           <TextButton
             label={LOGIN_GO_TO_SIGNUP_LABEL}
             onPress={handleGoToSignup}
             hierarchy="tertiary"
+            size="caption"
             underline
           />
         </View>

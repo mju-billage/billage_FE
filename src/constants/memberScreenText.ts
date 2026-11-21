@@ -35,7 +35,7 @@ export const MEMBER_ADD_BULK_TITLE = '일괄 추가';
 export const MEMBER_ADD_BULK_PLACEHOLDER =
   '띄어쓰기 또는 쉼표로 구분하여 명단을 입력해주세요.';
 export const MEMBER_ADD_BULK_HELPER =
-  '여기서는 이름만 추가할 수 있어요. 모임원의 상세 정보는 개별 페이지에서 수정할 수 있어요.';
+  '여기서는 이름만 추가할 수 있어요.\n모임원의 상세 정보는 개별 페이지에서 수정할 수 있어요.';
 export const MEMBER_ADD_BULK_TEXT_MAX_LENGTH = 2000;
 export const MEMBER_ADD_BULK_NAME_TOO_LONG_ERROR = '이름은 각각 최대 10자예요.';
 export const MEMBER_ADD_BULK_MAX_COUNT = 100;

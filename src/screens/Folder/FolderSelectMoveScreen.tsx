@@ -8,6 +8,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
+import SearchField from '../../components/Input/Search/SearchField';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import FolderItem, {
   FOLDER_GRID_COLUMNS,
@@ -39,6 +40,7 @@ import {
 import {
   FOLDER_EMPTY_SUBTITLE,
   FOLDER_NAME_MAX_LENGTH,
+  FOLDER_SEARCH_PLACEHOLDER,
   NEW_FOLDER_CREATE_LABEL,
   NEW_FOLDER_DIALOG_TITLE,
   NEW_FOLDER_NAME_PLACEHOLDER,
@@ -56,7 +58,7 @@ import { FOREGROUND_DISABLED, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/
 import { TYPOGRAPHY } from '../../constants/typography';
 
 const FOLDER_ADD_ICON = require('../../assets/icons/content/Folder Add.png');
-const MENU_ICON = require('../../assets/icons/action/MenuHorizontal.png');
+const MENU_ICON = require('../../assets/icons/action/Menu Vertical.png');
 const GRID_ICON = require('../../assets/icons/system/Grid.png');
 const LIST_ICON = require('../../assets/icons/system/List.png');
 
@@ -80,6 +82,7 @@ function FolderSelectMoveScreen() {
   const folderId = route.params.folderId;
 
   const [items, setItems] = useState<FolderListItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [selected, setSelected] = useState<{ id: string; kind: 'folder' | 'ledger'; name: string }[]>([]);
@@ -145,6 +148,12 @@ function FolderSelectMoveScreen() {
         : [...prev, { id: item.id, kind: item.kind, name: item.name }],
     );
   };
+
+  const filteredItems = searchQuery.trim()
+    ? items.filter(item =>
+        item.name.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+      )
+    : items;
 
   const confirmLabel =
     selected.length > 0
@@ -227,6 +236,15 @@ function FolderSelectMoveScreen() {
       />
 
       <View style={styles.body}>
+        <View style={styles.searchWrapper}>
+          <SearchField
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onClear={() => setSearchQuery('')}
+            placeholder={FOLDER_SEARCH_PLACEHOLDER}
+          />
+        </View>
+
         {loadState === 'loading' && (
           <View style={styles.stateContainer}>
             <Text style={styles.stateText}>{SELECT_MOVE_LOADING}</Text>
@@ -242,7 +260,7 @@ function FolderSelectMoveScreen() {
 
         {loadState === 'ready' && (
           <>
-            {items.length === 0 ? (
+            {filteredItems.length === 0 ? (
               <View style={styles.emptyState}>
                 <Text style={styles.emptyTitle}>{SELECT_MOVE_EMPTY_TITLE}</Text>
                 <Text style={styles.emptySubtitle}>{FOLDER_EMPTY_SUBTITLE}</Text>
@@ -250,7 +268,7 @@ function FolderSelectMoveScreen() {
             ) : (
               <FlatList
                 key={viewMode}
-                data={items}
+                data={filteredItems}
                 keyExtractor={item => `${item.kind}-${item.id}`}
                 numColumns={viewMode === 'grid' ? FOLDER_GRID_COLUMNS : 1}
                 columnWrapperStyle={viewMode === 'grid' ? styles.gridRow : undefined}
@@ -300,7 +318,6 @@ function FolderSelectMoveScreen() {
         }}
         textFieldPlaceholder={NEW_FOLDER_NAME_PLACEHOLDER}
         textFieldMaxLength={FOLDER_NAME_MAX_LENGTH}
-        autoFocusTextField
         textFieldError={newFolderError}
         confirmLabel={NEW_FOLDER_CREATE_LABEL}
         confirmDisabled={isLocked}
@@ -316,6 +333,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 16,
     paddingHorizontal: 20,
+  },
+  searchWrapper: {
+    marginBottom: 16,
   },
   listContent: {
     paddingBottom: 24,

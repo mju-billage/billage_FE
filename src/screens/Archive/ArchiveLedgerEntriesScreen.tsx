@@ -38,6 +38,7 @@ function ArchiveLedgerEntriesScreen() {
 
       <ReportEntryList
         sheet
+        showLedgerName={false}
         entries={entries.map(entry => ({ ...entry, ledgerName }))}
         onPressEntry={entry =>
           navigation.navigate('ArchiveEntryDetail', {

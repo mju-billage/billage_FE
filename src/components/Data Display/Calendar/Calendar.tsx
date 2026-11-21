@@ -591,7 +591,7 @@ const styles = StyleSheet.create({
     fontSize: 7,
     lineHeight: 9,
     letterSpacing: 0.4,
-    color: FOREGROUND_SECONDARY,
+    color: FOREGROUND_PRIMARY,
   },
   ledgerAmountExpense: {
     fontFamily: FONT_FAMILY,
@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
     fontSize: 7,
     lineHeight: 9,
     letterSpacing: 0.4,
-    color: FOREGROUND_PRIMARY,
+    color: FOREGROUND_SECONDARY,
   },
   rangeBand: {
     position: 'absolute',

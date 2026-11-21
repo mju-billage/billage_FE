@@ -2,7 +2,6 @@ export const ARCHIVE_SCREEN_TITLE = '보관함';
 export const ARCHIVE_LOADING = '보관 기록을 불러오는 중이에요.';
 export const ARCHIVE_RETRY_LABEL = '다시 시도';
 export const ARCHIVE_EMPTY_TITLE = '보관된 내역이 없어요.';
-export const ARCHIVE_CARD_LEDGER_COUNT_SUFFIX = '개 장부';
 export const ARCHIVE_CARD_VIEW_LABEL = '기록보기';
 
 export const ARCHIVE_RENAME_DIALOG_TITLE = '보관 제목 변경하기';

@@ -31,7 +31,7 @@ import {
   MEMBER_PAYMENT_LOADING,
 } from '../../constants/memberScreenText';
 import {
-  BACKGROUND_SECONDARY,
+  FILL_NEUTRAL_NORMAL,
   FILL_NEUTRAL_SUBTLE,
   FOREGROUND_DISABLED,
   FOREGROUND_NEUTRAL_SUBTLE,
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingHorizontal: 20,
     paddingTop: 8,
-    backgroundColor: BACKGROUND_SECONDARY,
+    backgroundColor: FILL_NEUTRAL_NORMAL,
   },
   stateContainer: {
     flex: 1,

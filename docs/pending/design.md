@@ -170,3 +170,83 @@ label 타이포가 화면(회원가입 입력 / 모임 프로필 수정 등)에 
 
 달라야 한다면 `DuesProgressCard`에 화면 구분용 prop(예: `size="detail" | "list"`)을
 추가해 분기. 같아야 한다면 하나로 통일.
+
+---
+
+## 13. Dialog 확인 버튼 텍스트 — Body2/primary 기대값과 공용 TextButton 충돌
+
+**현상/생긴 경위**
+
+2차 QA 더보기 코멘트 #34(노드 76:18843, "확인 Text")는 Dialog의 확인 버튼
+텍스트가 `Body2`(14px/400) + `foreground/primary`여야 한다고 했다. 그런데 확인
+버튼은 공용 `TextButton.tsx`를 쓰고, 기본 라벨 타이포는 `Other/Button`(14px/600)
+고정이며 색상은 `hierarchy` prop(Dialog는 `secondary`→파란색 또는 `negative`→빨간색)에
+따라 정해진다(`TextButton.tsx:90-110`). Dialog 확인 버튼만 글자 굵기를 regular로
+낮추고 색을 무조건 primary(네이비)로 바꾸면, `TextButton`을 쓰는 다른 화면(더보기
+메뉴 리스트, 로그인 화면 등)에도 영향을 줄지, 아니면 Dialog 전용 예외가 필요한지
+불명확해서 코드를 건들지 않았다. (바로 옆 노드인 #33 "확인 Text"는 Dialog 타이틀로
+판단해 `H3`+`primary`로 이미 반영함 — 혼동 주의.)
+
+**물어볼 것**
+
+Dialog 확인 버튼만 `Body2`+`primary`로 바꿔야 하는지, 아니면 `TextButton`
+전체의 기본 타이포/색상 체계를 바꿔야 하는지. 바꾼다면 기존 `secondary`(파란)/`negative`(빨간)
+색상 구분은 그대로 유지하는지.
+
+**답이 오면 할 일**
+
+Dialog 전용이면 `Dialog.tsx`의 확인 `TextButton`에 별도 `labelStyle`/`hierarchy`
+오버라이드 추가. 전역 변경이면 `TextButton.tsx`의 `label`/`*Label` 스타일 수정
+(이 경우 design.md #11 — TextButton tertiary 색상 충돌 — 과 함께 재검토 필요).
+
+---
+
+## 14. ReportMainScreen 보고서 카드 — "전체" 탭 + 카드 구조 확장 요구
+
+**현상/생긴 경위**
+
+더보기 코멘트 #93(노드 76:20415)은 보고서 생성 메인 화면(`ReportMainScreen.tsx`)의
+Report Card가 "전체탭 없음·단순 카드 구조"라고 지적했다. 지금 `Tabs`는 `장부별`/`기간별`
+2개만 있고(`REPORT_TAB_BY_LEDGER`/`REPORT_TAB_BY_PERIOD`), 리스트 카드는 제목+생성일시만
+보여준다(`styles.card`). 코멘트는 "전체"를 포함한 3탭 구조와 더 풍부한 카드 레이아웃(아이콘·
+배지 등)을 기대하는 것으로 보이는데, 구체적으로 "전체" 탭이 두 타입을 합쳐 보여주는 것인지,
+카드에 정확히 어떤 요소가 추가되어야 하는지는 캡처 캡션만으로 판단이 안 된다. 타입 필터
+전체 보기를 추가하려면 `ReportType` 유니온이나 API 쿼리 스펙도 바뀔 수 있어 백엔드 영향도
+있을 수 있다. (같은 노드 그룹의 #92 "생성 일시 Text"는 라벨 누락 건이라 이미
+`REPORT_DETAIL_CREATED_AT_LABEL` 접두어 추가로 반영함.)
+
+**물어볼 것**
+
+"전체" 탭이 실제로 필요한지(필요하다면 API 쿼리 스펙 변경 필요), 카드에 추가되어야 할
+요소가 구체적으로 무엇인지 — 목업 화면 필요.
+
+**답이 오면 할 일**
+
+API가 전체 조회를 지원하면 `ReportType`에 `'ALL'` 같은 값 추가하고 `TABS` 배열·
+`reportService.getReports` 호출부 수정. 카드 레이아웃은 목업대로 `styles.card`/
+`renderItem` 수정.
+
+---
+
+## 15. AllGroupsScreen 그룹 카드 — 이메일 필드 자체가 없음
+
+**현상/생긴 경위**
+
+더보기 코멘트 #110(노드 76:21102)은 전체 모임 관리 화면(`AllGroupsScreen.tsx`)의
+그룹 카드(`EntityCard.tsx`의 `type: 'group'` variant)에 이메일 텍스트가 있어야
+한다고 했다. 그런데 `Group` 타입(`src/types/group.ts`)에는 애초에 email 같은
+필드가 없고, 모임(그룹) 자체가 이메일을 가질 이유가 설계상 불명확하다(개인 프로필
+`type: 'profile'` variant는 이미 `email` prop을 받아 렌더링하고 있어 혼동 가능성
+있음 — `EntityCard.tsx:89-91`). `EntityCard.tsx`는 2차 QA 1라운드에서 고친
+14개 공용 컴포넌트에 포함되지 않은 컴포넌트라 임의로 건들지 않고 보류했다.
+
+**물어볼 것**
+
+그룹 카드에 실제로 이메일(또는 이메일처럼 보이는 다른 정보 — 가입 코드, 생성일 등)을
+추가해야 하는지, 추가한다면 백엔드 `Group` 응답에 해당 필드가 있는지.
+
+**답이 오면 할 일**
+
+백엔드가 필드를 제공하면 `types/group.ts`의 `Group` 타입에 필드 추가하고
+`EntityCard.tsx`의 `type: 'group'` variant에 `email`(또는 해당 필드) prop과
+렌더링 로직 추가(`type: 'profile'`의 이메일 렌더링 패턴 재사용).

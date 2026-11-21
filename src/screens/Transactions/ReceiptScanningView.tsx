@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { Animated, Image, StyleSheet, View } from 'react-native';
 import * as fileService from '../../services/fileService';
 import * as ocrService from '../../services/ocrService';
 import { ApiError } from '../../services/apiClient';
@@ -99,6 +99,7 @@ function ReceiptScanningView({ image, onComplete }: ReceiptScanningViewProps) {
   return (
     <View style={styles.container}>
       <View style={styles.previewBox}>
+        <Image source={{ uri: image.uri }} style={styles.previewImage} resizeMode="cover" />
         <Animated.View
           style={[styles.sweepLine, { transform: [{ translateY }] }]}
         />
@@ -178,6 +179,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: BORDER_NEUTRAL_NORMAL,
     overflow: 'hidden',
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
   },
   sweepLine: {
     width: '100%',

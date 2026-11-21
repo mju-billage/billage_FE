@@ -114,7 +114,6 @@ function SignupInfoScreen() {
       background="secondary"
       edges={['bottom']}
       style={styles.container}
-      avoidKeyboard={false}
       snackbar={
         <Snackbar
           visible={snackbarMessage != null}

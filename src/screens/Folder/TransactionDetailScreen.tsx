@@ -51,7 +51,13 @@ import {
   TRANSACTION_MEMO_EMPTY_PLACEHOLDER,
   TRANSACTION_MEMO_LABEL,
   TRANSACTION_PAYER_COUNT_SUFFIX,
+  TRANSACTION_RECEIPT_AMOUNT_LABEL,
+  TRANSACTION_RECEIPT_DETAIL_LABEL,
+  TRANSACTION_RECEIPT_ITEM_NAME_LABEL,
+  TRANSACTION_RECEIPT_ITEMS_EMPTY_LABEL,
   TRANSACTION_RECEIPT_LABEL,
+  TRANSACTION_RECEIPT_QUANTITY_LABEL,
+  TRANSACTION_RECEIPT_UNIT_PRICE_LABEL,
 } from '../../constants/ledgerScreenText';
 import {
   DATE_SHEET_TITLE_EXPENSE,
@@ -589,6 +595,46 @@ function TransactionDetailScreen() {
           )}
         </View>
 
+        {entry.receiptFiles.length > 0 && (
+          <View style={layoutStyles.section}>
+            <Text style={layoutStyles.receiptSectionLabel}>{TRANSACTION_RECEIPT_DETAIL_LABEL}</Text>
+            {entry.ocr && entry.ocr.items.length > 0 ? (
+              <View style={styles.ocrTable}>
+                <View style={styles.ocrRow}>
+                  <Text style={[styles.ocrCell, styles.ocrCellName, styles.ocrHeaderText]}>
+                    {TRANSACTION_RECEIPT_ITEM_NAME_LABEL}
+                  </Text>
+                  <Text style={[styles.ocrCell, styles.ocrCellQuantity, styles.ocrHeaderText]}>
+                    {TRANSACTION_RECEIPT_QUANTITY_LABEL}
+                  </Text>
+                  <Text style={[styles.ocrCell, styles.ocrCellUnitPrice, styles.ocrHeaderText]}>
+                    {TRANSACTION_RECEIPT_UNIT_PRICE_LABEL}
+                  </Text>
+                  <Text style={[styles.ocrCell, styles.ocrCellAmount, styles.ocrHeaderText]}>
+                    {TRANSACTION_RECEIPT_AMOUNT_LABEL}
+                  </Text>
+                </View>
+                {entry.ocr.items.map((item, index) => (
+                  <View key={index} style={styles.ocrRow}>
+                    <Text style={[styles.ocrCell, styles.ocrCellName]}>{item.name}</Text>
+                    <Text style={[styles.ocrCell, styles.ocrCellQuantity]}>
+                      {item.quantity != null ? item.quantity : ''}
+                    </Text>
+                    <Text style={[styles.ocrCell, styles.ocrCellUnitPrice]}>
+                      {item.unitPrice != null ? item.unitPrice.toLocaleString() : ''}
+                    </Text>
+                    <Text style={[styles.ocrCell, styles.ocrCellAmount]}>
+                      {item.amount != null ? item.amount.toLocaleString() : ''}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <Text style={styles.ocrEmptyText}>{TRANSACTION_RECEIPT_ITEMS_EMPTY_LABEL}</Text>
+            )}
+          </View>
+        )}
+
         {isDuesLinked && (
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>
@@ -733,6 +779,38 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 20,
     paddingVertical: 16,
+  },
+  ocrTable: {
+    gap: 8,
+  },
+  ocrRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  ocrCell: {
+    ...TYPOGRAPHY.body3,
+  },
+  ocrHeaderText: {
+    color: FOREGROUND_DISABLED,
+  },
+  ocrCellName: {
+    flex: 2,
+  },
+  ocrCellQuantity: {
+    flex: 1,
+    textAlign: 'right',
+  },
+  ocrCellUnitPrice: {
+    flex: 1,
+    textAlign: 'right',
+  },
+  ocrCellAmount: {
+    flex: 1,
+    textAlign: 'right',
+  },
+  ocrEmptyText: {
+    ...TYPOGRAPHY.body3,
+    color: FOREGROUND_DISABLED,
   },
 });
 

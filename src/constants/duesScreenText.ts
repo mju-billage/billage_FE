@@ -12,7 +12,7 @@ export const DUES_LOADING = '회비 목록을 불러오는 중이에요.';
 export const DUES_RETRY_LABEL = '다시 시도';
 
 export const DUES_BADGE_CLOSED = '마감';
-export const DUES_BADGE_SCHEDULED = '예정';
+export const DUES_BADGE_SCHEDULED = '진행전';
 
 export const DUES_DETAIL_LOADING = '회비 정보를 불러오는 중이에요.';
 export const DUES_DETAIL_RETRY_LABEL = '다시 시도';
@@ -21,7 +21,6 @@ export const DUES_DETAIL_CARD_TITLE = '회비가 모이기까지';
 export const DUES_MEMBER_TAB_UNPAID = '미납부';
 export const DUES_MEMBER_TAB_PAID = '납부 완료';
 export const DUES_MEMBER_COUNT_SUFFIX = '명';
-export const DUES_MEMBER_LIST_EMPTY = '대상자가 없어요.';
 export const DUES_MEMBER_PAID_EMPTY_TITLE = '납부 완료된 모임원이 없어요.';
 export const DUES_MEMBER_PAID_EMPTY_SUBTITLE = '모임원의 납부 현황을 확인해주세요.';
 
@@ -34,7 +33,7 @@ export const DUES_CREATE_AMOUNT_LABEL = '금액';
 export const DUES_CREATE_AMOUNT_PLACEHOLDER = '금액을 입력해주세요.';
 export const DUES_AMOUNT_MAX = 999_999_999;
 
-export const DUES_CREATE_LEDGER_LABEL = '장부';
+export const DUES_CREATE_LEDGER_LABEL = '장부 선택';
 export const DUES_CREATE_LEDGER_PLACEHOLDER = '+ 선택하기';
 
 export const DUES_CREATE_PERIOD_LABEL = '기간';
@@ -72,7 +71,7 @@ export const DUES_EDIT_LEAVE_TITLE = '회비 수정을 그만둘까요?';
 export const DUES_EDIT_LEAVE_DESCRIPTION = '변경된 내용은 저장되지 않아요.';
 export const DUES_EDIT_LOADING = '회비 정보를 불러오는 중이에요.';
 export const DUES_EDIT_RETRY_LABEL = '다시 시도';
-export const SNACKBAR_DUES_UPDATED = '회비 수정이 완료되었어요.';
+export const SNACKBAR_DUES_UPDATED = '변경 사항이 저장되었어요.';
 
 export const DUES_MEMBER_EDIT_SUBMIT_LABEL = '수정하기';
 export const DUES_MEMBER_EDIT_LEAVE_TITLE = '모임원 선택을 그만둘까요?';

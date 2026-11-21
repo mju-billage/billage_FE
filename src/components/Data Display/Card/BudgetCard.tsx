@@ -3,7 +3,7 @@ import ProgressBar from '../../Feedback/Progress Bar/ProgressBar';
 import Divider from '../Divider/Divider';
 import CardBase from './CardBase';
 import { formatExpense, formatWon } from '../../../utils/currency';
-import { FOREGROUND_NEUTRAL_SUBTLE } from '../../../constants/colors';
+import { FOREGROUND_NEUTRAL_SUBTLE, FOREGROUND_PRIMARY } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
 
 type BudgetCardProps =
@@ -35,9 +35,6 @@ function BudgetCard(props: BudgetCardProps) {
       <Text style={styles.remainingTitle}>
         남은 예산 {formatWon(remainingBudget)}원
       </Text>
-      <View style={styles.dividerWrapper}>
-        <Divider />
-      </View>
       <View style={styles.statRow}>
         <View style={styles.statColumn}>
           <Text style={styles.statLabel}>지출</Text>
@@ -65,13 +62,12 @@ const styles = StyleSheet.create({
   },
   remainingTitle: {
     ...TYPOGRAPHY.h3,
-  },
-  dividerWrapper: {
-    marginVertical: 12,
+    color: FOREGROUND_PRIMARY,
   },
   statRow: {
     flexDirection: 'row',
     alignItems: 'stretch',
+    marginTop: 12,
     marginBottom: 12,
   },
   statColumn: {
