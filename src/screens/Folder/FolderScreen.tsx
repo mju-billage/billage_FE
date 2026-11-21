@@ -231,9 +231,9 @@ function FolderScreen() {
         [
           { key: 'selectMove', label: FOLDER_MENU_SELECT_MOVE },
           { key: 'rename', label: FOLDER_MENU_RENAME },
-          ...gridListItems,
-          { key: 'unlink', label: FOLDER_MENU_UNLINK },
         ],
+        gridListItems,
+        [{ key: 'unlink', label: FOLDER_MENU_UNLINK }],
       ];
 
   const handleSelectMenu = (key: string) => {

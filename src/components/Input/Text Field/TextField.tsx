@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     flexBasis: 0,
     padding: 0,
-    color: FOREGROUND_NEUTRAL_NORMAL,
+    color: FOREGROUND_PRIMARY,
     outlineWidth: 0,
     ...({ outlineStyle: 'none' } as any),
   },
@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     backgroundColor: FOREGROUND_NEUTRAL_SUBTLE,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 4,
+    marginRight: 6,
   },
   clearIcon: {
     width: 10,

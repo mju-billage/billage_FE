@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   value: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.subtitle1,
   },
   valuePositive: {
     color: FEEDBACK_POSITIVE_BOLD,

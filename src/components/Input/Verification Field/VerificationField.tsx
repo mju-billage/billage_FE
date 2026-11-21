@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import {
   BACKGROUND_PRIMARY,
@@ -27,6 +27,7 @@ function VerificationField({
   error,
 }: VerificationFieldProps) {
   const inputRef = useRef<TextInput>(null);
+  const [isFocused, setIsFocused] = useState(false);
   const digits = Array.from({ length }, (_, index) => value[index] ?? '');
 
   return (
@@ -36,7 +37,7 @@ function VerificationField({
         onPress={() => !disabled && inputRef.current?.focus()}
       >
         {digits.map((digit, index) => {
-          const isActive = index === value.length;
+          const isActive = isFocused && index === value.length;
           const isFilled = digit !== '';
           return (
             <View
@@ -46,7 +47,6 @@ function VerificationField({
                 isFilled && !isActive && styles.boxFilled,
                 isActive && !disabled && styles.boxActive,
                 disabled && styles.boxDisabled,
-                error && styles.boxError,
               ]}
             >
               <Text style={[styles.digit, disabled && styles.digitDisabled]}>
@@ -63,6 +63,8 @@ function VerificationField({
           keyboardType="number-pad"
           maxLength={length}
           editable={!disabled}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
       </Pressable>
       {error && <Text style={styles.errorText}>{error}</Text>}
@@ -75,7 +77,8 @@ const BOX_SIZE = 44;
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'space-between',
+    width: '100%',
   },
   box: {
     width: BOX_SIZE,
@@ -96,10 +99,6 @@ const styles = StyleSheet.create({
   boxDisabled: {
     backgroundColor: FILL_DISABLED,
   },
-  boxError: {
-    borderWidth: 2,
-    borderColor: FEEDBACK_NEGATIVE_BOLD,
-  },
   errorText: {
     ...TYPOGRAPHY.body3,
     color: FEEDBACK_NEGATIVE_BOLD,
@@ -108,6 +107,7 @@ const styles = StyleSheet.create({
   digit: {
     ...TYPOGRAPHY.h1,
     color: FOREGROUND_SECONDARY,
+    textAlign: 'center',
   },
   digitDisabled: {
     color: FOREGROUND_DISABLED,

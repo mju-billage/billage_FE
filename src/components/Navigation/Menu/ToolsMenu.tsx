@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingVertical: 12,
-    paddingHorizontal: 4,
+    paddingHorizontal: 16,
     borderRadius: 8,
   },
   dividerWrapper: {
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   itemLabel: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.subtitle4,
   },
   chevron: {
     width: 16,

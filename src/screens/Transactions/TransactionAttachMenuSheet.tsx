@@ -33,7 +33,7 @@ function TransactionAttachMenuSheet({
   return (
     <BottomSheet visible={visible} onClose={onClose}>
       <Menu
-        sections={[ATTACH_MENU_ITEMS]}
+        sections={ATTACH_MENU_ITEMS.map(item => [item])}
         onSelect={key => onSelect(key as AttachMenuKey)}
       />
     </BottomSheet>

@@ -10,6 +10,7 @@ import TextButton from '../../components/Input/Button/TextButton';
 import Tabs from '../../components/Navigation/Tabs/Tabs';
 import DuesStatusCard from '../../components/Data Display/Card/DuesStatusCard';
 import MemberListItem from '../../components/Data Display/Lists/MemberListItem';
+import Divider from '../../components/Data Display/Divider/Divider';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import FolderMoreMenu from '../Folder/FolderMoreMenu';
@@ -417,6 +418,9 @@ function DuesDetailScreen() {
             />
           )}
         </View>
+        <View style={styles.dividerWrapper}>
+          <Divider />
+        </View>
 
         <ScrollView contentContainerStyle={styles.memberScrollContent}>
           {isMembersLoading ? (
@@ -546,6 +550,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 8,
     marginBottom: 4,
+  },
+  dividerWrapper: {
+    marginVertical: 4,
   },
   memberCountText: {
     ...TYPOGRAPHY.body2,

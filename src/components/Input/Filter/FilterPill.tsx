@@ -1,7 +1,6 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 import {
   BORDER_NEUTRAL_NORMAL,
-  FOREGROUND_INVERSE,
   FOREGROUND_NEUTRAL_NORMAL,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
@@ -36,14 +35,13 @@ const styles = StyleSheet.create({
   },
   pillActive: {
     borderColor: FOREGROUND_SECONDARY,
-    backgroundColor: FOREGROUND_SECONDARY,
   },
   pillLabel: {
     ...TYPOGRAPHY.chips,
     color: FOREGROUND_NEUTRAL_NORMAL,
   },
   pillLabelActive: {
-    color: FOREGROUND_INVERSE,
+    color: FOREGROUND_SECONDARY,
   },
 });
 

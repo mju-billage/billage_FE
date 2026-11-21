@@ -193,7 +193,7 @@ function GroupProfileEditScreen() {
           <Avatar
             type={avatarImageUri ? 'image' : 'icon'}
             imageUri={avatarImageUri}
-            size="lg"
+            size="xl"
           />
           {isUploadingImage ? (
             <View style={styles.avatarUploadingOverlay}>
@@ -301,9 +301,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: -4,
     bottom: -4,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: NAVY_800,
     alignItems: 'center',
     justifyContent: 'center',
@@ -311,8 +311,8 @@ const styles = StyleSheet.create({
     borderColor: FOREGROUND_INVERSE,
   },
   cameraBadgeIcon: {
-    width: 14,
-    height: 14,
+    width: 20,
+    height: 20,
     tintColor: FOREGROUND_INVERSE,
   },
   avatarUploadingOverlay: {

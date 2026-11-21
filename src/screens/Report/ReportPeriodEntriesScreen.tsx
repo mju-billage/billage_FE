@@ -79,6 +79,7 @@ function ReportPeriodEntriesScreen() {
         </View>
 
         <ReportEntryList
+          sheet
           entries={entries}
           onPressEntry={entry =>
             navigation.navigate('ReportEntryDetail', { ledgerName: entry.ledgerName, entry })

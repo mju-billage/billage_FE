@@ -10,7 +10,7 @@ import {
 
 const MEMBER_ICON = require('../../../assets/icons/user/Member.png');
 
-type AvatarSize = 'sm' | 'md' | 'lg';
+type AvatarSize = 'sm' | 'md' | 'lg' | 'xl';
 type AvatarStyleVariant = 'default' | 'neutral';
 
 type AvatarProps =
@@ -28,7 +28,7 @@ type AvatarProps =
       style?: AvatarStyleVariant;
     };
 
-const SIZE_BY_KEY: Record<AvatarSize, number> = { sm: 28, md: 36, lg: 48 };
+const SIZE_BY_KEY: Record<AvatarSize, number> = { sm: 28, md: 36, lg: 48, xl: 88 };
 
 export function getSquircleRadius(dimension: number): number {
   return dimension * (7 / 24);

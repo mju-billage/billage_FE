@@ -3,6 +3,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SectionList, StyleSheet, Text, View } from 'react-native';
 import Tabs from '../../components/Navigation/Tabs/Tabs';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
+import Divider from '../../components/Data Display/Divider/Divider';
+import type { ReportEntrySnapshot } from '../../types/report';
 import { formatDateHeader } from '../../utils/dateHeader';
 import {
   REPORT_ENTRY_LIST_COUNT_SUFFIX,
@@ -14,14 +16,9 @@ import {
 import { BACKGROUND_SECONDARY, FOREGROUND_NEUTRAL_SUBTLE } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
-export type TaggedReportEntry = {
+export type TaggedReportEntry = ReportEntrySnapshot & {
   ledgerName: string;
-  type: 'INCOME' | 'EXPENSE';
-  title: string;
-  amount: number;
-  occurredOn: string;
   approvalStatus?: 'PENDING' | 'APPROVED';
-  receiptFiles?: { fileId: string }[];
 };
 
 type Tab = 'all' | 'income' | 'expense';
@@ -78,6 +75,7 @@ function ReportEntryList({ entries, onPressEntry, sheet = false }: ReportEntryLi
   return (
     <View style={[styles.container, sheet && styles.containerSheet]}>
       <Tabs items={TABS} value={tab} onChange={setTab} showIcon={false} fullWidth={sheet} />
+      <Divider />
 
       <Text style={[styles.countText, inset]}>
         {filtered.length}

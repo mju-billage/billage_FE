@@ -25,6 +25,7 @@ function CarouselIndicator({ count, selectedIndex }: CarouselIndicatorProps) {
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
   },
   dot: {
@@ -34,6 +35,9 @@ const styles = StyleSheet.create({
     backgroundColor: FOREGROUND_NEUTRAL_SUBTLE,
   },
   dotSelected: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: FOREGROUND_SECONDARY,
   },
 });

@@ -7,6 +7,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import TextArea from '../../components/Input/Text Field/TextArea';
 import Button from '../../components/Input/Button/Button';
+import Divider from '../../components/Data Display/Divider/Divider';
 import { getActiveGroup } from '../../types/group';
 import * as memberService from '../../services/memberService';
 import { useSubmitLock } from '../../hooks/useSubmitLock';
@@ -109,6 +110,7 @@ function MemberAddBulkScreen() {
           rows={8}
         />
       </View>
+      <Divider />
       <View style={styles.footer}>
         <Button
           label={MEMBER_ADD_SUBMIT_LABEL}

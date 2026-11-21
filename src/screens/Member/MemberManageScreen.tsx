@@ -14,6 +14,7 @@ import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
 import MemberMoreMenu from './MemberMoreMenu';
 import MemberAddSheet from './MemberAddSheet';
+import Divider from '../../components/Data Display/Divider/Divider';
 import { getActiveGroup } from '../../types/group';
 import type { Member } from '../../types/member';
 import * as memberService from '../../services/memberService';
@@ -234,6 +235,7 @@ function MemberManageScreen() {
           variant="outline"
           onClear={() => setKeyword('')}
         />
+        <Divider />
 
         {loadState === 'loading' && (
           <View style={styles.stateContainer}>

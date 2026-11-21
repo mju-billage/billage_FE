@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import {
+  BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_SUBTLE,
   FOREGROUND_INVERSE,
   FOREGROUND_NEUTRAL_NORMAL,
@@ -99,7 +100,7 @@ const styles = StyleSheet.create({
   },
   containerOutline: {
     borderWidth: 1,
-    borderColor: FOREGROUND_NEUTRAL_SUBTLE,
+    borderColor: BORDER_NEUTRAL_NORMAL,
   },
   input: {
     ...TYPOGRAPHY.body2,

@@ -8,9 +8,9 @@ import {
 } from 'react-native';
 import Divider from '../../Data Display/Divider/Divider';
 import {
-  FEEDBACK_NEGATIVE_BOLD,
   FILL_NEUTRAL_NORMAL,
   FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_PRIMARY,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   labelDestructive: {
-    color: FEEDBACK_NEGATIVE_BOLD,
+    color: FOREGROUND_PRIMARY,
   },
 });
 

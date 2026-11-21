@@ -29,7 +29,7 @@ function CardBase({ variant = 'filled', onPress, style, children }: CardBaseProp
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 16,
   },
   filled: {

@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   },
   groupName: {
     ...TYPOGRAPHY.caption,
-    color: FOREGROUND_NEUTRAL_NORMAL,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   statusSlot: {
     marginLeft: 'auto',
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   statusIcon: {
     width: 16,
     height: 16,
-    tintColor: FOREGROUND_NEUTRAL_SUBTLE,
+    tintColor: FOREGROUND_NEUTRAL_NORMAL,
   },
   bottomRow: {
     flexDirection: 'row',

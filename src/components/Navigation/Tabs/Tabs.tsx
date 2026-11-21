@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_SECONDARY,
   },
   label: {
-    ...TYPOGRAPHY.body2,
+    ...TYPOGRAPHY.button,
     color: FOREGROUND_DISABLED,
   },
   labelSelected: {

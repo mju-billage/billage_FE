@@ -9,6 +9,7 @@ import Button from '../../components/Input/Button/Button';
 import CardBase from '../../components/Data Display/Card/CardBase';
 import ProgressBar from '../../components/Feedback/Progress Bar/ProgressBar';
 import FolderItem from '../../components/Data Display/Folder/FolderItem';
+import Divider from '../../components/Data Display/Divider/Divider';
 import { formatExpense, formatWon } from '../../utils/currency';
 import type {
   StatisticsBudgetUsageItem,
@@ -221,6 +222,12 @@ function StatisticsScreen() {
           </CardBase>
         )}
 
+        {mostActiveLedger && budgetUsage.length > 0 && (
+          <View style={styles.dividerWrapper}>
+            <Divider />
+          </View>
+        )}
+
         {budgetUsage.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{STATISTICS_BUDGET_USAGE_TITLE}</Text>
@@ -407,6 +414,9 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: 12,
+  },
+  dividerWrapper: {
+    marginVertical: 8,
   },
   sectionTitle: {
     ...TYPOGRAPHY.subtitle2,

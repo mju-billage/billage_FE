@@ -2,6 +2,7 @@ import { Image, Pressable, StyleProp, StyleSheet, Text, ViewStyle } from 'react-
 import {
   BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_SUBTLE,
+  FILL_SECONDARY_SUBTLE,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
@@ -47,7 +48,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 4,
     height: 44,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     borderWidth: 1,
     borderColor: BORDER_NEUTRAL_NORMAL,
     borderRadius: 8,
@@ -55,6 +56,7 @@ const styles = StyleSheet.create({
   },
   chipActive: {
     borderColor: FOREGROUND_SECONDARY,
+    backgroundColor: FILL_SECONDARY_SUBTLE,
   },
   icon: {
     width: 16,

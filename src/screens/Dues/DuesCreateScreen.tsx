@@ -18,6 +18,7 @@ import Button from '../../components/Input/Button/Button';
 import TextField from '../../components/Input/Text Field/TextField';
 import SearchField from '../../components/Input/Search/SearchField';
 import MemberListItem from '../../components/Data Display/Lists/MemberListItem';
+import Divider from '../../components/Data Display/Divider/Divider';
 import CheckBox from '../../components/Input/Control/CheckBox';
 import Dialog from '../../components/Feedback/Dialogs/Dialog';
 import Snackbar from '../../components/Feedback/Snackbar/Snackbar';
@@ -366,6 +367,9 @@ function DuesCreateScreen() {
             variant="outline"
             onClear={() => setSearchQuery('')}
           />
+          <View style={styles.dividerWrapper}>
+            <Divider />
+          </View>
 
           {memberLoadState === 'loading' && (
             <View style={styles.stateContainer}>
@@ -400,19 +404,28 @@ function DuesCreateScreen() {
                       {selectedMemberIds.length}{DUES_MEMBER_SELECT_COUNT_SUFFIX}
                     </Text>
                   </View>
+                  <View style={styles.dividerWrapper}>
+                    <Divider />
+                  </View>
                   {filteredMembers.length === 0 && (
                     <View style={styles.searchEmpty}>
                       <Text style={styles.searchEmptyText}>{DUES_MEMBER_SEARCH_EMPTY}</Text>
                     </View>
                   )}
-                  {filteredMembers.map(member => (
-                    <MemberListItem
-                      key={member.memberId}
-                      name={member.name}
-                      showAmount={false}
-                      selected={selectedMemberIds.includes(member.memberId)}
-                      onPress={() => toggleMember(member.memberId)}
-                    />
+                  {filteredMembers.map((member, index) => (
+                    <View key={member.memberId}>
+                      {index > 0 && (
+                        <View style={styles.dividerWrapper}>
+                          <Divider />
+                        </View>
+                      )}
+                      <MemberListItem
+                        name={member.name}
+                        showAmount={false}
+                        selected={selectedMemberIds.includes(member.memberId)}
+                        onPress={() => toggleMember(member.memberId)}
+                      />
+                    </View>
                   ))}
                 </ScrollView>
               )}
@@ -653,6 +666,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     paddingVertical: 12,
+  },
+  dividerWrapper: {
+    marginVertical: 4,
   },
   selectAllLabel: {
     ...TYPOGRAPHY.body2,
