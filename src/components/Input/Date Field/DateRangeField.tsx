@@ -46,12 +46,11 @@ function DateRangeField({
 
 const styles = StyleSheet.create({
   container: {
-    height: 52,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderRadius: 8,
+    padding: 16,
+    borderWidth: 1.5,
+    borderRadius: 12,
     borderColor: BORDER_NEUTRAL_NORMAL,
     backgroundColor: FILL_NEUTRAL_SUBTLE,
   },
@@ -59,12 +58,12 @@ const styles = StyleSheet.create({
     borderColor: FOREGROUND_SECONDARY,
   },
   text: {
-    ...TYPOGRAPHY.body2,
+    ...TYPOGRAPHY.subtitle4,
     flex: 1,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   separator: {
-    ...TYPOGRAPHY.body2,
+    ...TYPOGRAPHY.subtitle3,
     marginHorizontal: 8,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },

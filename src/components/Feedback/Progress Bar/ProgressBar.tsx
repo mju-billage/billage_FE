@@ -5,6 +5,7 @@ import {
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
+import { SHADOW_PROGRESS_INDICATOR } from '../../../constants/shadows';
 import { TYPOGRAPHY } from '../../../constants/typography';
 
 type ProgressBarStyle = 'round' | 'square';
@@ -25,7 +26,8 @@ function ProgressBar({
   trackColor,
 }: ProgressBarProps) {
   const percent: `${number}%` = `${Math.round(progress * 100)}%`;
-  const radius = style === 'round' ? BAR_HEIGHT / 2 : 4;
+  const height = style === 'square' ? SQUARE_HEIGHT : ROUND_HEIGHT;
+  const radius = style === 'round' ? height / 2 : SQUARE_RADIUS;
 
   return (
     <View>
@@ -33,7 +35,7 @@ function ProgressBar({
       <View
         style={[
           styles.track,
-          { borderRadius: radius },
+          { height, borderRadius: radius },
           trackColor ? { backgroundColor: trackColor } : null,
         ]}
       >
@@ -41,6 +43,7 @@ function ProgressBar({
           style={[
             styles.fill,
             muted && styles.fillMuted,
+            style === 'square' && !muted && styles.fillGlow,
             { width: percent, borderRadius: radius },
           ]}
         />
@@ -49,7 +52,9 @@ function ProgressBar({
   );
 }
 
-const BAR_HEIGHT = 8;
+const ROUND_HEIGHT = 8;
+const SQUARE_HEIGHT = 16;
+const SQUARE_RADIUS = 2;
 
 const styles = StyleSheet.create({
   label: {
@@ -59,9 +64,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   track: {
-    height: BAR_HEIGHT,
     backgroundColor: FILL_NEUTRAL_NORMAL,
-    overflow: 'hidden',
   },
   fill: {
     height: '100%',
@@ -69,6 +72,9 @@ const styles = StyleSheet.create({
   },
   fillMuted: {
     backgroundColor: FOREGROUND_DISABLED,
+  },
+  fillGlow: {
+    boxShadow: SHADOW_PROGRESS_INDICATOR,
   },
 });
 

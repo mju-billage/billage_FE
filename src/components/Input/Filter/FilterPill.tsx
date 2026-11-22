@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 import {
   BORDER_NEUTRAL_NORMAL,
-  FOREGROUND_NEUTRAL_NORMAL,
+  FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
@@ -27,18 +27,18 @@ function FilterPill({ label, active, onPress }: FilterPillProps) {
 
 const styles = StyleSheet.create({
   pill: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: BORDER_NEUTRAL_NORMAL,
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   pillActive: {
     borderColor: FOREGROUND_SECONDARY,
   },
   pillLabel: {
-    ...TYPOGRAPHY.chips,
-    color: FOREGROUND_NEUTRAL_NORMAL,
+    ...TYPOGRAPHY.button,
+    color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   pillLabelActive: {
     color: FOREGROUND_SECONDARY,

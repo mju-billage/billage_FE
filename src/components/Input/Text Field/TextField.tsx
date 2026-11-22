@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomWidth: 1,
+    borderBottomWidth: 1.5,
     paddingVertical: 8,
     paddingLeft: 20,
     paddingRight: 10,

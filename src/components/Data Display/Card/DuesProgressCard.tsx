@@ -270,7 +270,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   paymentSummaryText: {
-    ...TYPOGRAPHY.subtitle3,
+    ...TYPOGRAPHY.h3,
   },
   paymentSummaryAmount: {
     ...TYPOGRAPHY.body2,

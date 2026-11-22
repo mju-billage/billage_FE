@@ -2,7 +2,6 @@ import { Image, Pressable, StyleProp, StyleSheet, Text, ViewStyle } from 'react-
 import {
   BORDER_NEUTRAL_NORMAL,
   FILL_NEUTRAL_SUBTLE,
-  FILL_SECONDARY_SUBTLE,
   FOREGROUND_NEUTRAL_SUBTLE,
   FOREGROUND_SECONDARY,
 } from '../../../constants/colors';
@@ -47,16 +46,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    height: 44,
     paddingHorizontal: 16,
-    borderWidth: 1,
+    paddingVertical: 12,
+    borderWidth: 1.5,
     borderColor: BORDER_NEUTRAL_NORMAL,
-    borderRadius: 8,
+    borderRadius: 12,
     backgroundColor: FILL_NEUTRAL_SUBTLE,
   },
   chipActive: {
     borderColor: FOREGROUND_SECONDARY,
-    backgroundColor: FILL_SECONDARY_SUBTLE,
   },
   icon: {
     width: 16,
@@ -67,7 +65,7 @@ const styles = StyleSheet.create({
     tintColor: FOREGROUND_SECONDARY,
   },
   label: {
-    ...TYPOGRAPHY.chips,
+    ...TYPOGRAPHY.button,
     color: FOREGROUND_NEUTRAL_SUBTLE,
   },
   textActive: {

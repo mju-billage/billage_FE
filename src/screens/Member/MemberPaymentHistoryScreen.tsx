@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { SectionList, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import ScreenContainer from '../../components/Layout/ScreenContainer';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
@@ -8,9 +8,15 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import AppBar from '../../components/Navigation/App bar/AppBar';
 import Button from '../../components/Input/Button/Button';
 import TransactionListItem from '../../components/Data Display/Lists/TransactionListItem';
+import MemberPaymentFilterSheet, {
+  DEFAULT_MEMBER_PAYMENT_FILTER,
+  getMemberPaymentFilterDateRange,
+  type MemberPaymentFilterValue,
+} from './MemberPaymentFilterSheet';
 import { getActiveGroup } from '../../types/group';
 import type { MemberPayment } from '../../types/member';
 import * as memberService from '../../services/memberService';
+import * as ledgerService from '../../services/ledgerService';
 import { ApiError } from '../../services/apiClient';
 import { formatWon } from '../../utils/currency';
 import { formatDateHeader } from '../../utils/dateHeader';
@@ -37,6 +43,8 @@ import {
   FOREGROUND_NEUTRAL_SUBTLE,
 } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
+
+const FILTER_ICON = require('../../assets/icons/system/Filter.png');
 
 type LoadState = 'loading' | 'error' | 'ready';
 type MemberPaymentHistoryRouteProp = RouteProp<RootStackParamList, 'MemberPaymentHistory'>;
@@ -67,6 +75,9 @@ function MemberPaymentHistoryScreen() {
   const [loadErrorMessage, setLoadErrorMessage] = useState('');
   const [totalPaidAmount, setTotalPaidAmount] = useState(0);
   const [payments, setPayments] = useState<MemberPayment[]>([]);
+  const [filter, setFilter] = useState<MemberPaymentFilterValue>(DEFAULT_MEMBER_PAYMENT_FILTER);
+  const [filterSheetVisible, setFilterSheetVisible] = useState(false);
+  const [ledgerOptions, setLedgerOptions] = useState<{ id: string; name: string }[]>([]);
 
   const toErrorMessage = (error: unknown): string => {
     if (isNetworkError(error)) {
@@ -87,20 +98,48 @@ function MemberPaymentHistoryScreen() {
         setLoadState('error');
         return;
       }
-      const result = await memberService.getMemberPayments(group.id, memberId);
-      setTotalPaidAmount(result.totalPaidAmount);
-      setPayments(result.items);
+      const { from, to } = getMemberPaymentFilterDateRange(filter);
+      const result = await memberService.getMemberPayments(group.id, memberId, { from, to });
+      const filtered = filter.ledgerId
+        ? result.items.filter(item => item.ledgerId === filter.ledgerId)
+        : result.items;
+      const sorted = [...filtered].sort((a, b) =>
+        filter.sort === 'oldest'
+          ? a.paidAt.localeCompare(b.paidAt)
+          : b.paidAt.localeCompare(a.paidAt),
+      );
+      setTotalPaidAmount(sorted.reduce((sum, item) => sum + item.amount, 0));
+      setPayments(sorted);
       setLoadState('ready');
     } catch (error) {
       setLoadErrorMessage(toErrorMessage(error));
       setLoadState('error');
     }
-  }, [memberId]);
+  }, [memberId, filter]);
+
+  const loadLedgerOptions = useCallback(async () => {
+    const group = getActiveGroup();
+    if (!group) {
+      return;
+    }
+    try {
+      const ledgers = await ledgerService.getAllLedgersInGroup(group.id);
+      setLedgerOptions(ledgers.map(l => ({ id: l.id, name: l.name })));
+    } catch {
+      setLedgerOptions([]);
+    }
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
       load();
     }, [load]),
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      loadLedgerOptions();
+    }, [loadLedgerOptions]),
   );
 
   if (loadState === 'loading' || loadState === 'error') {
@@ -149,6 +188,15 @@ function MemberPaymentHistoryScreen() {
             {MEMBER_DETAIL_TOTAL_PAID_SUFFIX}
           </Text>
         </View>
+        <View style={styles.toolRow}>
+          <Pressable
+            onPress={() => setFilterSheetVisible(true)}
+            hitSlop={8}
+            accessibilityLabel="필터"
+          >
+            <Image source={FILTER_ICON} style={styles.toolIcon} />
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.listSection}>
@@ -179,6 +227,14 @@ function MemberPaymentHistoryScreen() {
           />
         )}
       </View>
+
+      <MemberPaymentFilterSheet
+        visible={filterSheetVisible}
+        value={filter}
+        ledgerOptions={ledgerOptions}
+        onClose={() => setFilterSheetVisible(false)}
+        onApply={setFilter}
+      />
     </ScreenContainer>
   );
 }
@@ -217,6 +273,15 @@ const styles = StyleSheet.create({
   summaryValue: {
     ...TYPOGRAPHY.subtitle1,
     marginTop: 4,
+  },
+  toolRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 12,
+  },
+  toolIcon: {
+    width: 24,
+    height: 24,
   },
   countText: {
     ...TYPOGRAPHY.body2,

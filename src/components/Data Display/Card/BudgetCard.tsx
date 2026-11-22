@@ -48,7 +48,7 @@ function BudgetCard(props: BudgetCardProps) {
           <Text style={styles.statValue}>{formatWon(budget)}원</Text>
         </View>
       </View>
-      <ProgressBar progress={ratio} showLabel />
+      <ProgressBar progress={ratio} showLabel style="square" />
     </CardBase>
   );
 }

@@ -216,6 +216,7 @@ function StatisticsScreen() {
                     Math.max((mostActiveLedger.budgetUsageRate ?? 0) / 100, 0),
                     1,
                   )}
+                  style="square"
                 />
               </View>
             )}
@@ -324,7 +325,10 @@ function BudgetUsageRow({ item }: { item: StatisticsBudgetUsageItem }) {
         {item.name}
       </Text>
       <View style={styles.budgetUsageBar}>
-        <ProgressBar progress={Math.min(Math.max(item.budgetUsageRate / 100, 0), 1)} />
+        <ProgressBar
+          progress={Math.min(Math.max(item.budgetUsageRate / 100, 0), 1)}
+          style="square"
+        />
       </View>
       <Text style={styles.budgetUsagePercent}>{Math.round(item.budgetUsageRate)}%</Text>
     </View>

@@ -31,7 +31,7 @@ import {
   LEDGER_SELECT_CONFIRM_LABEL,
   LEDGER_SELECT_PREVIOUS_LABEL,
 } from '../../constants/transactionScreenText';
-import { FOREGROUND_NEUTRAL_NORMAL } from '../../constants/colors';
+import { FOREGROUND_PRIMARY } from '../../constants/colors';
 import { TYPOGRAPHY } from '../../constants/typography';
 
 export type LedgerFilterPeriod = 'all' | '1month' | '3month' | '6month' | 'custom';
@@ -316,18 +316,16 @@ function LedgerFilterSheet({
 
 const styles = StyleSheet.create({
   title: {
-    ...TYPOGRAPHY.subtitle1,
+    ...TYPOGRAPHY.h3,
     marginBottom: 16,
   },
   sectionLabel: {
-    ...TYPOGRAPHY.body3,
-    fontWeight: 'bold',
-    color: FOREGROUND_NEUTRAL_NORMAL,
-    marginTop: 16,
-    marginBottom: 10,
+    ...TYPOGRAPHY.subtitle2,
+    color: FOREGROUND_PRIMARY,
+    marginBottom: 12,
   },
   sectionLabelSpaced: {
-    marginTop: 16,
+    marginTop: 24,
   },
   chipRow: {
     flexDirection: 'row',

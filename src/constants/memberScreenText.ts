@@ -73,3 +73,4 @@ export const MEMBER_PAYMENT_COUNT_SUFFIX = '건';
 export const MEMBER_PAYMENT_EMPTY = '납부 내역이 없어요.';
 export const MEMBER_PAYMENT_LOADING = '납부 내역을 불러오는 중이에요.';
 export const MEMBER_PAYMENT_LOADING_MORE = '불러오는 중이에요.';
+export const MEMBER_PAYMENT_FILTER_LEDGER_ADD_LABEL = '장부 선택하기';
