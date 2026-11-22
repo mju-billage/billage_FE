@@ -31,3 +31,30 @@ Swagger 의 요청 형식과 같다(`src/services/authService.ts` socialLogin).
   (2) 앱의 네이티브 앱 키와 서버에 등록된 카카오 앱이 같은지 — 카카오
   디벨로퍼스 콘솔에서 확인.
 - 재현되면 이 항목에 다시 적고, 안 되면 지운다.
+
+---
+
+## 2. 모임원 납부 내역 조회 API — 장부/정렬 쿼리 파라미터 없음
+
+**현상/생긴 경위**
+
+`GET /api/v1/groups/{groupId}/members/{memberId}/payments` (`memberService.getMemberPayments`)
+가 지금 `from`/`to`(기간)만 받는다. 디자인 QA 실측(더보기#200)으로
+`MemberPaymentHistoryScreen`에 필터바를 추가하면서 장부 선택 + 정렬순서(최신/과거)
+필터도 같이 넣었는데, 서버 파라미터가 없어서 **기간만 서버로 넘기고 장부
+필터링·정렬은 클라이언트(`MemberPaymentHistoryScreen.tsx`)에서 임시로 처리**했다.
+지금은 이 엔드포인트가 페이지네이션 없이 전체 목록을 한 번에 주기 때문에 클라이언트
+처리가 당장 깨지진 않지만, 모임원 1명의 납부 건수가 많아지면(장기 운영) 매번 전체
+목록을 받아 클라이언트에서 거르는 구조라 비효율적이고, 서버가 나중에 페이지네이션을
+넣으면 클라이언트 필터링 자체가 깨진다.
+
+**물어볼 것**
+
+이 엔드포인트에 `ledgerId`(단일 장부 필터), `sort`(예: `paidAt,desc` /
+`paidAt,asc`) 쿼리 파라미터를 추가해줄 수 있는지.
+
+**답이 오면 할 일**
+
+파라미터 추가되면 `memberService.ts`의 `MemberPaymentParams`에 `ledgerId`/`sort`
+추가하고, `MemberPaymentHistoryScreen.tsx`의 클라이언트 측 필터링·정렬 로직을
+제거하고 서버 호출로 옮긴다.

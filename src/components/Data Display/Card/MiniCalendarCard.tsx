@@ -3,7 +3,6 @@ import CardBase from './CardBase';
 import Divider from '../Divider/Divider';
 import FolderTabShape from './FolderTabShape';
 import { formatWon, truncateDigits } from '../../../utils/currency';
-import { todayKey } from '../../../utils/calendarGrid';
 import { CALENDAR_WEEKDAY_LABELS } from '../../../constants/calendarScreenText';
 import type { MiniCalendarData } from '../../../types/dashboard';
 import {
@@ -18,18 +17,12 @@ import { FONT_FAMILY, FONT_WEIGHT, TYPOGRAPHY } from '../../../constants/typogra
 
 const CHEVRON_RIGHT_ICON = require('../../../assets/icons/nav/Chevron Right.png');
 
-function toDotDateKey(dateKey: string): string {
-  return dateKey.replace(/-/g, '.');
-}
-
 type MiniCalendarCardProps = {
   data: MiniCalendarData;
   onPress: () => void;
 };
 
 function MiniCalendarCard({ data, onPress }: MiniCalendarCardProps) {
-  const todayDotKey = todayKey();
-
   return (
     <CardBase>
       <FolderTabShape fill={FILL_NEUTRAL_SUBTLE} />
@@ -52,12 +45,9 @@ function MiniCalendarCard({ data, onPress }: MiniCalendarCardProps) {
       {data.weeks.map((week, weekIndex) => (
         <View key={weekIndex} style={styles.weekRow}>
           {week.map((cell, cellIndex) => {
-            const isToday = toDotDateKey(cell.dateKey) === todayDotKey;
             return (
               <View key={cell.dateKey} style={styles.dayCell}>
-                <View
-                  style={[styles.dateCircle, isToday && styles.dateCircleToday]}
-                >
+                <View style={styles.dateCircle}>
                   <Text
                     style={[
                       styles.dateText,
@@ -132,10 +122,6 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  dateCircleToday: {
-    borderWidth: 1.5,
-    borderColor: FOREGROUND_SECONDARY,
   },
   dateText: {
     ...TYPOGRAPHY.subtitle1,
